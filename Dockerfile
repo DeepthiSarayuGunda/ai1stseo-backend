@@ -11,7 +11,7 @@ COPY app.py .
 COPY application.py .
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8080
 
 # Run with gunicorn
 CMD ["gunicorn", "application:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
