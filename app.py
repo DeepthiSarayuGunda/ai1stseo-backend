@@ -6,8 +6,6 @@ Based on SEMrush, Moz, Ahrefs, and industry best practices
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-from fastapi import FastAPI
-app = FastAPI()
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
