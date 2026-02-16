@@ -1,15 +1,13 @@
 version: 1.0
-runtime: python313
+runtime: python311
+
 build:
   commands:
     build:
       - pip install -r requirements.txt
+
 run:
-  runtime-version: 3.13
-  command: gunicorn application:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
+  command: gunicorn app:app --bind 0.0.0.0:$PORT
   network:
-    port: 8000
-    env: APP_PORT
-  env:
-    - name: APP_PORT
-      value: "8000"
+    port: 8080
+
