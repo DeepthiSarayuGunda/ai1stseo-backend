@@ -1226,17 +1226,4 @@ def catch_all(path):
         return send_from_directory('..', path)
     return send_from_directory('..', 'index.html')
 
-if __name__ == '__main__':
-    print("🚀 AISEO Master Backend starting...")
-    print("📊 Total Checks: 180 across 9 categories")
-    print("   - Technical SEO: 35 checks")
-    print("   - On-Page SEO: 25 checks")
-    print("   - Content SEO: 20 checks")
-    print("   - Mobile SEO: 15 checks")
-    print("   - Performance: 18 checks")
-    print("   - Security: 12 checks")
-    print("   - Social SEO: 10 checks")
-    print("   - Local SEO: 15 checks")
-    print("   - GEO/AEO: 30 checks (AI-First Optimization)")
-    print("📍 http://localhost:5000")
-    app.run(debug=True, port=5000)
+
