@@ -1052,7 +1052,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
 # ============== API ROUTES ==============
 @app.route('/')
 def serve_index():
-    return send_from_directory('..', 'index.html')
+    return jsonify({"status": "backend running"})
 
 @app.route('/analyze')
 def serve_analyze():
