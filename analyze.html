@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AISEO Master - 170 SEO Checks</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 700px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="url"], input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #00d4ff;
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .cat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .cat-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .cat-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: #00d4ff;
+        }
+        .cat-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        button {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .select-all {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .select-all a {
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔍 AISEO Master</div>
+        <p class="subtitle">180 Comprehensive SEO & GEO Checks</p>
+        
+        <form id="analyzeForm">
+            <div class="form-group">
+                <label for="url">Website URL</label>
+                <input type="text" id="url" name="url" placeholder="example.com or https://example.com" required>
+            </div>
+            
+            <label>Select Categories</label>
+            <div class="select-all">
+                <a onclick="toggleAll(true)">Select All</a> | <a onclick="toggleAll(false)">Deselect All</a>
+            </div>
+            <div class="categories">
+                <div class="cat-item"><input type="checkbox" id="technical" name="cats" value="technical" checked><label for="technical">⚙️ Technical (35)</label></div>
+                <div class="cat-item"><input type="checkbox" id="onpage" name="cats" value="onpage" checked><label for="onpage">📄 On-Page (25)</label></div>
+                <div class="cat-item"><input type="checkbox" id="content" name="cats" value="content" checked><label for="content">📝 Content (20)</label></div>
+                <div class="cat-item"><input type="checkbox" id="mobile" name="cats" value="mobile" checked><label for="mobile">📱 Mobile (15)</label></div>
+                <div class="cat-item"><input type="checkbox" id="performance" name="cats" value="performance" checked><label for="performance">⚡ Performance (18)</label></div>
+                <div class="cat-item"><input type="checkbox" id="security" name="cats" value="security" checked><label for="security">🔒 Security (12)</label></div>
+                <div class="cat-item"><input type="checkbox" id="social" name="cats" value="social" checked><label for="social">📣 Social (10)</label></div>
+                <div class="cat-item"><input type="checkbox" id="local" name="cats" value="local" checked><label for="local">📍 Local (15)</label></div>
+                <div class="cat-item"><input type="checkbox" id="geo" name="cats" value="geo" checked><label for="geo">🤖 GEO/AEO (30)</label></div>
+            </div>
+            
+            <button type="submit">🚀 Analyze Website</button>
+        </form>
+        
+        <div class="stats">
+            <div class="stat"><div class="stat-num">180</div><div class="stat-label">Total Checks</div></div>
+            <div class="stat"><div class="stat-num">9</div><div class="stat-label">Categories</div></div>
+            <div class="stat"><div class="stat-num">AI</div><div class="stat-label">Optimized</div></div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleAll(checked) {
+            document.querySelectorAll('input[name="cats"]').forEach(cb => cb.checked = checked);
+        }
+        
+        document.getElementById('analyzeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let url = document.getElementById('url').value.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            const cats = Array.from(document.querySelectorAll('input[name="cats"]:checked'))
+                .map(cb => cb.value)
+                .join(',');
+            
+            if (!cats) {
+                alert('Please select at least one category');
+                return;
+            }
+            
+            // Full page navigation to audit.html
+            window.location.href = '/audit/' + encodeURIComponent(url) + '?cats=' + cats;
+        });
+    </script>
+</body>
+</html>

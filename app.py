@@ -1052,15 +1052,15 @@ def analyze_geo_aeo(url, soup, response, load_time):
 # ============== API ROUTES ==============
 @app.route('/')
 def serve_index():
-    return jsonify({"status": "backend running"})
+    return send_from_directory('.', 'index.html')
 
 @app.route('/analyze')
 def serve_analyze():
-    return send_from_directory('..', 'analyze.html')
+    return send_from_directory('.', 'analyze.html')
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
-    return send_from_directory('../assets', filename)
+    return send_from_directory('assets', filename)
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
@@ -1222,12 +1222,12 @@ def serve_uml_diagrams():
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
-    return send_from_directory('..', 'audit.html')
+    return send_from_directory('.', 'audit.html')
 
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
-        return send_from_directory('..', path)
-    return send_from_directory('..', 'index.html')
+        return send_from_directory('.', path)
+    return send_from_directory('.', 'index.html')
 
 

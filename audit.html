@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Audit Results - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .url-display {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: inline-block;
+            word-break: break-all;
+            max-width: 600px;
+        }
+        .loading { text-align: center; padding: 60px; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+        
+        /* Category Overview Grid */
+        .category-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .category-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .category-card.active {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .category-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .category-score {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        .category-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .category-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .category-stats {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Detailed Results */
+        .results-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        .section-score {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        /* Subcategory */
+        .subcategory {
+            margin-bottom: 25px;
+        }
+        .subcategory-header {
+            font-size: 1rem;
+            color: #00d4ff;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Check Items */
+        .check-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+        .check-item.pass { border-left-color: #00c853; }
+        .check-item.warning { border-left-color: #ff9800; }
+        .check-item.fail { border-left-color: #f44336; }
+        .check-item.info { border-left-color: #2196f3; }
+        
+        .check-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .check-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .check-icon.pass { background: #00c853; }
+        .check-icon.warning { background: #ff9800; }
+        .check-icon.fail { background: #f44336; }
+        .check-icon.info { background: #2196f3; }
+        
+        .check-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        .check-impact {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .impact-Critical { background: #f44336; }
+        .impact-High { background: #ff9800; }
+        .impact-Medium { background: #2196f3; }
+        .impact-Low { background: #607d8b; }
+        
+        .check-value {
+            margin-left: 38px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+        .check-recommendation {
+            margin-left: 38px;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            border-left: 3px solid #ff9800;
+        }
+        .check-recommendation::before {
+            content: '💡 ';
+        }
+        
+        /* Filter buttons */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background: rgba(255,255,255,0.2); }
+        .filter-btn.active { background: linear-gradient(90deg, #00d4ff, #7b2cbf); }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* AI Recommendations Section */
+        .ai-section {
+            background: linear-gradient(135deg, rgba(123, 44, 191, 0.2), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(123, 44, 191, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .ai-icon {
+            font-size: 2.5rem;
+        }
+        .ai-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        .ai-subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        .ai-btn {
+            padding: 15px 30px;
+            background: linear-gradient(90deg, #7b2cbf, #00d4ff);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(123, 44, 191, 0.4);
+        }
+        .ai-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .ai-content {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .ai-content h1, .ai-content h2, .ai-content h3 {
+            color: #00d4ff;
+            margin: 20px 0 10px 0;
+        }
+        .ai-content code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .ai-content pre {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        .ai-loading .spinner {
+            width: 30px;
+            height: 30px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🔍 AISEO Master</div>
+            <p style="margin-top: 10px; color: rgba(255,255,255,0.7);">180 Comprehensive SEO & AI Optimization Checks</p>
+            <div class="url-display" id="urlDisplay">Loading...</div>
+        </header>
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Analyzing website with 180 SEO checks across 9 categories...</p>
+                <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">This may take 15-30 seconds</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const categoryMeta = {
+            'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 35 },
+            'onpage': { name: '📄 On-Page SEO', desc: 'Title, Meta, Headings, Images, Content Structure', checks: 25 },
+            'content': { name: '📝 Content SEO', desc: 'Content Quality, E-E-A-T, Linking', checks: 20 },
+            'mobile': { name: '📱 Mobile SEO', desc: 'Viewport, Responsiveness, Touch UX', checks: 15 },
+            'performance': { name: '⚡ Performance', desc: 'Core Web Vitals, Compression, Caching', checks: 18 },
+            'security': { name: '🔒 Security', desc: 'HTTPS, Security Headers, Forms', checks: 12 },
+            'social': { name: '📣 Social SEO', desc: 'Open Graph, Twitter Cards, Social Integration', checks: 10 },
+            'local': { name: '📍 Local SEO', desc: 'NAP, Local Schema, Maps, Reviews', checks: 15 },
+            'geo': { name: '🤖 GEO/AEO', desc: 'AI Search Optimization, LLM Interpretability, Snippets', checks: 30 }
+        };
+
+        function getTargetUrl() {
+            const path = window.location.pathname;
+            const match = path.match(/\/audit\/(.+)/);
+            if (match) {
+                let url = decodeURIComponent(match[1]);
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                return url;
+            }
+            return null;
+        }
+
+        function getCategories() {
+            const params = new URLSearchParams(window.location.search);
+            const cats = params.get('cats');
+            return cats ? cats.split(',') : Object.keys(categoryMeta);
+        }
+
+        function getScoreColor(score) {
+            if (score >= 80) return '#00c853';
+            if (score >= 60) return '#8bc34a';
+            if (score >= 40) return '#ff9800';
+            return '#f44336';
+        }
+
+        function renderResults(data) {
+            const content = document.getElementById('content');
+            
+            // Calculate totals
+            const failedChecks = data.totalChecks - data.totalPassed;
+            const warningChecks = Object.values(data.categories).reduce((sum, cat) => 
+                sum + cat.checks.filter(c => c.status === 'warning').length, 0);
+            const passedChecks = data.totalPassed;
+
+            let html = `
+                <!-- Overall Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: ${getScoreColor(data.overallScore)}">${Math.round(data.overallScore)}%</div>
+                        <div class="stat-label">Overall Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #00d4ff">${data.totalChecks}</div>
+                        <div class="stat-label">Total Checks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #00c853">${passedChecks}</div>
+                        <div class="stat-label">Passed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #ff9800">${warningChecks}</div>
+                        <div class="stat-label">Warnings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #f44336">${failedChecks - warningChecks}</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+
+                <!-- Category Overview Cards -->
+                <h2 style="margin-bottom: 15px; font-size: 1.2rem;">📊 Category Overview (Click to view details)</h2>
+                <div class="category-overview">
+            `;
+
+            // Add category cards
+            for (const [catKey, catData] of Object.entries(data.categories)) {
+                const meta = categoryMeta[catKey] || { name: catKey, desc: '', checks: catData.total };
+                const scoreColor = getScoreColor(catData.score);
+                html += `
+                    <div class="category-card" data-category="${catKey}">
+                        <div class="category-header">
+                            <span class="category-name">${meta.name}</span>
+                            <span class="category-score" style="color: ${scoreColor}">${Math.round(catData.score)}%</span>
+                        </div>
+                        <div class="category-bar">
+                            <div class="category-bar-fill" style="width: ${catData.score}%; background: ${scoreColor}"></div>
+                        </div>
+                        <div class="category-stats">${catData.passed}/${catData.total} passed • ${meta.desc}</div>
+                    </div>
+                `;
+            }
+
+            html += `</div>
+                
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All Checks</button>
+                    <button class="filter-btn" data-filter="fail">❌ Failed</button>
+                    <button class="filter-btn" data-filter="warning">⚠️ Warnings</button>
+                    <button class="filter-btn" data-filter="pass">✓ Passed</button>
+                    <button class="filter-btn" data-filter="info">ℹ️ Info</button>
+                </div>
+
+                <!-- Detailed Results -->
+                <div id="detailedResults"></div>
+
+                <!-- AI Recommendations Section -->
+                <div class="ai-section" id="aiSection">
+                    <div class="ai-header">
+                        <span class="ai-icon">🤖</span>
+                        <div>
+                            <div class="ai-title">AI-Powered Recommendations</div>
+                            <div class="ai-subtitle">Get personalized fixes and code snippets from our AI assistant (Llama 3.1)</div>
+                        </div>
+                    </div>
+                    <button class="ai-btn" id="aiBtn" onclick="getAIRecommendations()">
+                        <span>✨</span> Generate AI Recommendations
+                    </button>
+                    <div id="aiContent"></div>
+                </div>
+
+                <div style="text-align: center; padding: 30px;">
+                    <a href="/" class="back-btn">← Analyze Another URL</a>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            
+            // Store data globally
+            window.auditData = data;
+            window.currentFilter = 'all';
+            window.currentCategory = null;
+
+            // Add category card click handlers
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    window.currentCategory = card.dataset.category;
+                    renderDetailedResults();
+                });
+            });
+
+            // Add filter button handlers
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    window.currentFilter = btn.dataset.filter;
+                    renderDetailedResults();
+                });
+            });
+
+            // Show all categories by default
+            renderDetailedResults();
+        }
+
+        function renderDetailedResults() {
+            const container = document.getElementById('detailedResults');
+            const filter = window.currentFilter;
+            const selectedCategory = window.currentCategory;
+            
+            let html = '';
+            
+            const categoriesToShow = selectedCategory 
+                ? { [selectedCategory]: window.auditData.categories[selectedCategory] }
+                : window.auditData.categories;
+
+            for (const [catKey, catData] of Object.entries(categoriesToShow)) {
+                const meta = categoryMeta[catKey] || { name: catKey, desc: '' };
+                
+                // Filter checks
+                let checks = catData.checks;
+                if (filter !== 'all') {
+                    checks = checks.filter(c => c.status === filter);
+                }
+                
+                if (checks.length === 0) continue;
+
+                // Group by subcategory
+                const grouped = {};
+                checks.forEach(check => {
+                    const subcat = check.category || 'General';
+                    if (!grouped[subcat]) grouped[subcat] = [];
+                    grouped[subcat].push(check);
+                });
+
+                html += `
+                    <div class="results-section">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">${meta.name}</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">${meta.desc}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="section-score" style="color: ${getScoreColor(catData.score)}">${Math.round(catData.score)}%</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${catData.passed}/${catData.total} passed</div>
+                            </div>
+                        </div>
+                `;
+
+                for (const [subcat, subcatChecks] of Object.entries(grouped)) {
+                    const subcatPassed = subcatChecks.filter(c => c.status === 'pass').length;
+                    html += `
+                        <div class="subcategory">
+                            <div class="subcategory-header">
+                                <span>${subcat}</span>
+                                <span>${subcatPassed}/${subcatChecks.length} passed</span>
+                            </div>
+                    `;
+
+                    subcatChecks.forEach(check => {
+                        const icons = { pass: '✓', warning: '⚠', fail: '✗', info: 'ℹ' };
+                        html += `
+                            <div class="check-item ${check.status}">
+                                <div class="check-header">
+                                    <div class="check-icon ${check.status}">${icons[check.status]}</div>
+                                    <span class="check-name">${check.name}</span>
+                                    ${check.impact ? `<span class="check-impact impact-${check.impact}">${check.impact}</span>` : ''}
+                                </div>
+                                <div class="check-value">${check.description}: <strong>${check.value}</strong></div>
+                                ${check.status !== 'pass' ? `<div class="check-recommendation">${check.recommendation}</div>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+            }
+
+            if (!html) {
+                html = `<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+                    No checks match the current filter.
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderError(message) {
+            document.getElementById('content').innerHTML = `
+                <div style="text-align: center; padding: 60px; background: rgba(244, 67, 54, 0.1); border-radius: 16px; border: 1px solid rgba(244, 67, 54, 0.3);">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">❌</div>
+                    <h2>Analysis Failed</h2>
+                    <p style="margin-top: 15px; color: rgba(255,255,255,0.7);">${message}</p>
+                    <a href="/" class="back-btn" style="margin-top: 20px;">← Try Again</a>
+                </div>
+            `;
+        }
+
+        async function getAIRecommendations() {
+            const btn = document.getElementById('aiBtn');
+            const contentDiv = document.getElementById('aiContent');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Generating recommendations...';
+            
+            contentDiv.innerHTML = `
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <span>AI is analyzing your results and generating personalized recommendations... This may take up to 2 minutes.</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/ai-recommendations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: window.auditData.url,
+                        auditResults: window.auditData
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // Format the AI response with basic markdown-like styling
+                    let formatted = data.recommendations
+                        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/`([^`]+)`/g, '<code>$1</code>')
+                        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                        .replace(/^\d+\. (.*$)/gm, '<li>$1</li>')
+                        .replace(/^- (.*$)/gm, '<li>$1</li>');
+                    
+                    contentDiv.innerHTML = `<div class="ai-content">${formatted}</div>`;
+                    btn.innerHTML = '✅ Recommendations Generated';
+                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                } else {
+                    contentDiv.innerHTML = `
+                        <div style="padding: 20px; background: rgba(244, 67, 54, 0.1); border-radius: 8px; margin-top: 15px;">
+                            <strong>⚠️ AI Service Unavailable</strong><br>
+                            ${data.error || 'Could not connect to AI server.'}<br><br>
+                            <em>The SEO analysis above is still valid. AI recommendations require the Ollama server to be running.</em>
+                        </div>
+                    `;
+                    btn.innerHTML = '🔄 Retry AI Recommendations';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = `
+                    <div style="padding: 20px; background: rgba(244, 67, 54, 0.1); border-radius: 8px; margin-top: 15px;">
+                        <strong>⚠️ Connection Error</strong><br>
+                        ${error.message}<br><br>
+                        <em>The SEO analysis above is still valid. AI recommendations are an optional feature.</em>
+                    </div>
+                `;
+                btn.innerHTML = '🔄 Retry AI Recommendations';
+                btn.disabled = false;
+            }
+        }
+
+        async function runAnalysis() {
+            const targetUrl = getTargetUrl();
+            const categories = getCategories();
+            
+            document.getElementById('urlDisplay').textContent = targetUrl || 'No URL specified';
+
+            if (!targetUrl) {
+                renderError('No URL specified. Please go back and enter a URL to analyze.');
+                return;
+            }
+
+            try {
+                document.getElementById('content').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing ${targetUrl}...</p>
+                        <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">Running 180 checks across ${categories.length} categories...</p>
+                    </div>
+                `;
+                
+                const response = await fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: targetUrl, categories: categories })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    renderError(data.error || 'Failed to analyze URL');
+                    return;
+                }
+
+                renderResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                renderError('Network error: ' + error.message);
+            }
+        }
+
+        // Run on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runAnalysis);
+        } else {
+            runAnalysis();
+        }
+    </script>
+</body>
+</html>
