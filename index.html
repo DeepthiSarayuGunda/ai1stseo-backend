@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AISEO Master - AI-First SEO Platform</title>
+    <script type="module" crossorigin src="/assets/index-Bfah4_p8.js"></script>
+    <script>
+      // Intercept React Router navigation to /audit/ and force full page reload
+      // Also override to include ALL 9 categories instead of just 3
+      (function() {
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            // Replace the limited categories with all 9 categories
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            // Force full page navigation to load audit.html
+            window.location.href = newUrl;
+            return;
+          }
+          return originalPushState.apply(this, arguments);
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

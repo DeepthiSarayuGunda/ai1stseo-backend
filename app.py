@@ -1215,6 +1215,10 @@ Be specific and actionable. Include actual code examples where helpful."""
             'error': f'AI recommendation failed: {str(e)}'
         }), 500
 
+@app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
+def serve_uml_diagrams():
+    return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
