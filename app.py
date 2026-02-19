@@ -13,7 +13,7 @@ import re
 import time
 import json
 
-app = Flask(__name__, static_folder='../assets', static_url_path='/assets')
+app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
