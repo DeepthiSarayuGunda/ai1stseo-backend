@@ -6,13 +6,12 @@
     <title>AISEO Master - AI-First SEO Platform</title>
     <script type="module" crossorigin src="/assets/index-Bfah4_p8.js"></script>
     <script>
-      // Intercept React Router navigation to /audit/ and force full page reload
-      // Also override to include ALL 9 categories instead of just 3
+      // Intercept ALL navigation to /audit/ and force full page reload with all categories
       (function() {
+        // Intercept history.pushState
         const originalPushState = history.pushState;
         history.pushState = function(state, title, url) {
           if (url && url.includes('/audit/')) {
-            // Replace the limited categories with all 9 categories
             const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
             let newUrl = url;
             if (url.includes('?cats=')) {
@@ -22,12 +21,52 @@
             } else {
               newUrl = url + '?cats=' + allCats;
             }
-            // Force full page navigation to load audit.html
             window.location.href = newUrl;
             return;
           }
           return originalPushState.apply(this, arguments);
         };
+
+        // Intercept history.replaceState
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            window.location.href = newUrl;
+            return;
+          }
+          return originalReplaceState.apply(this, arguments);
+        };
+
+        // Intercept clicks on links
+        document.addEventListener('click', function(e) {
+          const target = e.target.closest('a, button');
+          if (target) {
+            const href = target.getAttribute('href') || target.getAttribute('data-href') || '';
+            if (href.includes('/audit/')) {
+              e.preventDefault();
+              e.stopPropagation();
+              const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+              let newUrl = href;
+              if (href.includes('?cats=')) {
+                newUrl = href.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+              } else if (href.includes('?')) {
+                newUrl = href + '&cats=' + allCats;
+              } else {
+                newUrl = href + '?cats=' + allCats;
+              }
+              window.location.href = newUrl;
+            }
+          }
+        }, true);
       })();
     </script>
   </head>
