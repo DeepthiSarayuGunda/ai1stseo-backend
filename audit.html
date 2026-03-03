@@ -642,7 +642,7 @@
             `;
 
             try {
-                const response = await fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/ai-recommendations', {
+                const response = await fetch('/api/ai-recommendations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -712,7 +712,7 @@
                     </div>
                 `;
                 
-                const response = await fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/analyze', {
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: targetUrl, categories: categories })
