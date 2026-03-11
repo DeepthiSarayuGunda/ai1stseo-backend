@@ -1149,6 +1149,29 @@ def logout():
     
     return jsonify({'status': 'success', 'message': 'Logged out successfully'})
 
+@app.route('/api/delete-account', methods=['POST'])
+def delete_account():
+    """Delete user account permanently"""
+    data = request.get_json()
+    token = data.get('token', '')
+    
+    if token not in ACTIVE_TOKENS:
+        return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
+    
+    # Get user email from token
+    email = ACTIVE_TOKENS[token]['email']
+    
+    # Delete user data
+    if email in USERS:
+        del USERS[email]
+    
+    # Delete all tokens for this user
+    tokens_to_delete = [t for t, data in ACTIVE_TOKENS.items() if data['email'] == email]
+    for t in tokens_to_delete:
+        del ACTIVE_TOKENS[t]
+    
+    return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
+
 @app.route('/api/verify', methods=['POST'])
 def verify_token():
     """Verify if token is valid"""
