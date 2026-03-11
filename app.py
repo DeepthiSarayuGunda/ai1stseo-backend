@@ -15,6 +15,8 @@ import json
 import secrets
 import hashlib
 from datetime import datetime, timedelta
+import json
+import os
 
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
@@ -24,12 +26,45 @@ CORS(app, origins=[
     'http://127.0.0.1:5000'
 ])
 
-# Simple in-memory user storage (replace with database in production)
-# Format: email -> {name, password_hash}
-USERS = {}
+# File-based storage for persistence
+USERS_FILE = 'users.json'
+TOKENS_FILE = 'tokens.json'
 
-# Token storage (in production, use Redis or database)
-ACTIVE_TOKENS = {}
+def load_users():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f)
+
+def load_tokens():
+    if os.path.exists(TOKENS_FILE):
+        with open(TOKENS_FILE, 'r') as f:
+            data = json.load(f)
+            # Convert expiry strings back to datetime
+            for token, info in data.items():
+                info['expiry'] = datetime.fromisoformat(info['expiry'])
+            return data
+    return {}
+
+def save_tokens(tokens):
+    # Convert datetime to string for JSON
+    data = {}
+    for token, info in tokens.items():
+        data[token] = {
+            'email': info['email'],
+            'name': info['name'],
+            'expiry': info['expiry'].isoformat()
+        }
+    with open(TOKENS_FILE, 'w') as f:
+        json.dump(data, f)
+
+# Load data from files
+USERS = load_users()
+ACTIVE_TOKENS = load_tokens()
 
 def fetch_website(url):
     """Fetch website content with timing"""
@@ -1098,6 +1133,7 @@ def signup():
         'password_hash': password_hash,
         'created_at': datetime.now().isoformat()
     }
+    save_users(USERS)
     
     return jsonify({
         'status': 'success',
@@ -1127,6 +1163,7 @@ def login():
             'name': USERS[email]['name'],
             'expiry': expiry
         }
+        save_tokens(ACTIVE_TOKENS)
         
         return jsonify({
             'status': 'success',
@@ -1146,6 +1183,7 @@ def logout():
     
     if token in ACTIVE_TOKENS:
         del ACTIVE_TOKENS[token]
+        save_tokens(ACTIVE_TOKENS)
     
     return jsonify({'status': 'success', 'message': 'Logged out successfully'})
 
@@ -1164,11 +1202,13 @@ def delete_account():
     # Delete user data
     if email in USERS:
         del USERS[email]
+        save_users(USERS)
     
     # Delete all tokens for this user
     tokens_to_delete = [t for t, data in ACTIVE_TOKENS.items() if data['email'] == email]
     for t in tokens_to_delete:
         del ACTIVE_TOKENS[t]
+    save_tokens(ACTIVE_TOKENS)
     
     return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
 
