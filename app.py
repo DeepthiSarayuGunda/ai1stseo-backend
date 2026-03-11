@@ -1135,6 +1135,9 @@ def signup():
     }
     save_users(USERS)
     
+    print(f"DEBUG: User created - {email}, Total users: {len(USERS)}")
+    print(f"DEBUG: Users dict: {list(USERS.keys())}")
+    
     return jsonify({
         'status': 'success',
         'message': 'Account created successfully'
@@ -1147,11 +1150,20 @@ def login():
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
     
+    print(f"DEBUG LOGIN: Email={email}, Total users in memory: {len(USERS)}")
+    print(f"DEBUG LOGIN: Users dict keys: {list(USERS.keys())}")
+    print(f"DEBUG LOGIN: Email in USERS? {email in USERS}")
+    
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
     
     # Hash the password and check
     password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    if email in USERS:
+        print(f"DEBUG LOGIN: Stored hash: {USERS[email]['password_hash'][:20]}...")
+        print(f"DEBUG LOGIN: Input hash: {password_hash[:20]}...")
+        print(f"DEBUG LOGIN: Match? {USERS[email]['password_hash'] == password_hash}")
     
     if email in USERS and USERS[email]['password_hash'] == password_hash:
         # Generate token
