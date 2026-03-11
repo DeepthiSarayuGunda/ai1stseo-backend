@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Site Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--mg:#ff00ff;--cy:#00ffff;--or:#ff6600;--dk:#0a0a1a;--pn:#12122a}
+body{background:var(--dk);color:#fff;font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,.03) 2px,rgba(0,255,255,.03) 4px);pointer-events:none;z-index:9999}
+.grid-bg{position:fixed;bottom:0;left:0;width:100%;height:40%;background:linear-gradient(transparent 65%,rgba(255,0,255,.1));perspective:300px;z-index:0}
+.grid-bg::before{content:'';position:absolute;width:200%;height:200%;left:-50%;bottom:0;background:repeating-linear-gradient(90deg,rgba(255,0,255,.15) 0,transparent 1px,transparent 60px),repeating-linear-gradient(0deg,rgba(0,255,255,.1) 0,transparent 1px,transparent 60px);transform:rotateX(60deg);transform-origin:bottom}
+.hdr{text-align:center;padding:20px 20px 10px;position:relative;z-index:2}
+.hdr h1{font-family:'Orbitron',sans-serif;font-size:2.2em;background:linear-gradient(90deg,var(--mg),var(--cy),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px}
+.hdr p{color:var(--cy);font-size:.85em;margin-top:4px;opacity:.8}
+.auth-bar{position:absolute;top:20px;right:20px;display:flex;gap:10px;align-items:center;z-index:10}
+.auth-bar .uname{color:var(--cy);font-size:.85em}
+.btn{font-family:'Share Tech Mono',monospace;padding:8px 16px;border:1px solid var(--mg);background:rgba(255,0,255,.1);color:var(--mg);cursor:pointer;font-size:.8em;transition:all .2s;text-transform:uppercase;letter-spacing:1px}
+.btn:hover{background:rgba(255,0,255,.3);box-shadow:0 0 10px rgba(255,0,255,.5)}
+.btn.cy{border-color:var(--cy);color:var(--cy);background:rgba(0,255,255,.1)}
+.btn.cy:hover{background:rgba(0,255,255,.3);box-shadow:0 0 10px rgba(0,255,255,.5)}
+.btn.or{border-color:var(--or);color:var(--or);background:rgba(255,102,0,.1)}
+.btn.or:hover{background:rgba(255,102,0,.3);box-shadow:0 0 10px rgba(255,102,0,.5)}
+.btn.active{background:rgba(255,0,255,.4);box-shadow:0 0 10px rgba(255,0,255,.5)}
+.btn.cy.active{background:rgba(0,255,255,.4);box-shadow:0 0 10px rgba(0,255,255,.5)}
+.btn.sm{padding:5px 10px;font-size:.7em}
+.main{max-width:1100px;margin:0 auto;padding:10px 20px 30px;position:relative;z-index:2}
+.pnl{background:var(--pn);border:1px solid rgba(255,0,255,.3);padding:16px;margin-bottom:14px;position:relative}
+.pnl::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mg),var(--cy))}
+.pnl h2{font-family:'Orbitron',sans-serif;font-size:1em;color:var(--mg);margin-bottom:10px;letter-spacing:2px}
+.pnl h2.cyt{color:var(--cy)}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.tbtn{font-family:'Share Tech Mono',monospace;padding:12px;border:1px solid rgba(255,0,255,.4);background:rgba(255,0,255,.05);color:#fff;cursor:pointer;text-align:center;transition:all .2s;font-size:.8em}
+.tbtn:hover{background:rgba(255,0,255,.2);box-shadow:0 0 10px rgba(255,0,255,.5);transform:translateY(-1px)}
+.tbtn .ico{font-size:1.4em;display:block;margin-bottom:4px}
+.ubar{display:flex;gap:8px;margin-bottom:10px}
+.ubar input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.85em;outline:none}
+.ubar input:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,255,255,.3)}
+.ubar input::placeholder{color:rgba(0,255,255,.4)}
+.res{background:rgba(0,0,0,.5);border:1px solid rgba(0,255,255,.2);padding:12px;min-height:120px;max-height:300px;overflow-y:auto;font-size:.8em;line-height:1.5;white-space:pre-wrap;color:rgba(0,255,255,.9)}
+.res::-webkit-scrollbar{width:6px}
+.res::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+.res::-webkit-scrollbar-thumb{background:var(--mg)}
+</style>
+<style>
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--pn);border:1px solid var(--mg);padding:24px;width:360px;max-width:90vw;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mg),var(--cy))}
+.modal h2{font-family:'Orbitron',sans-serif;font-size:1em;color:var(--mg);margin-bottom:16px;text-align:center}
+.modal input{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:10px;font-family:'Share Tech Mono',monospace;font-size:.85em;margin-bottom:10px;outline:none}
+.modal input:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,255,255,.3)}
+.modal .mbtn{width:100%;padding:10px;margin-top:4px}
+.modal .toggle{color:rgba(0,255,255,.6);font-size:.75em;text-align:center;margin-top:10px;cursor:pointer}
+.modal .toggle:hover{color:var(--cy)}
+.modal .close-x{position:absolute;top:8px;right:12px;color:var(--mg);cursor:pointer;font-size:1.2em}
+.modal .err{color:#ff4444;font-size:.75em;margin-bottom:8px;min-height:1em}
+/* Subscription panel */
+.sub-panel{display:none}
+.sub-panel.show{display:block}
+.ch-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.ch-btn{padding:10px 4px;border:1px solid rgba(255,0,255,.3);background:rgba(255,0,255,.05);color:rgba(255,255,255,.7);cursor:pointer;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7em;transition:all .2s}
+.ch-btn:hover{background:rgba(255,0,255,.15)}
+.ch-btn.sel{background:rgba(255,0,255,.35);border-color:var(--mg);color:#fff;box-shadow:0 0 8px rgba(255,0,255,.4)}
+.ch-btn .ch-ico{font-size:1.3em;display:block;margin-bottom:3px}
+.freq-row{display:flex;gap:8px;margin-bottom:12px}
+.freq-btn{flex:1;padding:8px;border:1px solid rgba(0,255,255,.3);background:rgba(0,255,255,.05);color:rgba(0,255,255,.7);cursor:pointer;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.75em;transition:all .2s}
+.freq-btn.sel{background:rgba(0,255,255,.3);border-color:var(--cy);color:#fff}
+.sub-status{font-size:.75em;color:var(--cy);margin-top:8px;min-height:1.2em}
+/* Chat panel */
+.chat-panel{display:none}
+.chat-panel.show{display:block}
+.chat-log{background:rgba(0,0,0,.5);border:1px solid rgba(0,255,255,.2);padding:10px;height:220px;overflow-y:auto;font-size:.8em;line-height:1.5;margin-bottom:8px}
+.chat-log::-webkit-scrollbar{width:6px}
+.chat-log::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+.chat-log::-webkit-scrollbar-thumb{background:var(--mg)}
+.chat-msg{margin-bottom:8px}
+.chat-msg.user{color:var(--or)}
+.chat-msg.agent{color:var(--cy)}
+.chat-msg .sender{font-size:.7em;opacity:.6;margin-bottom:2px}
+.chat-input{display:flex;gap:8px}
+.chat-input input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.85em;outline:none}
+.chat-input input:focus{border-color:var(--cy)}
+.typing{color:rgba(255,0,255,.6);font-size:.75em;font-style:italic;margin-bottom:4px;min-height:1em}
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{padding:8px 14px;border:1px solid rgba(255,0,255,.3);background:rgba(255,0,255,.05);color:rgba(255,255,255,.6);cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.75em;transition:all .2s;text-transform:uppercase}
+.tab:hover{background:rgba(255,0,255,.15)}
+.tab.active{background:rgba(255,0,255,.3);border-color:var(--mg);color:#fff}
+@media(max-width:600px){.tgrid{grid-template-columns:repeat(2,1fr)}.ch-grid{grid-template-columns:repeat(3,1fr)}.hdr h1{font-size:1.5em}.auth-bar{position:static;justify-content:center;margin-bottom:10px}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+<div class="modal">
+<span class="close-x" onclick="closeAuth()">&times;</span>
+<h2 id="authTitle">LOGIN</h2>
+<div class="err" id="authErr"></div>
+<input type="text" id="authName" placeholder="Name" style="display:none">
+<input type="email" id="authEmail" placeholder="Email">
+<input type="password" id="authPass" placeholder="Password">
+<button class="btn mbtn" onclick="doAuth()">LOGIN</button>
+<div class="toggle" id="authToggle" onclick="toggleAuthMode()">No account? Sign up</div>
+</div>
+</div>
+
+<div class="hdr">
+<div class="auth-bar">
+<span class="uname" id="userName" style="display:none"></span>
+<button class="btn sm" id="authBtn" onclick="openAuth()">LOGIN</button>
+<button class="btn sm cy" id="logoutBtn" style="display:none" onclick="doLogout()">LOGOUT</button>
+</div>
+<h1>OPENCLAW SITE MONITOR</h1>
+<p>AI-Powered SEO &amp; Uptime Intelligence // v3.0</p>
+</div>
+
+<div class="main">
+<!-- Scanner Panel -->
+<div class="pnl">
+<h2>&#9781; MONITORING TOOLS</h2>
+<div class="tgrid">
+<button class="tbtn" onclick="runTool('scan')"><span class="ico">&#128270;</span>SEO Scan</button>
+<button class="tbtn" onclick="runTool('uptime')"><span class="ico">&#9889;</span>Uptime Check</button>
+<button class="tbtn" onclick="runTool('content')"><span class="ico">&#128196;</span>Content Monitor</button>
+<button class="tbtn" onclick="runTool('ai-visibility')"><span class="ico">&#129302;</span>AI Citations</button>
+<button class="tbtn" onclick="runTool('transaction')"><span class="ico">&#128176;</span>Transaction Test</button>
+<button class="tbtn" onclick="runTool('full-scan')"><span class="ico">&#127776;</span>Full Scan</button>
+</div>
+<div class="ubar">
+<input type="text" id="siteUrl" placeholder="https://yoursite.com" value="https://ai1stseo.com">
+</div>
+<div class="res" id="results">[ READY ] Select a tool and enter a URL to begin scanning...</div>
+</div>
+
+<!-- Subscription & Chat Panel (logged-in only) -->
+<div class="sub-panel" id="memberArea">
+<div class="pnl">
+<h2 class="cyt">&#128272; MEMBER DASHBOARD</h2>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('subscribe')">&#128232; Daily Reports</div>
+<div class="tab" onclick="switchTab('chat')">&#129302; OpenClaw Agent</div>
+</div>
+
+<!-- Subscribe Tab -->
+<div id="tabSubscribe">
+<p style="font-size:.8em;color:rgba(255,255,255,.7);margin-bottom:12px">Get your daily monitoring report delivered to your platform of choice.</p>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">CHOOSE YOUR CHANNELS</h2>
+<div class="ch-grid">
+<button class="ch-btn" data-ch="email" onclick="toggleCh(this)"><span class="ch-ico">&#9993;</span>Email</button>
+<button class="ch-btn" data-ch="whatsapp" onclick="toggleCh(this)"><span class="ch-ico">&#128172;</span>WhatsApp</button>
+<button class="ch-btn" data-ch="slack" onclick="toggleCh(this)"><span class="ch-ico">&#128488;</span>Slack</button>
+<button class="ch-btn" data-ch="telegram" onclick="toggleCh(this)"><span class="ch-ico">&#9992;</span>Telegram</button>
+<button class="ch-btn" data-ch="discord" onclick="toggleCh(this)"><span class="ch-ico">&#127918;</span>Discord</button>
+</div>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">SITES TO MONITOR</h2>
+<div class="ubar" style="margin-bottom:12px">
+<input type="text" id="subSites" placeholder="https://yoursite.com (comma-separated for multiple)" value="https://ai1stseo.com">
+</div>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">FREQUENCY</h2>
+<div class="freq-row">
+<button class="freq-btn sel" data-freq="daily" onclick="setFreq(this)">Daily</button>
+<button class="freq-btn" data-freq="weekly" onclick="setFreq(this)">Weekly</button>
+<button class="freq-btn" data-freq="realtime" onclick="setFreq(this)">Real-time Alerts</button>
+</div>
+<div style="display:flex;gap:8px">
+<button class="btn" onclick="doSubscribe()">&#10003; SUBSCRIBE</button>
+<button class="btn cy" onclick="doUnsubscribe()">UNSUBSCRIBE</button>
+</div>
+<div class="sub-status" id="subStatus"></div>
+</div>
+
+<!-- Chat Tab -->
+<div id="tabChat" style="display:none">
+<p style="font-size:.8em;color:rgba(255,255,255,.7);margin-bottom:8px">Chat with your OpenClaw agent about your site's SEO, issues, and fixes.</p>
+<div class="typing" id="typing"></div>
+<div class="chat-log" id="chatLog">
+<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>Hi! Send <span style="color:var(--or)">scan yoursite.com</span> to get started, or <span style="color:var(--or)">help</span> for commands.</div>
+</div>
+<div class="chat-input">
+<input type="text" id="chatMsg" placeholder="Ask about your site... (try: scan ai1stseo.com)" onkeydown="if(event.key==='Enter')sendChat()">
+<button class="btn" onclick="sendChat()">SEND</button>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+// === State ===
+let token = localStorage.getItem('ocm_token');
+let userName = localStorage.getItem('ocm_name');
+let isSignup = false;
+let selectedChannels = [];
+let selectedFreq = 'daily';
+
+// === Init ===
+window.addEventListener('DOMContentLoaded', () => {
+  if (token) { checkAuth(); } else { showLoggedOut(); }
+});
+
+function showLoggedIn(name) {
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userName').style.display = '';
+  document.getElementById('authBtn').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = '';
+  document.getElementById('memberArea').classList.add('show');
+  loadSubscription();
+}
+
+function showLoggedOut() {
+  document.getElementById('userName').style.display = 'none';
+  document.getElementById('authBtn').style.display = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('memberArea').classList.remove('show');
+  token = null; userName = null;
+  localStorage.removeItem('ocm_token');
+  localStorage.removeItem('ocm_name');
+}
+
+async function checkAuth() {
+  try {
+    const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    if (d.status === 'success') {
+      userName = d.name;
+      localStorage.setItem('ocm_name', userName);
+      showLoggedIn(userName);
+      if (d.subscription && d.subscription.active) {
+        restoreSubscription(d.subscription);
+      }
+    } else { showLoggedOut(); }
+  } catch(e) { showLoggedOut(); }
+}
+
+// === Auth Modal ===
+function openAuth() { document.getElementById('authModal').classList.add('show'); setAuthMode(false); }
+function closeAuth() { document.getElementById('authModal').classList.remove('show'); document.getElementById('authErr').textContent = ''; }
+function toggleAuthMode() { setAuthMode(!isSignup); }
+function setAuthMode(signup) {
+  isSignup = signup;
+  document.getElementById('authTitle').textContent = signup ? 'SIGN UP' : 'LOGIN';
+  document.getElementById('authName').style.display = signup ? '' : 'none';
+  document.querySelector('.modal .mbtn').textContent = signup ? 'SIGN UP' : 'LOGIN';
+  document.getElementById('authToggle').textContent = signup ? 'Have an account? Log in' : 'No account? Sign up';
+  document.getElementById('authErr').textContent = '';
+}
+
+async function doAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPass').value;
+  const name = document.getElementById('authName').value.trim();
+  const errEl = document.getElementById('authErr');
+  if (!email || !password) { errEl.textContent = 'Email and password required'; return; }
+  if (isSignup && !name) { errEl.textContent = 'Name required'; return; }
+  try {
+    const url = isSignup ? '/api/auth/signup' : '/api/auth/login';
+    const body = isSignup ? { name, email, password } : { email, password };
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json();
+    if (d.status === 'success') {
+      if (isSignup) { setAuthMode(false); errEl.textContent = ''; document.getElementById('authErr').style.color = '#0f0'; document.getElementById('authErr').textContent = 'Account created! Now log in.'; return; }
+      token = d.token; userName = d.name;
+      localStorage.setItem('ocm_token', token);
+      localStorage.setItem('ocm_name', userName);
+      closeAuth(); showLoggedIn(userName);
+    } else { errEl.textContent = d.message || 'Error'; }
+  } catch(e) { errEl.textContent = 'Connection error'; }
+}
+
+async function doLogout() {
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }); } catch(e) {}
+  showLoggedOut();
+}
+</script>
+
+<script>
+// === Subscription ===
+function toggleCh(el) {
+  el.classList.toggle('sel');
+  const ch = el.dataset.ch;
+  if (el.classList.contains('sel')) { if (!selectedChannels.includes(ch)) selectedChannels.push(ch); }
+  else { selectedChannels = selectedChannels.filter(c => c !== ch); }
+}
+
+function setFreq(el) {
+  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedFreq = el.dataset.freq;
+}
+
+function restoreSubscription(sub) {
+  if (sub.channels) {
+    selectedChannels = [...sub.channels];
+    document.querySelectorAll('.ch-btn').forEach(b => {
+      b.classList.toggle('sel', sub.channels.includes(b.dataset.ch));
+    });
+  }
+  if (sub.frequency) {
+    selectedFreq = sub.frequency;
+    document.querySelectorAll('.freq-btn').forEach(b => {
+      b.classList.toggle('sel', b.dataset.freq === sub.frequency);
+    });
+  }
+  if (sub.sites) { document.getElementById('subSites').value = sub.sites.join(', '); }
+  if (sub.active) {
+    document.getElementById('subStatus').textContent = '[ ACTIVE ] Subscribed via ' + sub.channels.join(', ') + ' (' + sub.frequency + ')';
+  }
+}
+
+async function loadSubscription() {
+  try {
+    const r = await fetch('/api/subscription', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    if (d.status === 'success' && d.subscription && d.subscription.active) {
+      restoreSubscription(d.subscription);
+    }
+  } catch(e) {}
+}
+
+async function doSubscribe() {
+  if (!selectedChannels.length) { document.getElementById('subStatus').textContent = '[ ERROR ] Select at least one channel'; return; }
+  const sites = document.getElementById('subSites').value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!sites.length) { document.getElementById('subStatus').textContent = '[ ERROR ] Enter at least one site URL'; return; }
+  try {
+    const r = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ channels: selectedChannels, sites, frequency: selectedFreq })
+    });
+    const d = await r.json();
+    document.getElementById('subStatus').textContent = d.status === 'success' ? '[ OK ] ' + d.message : '[ ERROR ] ' + d.message;
+  } catch(e) { document.getElementById('subStatus').textContent = '[ ERROR ] Connection failed'; }
+}
+
+async function doUnsubscribe() {
+  try {
+    const r = await fetch('/api/unsubscribe', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    document.getElementById('subStatus').textContent = '[ OK ] ' + d.message;
+    selectedChannels = [];
+    document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('sel'));
+  } catch(e) { document.getElementById('subStatus').textContent = '[ ERROR ] Connection failed'; }
+}
+
+// === Tabs ===
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabSubscribe').style.display = tab === 'subscribe' ? '' : 'none';
+  document.getElementById('tabChat').style.display = tab === 'chat' ? '' : 'none';
+}
+
+// === Chat ===
+async function sendChat() {
+  const input = document.getElementById('chatMsg');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const log = document.getElementById('chatLog');
+  log.innerHTML += '<div class="chat-msg user"><div class="sender">YOU</div>' + escHtml(msg) + '</div>';
+  log.scrollTop = log.scrollHeight;
+  document.getElementById('typing').textContent = 'OpenClaw is thinking...';
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ message: msg })
+    });
+    const d = await r.json();
+    document.getElementById('typing').textContent = '';
+    const resp = d.status === 'success' ? d.response : (d.message || 'Error');
+    log.innerHTML += '<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>' + escHtml(resp) + '</div>';
+    log.scrollTop = log.scrollHeight;
+  } catch(e) {
+    document.getElementById('typing').textContent = '';
+    log.innerHTML += '<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>Connection error. Try again.</div>';
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// === Scanner Tools ===
+async function runTool(tool) {
+  const url = document.getElementById('siteUrl').value.trim();
+  const res = document.getElementById('results');
+  res.textContent = '[ SCANNING ] Running ' + tool + ' on ' + url + '...';
+  try {
+    let endpoint = '/api/' + tool + '?url=' + encodeURIComponent(url);
+    if (tool === 'ai-visibility') endpoint += '&brand=AI%201st%20SEO';
+    const r = await fetch(endpoint);
+    const d = await r.json();
+    if (d.error) { res.textContent = '[ ERROR ] ' + d.error; return; }
+    res.textContent = formatResult(tool, d);
+  } catch(e) { res.textContent = '[ ERROR ] ' + e.message; }
+}
+
+function formatResult(tool, d) {
+  let out = '[ COMPLETE ] ' + tool.toUpperCase() + ' Results\n' + '='.repeat(40) + '\n\n';
+  if (tool === 'scan' || tool === 'full-scan') {
+    const seo = d.seo || d;
+    out += 'SEO Score: ' + (seo.score || 'N/A') + '/100\n';
+    if (seo.critical_issues && seo.critical_issues.length) {
+      out += '\nCritical Issues:\n';
+      seo.critical_issues.forEach(i => out += '  ! ' + i + '\n');
+    }
+    if (seo.warnings && seo.warnings.length) {
+      out += '\nWarnings:\n';
+      seo.warnings.slice(0, 5).forEach(w => out += '  ~ ' + w + '\n');
+    }
+    if (seo.recommendations) {
+      out += '\nTop Recommendations:\n';
+      (Array.isArray(seo.recommendations) ? seo.recommendations : []).slice(0, 3).forEach(r => {
+        out += '  > [' + (r.priority || '?') + '] ' + (r.action || r) + '\n';
+      });
+    }
+  }
+  if (d.uptime || tool === 'uptime') {
+    const u = d.uptime || d;
+    out += (tool === 'full-scan' ? '\n--- UPTIME ---\n' : '');
+    out += 'Status: ' + (u.is_up ? 'UP' : 'DOWN') + '\n';
+    out += 'Response: ' + (u.response_time_ms || 'N/A') + 'ms\n';
+    out += 'Status Code: ' + (u.status_code || 'N/A') + '\n';
+  }
+  if (tool === 'content') {
+    out += 'Changed: ' + (d.has_changed ? 'YES' : 'No changes detected') + '\n';
+    if (d.changes) out += 'Details: ' + JSON.stringify(d.changes, null, 2) + '\n';
+  }
+  if (tool === 'ai-visibility') {
+    out += JSON.stringify(d, null, 2);
+  }
+  if (tool === 'transaction') {
+    out += JSON.stringify(d, null, 2);
+  }
+  if (d.content) { out += '\n--- CONTENT ---\n' + JSON.stringify(d.content, null, 2) + '\n'; }
+  if (d.ai) { out += '\n--- AI VISIBILITY ---\n' + JSON.stringify(d.ai, null, 2) + '\n'; }
+  if (d.transaction) { out += '\n--- TRANSACTIONS ---\n' + JSON.stringify(d.transaction, null, 2) + '\n'; }
+  return out;
+}
+</script>
+</body>
+</html>
