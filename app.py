@@ -25,10 +25,8 @@ CORS(app, origins=[
 ])
 
 # Simple in-memory user storage (replace with database in production)
-USERS = {
-    'admin': hashlib.sha256('admin123'.encode()).hexdigest(),
-    'demo': hashlib.sha256('demo123'.encode()).hexdigest()
-}
+# Format: email -> {name, password_hash}
+USERS = {}
 
 # Token storage (in production, use Redis or database)
 ACTIVE_TOKENS = {}
@@ -1074,37 +1072,71 @@ def serve_analyze():
 def serve_assets(filename):
     return send_from_directory('assets', filename)
 
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    """User registration endpoint"""
+    data = request.get_json()
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    
+    if not name or not email or not password:
+        return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
+    
+    # Basic email validation
+    if '@' not in email or '.' not in email:
+        return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
+    
+    # Check if email already exists
+    if email in USERS:
+        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+    
+    # Hash password and store user
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    USERS[email] = {
+        'name': name,
+        'password_hash': password_hash,
+        'created_at': datetime.now().isoformat()
+    }
+    
+    return jsonify({
+        'status': 'success',
+        'message': 'Account created successfully'
+    })
+
 @app.route('/api/login', methods=['POST'])
 def login():
     """User login endpoint"""
     data = request.get_json()
-    username = data.get('username', '')
+    email = data.get('email', '').strip().lower()
     password = data.get('password', '')
     
-    if not username or not password:
-        return jsonify({'status': 'error', 'message': 'Username and password required'}), 400
+    if not email or not password:
+        return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
     
     # Hash the password and check
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     
-    if username in USERS and USERS[username] == password_hash:
+    if email in USERS and USERS[email]['password_hash'] == password_hash:
         # Generate token
         token = secrets.token_urlsafe(32)
         expiry = datetime.now() + timedelta(hours=24)
         
         ACTIVE_TOKENS[token] = {
-            'username': username,
+            'email': email,
+            'name': USERS[email]['name'],
             'expiry': expiry
         }
         
         return jsonify({
             'status': 'success',
             'token': token,
-            'username': username,
+            'name': USERS[email]['name'],
+            'email': email,
             'message': 'Login successful'
         })
     else:
-        return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
+        return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
@@ -1129,7 +1161,8 @@ def verify_token():
             return jsonify({
                 'status': 'success',
                 'valid': True,
-                'username': token_data['username']
+                'name': token_data['name'],
+                'email': token_data['email']
             })
         else:
             # Token expired
