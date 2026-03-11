@@ -9,6 +9,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY app.py .
 COPY application.py .
+COPY index.html .
+COPY analyze.html .
+COPY audit.html .
+COPY assets/ ./assets/
 
 # Expose port
 EXPOSE 8080
