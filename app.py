@@ -12,6 +12,9 @@ from urllib.parse import urlparse, urljoin
 import re
 import time
 import json
+import secrets
+import hashlib
+from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
@@ -20,6 +23,15 @@ CORS(app, origins=[
     'http://localhost:5000',
     'http://127.0.0.1:5000'
 ])
+
+# Simple in-memory user storage (replace with database in production)
+USERS = {
+    'admin': hashlib.sha256('admin123'.encode()).hexdigest(),
+    'demo': hashlib.sha256('demo123'.encode()).hexdigest()
+}
+
+# Token storage (in production, use Redis or database)
+ACTIVE_TOKENS = {}
 
 def fetch_website(url):
     """Fetch website content with timing"""
@@ -1061,6 +1073,69 @@ def serve_analyze():
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory('assets', filename)
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """User login endpoint"""
+    data = request.get_json()
+    username = data.get('username', '')
+    password = data.get('password', '')
+    
+    if not username or not password:
+        return jsonify({'status': 'error', 'message': 'Username and password required'}), 400
+    
+    # Hash the password and check
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    if username in USERS and USERS[username] == password_hash:
+        # Generate token
+        token = secrets.token_urlsafe(32)
+        expiry = datetime.now() + timedelta(hours=24)
+        
+        ACTIVE_TOKENS[token] = {
+            'username': username,
+            'expiry': expiry
+        }
+        
+        return jsonify({
+            'status': 'success',
+            'token': token,
+            'username': username,
+            'message': 'Login successful'
+        })
+    else:
+        return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    """User logout endpoint"""
+    data = request.get_json()
+    token = data.get('token', '')
+    
+    if token in ACTIVE_TOKENS:
+        del ACTIVE_TOKENS[token]
+    
+    return jsonify({'status': 'success', 'message': 'Logged out successfully'})
+
+@app.route('/api/verify', methods=['POST'])
+def verify_token():
+    """Verify if token is valid"""
+    data = request.get_json()
+    token = data.get('token', '')
+    
+    if token in ACTIVE_TOKENS:
+        token_data = ACTIVE_TOKENS[token]
+        if datetime.now() < token_data['expiry']:
+            return jsonify({
+                'status': 'success',
+                'valid': True,
+                'username': token_data['username']
+            })
+        else:
+            # Token expired
+            del ACTIVE_TOKENS[token]
+    
+    return jsonify({'status': 'error', 'valid': False}), 401
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
