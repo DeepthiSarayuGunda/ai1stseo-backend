@@ -31,40 +31,58 @@ USERS_FILE = 'users.json'
 TOKENS_FILE = 'tokens.json'
 
 def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'r') as f:
-            return json.load(f)
+    """Load users from file on every call"""
+    try:
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading users: {e}")
     return {}
 
 def save_users(users):
-    with open(USERS_FILE, 'w') as f:
-        json.dump(users, f)
+    """Save users to file"""
+    try:
+        with open(USERS_FILE, 'w') as f:
+            json.dump(users, f, indent=2)
+        print(f"Saved {len(users)} users to {USERS_FILE}")
+    except Exception as e:
+        print(f"Error saving users: {e}")
 
 def load_tokens():
-    if os.path.exists(TOKENS_FILE):
-        with open(TOKENS_FILE, 'r') as f:
-            data = json.load(f)
-            # Convert expiry strings back to datetime
-            for token, info in data.items():
-                info['expiry'] = datetime.fromisoformat(info['expiry'])
-            return data
+    """Load tokens from file on every call"""
+    try:
+        if os.path.exists(TOKENS_FILE):
+            with open(TOKENS_FILE, 'r') as f:
+                data = json.load(f)
+                # Convert expiry strings back to datetime
+                for token, info in data.items():
+                    info['expiry'] = datetime.fromisoformat(info['expiry'])
+                return data
+    except Exception as e:
+        print(f"Error loading tokens: {e}")
     return {}
 
 def save_tokens(tokens):
-    # Convert datetime to string for JSON
-    data = {}
-    for token, info in tokens.items():
-        data[token] = {
-            'email': info['email'],
-            'name': info['name'],
-            'expiry': info['expiry'].isoformat()
-        }
-    with open(TOKENS_FILE, 'w') as f:
-        json.dump(data, f)
+    """Save tokens to file"""
+    try:
+        # Convert datetime to string for JSON
+        data = {}
+        for token, info in tokens.items():
+            data[token] = {
+                'email': info['email'],
+                'name': info['name'],
+                'expiry': info['expiry'].isoformat()
+            }
+        with open(TOKENS_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+        print(f"Saved {len(tokens)} tokens to {TOKENS_FILE}")
+    except Exception as e:
+        print(f"Error saving tokens: {e}")
 
-# Load data from files
-USERS = load_users()
-ACTIVE_TOKENS = load_tokens()
+# Don't load at startup - load on each request instead
+USERS = {}
+ACTIVE_TOKENS = {}
 
 def fetch_website(url):
     """Fetch website content with timing"""
@@ -1122,21 +1140,23 @@ def signup():
     if '@' not in email or '.' not in email:
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
     
+    # Load users from file
+    users = load_users()
+    
     # Check if email already exists
-    if email in USERS:
+    if email in users:
         return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
     
     # Hash password and store user
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    USERS[email] = {
+    users[email] = {
         'name': name,
         'password_hash': password_hash,
         'created_at': datetime.now().isoformat()
     }
-    save_users(USERS)
+    save_users(users)
     
-    print(f"DEBUG: User created - {email}, Total users: {len(USERS)}")
-    print(f"DEBUG: Users dict: {list(USERS.keys())}")
+    print(f"DEBUG: User created - {email}, Total users: {len(users)}")
     
     return jsonify({
         'status': 'success',
@@ -1150,9 +1170,12 @@ def login():
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
     
-    print(f"DEBUG LOGIN: Email={email}, Total users in memory: {len(USERS)}")
-    print(f"DEBUG LOGIN: Users dict keys: {list(USERS.keys())}")
-    print(f"DEBUG LOGIN: Email in USERS? {email in USERS}")
+    # Load users from file on each request
+    users = load_users()
+    
+    print(f"DEBUG LOGIN: Email={email}, Total users in file: {len(users)}")
+    print(f"DEBUG LOGIN: Users in file: {list(users.keys())}")
+    print(f"DEBUG LOGIN: Email in users? {email in users}")
     
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
@@ -1160,27 +1183,29 @@ def login():
     # Hash the password and check
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     
-    if email in USERS:
-        print(f"DEBUG LOGIN: Stored hash: {USERS[email]['password_hash'][:20]}...")
+    if email in users:
+        print(f"DEBUG LOGIN: Stored hash: {users[email]['password_hash'][:20]}...")
         print(f"DEBUG LOGIN: Input hash: {password_hash[:20]}...")
-        print(f"DEBUG LOGIN: Match? {USERS[email]['password_hash'] == password_hash}")
+        print(f"DEBUG LOGIN: Match? {users[email]['password_hash'] == password_hash}")
     
-    if email in USERS and USERS[email]['password_hash'] == password_hash:
+    if email in users and users[email]['password_hash'] == password_hash:
         # Generate token
         token = secrets.token_urlsafe(32)
         expiry = datetime.now() + timedelta(hours=24)
         
-        ACTIVE_TOKENS[token] = {
+        # Load and save tokens
+        tokens = load_tokens()
+        tokens[token] = {
             'email': email,
-            'name': USERS[email]['name'],
+            'name': users[email]['name'],
             'expiry': expiry
         }
-        save_tokens(ACTIVE_TOKENS)
+        save_tokens(tokens)
         
         return jsonify({
             'status': 'success',
             'token': token,
-            'name': USERS[email]['name'],
+            'name': users[email]['name'],
             'email': email,
             'message': 'Login successful'
         })
@@ -1193,9 +1218,10 @@ def logout():
     data = request.get_json()
     token = data.get('token', '')
     
-    if token in ACTIVE_TOKENS:
-        del ACTIVE_TOKENS[token]
-        save_tokens(ACTIVE_TOKENS)
+    tokens = load_tokens()
+    if token in tokens:
+        del tokens[token]
+        save_tokens(tokens)
     
     return jsonify({'status': 'success', 'message': 'Logged out successfully'})
 
@@ -1205,22 +1231,24 @@ def delete_account():
     data = request.get_json()
     token = data.get('token', '')
     
-    if token not in ACTIVE_TOKENS:
+    tokens = load_tokens()
+    if token not in tokens:
         return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
     
     # Get user email from token
-    email = ACTIVE_TOKENS[token]['email']
+    email = tokens[token]['email']
     
     # Delete user data
-    if email in USERS:
-        del USERS[email]
-        save_users(USERS)
+    users = load_users()
+    if email in users:
+        del users[email]
+        save_users(users)
     
     # Delete all tokens for this user
-    tokens_to_delete = [t for t, data in ACTIVE_TOKENS.items() if data['email'] == email]
+    tokens_to_delete = [t for t, data in tokens.items() if data['email'] == email]
     for t in tokens_to_delete:
-        del ACTIVE_TOKENS[t]
-    save_tokens(ACTIVE_TOKENS)
+        del tokens[t]
+    save_tokens(tokens)
     
     return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
 
@@ -1230,8 +1258,9 @@ def verify_token():
     data = request.get_json()
     token = data.get('token', '')
     
-    if token in ACTIVE_TOKENS:
-        token_data = ACTIVE_TOKENS[token]
+    tokens = load_tokens()
+    if token in tokens:
+        token_data = tokens[token]
         if datetime.now() < token_data['expiry']:
             return jsonify({
                 'status': 'success',
@@ -1241,7 +1270,8 @@ def verify_token():
             })
         else:
             # Token expired
-            del ACTIVE_TOKENS[token]
+            del tokens[token]
+            save_tokens(tokens)
     
     return jsonify({'status': 'error', 'valid': False}), 401
 
