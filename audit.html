@@ -12,6 +12,57 @@
             min-height: 100vh;
             color: #fff;
         }
+        .tools-tab {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+        }
+        .tools-tab-btn {
+            background: rgba(20,25,40,0.95);
+            border: 1px solid rgba(0,212,255,0.4);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        .tools-tab-btn:hover {
+            background: rgba(0,212,255,0.15);
+            border-color: rgba(0,212,255,0.6);
+        }
+        .tools-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: rgba(20,25,40,0.98);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 10px;
+            min-width: 210px;
+            padding: 6px 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+        }
+        .tools-dropdown.open { display: block; }
+        .tools-dropdown a {
+            display: block;
+            padding: 10px 16px;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .tools-dropdown a:hover {
+            background: rgba(0,212,255,0.1);
+            color: #fff;
+        }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
@@ -362,6 +413,18 @@
             <p style="margin-top: 10px; color: rgba(255,255,255,0.7);">200 Comprehensive SEO & AI Optimization Checks</p>
             <div class="url-display" id="urlDisplay">Loading...</div>
         </header>
+
+        <div class="tools-tab" id="toolsTab">
+            <button class="tools-tab-btn" onclick="document.getElementById('toolsDD').classList.toggle('open')">🛠 Tools ▾</button>
+            <div class="tools-dropdown" id="toolsDD">
+                <a href="https://www.ai1stseo.com">🏠 Home</a>
+                <a href="https://monitor.ai1stseo.com">📊 Website Monitoring</a>
+                <a href="https://seoaudit.ai1stseo.com">🔍 SEO Audit</a>
+                <a href="https://seoanalysis.ai1stseo.com">📈 SEO Analysis</a>
+                <a href="https://docsummarizer.ai1stseo.com">📄 Doc Summarizer</a>
+                <a href="https://automationhub.ai1stseo.com">⚙️ Automation Hub</a>
+            </div>
+        </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
@@ -372,6 +435,13 @@
     </div>
 
     <script>
+        // Close tools dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var tab = document.getElementById('toolsTab');
+            var dd = document.getElementById('toolsDD');
+            if (dd && tab && !tab.contains(e.target)) dd.classList.remove('open');
+        });
+
         const categoryMeta = {
             'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 35 },
             'onpage': { name: '📄 On-Page SEO', desc: 'Title, Meta, Headings, Images, Content Structure', checks: 25 },
