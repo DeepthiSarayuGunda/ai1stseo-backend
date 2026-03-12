@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AISEO Master - AI-First SEO Platform</title>
+    <script type="module" crossorigin src="/assets/index-Bfah4_p8.js"></script>
+    <script>
+      // Intercept ALL navigation to /audit/ and force full page reload with all categories
+      (function() {
+        // Intercept history.pushState
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            window.location.href = newUrl;
+            return;
+          }
+          return originalPushState.apply(this, arguments);
+        };
+
+        // Intercept history.replaceState
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            window.location.href = newUrl;
+            return;
+          }
+          return originalReplaceState.apply(this, arguments);
+        };
+
+        // Intercept clicks on links
+        document.addEventListener('click', function(e) {
+          const target = e.target.closest('a, button');
+          if (target) {
+            const href = target.getAttribute('href') || target.getAttribute('data-href') || '';
+            if (href.includes('/audit/')) {
+              e.preventDefault();
+              e.stopPropagation();
+              const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+              let newUrl = href;
+              if (href.includes('?cats=')) {
+                newUrl = href.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+              } else if (href.includes('?')) {
+                newUrl = href + '&cats=' + allCats;
+              } else {
+                newUrl = href + '?cats=' + allCats;
+              }
+              window.location.href = newUrl;
+            }
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Inject "Tools" dropdown into the React nav bar
+      (function() {
+        let injected = false;
+        function injectToolsNav() {
+          if (injected) return;
+          // Find the nav - look for the nav element or header with nav links
+          const nav = document.querySelector('nav') || document.querySelector('header');
+          if (!nav) return;
+          // Look for the right side of the nav (where LOGIN button is)
+          const buttons = nav.querySelectorAll('button, a');
+          let loginBtn = null;
+          buttons.forEach(function(btn) {
+            const t = btn.textContent.trim().toUpperCase();
+            if (t === 'LOGIN' || t === 'SIGN UP' || t.length <= 12) {
+              if (!loginBtn && btn.getBoundingClientRect().right > window.innerWidth * 0.5) {
+                loginBtn = btn;
+              }
+            }
+          });
+          // Find the container that holds nav links
+          const navLinks = nav.querySelectorAll('a[href]');
+          if (navLinks.length < 2) return;
+          // Check if we already injected
+          if (document.getElementById('tools-dropdown-wrap')) { injected = true; return; }
+          // Create the Tools dropdown
+          const wrap = document.createElement('div');
+          wrap.id = 'tools-dropdown-wrap';
+          wrap.style.cssText = 'position:relative;display:inline-block;margin-left:8px;';
+          const btn = document.createElement('button');
+          // Match the style of existing nav links
+          const refLink = navLinks[1] || navLinks[0];
+          const refStyle = window.getComputedStyle(refLink);
+          btn.textContent = 'Tools \u25BE';
+          btn.style.cssText = 'background:none;border:none;cursor:pointer;font-family:inherit;font-size:' + refStyle.fontSize + ';color:' + refStyle.color + ';padding:' + refStyle.padding + ';letter-spacing:' + refStyle.letterSpacing + ';text-transform:' + refStyle.textTransform + ';transition:opacity .2s;';
+          btn.onmouseover = function() { btn.style.opacity = '0.7'; };
+          btn.onmouseout = function() { btn.style.opacity = '1'; };
+          const dd = document.createElement('div');
+          dd.style.cssText = 'display:none;position:absolute;top:100%;right:0;background:rgba(20,25,40,.98);border:1px solid rgba(0,212,255,.3);border-radius:8px;min-width:200px;padding:6px 0;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,.4);backdrop-filter:blur(10px);margin-top:4px;';
+          dd.innerHTML = '<a href="https://monitor.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">📊 Website Monitoring</a><a href="https://seoaudit.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">🔍 SEO Audit</a>';
+          btn.onclick = function(e) { e.stopPropagation(); dd.style.display = dd.style.display === 'none' ? 'block' : 'none'; };
+          document.addEventListener('click', function() { dd.style.display = 'none'; });
+          wrap.appendChild(btn);
+          wrap.appendChild(dd);
+          // Insert before the login button or at the end of nav
+          if (loginBtn && loginBtn.parentElement) {
+            loginBtn.parentElement.insertBefore(wrap, loginBtn);
+          } else {
+            // Find the flex container in the nav and append
+            const flexContainers = nav.querySelectorAll('div');
+            let target = nav;
+            flexContainers.forEach(function(d) {
+              const s = window.getComputedStyle(d);
+              if (s.display === 'flex' && d.children.length >= 2) target = d;
+            });
+            target.appendChild(wrap);
+          }
+          injected = true;
+        }
+        setInterval(injectToolsNav, 500);
+        injectToolsNav();
+      })();
+    </script>
+  </body>
+</html>
