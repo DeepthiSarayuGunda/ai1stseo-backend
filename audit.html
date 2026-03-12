@@ -401,7 +401,12 @@
         function getCategories() {
             const params = new URLSearchParams(window.location.search);
             const cats = params.get('cats');
-            return cats ? cats.split(',') : Object.keys(categoryMeta);
+            let categories = cats ? cats.split(',') : Object.keys(categoryMeta);
+            // Always include citationgap if not already present
+            if (!categories.includes('citationgap')) {
+                categories.push('citationgap');
+            }
+            return categories;
         }
 
         function getScoreColor(score) {
