@@ -18,6 +18,10 @@ import json
 app = Flask(__name__, static_folder='../assets', static_url_path='/assets')
 CORS(app)
 
+# Register auth blueprint (Cognito + Secrets Manager)
+from auth import auth_bp
+app.register_blueprint(auth_bp)
+
 def fetch_website(url):
     """Fetch website content with timing"""
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
