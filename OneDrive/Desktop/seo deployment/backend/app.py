@@ -555,81 +555,103 @@ def analyze_mobile_seo(url, soup, response, load_time):
     # 1-5: Viewport & Responsiveness
     viewport = soup.find('meta', attrs={'name': 'viewport'})
     add_check(checks, 'Viewport Meta Tag', 'pass' if viewport else 'fail',
-              'Viewport defined', viewport.get('content', '')[:50] if viewport else 'Missing',
-              'Add viewport meta tag', 'Critical', 'Viewport')
+              'Checks for the viewport meta tag that controls page scaling on mobile devices. Since Google uses mobile-first indexing, this tag is essential — without it, your page renders at desktop width on phones, making it unusable and hurting mobile rankings',
+              viewport.get('content', '')[:80] if viewport else 'Missing — page will not display correctly on mobile devices',
+              'Add <meta name="viewport" content="width=device-width, initial-scale=1.0"> in your <head> tag. This is the single most important mobile optimization and is required for Google\'s mobile-first indexing', 'Critical', 'Viewport')
     
     viewport_content = viewport.get('content', '') if viewport else ''
     has_width = 'width=' in viewport_content
     add_check(checks, 'Viewport Width', 'pass' if has_width else 'fail',
-              'Width specified', 'Yes' if has_width else 'No', 'Set width=device-width', 'Critical', 'Viewport')
+              'Verifies the viewport tag includes a width directive. The width=device-width setting tells the browser to match the page width to the device screen width, which is the foundation of responsive design',
+              'width=device-width is set (correct)' if has_width else 'No width directive — page will not adapt to screen size',
+              'Ensure your viewport tag includes width=device-width. Without this, the browser defaults to a virtual viewport of ~980px, causing horizontal scrolling on mobile devices', 'Critical', 'Viewport')
     
     has_scale = 'initial-scale' in viewport_content
     add_check(checks, 'Initial Scale', 'pass' if has_scale else 'warning',
-              'Initial scale set', 'Yes' if has_scale else 'No', 'Set initial-scale=1', 'High', 'Viewport')
+              'Checks for initial-scale=1 in the viewport tag. This sets the initial zoom level when the page first loads. Without it, some mobile browsers may zoom in or out unexpectedly, creating a poor first impression',
+              'initial-scale is set' if has_scale else 'initial-scale not specified — browser will choose default zoom',
+              'Add initial-scale=1 to your viewport tag: <meta name="viewport" content="width=device-width, initial-scale=1.0">. This ensures the page loads at 100% zoom on all devices', 'High', 'Viewport')
     
     # Check for user-scalable=no (bad for accessibility)
     no_scale = 'user-scalable=no' in viewport_content or 'maximum-scale=1' in viewport_content
     add_check(checks, 'Zoom Enabled', 'pass' if not no_scale else 'warning',
-              'User can zoom', 'Yes' if not no_scale else 'Disabled', 'Allow user zooming for accessibility', 'Medium', 'Viewport')
+              'Checks whether users can pinch-to-zoom on the page. Disabling zoom (user-scalable=no or maximum-scale=1) is an accessibility violation — visually impaired users rely on zoom to read content. This also fails WCAG 2.1 Success Criterion 1.4.4',
+              'Zoom is enabled (accessible)' if not no_scale else 'Zoom is disabled — this is an accessibility violation',
+              'Remove user-scalable=no and maximum-scale=1 from your viewport tag. Users must be able to zoom to at least 200% for accessibility compliance. Your responsive design should handle zoom gracefully', 'Medium', 'Viewport')
     
     # Check for responsive CSS
     media_queries = '@media' in html
     add_check(checks, 'Media Queries', 'pass' if media_queries else 'warning',
-              'Responsive CSS', 'Found' if media_queries else 'Not found', 'Use CSS media queries', 'High', 'Responsiveness')
+              'Checks for CSS @media queries that adapt the layout to different screen sizes. Media queries are the core mechanism of responsive web design, allowing you to adjust layouts, font sizes, and element visibility based on device width',
+              'CSS media queries found (responsive design detected)' if media_queries else 'No media queries found — layout may not adapt to different screen sizes',
+              'Implement CSS media queries for key breakpoints: @media (max-width: 768px) for tablets, @media (max-width: 480px) for phones. Adjust grid layouts, font sizes, padding, and navigation for each breakpoint', 'High', 'Responsiveness')
     
     # 6-10: Touch & Mobile UX
-    # Check for touch-friendly elements
     buttons = soup.find_all(['button', 'a'])
     small_targets = [b for b in buttons if b.get('style') and ('font-size: 1' in b.get('style', '') or 'padding: 0' in b.get('style', ''))]
     add_check(checks, 'Touch Targets', 'pass' if len(small_targets) < len(buttons) * 0.1 else 'warning',
-              'Touch-friendly buttons', f'{len(buttons) - len(small_targets)}/{len(buttons)}', 'Use 48px minimum touch targets', 'Medium', 'Touch UX')
+              'Checks for adequately sized touch targets (buttons, links). Google requires a minimum 48x48px touch target size. Small targets cause accidental taps, frustrate users, and are flagged as mobile usability issues in Google Search Console',
+              f'{len(buttons) - len(small_targets)} of {len(buttons)} interactive elements appear touch-friendly',
+              'Ensure all buttons and links have a minimum size of 48x48 CSS pixels with at least 8px spacing between targets. Use padding to increase tap area without changing visual size. Test with Chrome DevTools mobile emulator', 'Medium', 'Touch UX')
     
-    # Check for mobile-unfriendly plugins
     flash = soup.find_all(['object', 'embed'])
     flash_content = [f for f in flash if 'flash' in str(f).lower() or 'swf' in str(f).lower()]
     add_check(checks, 'No Flash Content', 'pass' if not flash_content else 'fail',
-              'Flash elements', f'{len(flash_content)} found', 'Remove Flash content', 'Critical', 'Mobile Compatibility')
+              'Checks for Flash (SWF) content that is completely unsupported on mobile devices. Flash was discontinued in 2020 and no modern browser supports it. Any Flash content is invisible to all mobile users and most desktop users',
+              f'{len(flash_content)} Flash elements found' if flash_content else 'No Flash content (correct — Flash is obsolete)',
+              'Replace all Flash content with HTML5, CSS3, and JavaScript alternatives. Use <video> for video, CSS animations for effects, and JavaScript for interactivity. Flash content is completely invisible to modern browsers', 'Critical', 'Mobile Compatibility')
     
-    # Check for frames
     frames = soup.find_all(['frame', 'frameset'])
     add_check(checks, 'No Frames', 'pass' if not frames else 'fail',
-              'Frame elements', f'{len(frames)} found', 'Remove frames', 'High', 'Mobile Compatibility')
+              'Checks for HTML frames/framesets which are obsolete and poorly supported on mobile devices. Frames break mobile navigation, prevent proper indexing by search engines, and create accessibility barriers',
+              f'{len(frames)} frame elements found' if frames else 'No frames (correct — frames are obsolete)',
+              'Replace framesets with modern CSS layouts (flexbox, grid) and use iframes only when necessary (e.g., embedding maps or videos). Frames have been deprecated since HTML5', 'High', 'Mobile Compatibility')
     
-    # Check for horizontal scroll indicators
     fixed_width = re.findall(r'width:\s*\d{4,}px', html)
     add_check(checks, 'No Fixed Width', 'pass' if not fixed_width else 'warning',
-              'Fixed width elements', f'{len(fixed_width)} found', 'Use responsive widths', 'Medium', 'Responsiveness')
+              'Checks for CSS elements with fixed widths of 1000px or more. Fixed-width elements wider than the mobile viewport cause horizontal scrolling, which is a major mobile usability issue flagged by Google Search Console',
+              f'{len(fixed_width)} elements with fixed widths over 1000px' if fixed_width else 'No oversized fixed-width elements found',
+              'Replace fixed pixel widths with responsive units: use max-width: 100%, width: 100%, or percentage-based widths. For containers, use max-width instead of width to allow shrinking on smaller screens', 'Medium', 'Responsiveness')
     
-    # Check for mobile-friendly font sizes
     small_fonts = re.findall(r'font-size:\s*[0-9]px', html)
     add_check(checks, 'Readable Font Size', 'pass' if len(small_fonts) < 3 else 'warning',
-              'Small fonts', f'{len(small_fonts)} found', 'Use 16px+ base font size', 'Medium', 'Readability')
+              'Checks for font sizes under 10px which are unreadable on mobile devices without zooming. Google recommends a base font size of 16px for body text on mobile. Small fonts are flagged as mobile usability issues in Search Console',
+              f'{len(small_fonts)} elements with very small font sizes (under 10px)' if small_fonts else 'All font sizes appear readable',
+              'Set your base body font size to 16px minimum. Use relative units (rem, em) instead of pixels so text scales properly. Ensure all text is readable without zooming on a 320px-wide screen', 'Medium', 'Readability')
     
     # 11-15: Mobile Performance
     images = soup.find_all('img')
     lazy_imgs = [i for i in images if i.get('loading') == 'lazy']
     add_check(checks, 'Image Lazy Loading', 'pass' if lazy_imgs or len(images) <= 3 else 'warning',
-              'Lazy loaded', f'{len(lazy_imgs)}/{len(images)}', 'Add loading="lazy" for mobile', 'High', 'Mobile Performance')
+              'Checks for loading="lazy" on images, which is critical for mobile performance. Mobile users often have slower connections and data limits. Lazy loading defers off-screen images, reducing initial page weight by 40-60% on image-heavy pages',
+              f'{len(lazy_imgs)} of {len(images)} images use lazy loading',
+              'Add loading="lazy" to all images below the fold. Do NOT lazy-load the first visible image (LCP element). This is a native browser feature requiring no JavaScript: <img src="photo.jpg" loading="lazy" alt="...">', 'High', 'Mobile Performance')
     
-    # Check page weight (HTML size)
     html_size = len(response.content) / 1024
     add_check(checks, 'Page Weight', 'pass' if html_size < 100 else 'warning',
-              'HTML size', f'{html_size:.1f} KB', 'Keep HTML under 100KB', 'Medium', 'Mobile Performance')
+              'Measures the HTML document size in kilobytes. On mobile networks (3G/4G), every kilobyte matters. Pages over 100KB of HTML take noticeably longer to parse and render, especially on lower-end mobile devices with limited processing power',
+              f'{html_size:.1f} KB HTML document size (target: under 100KB)',
+              'Reduce HTML size by removing inline styles, unnecessary comments, whitespace, and unused code. Minify HTML in production. Consider server-side rendering optimizations and removing redundant wrapper elements', 'Medium', 'Mobile Performance')
     
-    # Check for AMP
     amp_link = soup.find('link', rel='amphtml')
     add_check(checks, 'AMP Version', 'info',
-              'AMP available', 'Yes' if amp_link else 'No', 'Consider AMP for mobile', 'Low', 'Mobile Performance')
+              'Checks for an AMP (Accelerated Mobile Pages) version of the page. AMP pages load near-instantly on mobile by using a stripped-down HTML framework. While AMP is no longer required for Top Stories, it still provides performance benefits for content-heavy sites',
+              'AMP version available' if amp_link else 'No AMP version detected',
+              'AMP is optional but can improve mobile performance for news and content sites. If implemented, ensure the AMP version has equivalent content to the canonical page. Google no longer requires AMP for Top Stories carousel placement', 'Low', 'Mobile Performance')
     
     # Check for mobile app links
     app_links = soup.find_all('meta', property=re.compile(r'al:(ios|android)'))
     add_check(checks, 'App Deep Links', 'info',
-              'App links', f'{len(app_links)} found', 'Add app deep links if applicable', 'Low', 'Mobile Integration')
+              'Checks for App Links meta tags that connect web pages to corresponding screens in iOS/Android apps. Deep linking improves user experience by opening content directly in the app when installed, and helps with app indexing in search results',
+              f'{len(app_links)} app deep link meta tags found',
+              'If you have a mobile app, add App Links meta tags: <meta property="al:ios:url" content="myapp://page"> and <meta property="al:android:url" content="myapp://page">. This enables seamless web-to-app transitions', 'Low', 'Mobile Integration')
     
     # Check for tel: links
     tel_links = soup.find_all('a', href=re.compile(r'^tel:'))
     add_check(checks, 'Click-to-Call', 'pass' if tel_links else 'info',
-              'Phone links', f'{len(tel_links)} found', 'Add tel: links for mobile', 'Medium', 'Mobile UX')
+              'Checks for tel: links that allow mobile users to call with a single tap. Studies show 88% of local mobile searches result in a call or visit within 24 hours. Click-to-call links remove friction and are essential for businesses that take phone calls',
+              f'{len(tel_links)} click-to-call links found',
+              'Add tel: links for all phone numbers: <a href="tel:+15551234567">Call (555) 123-4567</a>. Place them prominently in the header, contact section, and footer. On mobile, these trigger the phone dialer directly', 'Medium', 'Mobile UX')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -642,82 +664,114 @@ def analyze_performance_seo(url, soup, response, load_time):
     
     # 1-5: Core Web Vitals Indicators
     add_check(checks, 'Page Load Time', 'pass' if load_time < 2 else ('warning' if load_time < 4 else 'fail'),
-              'Server response time', f'{load_time:.2f}s', 'Optimize to under 2 seconds', 'Critical', 'Core Web Vitals')
+              'Measures the server response time (Time to First Byte). This is a Core Web Vital indicator — Google uses page speed as a ranking factor. Pages loading in under 2 seconds provide good user experience; over 4 seconds causes 25% of users to abandon the page',
+              f'{load_time:.2f} seconds (target: under 2s, critical threshold: 4s)',
+              'Optimize server response time by enabling caching, using a CDN, optimizing database queries, and upgrading hosting. Consider server-side rendering (SSR) or static site generation (SSG) for content pages. Use tools like WebPageTest for detailed analysis', 'Critical', 'Core Web Vitals')
     
     html_size = len(response.content) / 1024
     add_check(checks, 'HTML Size', 'pass' if html_size < 100 else ('warning' if html_size < 200 else 'fail'),
-              'Document size', f'{html_size:.1f} KB', 'Keep HTML under 100KB', 'High', 'Core Web Vitals')
+              'Measures the raw HTML document size. Large HTML files take longer to download and parse, directly impacting First Contentful Paint (FCP) and Largest Contentful Paint (LCP). This is especially impactful on mobile networks',
+              f'{html_size:.1f} KB (target: under 100KB, warning: over 200KB)',
+              'Reduce HTML size by minifying output, removing inline CSS/JS, eliminating unnecessary comments and whitespace, and using server-side compression. Consider code-splitting for single-page applications', 'High', 'Core Web Vitals')
     
     # CLS indicators - images without dimensions
     images = soup.find_all('img')
     imgs_dims = [i for i in images if i.get('width') and i.get('height')]
     cls_risk = len(images) - len(imgs_dims)
     add_check(checks, 'CLS Prevention', 'pass' if cls_risk == 0 or not images else 'warning',
-              'Images with dimensions', f'{len(imgs_dims)}/{len(images)}', 'Add width/height to prevent layout shift', 'High', 'Core Web Vitals')
+              'Checks for images with explicit width/height attributes to prevent Cumulative Layout Shift (CLS). CLS is a Core Web Vital — when images load without reserved space, page content jumps around, frustrating users and hurting rankings',
+              f'{len(imgs_dims)} of {len(images)} images have dimensions set. {cls_risk} images risk causing layout shift' if images else 'No images found',
+              'Add width and height attributes to all <img> tags. The browser uses these to reserve space before the image loads, preventing layout shift. CSS can still make images responsive with max-width: 100%; height: auto;', 'High', 'Core Web Vitals')
     
-    # LCP indicators - large images/videos above fold
-    large_media = soup.find_all(['img', 'video'])[:3]  # First 3 are likely above fold
+    # LCP indicators
+    large_media = soup.find_all(['img', 'video'])[:3]
     preload = soup.find_all('link', rel='preload')
     add_check(checks, 'LCP Optimization', 'pass' if preload else 'info',
-              'Preload hints', f'{len(preload)} preloads', 'Preload LCP element', 'High', 'Core Web Vitals')
+              'Checks for <link rel="preload"> hints that tell the browser to prioritize loading critical resources. Preloading the Largest Contentful Paint (LCP) element (usually the hero image or main heading font) can improve LCP by 200-500ms',
+              f'{len(preload)} preload hints found',
+              'Identify your LCP element (usually the hero image or largest text block) and preload it: <link rel="preload" as="image" href="hero.webp">. Also preload critical fonts and above-the-fold CSS. Use Chrome DevTools Performance tab to identify the LCP element', 'High', 'Core Web Vitals')
     
-    # INP/FID indicators - JavaScript blocking
+    # INP/FID indicators
     js_files = soup.find_all('script', src=True)
     async_defer = [s for s in js_files if s.get('async') or s.get('defer')]
     add_check(checks, 'Non-blocking JS', 'pass' if len(async_defer) >= len(js_files) * 0.5 or not js_files else 'warning',
-              'Async/defer scripts', f'{len(async_defer)}/{len(js_files)}', 'Add async/defer to scripts', 'High', 'Core Web Vitals')
+              'Checks whether JavaScript files use async or defer attributes. Render-blocking scripts prevent the page from displaying until they finish downloading and executing, directly impacting Interaction to Next Paint (INP) and First Input Delay (FID)',
+              f'{len(async_defer)} of {len(js_files)} scripts use async/defer (non-blocking)',
+              'Add async or defer to all non-critical scripts. Use defer for scripts that depend on DOM: <script src="app.js" defer>. Use async for independent scripts like analytics: <script src="analytics.js" async>. Move critical JS inline in <head>', 'High', 'Core Web Vitals')
     
     # 6-10: Compression & Caching
     encoding = response.headers.get('Content-Encoding', '')
     add_check(checks, 'Compression', 'pass' if encoding in ['gzip', 'br', 'deflate'] else 'warning',
-              'Response compression', encoding or 'None', 'Enable gzip/brotli compression', 'High', 'Compression')
+              'Checks whether the server compresses responses using gzip or Brotli. Compression typically reduces transfer size by 60-80%, dramatically improving load times. Brotli (br) offers 15-20% better compression than gzip for text content',
+              f'Compression: {encoding}' if encoding else 'No compression detected — responses are sent uncompressed',
+              'Enable Brotli (preferred) or gzip compression on your server. In Nginx: gzip on; gzip_types text/html text/css application/javascript; In Apache: AddOutputFilterByType DEFLATE text/html text/css application/javascript', 'High', 'Compression')
     
     cache_control = response.headers.get('Cache-Control', '')
     add_check(checks, 'Cache Headers', 'pass' if cache_control else 'warning',
-              'Cache-Control header', cache_control[:50] if cache_control else 'Not set', 'Set cache headers', 'Medium', 'Caching')
+              'Checks for Cache-Control headers that tell browsers how long to store resources locally. Proper caching means returning visitors load pages instantly from their local cache instead of re-downloading everything from the server',
+              f'Cache-Control: {cache_control[:80]}' if cache_control else 'No Cache-Control header — browser will re-download resources on every visit',
+              'Set Cache-Control headers: for static assets (CSS, JS, images) use max-age=31536000 (1 year) with versioned filenames. For HTML pages use max-age=3600 or no-cache with ETag for freshness validation', 'Medium', 'Caching')
     
     etag = response.headers.get('ETag', '')
     add_check(checks, 'ETag Header', 'pass' if etag else 'info',
-              'ETag for caching', 'Present' if etag else 'Not set', 'Enable ETag', 'Low', 'Caching')
+              'Checks for ETag headers that enable efficient cache validation. When a cached resource expires, the browser sends the ETag back to the server — if the resource has not changed, the server responds with 304 Not Modified (no download needed)',
+              'ETag header present (enables efficient cache revalidation)' if etag else 'No ETag header set',
+              'Enable ETag headers on your server for cache validation. ETags work with Cache-Control to minimize unnecessary downloads. Most web servers (Nginx, Apache) generate ETags automatically — ensure they are not disabled', 'Low', 'Caching')
     
     expires = response.headers.get('Expires', '')
     add_check(checks, 'Expires Header', 'pass' if expires or cache_control else 'info',
-              'Expires header', 'Set' if expires else 'Not set', 'Set expiration for static assets', 'Low', 'Caching')
+              'Checks for the Expires header that sets an absolute expiration date for cached resources. While Cache-Control max-age is preferred (relative time), Expires provides backward compatibility with older HTTP/1.0 clients and CDN edge servers',
+              'Expires header set' if expires else ('Cache-Control is set (Expires not needed)' if cache_control else 'No expiration headers — resources are not cached'),
+              'If not using Cache-Control, set Expires headers for static assets. Cache-Control max-age takes precedence when both are present. For most setups, Cache-Control alone is sufficient', 'Low', 'Caching')
     
     # 11-15: Resource Optimization
     css_files = soup.find_all('link', rel='stylesheet')
     add_check(checks, 'CSS Files Count', 'pass' if len(css_files) <= 5 else 'warning',
-              'Stylesheet count', f'{len(css_files)} files', 'Combine CSS files', 'Medium', 'Resources')
+              'Counts external CSS stylesheet files. Each CSS file requires a separate HTTP request, and stylesheets are render-blocking by default — the browser cannot display the page until all CSS is downloaded and parsed. Fewer files means faster rendering',
+              f'{len(css_files)} external CSS files (target: 5 or fewer)',
+              'Combine multiple CSS files into one or two bundles. Inline critical above-the-fold CSS in the <head> and load the rest asynchronously. Use CSS minification to reduce file sizes. Consider using a build tool like Webpack or Vite', 'Medium', 'Resources')
     
     add_check(checks, 'JS Files Count', 'pass' if len(js_files) <= 10 else 'warning',
-              'Script count', f'{len(js_files)} files', 'Combine/minimize JS files', 'Medium', 'Resources')
+              'Counts external JavaScript files. Each script file adds an HTTP request and potential render-blocking time. Excessive scripts increase page weight, slow down parsing, and can cause JavaScript execution bottlenecks on mobile devices',
+              f'{len(js_files)} external JavaScript files (target: 10 or fewer)',
+              'Bundle JavaScript files using a module bundler (Webpack, Rollup, Vite). Remove unused libraries. Use code-splitting to load only the JavaScript needed for the current page. Defer non-critical scripts with the defer attribute', 'Medium', 'Resources')
     
     inline_styles = soup.find_all(style=True)
     add_check(checks, 'Inline Styles', 'pass' if len(inline_styles) < 20 else 'warning',
-              'Inline style attributes', f'{len(inline_styles)} elements', 'Move styles to CSS files', 'Low', 'Resources')
+              'Counts elements with inline style attributes. Excessive inline styles increase HTML size, cannot be cached separately, and make maintenance difficult. They also prevent Content Security Policy (CSP) from blocking injected styles',
+              f'{len(inline_styles)} elements with inline styles (target: under 20)',
+              'Move inline styles to external CSS files or <style> blocks. This enables browser caching, reduces HTML size, and improves maintainability. Exception: critical above-the-fold styles can be inlined in <head> for performance', 'Low', 'Resources')
     
-    # Resource hints
     preconnect = soup.find_all('link', rel='preconnect')
     add_check(checks, 'Preconnect Hints', 'pass' if preconnect else 'info',
-              'Preconnect links', f'{len(preconnect)} hints', 'Add preconnect for third-party domains', 'Medium', 'Resource Hints')
+              'Checks for <link rel="preconnect"> tags that establish early connections to important third-party domains. Preconnect saves 100-300ms per domain by completing DNS lookup, TCP handshake, and TLS negotiation before the resource is actually needed',
+              f'{len(preconnect)} preconnect hints found',
+              'Add preconnect for your most important third-party domains (fonts, CDN, analytics): <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>. Limit to 4-6 domains — too many preconnects waste resources', 'Medium', 'Resource Hints')
     
     dns_prefetch = soup.find_all('link', rel='dns-prefetch')
     add_check(checks, 'DNS Prefetch', 'pass' if dns_prefetch or preconnect else 'info',
-              'DNS prefetch', f'{len(dns_prefetch)} hints', 'Add dns-prefetch hints', 'Low', 'Resource Hints')
+              'Checks for <link rel="dns-prefetch"> tags that resolve domain names before they are needed. DNS resolution typically takes 20-120ms per domain. Prefetching eliminates this delay for third-party resources loaded later in the page',
+              f'{len(dns_prefetch)} dns-prefetch hints found',
+              'Add dns-prefetch for third-party domains used on the page: <link rel="dns-prefetch" href="//cdn.example.com">. This is lighter than preconnect and suitable for domains where you are less certain the connection will be used', 'Low', 'Resource Hints')
     
     # 16-18: Image Optimization
     lazy_imgs = [i for i in images if i.get('loading') == 'lazy']
     add_check(checks, 'Lazy Loading', 'pass' if lazy_imgs or len(images) <= 3 else 'warning',
-              'Lazy loaded images', f'{len(lazy_imgs)}/{len(images)}', 'Add loading="lazy"', 'High', 'Images')
+              'Checks for native lazy loading on images. Images are typically the heaviest resources on a page. Lazy loading defers downloading off-screen images until the user scrolls near them, reducing initial page weight and improving LCP',
+              f'{len(lazy_imgs)} of {len(images)} images use lazy loading',
+              'Add loading="lazy" to all below-the-fold images. Do NOT lazy-load the LCP image (hero/banner). Native lazy loading requires no JavaScript: <img src="photo.jpg" loading="lazy" alt="...">. This alone can reduce initial page weight by 40-60%', 'High', 'Images')
     
     srcset_imgs = [i for i in images if i.get('srcset')]
     add_check(checks, 'Responsive Images', 'pass' if srcset_imgs or len(images) <= 2 else 'info',
-              'Srcset images', f'{len(srcset_imgs)}/{len(images)}', 'Use srcset for responsive images', 'Medium', 'Images')
+              'Checks for srcset attributes that serve appropriately sized images based on device screen size. Without responsive images, mobile users download full-resolution desktop images — often 3-5x larger than needed, wasting bandwidth and slowing load times',
+              f'{len(srcset_imgs)} of {len(images)} images use srcset',
+              'Generate multiple image sizes and use srcset: <img srcset="small.jpg 400w, medium.jpg 800w, large.jpg 1200w" sizes="(max-width: 600px) 400px, 800px" src="medium.jpg">. Many CDNs and CMS platforms can auto-generate responsive variants', 'Medium', 'Images')
     
-    # Check for image optimization (WebP)
     webp = [i for i in images if '.webp' in str(i.get('src', ''))]
     add_check(checks, 'WebP Images', 'pass' if webp or not images else 'info',
-              'WebP format', f'{len(webp)}/{len(images)}', 'Use WebP for better compression', 'Medium', 'Images')
+              'Checks for WebP image format usage. WebP provides 25-35% smaller file sizes than JPEG and 26% smaller than PNG at equivalent quality. Supported by all modern browsers, WebP is the recommended format for web images in 2026',
+              f'{len(webp)} of {len(images)} images use WebP format',
+              'Convert images to WebP using tools like Squoosh, cwebp, or your CDN\'s auto-conversion. Use <picture> for fallback: <picture><source srcset="img.webp" type="image/webp"><img src="img.jpg"></picture>. Consider AVIF for even better compression', 'Medium', 'Images')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
