@@ -38,7 +38,7 @@ def safe_get(url, timeout=5):
 def add_check(checks, name, status, desc, value, rec, impact, cat=None):
     """Add a check to the list"""
     checks.append({'name': name, 'status': status, 'description': desc, 
-                   'value': str(value)[:200], 'recommendation': rec, 
+                   'value': str(value)[:500], 'recommendation': rec, 
                    'impact': impact, 'category': cat or 'General'})
 
 
@@ -51,140 +51,193 @@ def analyze_technical_seo(url, soup, response, load_time):
     # 1-7: Crawlability
     robots = safe_get(f"{parsed.scheme}://{parsed.netloc}/robots.txt")
     add_check(checks, 'Robots.txt', 'pass' if robots and robots.status_code == 200 else 'warning',
-              'Robots.txt accessibility', 'Found' if robots and robots.status_code == 200 else 'Not found',
-              'Create robots.txt file', 'High', 'Crawlability')
+              'Checks whether a robots.txt file exists at the site root. This file tells search engine crawlers which pages or sections they can or cannot access, helping you control crawl budget and prevent indexing of private areas',
+              'Found' if robots and robots.status_code == 200 else 'Not found',
+              'Create a robots.txt file in your site root. Include directives like "User-agent: *" and "Disallow: /private/" to control crawler access. Also add a Sitemap directive pointing to your XML sitemap URL', 'High', 'Crawlability')
     
     meta_robots = soup.find('meta', {'name': 'robots'})
     robots_content = meta_robots.get('content', '').lower() if meta_robots else ''
     add_check(checks, 'Meta Robots', 'pass' if 'noindex' not in robots_content else 'fail',
-              'Page indexability', robots_content or 'Not set (indexable)', 'Remove noindex if needed', 'Critical', 'Crawlability')
+              'Checks the meta robots tag to see if this page is allowed to be indexed by search engines. A "noindex" directive tells Google and other engines to exclude this page from search results entirely',
+              robots_content or 'Not set (indexable by default)',
+              'If this page should appear in search results, remove the "noindex" directive from the meta robots tag. If intentionally hidden, this is expected. Check: <meta name="robots" content="index, follow">', 'Critical', 'Crawlability')
     
     sitemap = safe_get(f"{parsed.scheme}://{parsed.netloc}/sitemap.xml")
     add_check(checks, 'XML Sitemap', 'pass' if sitemap and sitemap.status_code == 200 else 'warning',
-              'Sitemap availability', 'Found' if sitemap and sitemap.status_code == 200 else 'Not found',
-              'Create XML sitemap', 'High', 'Crawlability')
+              'Checks for an XML sitemap at /sitemap.xml. Sitemaps help search engines discover all your pages faster and understand your site structure, especially important for large sites or new pages that lack inbound links',
+              'Found' if sitemap and sitemap.status_code == 200 else 'Not found',
+              'Create an XML sitemap listing all important pages with their last-modified dates and priority. Submit it to Google Search Console and Bing Webmaster Tools. Most CMS platforms (WordPress, Shopify) generate these automatically', 'High', 'Crawlability')
     
     canonical = soup.find('link', {'rel': 'canonical'})
     add_check(checks, 'Canonical URL', 'pass' if canonical else 'warning',
-              'Canonical tag presence', canonical.get('href', '')[:60] if canonical else 'Not set',
-              'Add canonical tag', 'High', 'Crawlability')
+              'Checks for a canonical tag that tells search engines which version of a page is the "official" one. This prevents duplicate content issues when the same page is accessible via multiple URLs (e.g., with/without www, with tracking parameters)',
+              canonical.get('href', '')[:100] if canonical else 'Not set',
+              'Add a <link rel="canonical" href="https://yoursite.com/page"> tag in the <head> section. This consolidates ranking signals to one URL and prevents search engines from splitting authority across duplicate pages', 'High', 'Crawlability')
     
     # Check if canonical is self-referencing
     canonical_href = canonical.get('href', '') if canonical else ''
     is_self_canonical = url in canonical_href or canonical_href in url
     add_check(checks, 'Self-Referencing Canonical', 'pass' if is_self_canonical or not canonical else 'warning',
-              'Canonical points to self', 'Yes' if is_self_canonical else 'No',
-              'Use self-referencing canonical', 'Medium', 'Crawlability')
+              'Verifies the canonical tag points back to this page itself. A self-referencing canonical is best practice — it explicitly tells search engines this is the preferred URL, even if no duplicates exist',
+              'Yes (self-referencing)' if is_self_canonical else 'No — points to a different URL',
+              'Set the canonical URL to match the current page URL exactly. If it points elsewhere, search engines may treat this page as a duplicate and consolidate ranking signals to the other URL instead', 'Medium', 'Crawlability')
     
     hreflang = soup.find_all('link', {'hreflang': True})
     add_check(checks, 'Hreflang Tags', 'pass' if hreflang else 'info',
-              'International targeting', f'{len(hreflang)} tags', 'Add for multi-language sites', 'Medium', 'Crawlability')
+              'Checks for hreflang tags that tell search engines which language and regional version of a page to show to users in different countries. Essential for multilingual or multi-regional sites to avoid duplicate content across languages',
+              f'{len(hreflang)} hreflang tags found', 'Add hreflang tags if your site serves content in multiple languages or targets different countries. Format: <link rel="alternate" hreflang="es" href="https://yoursite.com/es/page">. Include an x-default for the fallback version', 'Medium', 'Crawlability')
     
     # Check for noindex in X-Robots-Tag header
     x_robots = response.headers.get('X-Robots-Tag', '')
     add_check(checks, 'X-Robots-Tag', 'pass' if 'noindex' not in x_robots.lower() else 'fail',
-              'HTTP header indexability', x_robots or 'Not set', 'Remove noindex from header', 'High', 'Crawlability')
+              'Checks the X-Robots-Tag HTTP header for indexing directives. This header-level directive works like the meta robots tag but is set at the server level, often used for non-HTML files like PDFs. A "noindex" here will block the page from search results',
+              x_robots or 'Not set (no restrictions)',
+              'Remove the "noindex" directive from the X-Robots-Tag HTTP header in your server configuration (Nginx, Apache, or CDN settings) if this page should be indexed. This overrides any meta tag settings', 'High', 'Crawlability')
     
     # 8-14: Security
     add_check(checks, 'HTTPS', 'pass' if parsed.scheme == 'https' else 'fail',
-              'Secure protocol', parsed.scheme.upper(), 'Enable SSL certificate', 'Critical', 'Security')
+              'Checks whether the site uses HTTPS (SSL/TLS encryption). HTTPS is a confirmed Google ranking factor and is essential for user trust, data security, and browser compatibility. Sites without HTTPS show "Not Secure" warnings in Chrome',
+              parsed.scheme.upper(), 'Install an SSL certificate and redirect all HTTP traffic to HTTPS. Free certificates are available from Let\'s Encrypt. Most hosting providers offer one-click SSL setup', 'Critical', 'Security')
     
     hsts = response.headers.get('Strict-Transport-Security', '')
     add_check(checks, 'HSTS Header', 'pass' if hsts else 'warning',
-              'HTTP Strict Transport Security', 'Enabled' if hsts else 'Not set', 'Enable HSTS', 'Medium', 'Security')
+              'Checks for the Strict-Transport-Security header, which tells browsers to always use HTTPS for your site. This prevents downgrade attacks and cookie hijacking by ensuring the browser never makes an insecure HTTP request after the first visit',
+              'Enabled' if hsts else 'Not set',
+              'Add the header: Strict-Transport-Security: max-age=31536000; includeSubDomains; preload. This tells browsers to enforce HTTPS for one year. Consider submitting to the HSTS preload list at hstspreload.org', 'Medium', 'Security')
     
     xcto = response.headers.get('X-Content-Type-Options', '')
     add_check(checks, 'X-Content-Type-Options', 'pass' if xcto else 'warning',
-              'MIME sniffing protection', xcto or 'Not set', 'Add nosniff header', 'Medium', 'Security')
+              'Checks for the X-Content-Type-Options header that prevents browsers from MIME-sniffing a response away from the declared content type. Without this, attackers could trick the browser into executing malicious files disguised as harmless content types',
+              xcto or 'Not set',
+              'Add the header: X-Content-Type-Options: nosniff. This is a simple one-line server configuration change that prevents MIME type confusion attacks', 'Medium', 'Security')
     
     xfo = response.headers.get('X-Frame-Options', '')
     add_check(checks, 'X-Frame-Options', 'pass' if xfo else 'warning',
-              'Clickjacking protection', xfo or 'Not set', 'Add X-Frame-Options', 'Medium', 'Security')
+              'Checks for the X-Frame-Options header that prevents your site from being embedded in iframes on other domains. Without this protection, attackers can overlay invisible frames on your site to trick users into clicking malicious elements (clickjacking)',
+              xfo or 'Not set',
+              'Add the header: X-Frame-Options: SAMEORIGIN (allows framing only from your own domain) or DENY (blocks all framing). This protects against clickjacking attacks', 'Medium', 'Security')
     
     csp = response.headers.get('Content-Security-Policy', '')
     add_check(checks, 'Content-Security-Policy', 'pass' if csp else 'info',
-              'CSP header', 'Set' if csp else 'Not set', 'Implement CSP', 'Medium', 'Security')
+              'Checks for a Content Security Policy header that controls which resources (scripts, styles, images) the browser is allowed to load. CSP is one of the strongest defenses against cross-site scripting (XSS) and data injection attacks',
+              'Configured' if csp else 'Not set',
+              'Implement a CSP header that whitelists trusted sources. Start with a report-only mode to identify issues: Content-Security-Policy-Report-Only: default-src \'self\'. Gradually tighten the policy as you identify all legitimate resource sources', 'Medium', 'Security')
     
     mixed = len(soup.find_all(src=re.compile(r'^http://')))
     add_check(checks, 'No Mixed Content', 'pass' if mixed == 0 else 'warning',
-              'All resources HTTPS', f'{mixed} insecure resources', 'Fix mixed content', 'High', 'Security')
+              'Checks whether all resources (images, scripts, stylesheets) are loaded over HTTPS. Mixed content occurs when an HTTPS page loads resources over insecure HTTP, which triggers browser warnings and can break page functionality',
+              f'{mixed} insecure resources found' if mixed > 0 else 'All resources loaded securely over HTTPS',
+              'Update all resource URLs from http:// to https://. Use protocol-relative URLs (//example.com/file.js) or absolute HTTPS URLs. Check images, scripts, stylesheets, fonts, and iframes', 'High', 'Security')
     
     # Check for password fields on HTTP
     password_fields = soup.find_all('input', {'type': 'password'})
     add_check(checks, 'Secure Password Fields', 'pass' if parsed.scheme == 'https' or not password_fields else 'fail',
-              'Password fields on HTTPS', f'{len(password_fields)} fields', 'Use HTTPS for login pages', 'Critical', 'Security')
+              'Checks that any password input fields are served over HTTPS. Transmitting passwords over unencrypted HTTP exposes user credentials to interception. Browsers now display prominent warnings on HTTP pages with password fields',
+              f'{len(password_fields)} password fields found' + (' — served securely over HTTPS' if parsed.scheme == 'https' else ' — WARNING: served over insecure HTTP'),
+              'Ensure all pages with login forms or password fields are served exclusively over HTTPS. Redirect any HTTP versions to HTTPS immediately', 'Critical', 'Security')
     
     # 15-23: URL Structure
     add_check(checks, 'URL Length', 'pass' if len(url) < 75 else 'warning',
-              'URL characters', f'{len(url)} chars', 'Keep under 75 characters', 'Medium', 'URL Structure')
+              'Measures the total character count of the URL. Shorter URLs are easier for users to read, share, and remember. Google has indicated that URLs under 75 characters tend to perform better in search results and are fully displayed in SERPs',
+              f'{len(url)} characters', 'Shorten the URL by removing unnecessary words, parameters, or directory levels. Focus on including only the target keyword and essential path segments. Aim for under 75 characters total', 'Medium', 'URL Structure')
     
     add_check(checks, 'URL Lowercase', 'pass' if url == url.lower() else 'warning',
-              'Lowercase URL', 'Yes' if url == url.lower() else 'Has uppercase', 'Use lowercase URLs', 'Medium', 'URL Structure')
+              'Checks whether the URL uses only lowercase characters. Mixed-case URLs can create duplicate content issues since some servers treat /Page and /page as different URLs, splitting ranking signals between them',
+              'All lowercase' if url == url.lower() else 'Contains uppercase characters — may cause duplicate content issues',
+              'Configure your server to redirect uppercase URLs to their lowercase equivalents using 301 redirects. In Nginx: rewrite ^(.*)$ $scheme://$host$lowercase_uri redirect;', 'Medium', 'URL Structure')
     
     add_check(checks, 'URL Hyphens', 'pass' if '_' not in parsed.path else 'warning',
-              'Word separators', 'Hyphens' if '_' not in parsed.path else 'Has underscores', 'Use hyphens not underscores', 'Medium', 'URL Structure')
+              'Checks whether the URL uses hyphens (-) instead of underscores (_) as word separators. Google treats hyphens as word separators but treats underscores as word joiners, meaning "seo-tips" is read as two words but "seo_tips" is read as one',
+              'Uses hyphens (correct)' if '_' not in parsed.path else 'Contains underscores — Google reads these as word joiners, not separators',
+              'Replace underscores with hyphens in all URLs. Set up 301 redirects from old underscore URLs to new hyphenated versions to preserve any existing link equity', 'Medium', 'URL Structure')
     
     depth = len([p for p in parsed.path.split('/') if p])
     add_check(checks, 'URL Depth', 'pass' if depth <= 3 else 'warning',
-              'Directory levels', f'{depth} levels', 'Keep within 3 levels', 'Medium', 'URL Structure')
+              'Counts the number of directory levels in the URL path. Pages buried deep in the site hierarchy (4+ levels) receive less crawl priority and link equity. Flatter URL structures help search engines discover and rank content more efficiently',
+              f'{depth} directory levels deep',
+              'Restructure deep URLs to be within 3 levels of the root. Example: change /blog/2024/category/subcategory/post to /blog/post-title. Flatter structures improve both crawlability and user navigation', 'Medium', 'URL Structure')
     
     # Check for URL parameters
     params = parsed.query
     param_count = len(params.split('&')) if params else 0
     add_check(checks, 'URL Parameters', 'pass' if param_count <= 2 else 'warning',
-              'Query parameters', f'{param_count} parameters', 'Minimize URL parameters', 'Medium', 'URL Structure')
+              'Counts query string parameters (?key=value) in the URL. Excessive parameters create crawl bloat, as search engines may treat each parameter combination as a separate page. This wastes crawl budget and dilutes ranking signals',
+              f'{param_count} parameters found',
+              'Minimize URL parameters by using clean URL paths instead. For tracking, use UTM parameters only for campaign links (not internal navigation). Configure Google Search Console to indicate which parameters to ignore', 'Medium', 'URL Structure')
     
     # Check for special characters in URL
     special_chars = re.findall(r'[^a-zA-Z0-9\-\_\/\.\:]', parsed.path)
     add_check(checks, 'Clean URL', 'pass' if not special_chars else 'warning',
-              'Special characters', f'{len(special_chars)} found', 'Remove special characters', 'Medium', 'URL Structure')
+              'Checks for special characters (spaces, accents, symbols) in the URL path. Clean URLs with only alphanumeric characters, hyphens, and slashes are more reliable across browsers, easier to share, and less likely to cause encoding issues in links',
+              f'{len(special_chars)} special characters found' if special_chars else 'URL is clean — no special characters',
+              'Remove or replace special characters with hyphens. URL-encode any necessary characters. Avoid spaces (which become %20), accents, and symbols like &, =, +, or # in URL paths', 'Medium', 'URL Structure')
     
     # 24-30: Internal Linking
     all_links = soup.find_all('a', href=True)
     internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
     add_check(checks, 'Internal Links', 'pass' if len(internal) >= 3 else 'warning',
-              'Internal linking', f'{len(internal)} links', 'Add 3-10 internal links', 'High', 'Internal Linking')
+              'Counts links pointing to other pages on the same domain. Internal links distribute page authority (link equity) throughout your site, help search engines discover content, and guide users to related pages. Pages with few internal links are harder to rank',
+              f'{len(internal)} internal links found',
+              'Add 3-10 contextual internal links per page pointing to related content. Use descriptive anchor text that includes target keywords. Prioritize linking to your most important pages (pillar content, service pages)', 'High', 'Internal Linking')
     
     external = [l for l in all_links if l.get('href', '').startswith('http') and parsed.netloc not in l.get('href', '')]
     add_check(checks, 'External Links', 'pass' if external else 'info',
-              'Outbound links', f'{len(external)} links', 'Link to authority sites', 'Medium', 'Internal Linking')
+              'Counts outbound links to other domains. Linking to authoritative external sources signals to search engines that your content is well-researched and trustworthy. It also provides additional value to users by connecting them to supporting information',
+              f'{len(external)} external links found',
+              'Include 2-5 outbound links to authoritative, relevant sources (industry publications, research papers, official documentation). This builds topical trust and demonstrates E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness)', 'Medium', 'Internal Linking')
     
     # Check for broken link indicators (empty hrefs)
     empty_links = [l for l in all_links if not l.get('href', '').strip() or l.get('href', '') == '#']
     add_check(checks, 'Valid Link Hrefs', 'pass' if len(empty_links) < 3 else 'warning',
-              'Empty/placeholder links', f'{len(empty_links)} found', 'Fix empty href attributes', 'Medium', 'Internal Linking')
+              'Checks for links with empty or placeholder href attributes (href="" or href="#"). These create poor user experience, waste crawl budget, and can cause unexpected page reloads or scroll-to-top behavior',
+              f'{len(empty_links)} empty/placeholder links found',
+              'Replace empty href attributes with actual destination URLs. If a link is meant as a button, use a <button> element instead. Remove any href="#" links that serve no navigation purpose', 'Medium', 'Internal Linking')
     
     # Check for nofollow on internal links
     nofollow_internal = [l for l in internal if 'nofollow' in str(l.get('rel', []))]
     add_check(checks, 'Internal Nofollow', 'pass' if not nofollow_internal else 'warning',
-              'Nofollow on internal links', f'{len(nofollow_internal)} found', 'Remove nofollow from internal links', 'Medium', 'Internal Linking')
+              'Checks for rel="nofollow" on internal links. Adding nofollow to your own internal links wastes link equity — it tells search engines not to pass ranking value to your own pages, which hurts your site\'s overall SEO performance',
+              f'{len(nofollow_internal)} internal links with nofollow' if nofollow_internal else 'No internal links have nofollow (correct)',
+              'Remove rel="nofollow" from all internal links. Nofollow should only be used on external links to untrusted or user-generated content, paid links, or login/registration pages', 'Medium', 'Internal Linking')
     
     # Check anchor text quality
     generic_anchors = ['click here', 'read more', 'learn more', 'here', 'link']
     generic_links = [l for l in all_links if l.get_text().strip().lower() in generic_anchors]
     add_check(checks, 'Descriptive Anchors', 'pass' if len(generic_links) <= 2 else 'warning',
-              'Generic anchor text', f'{len(generic_links)} generic', 'Use descriptive anchor text', 'Medium', 'Internal Linking')
+              'Checks for generic anchor text like "click here" or "read more." Descriptive anchor text helps search engines understand what the linked page is about and improves accessibility for screen reader users who navigate by link text',
+              f'{len(generic_links)} links with generic anchor text (e.g., "click here", "read more")',
+              'Replace generic anchor text with descriptive phrases that include relevant keywords. Instead of "click here to learn about SEO," use "learn about our SEO audit process." This helps both search engines and users understand link destinations', 'Medium', 'Internal Linking')
     
     # 31-35: Structured Data & Technical
     json_ld = soup.find_all('script', {'type': 'application/ld+json'})
     add_check(checks, 'Schema.org JSON-LD', 'pass' if json_ld else 'warning',
-              'Structured data', f'{len(json_ld)} blocks', 'Add Schema.org markup', 'High', 'Structured Data')
+              'Checks for JSON-LD structured data markup. Schema.org markup helps search engines understand your content\'s meaning and context, enabling rich results (star ratings, FAQs, breadcrumbs, product info) that significantly increase click-through rates in search results',
+              f'{len(json_ld)} JSON-LD blocks found',
+              'Add JSON-LD structured data in a <script type="application/ld+json"> tag. Start with Organization, WebSite, and BreadcrumbList schemas. For content pages, add Article or BlogPosting. Use Google\'s Rich Results Test to validate: search.google.com/test/rich-results', 'High', 'Structured Data')
     
     microdata = soup.find_all(attrs={'itemtype': True})
     add_check(checks, 'Microdata', 'pass' if microdata or json_ld else 'info',
-              'Microdata markup', f'{len(microdata)} items', 'Consider adding microdata', 'Low', 'Structured Data')
+              'Checks for HTML microdata attributes (itemtype, itemprop). Microdata is an older format for structured data embedded directly in HTML elements. While JSON-LD is now preferred by Google, microdata still works and can complement JSON-LD markup',
+              f'{len(microdata)} microdata items found',
+              'If you already have JSON-LD, microdata is optional. If not, consider adding JSON-LD instead as it\'s easier to maintain (separate from HTML) and is Google\'s recommended format', 'Low', 'Structured Data')
     
     viewport = soup.find('meta', attrs={'name': 'viewport'})
     add_check(checks, 'Viewport Meta', 'pass' if viewport else 'fail',
-              'Mobile viewport', viewport.get('content', '')[:40] if viewport else 'Not set', 'Add viewport meta tag', 'Critical', 'Technical')
+              'Checks for the viewport meta tag that controls how the page scales on mobile devices. Without this tag, mobile browsers render the page at desktop width and scale it down, making text unreadable and buttons untappable. This is a core mobile-friendliness requirement',
+              viewport.get('content', '')[:80] if viewport else 'Not set — page will not render correctly on mobile devices',
+              'Add this tag in your <head>: <meta name="viewport" content="width=device-width, initial-scale=1.0">. This ensures the page adapts to the device screen width', 'Critical', 'Technical')
     
     doctype = '<!doctype' in html.lower()[:100]
     add_check(checks, 'DOCTYPE Declaration', 'pass' if doctype else 'warning',
-              'HTML DOCTYPE', 'Present' if doctype else 'Missing', 'Add DOCTYPE declaration', 'Medium', 'Technical')
+              'Checks for an HTML DOCTYPE declaration at the top of the page. The DOCTYPE tells browsers which version of HTML to use for rendering. Without it, browsers enter "quirks mode" which can cause inconsistent layout and styling across different browsers',
+              'Present (standards mode)' if doctype else 'Missing — browser may use quirks mode',
+              'Add <!DOCTYPE html> as the very first line of your HTML document, before the <html> tag. This triggers standards mode rendering in all modern browsers', 'Medium', 'Technical')
     
     charset = soup.find('meta', charset=True) or soup.find('meta', {'http-equiv': 'Content-Type'})
     add_check(checks, 'Character Encoding', 'pass' if charset else 'warning',
-              'Charset declaration', 'UTF-8' if charset else 'Not set', 'Declare character encoding', 'High', 'Technical')
+              'Checks for a character encoding declaration (usually UTF-8). This tells browsers how to interpret the bytes in your HTML file as text characters. Without it, special characters, accents, and non-Latin scripts may display as garbled text',
+              'UTF-8 declared' if charset else 'Not set — may cause character display issues',
+              'Add <meta charset="UTF-8"> as the first element inside your <head> tag. UTF-8 supports virtually all characters and symbols from every language and is the universal standard', 'High', 'Technical')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -199,113 +252,158 @@ def analyze_onpage_seo(url, soup, response, load_time):
     title = soup.find('title')
     title_text = title.string.strip() if title and title.string else ''
     add_check(checks, 'Title Tag Present', 'pass' if title_text else 'fail',
-              'Title tag exists', title_text[:50] + '...' if len(title_text) > 50 else title_text or 'Missing',
-              'Add descriptive title tag', 'Critical', 'Title & Meta')
+              'Checks for a <title> tag in the page head. The title tag is the single most important on-page SEO element — it appears as the clickable headline in search results and browser tabs. Pages without titles are nearly impossible to rank',
+              title_text[:80] + '...' if len(title_text) > 80 else title_text or 'Missing — no title tag found',
+              'Add a unique, descriptive <title> tag that includes your primary keyword near the beginning. Format: "Primary Keyword - Secondary Keyword | Brand Name". Every page on your site should have a unique title', 'Critical', 'Title & Meta')
     
     add_check(checks, 'Title Length', 'pass' if 30 <= len(title_text) <= 60 else 'warning',
-              'Title characters', f'{len(title_text)} chars', 'Optimize to 50-60 characters', 'High', 'Title & Meta')
+              'Measures the character count of your title tag. Google typically displays 50-60 characters in search results. Titles that are too short miss keyword opportunities, while titles that are too long get truncated with "..." which reduces click-through rates',
+              f'{len(title_text)} characters (optimal range: 50-60)',
+              'Rewrite the title to be 50-60 characters. Front-load your most important keyword. Include a compelling reason to click. Example: "SEO Audit Tool - Free 200+ Point Website Analysis | AISEO"', 'High', 'Title & Meta')
     
     # Check for duplicate words in title
     title_words = title_text.lower().split()
     unique_title_words = set(title_words)
     add_check(checks, 'Title Uniqueness', 'pass' if len(unique_title_words) >= len(title_words) * 0.7 else 'warning',
-              'Unique words in title', f'{len(unique_title_words)}/{len(title_words)}', 'Avoid repetitive words', 'Medium', 'Title & Meta')
+              'Checks for repeated words in the title tag. Keyword stuffing in titles (repeating the same word multiple times) looks spammy to both users and search engines, and can trigger ranking penalties',
+              f'{len(unique_title_words)} unique words out of {len(title_words)} total',
+              'Remove repeated words from the title. Each word should add meaning. Instead of "SEO SEO Tools - Best SEO Software," use "SEO Tools - Professional Website Analysis Software"', 'Medium', 'Title & Meta')
     
     meta_desc = soup.find('meta', attrs={'name': 'description'})
     desc_text = meta_desc.get('content', '').strip() if meta_desc else ''
     add_check(checks, 'Meta Description', 'pass' if desc_text else 'fail',
-              'Description presence', desc_text[:60] + '...' if len(desc_text) > 60 else desc_text or 'Missing',
-              'Add meta description', 'High', 'Title & Meta')
+              'Checks for a meta description tag. While not a direct ranking factor, the meta description appears as the snippet text below your title in search results. A compelling description significantly increases click-through rate, which indirectly boosts rankings',
+              desc_text[:100] + '...' if len(desc_text) > 100 else desc_text or 'Missing — Google will auto-generate a snippet from page content',
+              'Write a unique meta description that summarizes the page content, includes target keywords naturally, and contains a call-to-action. Include your value proposition to entice clicks from search results', 'High', 'Title & Meta')
     
     add_check(checks, 'Description Length', 'pass' if 120 <= len(desc_text) <= 160 else 'warning',
-              'Description characters', f'{len(desc_text)} chars', 'Optimize to 150-160 characters', 'High', 'Title & Meta')
+              'Measures the character count of your meta description. Google displays approximately 155-160 characters on desktop and 120 characters on mobile. Descriptions that are too short waste valuable SERP real estate, while too-long ones get truncated',
+              f'{len(desc_text)} characters (optimal range: 120-160)',
+              'Rewrite the meta description to be 120-160 characters. Use the full space to communicate value. Include a call-to-action like "Learn more," "Get started," or "Try free." Make it read like ad copy that compels clicks', 'High', 'Title & Meta')
     
     meta_keywords = soup.find('meta', attrs={'name': 'keywords'})
     add_check(checks, 'Meta Keywords', 'info',
-              'Keywords meta tag', 'Present' if meta_keywords else 'Not set (OK - deprecated)',
-              'Meta keywords are deprecated', 'Low', 'Title & Meta')
+              'Checks for the meta keywords tag. Google has officially confirmed they ignore this tag for ranking purposes since 2009. However, some other search engines (Yandex, Baidu) may still consider it. Its presence is neither helpful nor harmful for Google SEO',
+              'Present' if meta_keywords else 'Not set (this is fine — Google ignores meta keywords)',
+              'The meta keywords tag is deprecated for Google SEO. Focus your keyword optimization efforts on title tags, headings, content, and meta descriptions instead. No action needed here', 'Low', 'Title & Meta')
     
     html_tag = soup.find('html')
     lang = html_tag.get('lang', '') if html_tag else ''
     add_check(checks, 'Language Attribute', 'pass' if lang else 'warning',
-              'HTML lang attribute', lang or 'Not set', 'Add lang attribute', 'Medium', 'Title & Meta')
+              'Checks for a lang attribute on the <html> tag. This tells search engines and screen readers what language the page content is in, improving accessibility and helping search engines serve the right version to users in different regions',
+              f'Language set to: {lang}' if lang else 'Not set — search engines must guess the page language',
+              'Add a lang attribute to your <html> tag: <html lang="en"> for English, <html lang="es"> for Spanish, etc. This is a simple change that improves both SEO and accessibility compliance', 'Medium', 'Title & Meta')
     
     favicon = soup.find('link', rel=re.compile(r'icon', re.I))
     add_check(checks, 'Favicon', 'pass' if favicon else 'warning',
-              'Site icon', 'Present' if favicon else 'Missing', 'Add favicon', 'Low', 'Title & Meta')
+              'Checks for a favicon (the small icon shown in browser tabs, bookmarks, and search results). While not a direct ranking factor, favicons improve brand recognition and user trust. Google displays favicons next to search results on mobile',
+              'Favicon found' if favicon else 'No favicon detected',
+              'Add a favicon in multiple sizes. At minimum: <link rel="icon" type="image/png" href="/favicon.png">. For best results, include a 32x32 .ico file and a 180x180 apple-touch-icon for mobile devices', 'Low', 'Title & Meta')
     
     # 9-15: Headings
     h1_tags = soup.find_all('h1')
     add_check(checks, 'H1 Tag', 'pass' if len(h1_tags) == 1 else ('fail' if not h1_tags else 'warning'),
-              'H1 count', f'{len(h1_tags)} H1 tag(s)', 'Use exactly one H1', 'Critical', 'Headings')
+              'Checks for exactly one H1 heading tag on the page. The H1 is the main heading that tells search engines and users what the page is about. Having zero H1s means no clear topic signal; having multiple H1s dilutes the page focus and confuses hierarchy',
+              f'{len(h1_tags)} H1 tag(s) found' + (' (should be exactly 1)' if len(h1_tags) != 1 else ' (correct)'),
+              'Use exactly one H1 tag per page containing your primary keyword. The H1 should clearly describe the page topic and be different from the title tag. Place it at the top of the main content area', 'Critical', 'Headings')
     
     h1_text = h1_tags[0].get_text().strip() if h1_tags else ''
     add_check(checks, 'H1 Content', 'pass' if len(h1_text) >= 10 else 'warning',
-              'H1 text length', f'{len(h1_text)} chars' if h1_text else 'Empty', 'Write descriptive H1', 'High', 'Headings')
+              'Evaluates the content quality of the H1 tag. An H1 that is too short or empty fails to communicate the page topic to search engines. The H1 should be descriptive enough to stand alone as a summary of what the page covers',
+              f'H1 text: "{h1_text[:60]}..." ({len(h1_text)} chars)' if len(h1_text) > 60 else f'H1 text: "{h1_text}" ({len(h1_text)} chars)' if h1_text else 'H1 is empty or missing',
+              'Write a descriptive H1 of 20-70 characters that includes your primary keyword naturally. It should clearly tell visitors what they will find on this page. Avoid generic H1s like "Welcome" or "Home"', 'High', 'Headings')
     
     h2_tags = soup.find_all('h2')
     add_check(checks, 'H2 Tags', 'pass' if 2 <= len(h2_tags) <= 10 else 'warning',
-              'H2 count', f'{len(h2_tags)} H2 tag(s)', 'Use 2-6 H2 tags for structure', 'High', 'Headings')
+              'Counts H2 subheading tags that break content into logical sections. H2s help search engines understand content structure and enable featured snippet eligibility. They also improve readability by creating scannable sections for users',
+              f'{len(h2_tags)} H2 tags found',
+              'Use 2-8 H2 tags to organize your content into clear sections. Include secondary keywords and related terms in H2s. Think of H2s as chapter titles — each should introduce a distinct subtopic of the page', 'High', 'Headings')
     
     h3_tags = soup.find_all('h3')
     add_check(checks, 'H3 Tags', 'pass' if h3_tags else 'info',
-              'H3 count', f'{len(h3_tags)} H3 tag(s)', 'Use H3 for subsections', 'Low', 'Headings')
+              'Checks for H3 subheading tags that provide additional content hierarchy under H2 sections. H3s signal detailed content depth to search engines and help organize complex topics into digestible subsections',
+              f'{len(h3_tags)} H3 tags found',
+              'Use H3 tags to break down H2 sections into more specific subtopics. This creates a clear content outline that search engines can use to understand topic depth and potentially generate featured snippets', 'Low', 'Headings')
     
     all_headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
     empty_h = [h for h in all_headings if not h.get_text().strip()]
     add_check(checks, 'No Empty Headings', 'pass' if not empty_h else 'warning',
-              'Empty headings', f'{len(empty_h)} empty', 'Fill or remove empty headings', 'Medium', 'Headings')
+              'Checks for heading tags (H1-H6) that contain no text. Empty headings create confusing document structure for search engines and screen readers, and suggest incomplete or poorly structured content',
+              f'{len(empty_h)} empty heading tags found' if empty_h else 'All headings contain text (correct)',
+              'Either add descriptive text to empty headings or remove them entirely. If a heading is used purely for styling, replace it with a styled <div> or <span> instead — headings should always convey content structure', 'Medium', 'Headings')
     
     # Check heading hierarchy
     heading_order = [int(h.name[1]) for h in all_headings]
     hierarchy_ok = all(heading_order[i] <= heading_order[i-1] + 1 for i in range(1, len(heading_order))) if heading_order else True
     add_check(checks, 'Heading Hierarchy', 'pass' if hierarchy_ok else 'warning',
-              'Proper heading order', 'Correct' if hierarchy_ok else 'Skipped levels', 'Follow H1>H2>H3 order', 'Medium', 'Headings')
+              'Verifies that headings follow a logical order without skipping levels (e.g., H1 → H2 → H3, not H1 → H3). Proper hierarchy helps search engines understand content relationships and is required for accessibility compliance (WCAG)',
+              'Heading order is correct (no skipped levels)' if hierarchy_ok else 'Heading levels are skipped — e.g., jumping from H1 to H3 without an H2',
+              'Restructure headings to follow sequential order: H1 → H2 → H3 → H4. Never skip a level. If you need smaller text, use CSS styling on the correct heading level rather than jumping to a lower heading number', 'Medium', 'Headings')
     
     # 16-21: Images
     images = soup.find_all('img')
     imgs_alt = [i for i in images if i.get('alt')]
     add_check(checks, 'Image Alt Text', 'pass' if len(imgs_alt) == len(images) or not images else 'warning',
-              'Alt attributes', f'{len(imgs_alt)}/{len(images)}', 'Add alt to all images', 'High', 'Images')
+              'Checks whether all images have alt attributes. Alt text describes images to search engines (which cannot "see" images) and to visually impaired users using screen readers. Images without alt text are invisible to search engines and inaccessible to blind users',
+              f'{len(imgs_alt)} of {len(images)} images have alt text',
+              'Add descriptive alt text to every image that conveys meaning. Describe what the image shows in 5-15 words. Include relevant keywords naturally. For decorative images, use alt="" (empty alt). Example: alt="SEO audit dashboard showing website health score"', 'High', 'Images')
     
     imgs_dims = [i for i in images if i.get('width') and i.get('height')]
     add_check(checks, 'Image Dimensions', 'pass' if len(imgs_dims) == len(images) or not images else 'warning',
-              'Width/height set', f'{len(imgs_dims)}/{len(images)}', 'Specify dimensions to prevent CLS', 'Medium', 'Images')
+              'Checks whether images have explicit width and height attributes. Without dimensions, the browser does not know how much space to reserve, causing layout shifts as images load (Cumulative Layout Shift — a Core Web Vital that affects rankings)',
+              f'{len(imgs_dims)} of {len(images)} images have width/height specified',
+              'Add width and height attributes to all <img> tags matching the image\'s intrinsic dimensions. This prevents layout shift (CLS). Example: <img src="photo.jpg" width="800" height="600" alt="...">. CSS can still make them responsive', 'Medium', 'Images')
     
     lazy_imgs = [i for i in images if i.get('loading') == 'lazy']
     add_check(checks, 'Lazy Loading', 'pass' if lazy_imgs or len(images) <= 3 else 'warning',
-              'Lazy loaded images', f'{len(lazy_imgs)}/{len(images)}', 'Add loading="lazy"', 'Medium', 'Images')
+              'Checks for loading="lazy" on images below the fold. Lazy loading defers loading of off-screen images until the user scrolls near them, significantly improving initial page load time and reducing bandwidth usage on mobile devices',
+              f'{len(lazy_imgs)} of {len(images)} images use lazy loading',
+              'Add loading="lazy" to all images that are not visible in the initial viewport (below the fold). Do NOT lazy-load the hero image or LCP element — those should load immediately. Example: <img src="photo.jpg" loading="lazy" alt="...">', 'Medium', 'Images')
     
     srcset = [i for i in images if i.get('srcset')]
     add_check(checks, 'Responsive Images', 'pass' if srcset or len(images) <= 2 else 'info',
-              'Srcset usage', f'{len(srcset)} with srcset', 'Use srcset for responsive images', 'Medium', 'Images')
+              'Checks for srcset attributes that serve different image sizes based on the user\'s screen size. Without responsive images, mobile users download full-size desktop images, wasting bandwidth and slowing page load',
+              f'{len(srcset)} of {len(images)} images use srcset for responsive delivery',
+              'Add srcset to serve appropriately sized images: <img srcset="small.jpg 400w, medium.jpg 800w, large.jpg 1200w" sizes="(max-width: 600px) 400px, 800px" src="medium.jpg" alt="...">. This can reduce image payload by 50-70% on mobile', 'Medium', 'Images')
     
     # Check for large images without optimization hints
     webp_imgs = [i for i in images if '.webp' in str(i.get('src', ''))]
     add_check(checks, 'Modern Image Formats', 'pass' if webp_imgs or not images else 'info',
-              'WebP images', f'{len(webp_imgs)} WebP', 'Consider WebP format', 'Low', 'Images')
+              'Checks whether images use modern formats like WebP or AVIF. These formats provide 25-50% better compression than JPEG/PNG with equivalent visual quality, significantly reducing page weight and improving load times',
+              f'{len(webp_imgs)} of {len(images)} images use WebP format',
+              'Convert images to WebP format using tools like Squoosh, ImageMagick, or your CDN\'s auto-conversion feature. Use <picture> element for fallback: <picture><source srcset="image.webp" type="image/webp"><img src="image.jpg" alt="..."></picture>', 'Low', 'Images')
     
     # Empty alt vs missing alt
     empty_alt = [i for i in images if i.get('alt') == '']
     add_check(checks, 'Meaningful Alt Text', 'pass' if len(empty_alt) <= len(images) * 0.2 else 'warning',
-              'Non-empty alt text', f'{len(images) - len(empty_alt)}/{len(images)}', 'Add descriptive alt text', 'Medium', 'Images')
+              'Distinguishes between images with descriptive alt text vs empty alt="" attributes. Empty alt is correct for decorative images (icons, spacers), but content images need descriptive text. Too many empty alts suggest missing descriptions on important images',
+              f'{len(images) - len(empty_alt)} of {len(images)} images have non-empty alt text',
+              'Review images with empty alt="" attributes. If the image conveys information or content, add a descriptive alt. Only use empty alt for purely decorative images (backgrounds, dividers, icons that have adjacent text labels)', 'Medium', 'Images')
     
     # 22-25: Content Structure
     paragraphs = soup.find_all('p')
     add_check(checks, 'Paragraph Count', 'pass' if len(paragraphs) >= 3 else 'warning',
-              'Paragraphs', f'{len(paragraphs)} paragraphs', 'Use paragraphs for readability', 'Medium', 'Content Structure')
+              'Counts paragraph elements on the page. Well-structured content uses multiple paragraphs to break information into digestible chunks. Pages with few paragraphs often indicate thin content or content that is difficult to read',
+              f'{len(paragraphs)} paragraphs found',
+              'Break your content into short, focused paragraphs of 2-4 sentences each. Each paragraph should cover one idea. Use transition words to connect paragraphs. This improves readability scores and time-on-page metrics', 'Medium', 'Content Structure')
     
     lists = soup.find_all(['ul', 'ol'])
     add_check(checks, 'List Usage', 'pass' if lists else 'info',
-              'Lists present', f'{len(lists)} lists', 'Use lists for scannability', 'Low', 'Content Structure')
+              'Checks for ordered (<ol>) and unordered (<ul>) lists. Lists make content scannable, improve user experience, and are frequently used by Google for featured snippets. Content with lists tends to have higher engagement and lower bounce rates',
+              f'{len(lists)} lists found on the page',
+              'Add bulleted or numbered lists where appropriate — steps, features, benefits, comparisons. Lists are prime candidates for featured snippet extraction. Use <ol> for sequential steps and <ul> for non-ordered items', 'Low', 'Content Structure')
     
     word_count = len(text.split())
     add_check(checks, 'Word Count', 'pass' if word_count >= 300 else 'warning',
-              'Content length', f'{word_count} words', 'Aim for 300+ words', 'Medium', 'Content Structure')
+              'Measures the total word count of visible page content. Search engines use content length as a quality signal — pages with fewer than 300 words are often considered "thin content" and struggle to rank for competitive keywords',
+              f'{word_count} words on the page',
+              'Aim for at least 300 words for basic pages and 1,000-2,000 words for content targeting competitive keywords. Focus on quality over quantity — every sentence should add value. Longer content naturally covers more related keywords and topics', 'Medium', 'Content Structure')
     
     # Check for thin content
     add_check(checks, 'Content Depth', 'pass' if word_count >= 500 else ('warning' if word_count >= 200 else 'fail'),
-              'Content substance', 'Comprehensive' if word_count >= 500 else 'Thin content', 'Add more valuable content', 'High', 'Content Structure')
+              'Evaluates whether the page has enough substantive content to thoroughly cover its topic. Google\'s Helpful Content system rewards pages that demonstrate depth, expertise, and comprehensive coverage of a subject',
+              'Comprehensive content depth' if word_count >= 500 else f'Thin content — only {word_count} words. May struggle to rank',
+              'Expand the content to thoroughly cover the topic. Add sections addressing common questions, provide examples, include data/statistics, and cover related subtopics. Use tools like "People Also Ask" in Google to find questions to answer', 'High', 'Content Structure')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -321,93 +419,129 @@ def analyze_content_seo(url, soup, response, load_time):
     
     # 1-7: Content Quality
     add_check(checks, 'Content Length', 'pass' if word_count >= 1000 else ('warning' if word_count >= 300 else 'fail'),
-              'Word count', f'{word_count} words', '1000+ words for comprehensive content', 'High', 'Content Quality')
+              'Measures total word count as a content depth indicator. Studies consistently show that longer, comprehensive content ranks higher for competitive keywords. Pages under 300 words are flagged as thin content by Google\'s quality algorithms',
+              f'{word_count} words (target: 1,000+ for competitive topics)',
+              'Expand content to at least 1,000 words for pages targeting competitive keywords. Cover the topic comprehensively by addressing related questions, providing examples, and including supporting data. Use "People Also Ask" for content ideas', 'High', 'Content Quality')
     
     paragraphs = soup.find_all('p')
     para_count = len([p for p in paragraphs if len(p.get_text().strip()) > 20])
     add_check(checks, 'Paragraph Structure', 'pass' if para_count >= 5 else 'warning',
-              'Substantial paragraphs', f'{para_count} paragraphs', 'Use 5+ meaningful paragraphs', 'Medium', 'Content Quality')
+              'Counts substantial paragraphs (20+ characters) that form the body of the content. Well-structured content with multiple focused paragraphs signals depth and quality to search engines, and keeps readers engaged longer',
+              f'{para_count} substantial paragraphs found',
+              'Break content into 5+ focused paragraphs of 2-4 sentences each. Each paragraph should cover one distinct point. Short paragraphs improve readability, especially on mobile where long text blocks are overwhelming', 'Medium', 'Content Quality')
     
     # Readability - Flesch-like simple check
     sentences = re.split(r'[.!?]+', text)
     sent_count = len([s for s in sentences if len(s.split()) > 3])
     avg_sentence_len = word_count / sent_count if sent_count else 0
     add_check(checks, 'Sentence Length', 'pass' if 10 <= avg_sentence_len <= 20 else 'warning',
-              'Average sentence length', f'{avg_sentence_len:.1f} words', 'Aim for 15-20 words per sentence', 'Medium', 'Content Quality')
+              'Calculates average words per sentence as a readability indicator. Content with sentences averaging 15-20 words is easiest to read. Very long sentences (25+) reduce comprehension, while very short ones can feel choppy and lack depth',
+              f'Average sentence length: {avg_sentence_len:.1f} words (optimal: 15-20)',
+              'Aim for an average of 15-20 words per sentence. Mix short punchy sentences with longer explanatory ones for rhythm. Break up sentences over 25 words. Use tools like Hemingway Editor to identify overly complex sentences', 'Medium', 'Content Quality')
     
     # Vocabulary diversity
     unique_words = len(set(w.lower() for w in words if len(w) > 3))
     ratio = unique_words / word_count if word_count else 0
     add_check(checks, 'Vocabulary Diversity', 'pass' if ratio > 0.3 else 'warning',
-              'Unique words ratio', f'{ratio*100:.0f}% unique', 'Use varied vocabulary', 'Low', 'Content Quality')
+              'Measures the ratio of unique words to total words. Higher vocabulary diversity indicates richer, more natural content. Low diversity suggests repetitive writing or keyword stuffing, which search engines may penalize',
+              f'{ratio*100:.0f}% unique vocabulary (target: 30%+)',
+              'Use synonyms, related terms, and varied phrasing instead of repeating the same words. This also helps with semantic SEO — Google understands topic relevance through word variety, not just exact keyword matches', 'Low', 'Content Quality')
     
     # Questions for engagement
     questions = text.count('?')
     add_check(checks, 'Engaging Questions', 'pass' if questions >= 1 else 'info',
-              'Questions in content', f'{questions} questions', 'Include questions for engagement', 'Low', 'Content Quality')
+              'Counts question marks in the content. Questions increase reader engagement, create a conversational tone, and align with how people search (especially voice search). Content with questions is more likely to be selected for featured snippets',
+              f'{questions} questions found in content',
+              'Include 2-5 questions throughout your content, especially in headings. Use questions that match search queries: "What is...?", "How do you...?", "Why does...?". Answer each question directly in the following paragraph', 'Low', 'Content Quality')
     
     # Statistics and data
     numbers = re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?%?\b', text)
     add_check(checks, 'Data & Statistics', 'pass' if len(numbers) >= 3 else 'info',
-              'Numerical data', f'{len(numbers)} data points', 'Include statistics for credibility', 'Medium', 'Content Quality')
+              'Counts numerical data points in the content. Statistics, percentages, and specific numbers add credibility and authority to content. Data-driven content is more likely to be cited by other sites and referenced by AI systems',
+              f'{len(numbers)} numerical data points found',
+              'Include specific statistics, percentages, dates, and measurements to support your claims. Cite sources for data points. Example: "SEO drives 53% of all website traffic" is more compelling than "SEO drives a lot of traffic"', 'Medium', 'Content Quality')
     
     # Bold/emphasis usage
     bold = soup.find_all(['strong', 'b', 'em'])
     add_check(checks, 'Text Emphasis', 'pass' if bold else 'info',
-              'Emphasized text', f'{len(bold)} elements', 'Use bold for key points', 'Low', 'Content Quality')
+              'Checks for <strong>, <b>, and <em> tags that highlight key information. Text emphasis helps readers scan content quickly and signals to search engines which phrases are most important on the page',
+              f'{len(bold)} emphasized text elements found',
+              'Use <strong> tags to highlight key phrases, important statistics, and critical takeaways. This helps both skimming readers and search engines identify the most important content. Avoid over-emphasizing — 3-5 bold phrases per 500 words is ideal', 'Low', 'Content Quality')
     
     # 8-13: Linking
     all_links = soup.find_all('a', href=True)
     internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
     add_check(checks, 'Internal Links', 'pass' if 3 <= len(internal) <= 100 else 'warning',
-              'Internal linking', f'{len(internal)} links', 'Add 3-10 internal links', 'High', 'Linking')
+              'Counts internal links that connect to other pages on your domain. Internal linking is one of the most powerful and underused SEO tactics — it distributes page authority, helps search engines discover content, and keeps users engaged longer on your site',
+              f'{len(internal)} internal links found (optimal: 3-10 per page)',
+              'Add 3-10 contextual internal links per page. Link to related blog posts, service pages, and pillar content using descriptive anchor text. Create a hub-and-spoke model where pillar pages link to cluster content and vice versa', 'High', 'Linking')
     
     external = [l for l in all_links if l.get('href', '').startswith('http') and parsed.netloc not in l.get('href', '')]
     add_check(checks, 'External Links', 'pass' if external else 'info',
-              'Outbound links', f'{len(external)} links', 'Link to authority sources', 'Medium', 'Linking')
+              'Counts outbound links to external domains. Linking to authoritative sources demonstrates research quality and builds topical trust. Google\'s guidelines explicitly state that linking to relevant, high-quality external resources is a positive signal',
+              f'{len(external)} external links found',
+              'Include 2-5 outbound links to authoritative sources (research papers, industry publications, official documentation). This signals E-E-A-T and provides additional value to readers. Avoid linking to competitors\' commercial pages', 'Medium', 'Linking')
     
     link_density = len(all_links) / (word_count / 100) if word_count else 0
     add_check(checks, 'Link Density', 'pass' if 1 <= link_density <= 10 else 'warning',
-              'Links per 100 words', f'{link_density:.1f}', 'Maintain 1-5 links per 100 words', 'Medium', 'Linking')
+              'Calculates the ratio of links per 100 words of content. Too few links means missed opportunities for internal linking and citations. Too many links (over 10 per 100 words) can appear spammy and dilute the value passed to each linked page',
+              f'{link_density:.1f} links per 100 words (optimal: 1-5)',
+              'Maintain 1-5 links per 100 words of content. If link density is too high, remove low-value or redundant links. If too low, add contextual internal links to related content and external citations to authoritative sources', 'Medium', 'Linking')
     
     # Nofollow on external
     nofollow_ext = [l for l in external if 'nofollow' in str(l.get('rel', []))]
     add_check(checks, 'External Nofollow', 'info',
-              'Nofollow external links', f'{len(nofollow_ext)}/{len(external)}', 'Consider nofollow for untrusted links', 'Low', 'Linking')
+              'Checks how many external links use rel="nofollow." Nofollow tells search engines not to pass ranking value through the link. Use it for paid links, user-generated content, and untrusted sources. Trusted editorial links should generally be followed',
+              f'{len(nofollow_ext)} of {len(external)} external links have nofollow',
+              'Apply rel="nofollow" to paid/sponsored links and user-generated content. For editorial links to trusted sources (Wikipedia, government sites, research papers), leave them as followed links to build topical trust', 'Low', 'Linking')
     
     # Check for affiliate/sponsored links
     sponsored = [l for l in all_links if 'sponsored' in str(l.get('rel', [])) or 'ugc' in str(l.get('rel', []))]
     add_check(checks, 'Link Qualification', 'pass' if not external or sponsored or nofollow_ext else 'info',
-              'Qualified links', f'{len(sponsored)} sponsored/ugc', 'Use rel attributes appropriately', 'Low', 'Linking')
+              'Checks for proper use of rel="sponsored" and rel="ugc" attributes. Google requires these labels on paid/affiliate links (sponsored) and user-generated content links (ugc). Failure to properly label paid links can result in manual penalties',
+              f'{len(sponsored)} links properly labeled as sponsored/ugc',
+              'Label all paid, affiliate, or sponsored links with rel="sponsored". Label links from user comments, forums, or reviews with rel="ugc". This is a Google requirement — unlabeled paid links violate their guidelines', 'Low', 'Linking')
     
     # 14-20: E-E-A-T Signals
     author = any(p in str(soup).lower() for p in ['author', 'written by', 'posted by', 'byline'])
     add_check(checks, 'Author Attribution', 'pass' if author else 'warning',
-              'Author info', 'Present' if author else 'Not found', 'Add author bio for E-E-A-T', 'High', 'E-E-A-T')
+              'Checks for author information on the page. Google\'s E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) framework heavily weighs author credibility. Pages with clear author attribution rank better, especially for YMYL (Your Money Your Life) topics',
+              'Author attribution found on page' if author else 'No author information detected',
+              'Add a visible author name and bio to content pages. Include credentials, experience, and links to the author\'s social profiles or other published work. Use Person schema markup to help search engines connect content to the author entity', 'High', 'E-E-A-T')
     
     date_shown = any(p in str(soup).lower() for p in ['updated', 'published', 'modified', 'date'])
     add_check(checks, 'Content Date', 'pass' if date_shown else 'warning',
-              'Date visible', 'Present' if date_shown else 'Not found', 'Show publish/update date', 'Medium', 'E-E-A-T')
+              'Checks for visible publish or last-updated dates. Content freshness is a ranking factor — Google prefers recently updated content for time-sensitive queries. Showing dates also builds user trust and helps readers assess information relevance',
+              'Date information found on page' if date_shown else 'No publish/update date detected',
+              'Display both the original publish date and last-updated date on content pages. Use <time> HTML elements and datePublished/dateModified in schema markup. Regularly update content and reflect the new date to signal freshness', 'Medium', 'E-E-A-T')
     
     # About/Contact pages linked
     about_link = soup.find('a', href=re.compile(r'about|contact|team', re.I))
     add_check(checks, 'Trust Pages Linked', 'pass' if about_link else 'info',
-              'About/Contact links', 'Found' if about_link else 'Not found', 'Link to About/Contact pages', 'Medium', 'E-E-A-T')
+              'Checks for links to About, Contact, or Team pages. These "trust pages" are critical E-E-A-T signals — they prove there are real people behind the website. Google\'s Search Quality Rater Guidelines specifically look for accessible contact and about information',
+              'Links to About/Contact/Team pages found' if about_link else 'No links to trust pages detected',
+              'Add visible links to your About, Contact, and Team pages in the header, footer, or sidebar navigation. These pages should include real names, photos, credentials, physical address (if applicable), and multiple contact methods', 'Medium', 'E-E-A-T')
     
     # Citations/Sources
     citations = any(p in text.lower() for p in ['according to', 'source:', 'study shows', 'research', 'cited'])
     add_check(checks, 'Source Citations', 'pass' if citations else 'info',
-              'Citations present', 'Found' if citations else 'Not found', 'Cite authoritative sources', 'Medium', 'E-E-A-T')
+              'Checks for citation language indicating the content references external sources or research. Citing authoritative sources demonstrates thorough research, builds credibility, and aligns with Google\'s emphasis on well-sourced, factual content',
+              'Source citations or research references found' if citations else 'No citation language detected in content',
+              'Reference authoritative sources throughout your content using phrases like "According to [Source]..." or "Research from [Institution] shows...". Link to the original sources. This is especially important for YMYL topics (health, finance, legal)', 'Medium', 'E-E-A-T')
     
     # Expertise indicators
     expertise = any(p in text.lower() for p in ['years of experience', 'certified', 'expert', 'professional', 'specialist'])
     add_check(checks, 'Expertise Signals', 'pass' if expertise else 'info',
-              'Expertise indicators', 'Found' if expertise else 'Not found', 'Demonstrate expertise', 'Medium', 'E-E-A-T')
+              'Checks for language that demonstrates professional expertise and credentials. Google\'s E-E-A-T framework rewards content that clearly shows the author or organization has relevant qualifications and hands-on experience with the topic',
+              'Expertise indicators found (credentials, experience, certifications)' if expertise else 'No explicit expertise signals detected',
+              'Include credentials, certifications, years of experience, and professional affiliations in author bios and about pages. Use language that demonstrates first-hand experience: "In my 10 years as an SEO consultant..." rather than generic advice', 'Medium', 'E-E-A-T')
     
     # Contact information
     contact_info = re.search(r'\b[\w.-]+@[\w.-]+\.\w+\b', text) or re.search(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', text)
     add_check(checks, 'Contact Information', 'pass' if contact_info else 'info',
-              'Contact details', 'Found' if contact_info else 'Not found', 'Provide contact information', 'Medium', 'E-E-A-T')
+              'Checks for visible contact information (email addresses, phone numbers) on the page. Accessible contact details are a strong trust signal — they show the business is real and reachable. Google\'s quality raters specifically check for this on YMYL sites',
+              'Contact information (email or phone) found on page' if contact_info else 'No contact information detected on this page',
+              'Display at least one contact method (email, phone, contact form) on every page, ideally in the header or footer. For local businesses, include full NAP (Name, Address, Phone). Use tel: links for phone numbers and mailto: for emails', 'Medium', 'E-E-A-T')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
