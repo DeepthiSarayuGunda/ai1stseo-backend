@@ -974,7 +974,7 @@ def analyze_social_seo(url, soup, response, load_time):
     og_site_name = soup.find('meta', property='og:site_name')
     add_check(checks, 'OG Site Name', 'pass' if og_site_name else 'info',
               'Checks for the og:site_name meta tag, which displays your brand name alongside the page title in social previews. This helps users identify the source of shared content and builds brand recognition across social platforms.',
-              f'{"Brand: " + og_site_name.get("content", "")[:50] if og_site_name else "Not set — shared content won\'t show your brand name"}',
+              f'{"Brand: " + og_site_name.get("content", "")[:50] if og_site_name else "Not set — shared content will not show your brand name"}',
               'Add <meta property="og:site_name" content="Your Brand Name">. This appears as small text above or below the title in social previews, reinforcing brand identity with every share.',
               'Low', 'Open Graph')
     
@@ -1019,7 +1019,7 @@ def analyze_social_seo(url, soup, response, load_time):
     twitter_site = soup.find('meta', attrs={'name': 'twitter:site'})
     add_check(checks, 'Twitter Site Handle', 'pass' if twitter_site else 'info',
               'Checks for the twitter:site meta tag, which attributes the card to your brand\'s X/Twitter account. When set, your @handle appears in the card footer, driving followers to your profile and building brand authority on the platform.',
-              f'{"Handle: " + twitter_site.get("content", "") if twitter_site else "Not set — cards won\'t show your @handle"}',
+              f'{"Handle: " + twitter_site.get("content", "") if twitter_site else "Not set — cards will not show your @handle"}',
               'Add <meta name="twitter:site" content="@YourHandle">. This links every shared card back to your X profile, increasing brand visibility and follower growth.',
               'Low', 'Twitter/X')
     
@@ -1027,7 +1027,7 @@ def analyze_social_seo(url, soup, response, load_time):
     article_author = soup.find('meta', property='article:author')
     add_check(checks, 'Article Author', 'pass' if article_author else 'info',
               'Checks for the article:author meta tag, which LinkedIn uses to attribute content to a specific author. On LinkedIn, author attribution increases credibility and engagement, especially for thought leadership and B2B content.',
-              f'{"Author set: " + article_author.get("content", "")[:60] if article_author else "Not set — LinkedIn shares won\'t show author attribution"}',
+              f'{"Author set: " + article_author.get("content", "")[:60] if article_author else "Not set — LinkedIn shares will not show author attribution"}',
               'Add <meta property="article:author" content="https://yoursite.com/about/author-name"> or a Facebook profile URL. This is especially valuable for B2B content shared on LinkedIn.',
               'Low', 'LinkedIn')
     
@@ -1049,7 +1049,7 @@ def analyze_social_seo(url, soup, response, load_time):
     has_sameas = any('sameAs' in str(j) for j in json_ld)
     add_check(checks, 'SameAs Schema', 'pass' if has_sameas else 'warning',
               'Checks for sameAs schema markup that links your website to your social media profiles. This is a critical E-E-A-T signal — it helps Google and AI systems connect your brand entity across platforms, strengthening your knowledge graph presence and authority.',
-              f'{"sameAs schema found — social profiles linked in structured data" if has_sameas else "No sameAs schema — search engines can\'t connect your social profiles to your site entity"}',
+              f'{"sameAs schema found — social profiles linked in structured data" if has_sameas else "No sameAs schema — search engines cannot connect your social profiles to your site entity"}',
               'Add sameAs to your Organization JSON-LD: "sameAs": ["https://facebook.com/yourbusiness", "https://twitter.com/yourbusiness", "https://linkedin.com/company/yourbusiness"]. Include all active social profiles.',
               'High', 'Social Schema')
     
@@ -1196,7 +1196,7 @@ def analyze_local_seo(url, soup, response, load_time):
     has_hours = any(term in text.lower() for term in hours_patterns)
     add_check(checks, 'Business Hours', 'pass' if has_hours else 'info',
               'Scans for business hours or schedule-related content on the page. Displaying operating hours is critical for local search intent — users searching locally often need to know if you\'re open now. Google also uses this data for the "Open now" filter in Maps results.',
-              f'{"Business hours or schedule information detected" if has_hours else "No business hours found — users can\'t tell when you\'re open"}',
+              f'{"Business hours or schedule information detected" if has_hours else "No business hours found — users cannot tell when you are open"}',
               'Display your business hours: 1) List hours for each day of the week. 2) Include holiday hours and special schedules. 3) Add OpeningHoursSpecification schema markup. 4) Keep hours updated — incorrect hours lead to negative reviews.',
               'High', 'NAP')
     
@@ -1258,7 +1258,7 @@ def analyze_local_seo(url, soup, response, load_time):
     has_price_range = 'priceRange' in json_ld_content
     add_check(checks, 'Price Range Schema', 'pass' if has_price_range else 'info',
               'Checks for priceRange in your LocalBusiness schema. Price range indicators ($, $$, $$$) appear in Google search results and Maps, helping users filter businesses by budget and pre-qualifying visitors to improve conversion rates.',
-              f'{"Price range set in schema — visible in search filters" if has_price_range else "No price range — business won\'t appear in price-filtered searches"}',
+              f'{"Price range set in schema — visible in search filters" if has_price_range else "No price range — business will not appear in price-filtered searches"}',
               'Add priceRange to your LocalBusiness schema: "priceRange": "$$". Use $ (budget), $$ (moderate), $$$ (upscale), or $$$$ (luxury).',
               'Low', 'Schema')
     
@@ -1282,7 +1282,7 @@ def analyze_local_seo(url, soup, response, load_time):
     directions = soup.find('a', href=re.compile(r'maps\.google|google.*maps.*dir|directions', re.I))
     add_check(checks, 'Get Directions Link', 'pass' if directions else 'info',
               'Checks for a "Get Directions" link that opens Google Maps navigation to your business. This is a strong local intent signal and provides immediate utility to mobile users who are ready to visit your location.',
-              f'{"Directions link found — users can navigate to your location" if directions else "No directions link — mobile users can\'t easily navigate to you"}',
+              f'{"Directions link found — users can navigate to your location" if directions else "No directions link — mobile users cannot easily navigate to you"}',
               'Add a directions link: <a href="https://www.google.com/maps/dir/?api=1&destination=Your+Business+Name+City" target="_blank">Get Directions</a>. Place it near your address and map embed.',
               'Low', 'Local Signals')
     
@@ -1292,7 +1292,7 @@ def analyze_local_seo(url, soup, response, load_time):
     has_service_area = any(term in text.lower() for term in service_area_terms)
     add_check(checks, 'Service Area Mentioned', 'pass' if has_service_area else 'info',
               'Scans for service area or coverage mentions on the page. Explicitly stating which cities, neighborhoods, or regions you serve helps search engines match your business to location-specific queries and "near me" searches in those areas.',
-              f'{"Service area/coverage language found on page" if has_service_area else "No service area mentions — search engines can\'t determine your coverage region"}',
+              f'{"Service area/coverage language found on page" if has_service_area else "No service area mentions — search engines cannot determine your coverage region"}',
               'Mention your service areas naturally: 1) Add a "Service Areas" section listing cities/neighborhoods you serve. 2) Create location-specific landing pages for each major area. 3) Include service area in your LocalBusiness schema with areaServed.',
               'Medium', 'Local Signals')
     
@@ -1368,7 +1368,7 @@ def analyze_local_seo(url, soup, response, load_time):
     has_sameas = 'sameAs' in json_ld_content
     add_check(checks, 'SameAs Local Links', 'pass' if has_sameas else 'warning',
               'Checks for sameAs schema linking your website to your Google Business Profile, directory listings, and social profiles. This is how AI systems connect your website entity to your business entity across the web, enabling accurate citations in AI-generated answers.',
-              f'{"sameAs schema found — entity connections established for AI recognition" if has_sameas else "No sameAs schema — AI systems can\'t connect your site to your business listings"}',
+              f'{"sameAs schema found — entity connections established for AI recognition" if has_sameas else "No sameAs schema — AI systems cannot connect your site to your business listings"}',
               'Add sameAs to your LocalBusiness schema: "sameAs": ["https://www.google.com/maps/place/...", "https://www.yelp.com/biz/...", "https://facebook.com/..."]. Include your GBP URL, directory profiles, and social accounts.',
               'High', 'AI/Voice')
     
@@ -1435,7 +1435,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     entities_found = [s for s in entity_schemas if s in html]
     add_check(checks, 'Entity Schema Markup', 'pass' if entities_found else 'warning',
               'Checks for entity-type schemas (Person, Organization, Product, Article, etc.) that help AI systems build knowledge graphs about your content. Entity markup is how your brand, products, and people become recognized entities in AI systems.',
-              f'Entities found: {", ".join(entities_found) if entities_found else "None"} — {"AI can identify key entities on this page" if entities_found else "no entity schemas — AI systems can\'t identify what this page is about"}',
+              f'Entities found: {", ".join(entities_found) if entities_found else "None"} — {"AI can identify key entities on this page" if entities_found else "no entity schemas — AI systems cannot identify what this page is about"}',
               'Add entity schemas: 1) Organization for your business. 2) Person for team members/authors. 3) Article/BlogPosting for content. 4) Product for offerings. 5) Each entity should have name, description, and sameAs links.',
               'High', 'AI Parsing')
 
@@ -1508,7 +1508,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     definitions = re.findall(r'\b\w+\s+(?:is|are|means|refers to|defined as|is defined as)\s+[^.]+\.', text)
     add_check(checks, 'Direct Definitions', 'pass' if definitions else 'warning',
               'Scans for direct definition patterns ("X is...", "X means...", "X refers to..."). These are the most extractable content patterns for AI systems. When an AI needs to define a concept, it looks for these exact sentence structures.',
-              f'{len(definitions)} definition pattern(s) found — {"clear definitions available for AI extraction" if definitions else "no direct definitions — AI systems can\'t easily extract concept explanations"}',
+              f'{len(definitions)} definition pattern(s) found — {"clear definitions available for AI extraction" if definitions else "no direct definitions — AI systems cannot easily extract concept explanations"}',
               'Write direct definitions: 1) Start key paragraphs with "X is [definition]." 2) Use "refers to," "means," and "is defined as" patterns. 3) Keep definitions to 1-2 sentences. 4) Place them near the top of relevant sections.',
               'Critical', 'LLM Interpretability')
 
@@ -1560,7 +1560,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     descriptive_h = [h for h in headings if len(h.get_text().split()) >= 3 and h.get_text().lower().strip() not in generic_headings]
     add_check(checks, 'Descriptive Headings', 'pass' if len(descriptive_h) >= len(headings) * 0.5 else 'warning',
               'Evaluates whether headings are descriptive (3+ words, not generic like "Introduction" or "Summary"). Descriptive headings help AI systems understand section content without reading the full text, improving passage ranking accuracy.',
-              f'{len(descriptive_h)}/{len(headings)} headings are descriptive — {"good heading specificity" if len(descriptive_h) >= len(headings) * 0.5 else "too many generic headings — AI can\'t determine section content from headings alone"}',
+              f'{len(descriptive_h)}/{len(headings)} headings are descriptive — {"good heading specificity" if len(descriptive_h) >= len(headings) * 0.5 else "too many generic headings — AI cannot determine section content from headings alone"}',
               'Write descriptive headings: 1) Replace "Overview" with "Complete Guide to Technical SEO Auditing." 2) Include key terms in every heading. 3) Each heading should tell the reader (and AI) exactly what the section covers.',
               'High', 'Snippet Readiness')
 
@@ -1608,7 +1608,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     last_modified = response.headers.get('Last-Modified', '')
     add_check(checks, 'Last-Modified Header', 'pass' if last_modified else 'info',
               'Checks for the Last-Modified HTTP header, which tells crawlers when the page content was last changed. AI crawlers use this to prioritize re-crawling recently updated content and to assess freshness without downloading the full page.',
-              f'{"Last-Modified: " + last_modified if last_modified else "No Last-Modified header — crawlers can\'t determine content freshness from HTTP headers"}',
+              f'{"Last-Modified: " + last_modified if last_modified else "No Last-Modified header — crawlers cannot determine content freshness from HTTP headers"}',
               'Set the Last-Modified header: 1) Most web servers set this automatically for static files. 2) For dynamic pages, set it programmatically based on content update time. 3) Also set ETag for efficient conditional requests.',
               'Medium', 'Trust & Freshness')
 
@@ -1678,7 +1678,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     sitemap_resp = safe_get(f"{parsed.scheme}://{parsed.netloc}/sitemap.xml")
     add_check(checks, 'Sitemap for AI Discovery', 'pass' if sitemap_resp and sitemap_resp.status_code == 200 else 'warning',
               'Checks for an accessible XML sitemap, which helps AI crawlers discover and index all your content efficiently. Without a sitemap, AI crawlers must follow links to find pages, potentially missing important content that isn\'t well-linked.',
-              f'{"XML sitemap found — AI crawlers can discover all content" if sitemap_resp and sitemap_resp.status_code == 200 else "No sitemap found — AI crawlers may miss pages that aren\'t well-linked"}',
+              f'{"XML sitemap found — AI crawlers can discover all content" if sitemap_resp and sitemap_resp.status_code == 200 else "No sitemap found — AI crawlers may miss pages that are not well-linked"}',
               'Create and submit an XML sitemap: 1) Include all important pages with lastmod dates. 2) Submit to Google Search Console and Bing Webmaster Tools. 3) Reference it in robots.txt: Sitemap: https://yoursite.com/sitemap.xml.',
               'High', 'AI Crawlability')
 
@@ -1696,14 +1696,14 @@ def analyze_geo_aeo(url, soup, response, load_time):
     has_main_entity = 'mainEntity' in json_ld_text or 'mainEntityOfPage' in json_ld_text
     add_check(checks, 'Main Entity Declaration', 'pass' if has_main_entity else 'warning',
               'Checks for mainEntityOfPage or mainEntity in your schema, which explicitly tells AI systems what the primary topic of this page is. Without it, AI must infer the main topic from content analysis, which can be inaccurate for pages covering multiple subjects.',
-              f'{"mainEntity/mainEntityOfPage declared — AI knows the primary topic" if has_main_entity else "No main entity declared — AI must infer the page\'s primary topic"}',
+              f'{"mainEntity/mainEntityOfPage declared — AI knows the primary topic" if has_main_entity else "No main entity declared — AI must infer the primary topic of the page"}',
               'Add mainEntityOfPage to your schema: 1) For articles: "mainEntityOfPage": {"@type": "WebPage", "@id": "https://yoursite.com/page"}. 2) For FAQ pages: set mainEntity to the FAQPage. 3) This anchors AI understanding of your page\'s purpose.',
               'High', 'Knowledge Graph')
 
     breadcrumb_schema = 'BreadcrumbList' in html
     add_check(checks, 'Breadcrumb Schema', 'pass' if breadcrumb_schema else 'info',
               'Checks for BreadcrumbList schema, which maps your site\'s content hierarchy for AI systems. Breadcrumbs help AI understand how pages relate to each other and where content sits in your topic structure, improving topical authority signals.',
-              f'{"BreadcrumbList schema found — site hierarchy mapped for AI" if breadcrumb_schema else "No breadcrumb schema — AI can\'t see your content hierarchy"}',
+              f'{"BreadcrumbList schema found — site hierarchy mapped for AI" if breadcrumb_schema else "No breadcrumb schema — AI cannot see your content hierarchy"}',
               'Add BreadcrumbList schema: 1) Map the path from homepage to current page. 2) Include name and URL for each level. 3) Also display visual breadcrumbs for users. 4) This enables breadcrumb rich results in Google.',
               'Medium', 'Knowledge Graph')
 
@@ -1733,7 +1733,7 @@ def analyze_geo_aeo(url, soup, response, load_time):
     descriptive_internal = [a for a in internal_links if len(a.get_text().split()) >= 2]
     add_check(checks, 'Topic Cluster Links', 'pass' if len(descriptive_internal) >= 3 else 'warning',
               'Counts internal links with descriptive anchor text (2+ words). Topic clusters connected by descriptive internal links help AI systems map your topical authority. AI uses link context to understand entity relationships and content depth.',
-              f'{len(descriptive_internal)} descriptive internal link(s) — {"strong topic cluster signals for AI" if len(descriptive_internal) >= 3 else "weak internal linking — AI can\'t map your topical authority"}',
+              f'{len(descriptive_internal)} descriptive internal link(s) — {"strong topic cluster signals for AI" if len(descriptive_internal) >= 3 else "weak internal linking — AI cannot map your topical authority"}',
               'Build topic clusters: 1) Link related pages with descriptive anchor text ("learn about technical SEO" not "click here"). 2) Create pillar pages that link to cluster content. 3) Each cluster page should link back to the pillar. 4) This builds topical authority for AI.',
               'High', 'Knowledge Graph')
 
