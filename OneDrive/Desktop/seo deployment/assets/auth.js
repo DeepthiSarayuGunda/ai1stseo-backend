@@ -8,7 +8,7 @@
 
   // API base — auto-detect environment
   var API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000' : '';
+    ? 'http://localhost:5000' : 'http://api.ai1stseo.com';
 
   // Session keys
   var SK = {

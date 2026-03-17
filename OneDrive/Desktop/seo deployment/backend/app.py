@@ -16,7 +16,7 @@ import time
 import json
 
 app = Flask(__name__, static_folder='../assets', static_url_path='/assets')
-CORS(app)
+CORS(app, origins=['https://ai1stseo.com', 'https://www.ai1stseo.com', 'http://ai1stseo.com', 'http://www.ai1stseo.com', 'http://localhost:5000'], supports_credentials=True)
 
 # Register auth blueprint (Cognito + Secrets Manager)
 from auth import auth_bp
