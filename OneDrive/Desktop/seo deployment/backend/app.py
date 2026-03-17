@@ -966,7 +966,7 @@ def analyze_social_seo(url, soup, response, load_time):
     valid_types = ['website', 'article', 'product', 'profile', 'video.other', 'music.song']
     add_check(checks, 'OG Type', 'pass' if og_type_content in valid_types else ('warning' if og_type else 'info'),
               'Checks for the og:type meta tag, which tells platforms what kind of content this is. Different types unlock different preview formats — "article" shows author and publish date, "product" can show price, "video" enables inline playback.',
-              f'{"Type: " + og_type_content if og_type_content else "Not set — defaults to \"website\" type"}',
+              f'{"Type: " + og_type_content if og_type_content else "Not set — defaults to website type"}',
               'Set og:type based on your content: 1) Use "website" for homepages. 2) Use "article" for blog posts (enables article:author, article:published_time). 3) Use "product" for product pages. 4) Add as: <meta property="og:type" content="website">.',
               'Medium', 'Open Graph')
     
