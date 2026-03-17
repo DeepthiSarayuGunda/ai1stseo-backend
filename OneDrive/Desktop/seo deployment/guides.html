@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO & AEO Implementation Guides - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { margin-top: 10px; color: rgba(255,255,255,0.7); }
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .nav-btn.active { background: linear-gradient(90deg, #00d4ff, #7b2cbf); border-color: transparent; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">📚 AISEO Implementation Guides</div>
+            <p class="subtitle">Step-by-step instructions to implement SEO & AEO improvements on your website</p>
+            <div class="nav-bar">
+                <a href="/" class="nav-btn">← Back to Home</a>
+                <a href="/analyze" class="nav-btn">Run an Audit</a>
+            </div>
+        </header>
+
+        <!-- Guide Navigation -->
+        <div id="guideNav" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;justify-content:center;">
+            <button class="nav-btn active" onclick="showGuide('all')">All Guides</button>
+            <button class="nav-btn" onclick="showGuide('technical')">⚙️ Technical</button>
+            <button class="nav-btn" onclick="showGuide('onpage')">📄 On-Page</button>
+            <button class="nav-btn" onclick="showGuide('content')">📝 Content</button>
+            <button class="nav-btn" onclick="showGuide('performance')">⚡ Performance</button>
+            <button class="nav-btn" onclick="showGuide('social')">📣 Social</button>
+            <button class="nav-btn" onclick="showGuide('local')">📍 Local</button>
+            <button class="nav-btn" onclick="showGuide('geo')">🤖 GEO/AEO</button>
+            <button class="nav-btn" onclick="showGuide('security')">🔒 Security</button>
+        </div>
+
+        <div id="guides"></div>
+
+        <div style="text-align:center;padding:30px;margin-top:20px;">
+            <a href="/" class="nav-btn" style="display:inline-block;padding:14px 30px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);border:none;font-size:1rem;font-weight:500;border-radius:8px;">← Back to Home</a>
+        </div>
+    </div>
+
+<script>
+const guides = [
+{
+    cat: 'technical',
+    icon: '⚙️',
+    title: 'Technical SEO Essentials',
+    desc: 'Ensure search engines can crawl, index, and understand your site',
+    steps: [
+        {
+            title: 'Create a robots.txt file',
+            detail: 'Place a robots.txt file at your site root (e.g., yoursite.com/robots.txt). This tells search engine crawlers which pages to access and which to skip.',
+            code: `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /private/\nSitemap: https://yoursite.com/sitemap.xml`,
+            lang: 'text'
+        },
+        {
+            title: 'Generate and submit an XML Sitemap',
+            detail: 'An XML sitemap lists all important pages with their last-modified dates. Submit it to Google Search Console and Bing Webmaster Tools. Most CMS platforms generate these automatically.',
+            code: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>https://yoursite.com/</loc>\n    <lastmod>2026-03-15</lastmod>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://yoursite.com/services</loc>\n    <lastmod>2026-03-10</lastmod>\n    <priority>0.8</priority>\n  </url>\n</urlset>`,
+            lang: 'xml'
+        },
+        {
+            title: 'Add canonical tags to every page',
+            detail: 'Canonical tags prevent duplicate content issues by telling search engines which URL is the "official" version of a page. Add one to every page in the <head> section.',
+            code: `<link rel="canonical" href="https://yoursite.com/current-page">`,
+            lang: 'html'
+        },
+        {
+            title: 'Add structured data (JSON-LD)',
+            detail: 'Schema.org markup helps search engines understand your content and enables rich results (star ratings, FAQs, breadcrumbs). Add JSON-LD in a script tag.',
+            code: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Your Business Name",\n  "url": "https://yoursite.com",\n  "logo": "https://yoursite.com/logo.png",\n  "sameAs": [\n    "https://facebook.com/yourbusiness",\n    "https://twitter.com/yourbusiness",\n    "https://linkedin.com/company/yourbusiness"\n  ]\n}\n<\/script>`,
+            lang: 'html'
+        },
+        {
+            title: 'Set up proper URL structure',
+            detail: 'Keep URLs short (under 75 chars), lowercase, with hyphens as word separators. Avoid parameters, special characters, and deep nesting.',
+            code: `Good:  https://yoursite.com/seo-audit-tool\nBad:   https://yoursite.com/Tools/SEO_Audit?id=123&ref=home\n\nNginx redirect to lowercase:\nserver {\n    if ($uri ~ [A-Z]) {\n        rewrite ^(.*)$ $scheme://$host$lowercase_uri permanent;\n    }\n}`,
+            lang: 'text'
+        }
+    ]
+},
+{
+    cat: 'onpage',
+    icon: '📄',
+    title: 'On-Page SEO Optimization',
+    desc: 'Optimize individual page elements for maximum search visibility',
+    steps: [
+        {
+            title: 'Write optimized title tags',
+            detail: 'The title tag is the most important on-page element. Keep it 50-60 characters, front-load your primary keyword, and make it compelling enough to click.',
+            code: `<title>SEO Audit Tool - Free 200+ Point Website Analysis | AISEO</title>\n\n<!-- Formula: Primary Keyword - Value Proposition | Brand -->\n<!-- Length: 50-60 characters for full display in SERPs -->`,
+            lang: 'html'
+        },
+        {
+            title: 'Craft compelling meta descriptions',
+            detail: 'Meta descriptions appear as the snippet in search results. Write 120-160 characters with a call-to-action. Include your target keyword naturally.',
+            code: `<meta name="description" content="Run a free comprehensive SEO audit with 200+ checks across 9 categories. Get actionable recommendations to improve your search rankings. Try it now.">`,
+            lang: 'html'
+        },
+        {
+            title: 'Structure headings properly (H1-H6)',
+            detail: 'Use exactly one H1 per page with your primary keyword. Use H2s for main sections and H3s for subsections. Never skip heading levels.',
+            code: `<h1>Complete Guide to SEO Auditing</h1>        <!-- One H1, primary keyword -->\n  <h2>Technical SEO Checks</h2>                 <!-- Section -->\n    <h3>Crawlability</h3>                        <!-- Subsection -->\n    <h3>Indexing</h3>\n  <h2>On-Page SEO Checks</h2>\n    <h3>Title Tags</h3>\n    <h3>Meta Descriptions</h3>`,
+            lang: 'html'
+        },
+        {
+            title: 'Optimize all images',
+            detail: 'Add descriptive alt text, specify width/height to prevent layout shift, use lazy loading for below-fold images, and serve WebP format.',
+            code: `<!-- Fully optimized image -->\n<picture>\n  <source srcset="hero.webp" type="image/webp">\n  <img \n    src="hero.jpg" \n    alt="SEO audit dashboard showing website health score of 92%"\n    width="1200" \n    height="630"\n    loading="lazy"\n  >\n</picture>`,
+            lang: 'html'
+        },
+        {
+            title: 'Add language and encoding declarations',
+            detail: 'Tell browsers and search engines the page language and character encoding. These are simple additions that improve SEO and accessibility.',
+            code: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <!-- ... rest of head -->`,
+            lang: 'html'
+        }
+    ]
+},
+{
+    cat: 'content',
+    icon: '📝',
+    title: 'Content SEO & E-E-A-T',
+    desc: 'Create content that ranks well and demonstrates expertise',
+    steps: [
+        {
+            title: 'Write comprehensive, in-depth content',
+            detail: 'Aim for 1,000+ words on competitive topics. Cover the subject thoroughly by answering related questions, providing examples, and including data. Use "People Also Ask" in Google for content ideas.',
+            code: `Content structure template:\n\n1. Introduction (what + why it matters)\n2. Key concept explanation\n3. Step-by-step instructions\n4. Common mistakes to avoid\n5. FAQ section (use actual search queries)\n6. Conclusion with next steps\n\nTarget metrics:\n- 1,000-2,000 words for competitive keywords\n- 15-20 words average sentence length\n- 30%+ unique vocabulary ratio\n- 2-5 questions throughout content`,
+            lang: 'text'
+        },
+        {
+            title: 'Build E-E-A-T signals',
+            detail: 'Google\'s quality framework rewards Experience, Expertise, Authoritativeness, and Trustworthiness. Add author bios, credentials, dates, citations, and contact information.',
+            code: `<!-- Author bio example -->\n<div class="author-bio">\n  <img src="author.jpg" alt="Jane Smith, SEO Consultant">\n  <p><strong>Jane Smith</strong> is a certified SEO consultant \n  with 10 years of experience in technical SEO and content \n  strategy. She has helped 200+ businesses improve their \n  search visibility.</p>\n  <a href="/about/jane-smith">Full bio</a>\n</div>\n\n<!-- Date display -->\n<time datetime="2026-03-15">Published: March 15, 2026</time>\n<time datetime="2026-03-17">Updated: March 17, 2026</time>`,
+            lang: 'html'
+        },
+        {
+            title: 'Implement internal linking strategy',
+            detail: 'Add 3-10 contextual internal links per page. Use descriptive anchor text with keywords. Create a hub-and-spoke model linking pillar pages to cluster content.',
+            code: `<!-- Good: descriptive anchor text -->\n<p>Learn more about our \n  <a href="/guides/technical-seo">technical SEO audit process</a>\n  that checks 35 crawlability and indexing factors.</p>\n\n<!-- Bad: generic anchor text -->\n<p>To learn about technical SEO, \n  <a href="/guides/technical-seo">click here</a>.</p>\n\n<!-- Hub-and-spoke model -->\nPillar: /seo-guide (links to all clusters)\n  Cluster: /seo-guide/technical (links back to pillar)\n  Cluster: /seo-guide/on-page (links back to pillar)\n  Cluster: /seo-guide/content (links back to pillar)`,
+            lang: 'html'
+        },
+        {
+            title: 'Cite authoritative sources',
+            detail: 'Reference research, studies, and official documentation. This builds credibility and aligns with Google\'s emphasis on well-sourced content.',
+            code: `<!-- Inline citation -->\n<p>According to a \n  <a href="https://backlinko.com/search-engine-ranking" \n     rel="noopener" target="_blank">\n    Backlinko study of 11.8 million search results</a>, \n  the average first-page result contains 1,447 words.</p>\n\n<!-- Source list -->\n<h2>Sources</h2>\n<ol>\n  <li><a href="https://...">Google Search Central - SEO Guide</a></li>\n  <li><a href="https://...">Moz - Beginner's Guide to SEO</a></li>\n</ol>`,
+            lang: 'html'
+        }
+    ]
+},
+{
+    cat: 'performance',
+    icon: '⚡',
+    title: 'Performance & Core Web Vitals',
+    desc: 'Speed up your site to improve rankings and user experience',
+    steps: [
+        {
+            title: 'Enable compression (Brotli/Gzip)',
+            detail: 'Compression reduces transfer size by 60-80%. Brotli offers 15-20% better compression than gzip. Configure at the server level.',
+            code: `# Nginx configuration\ngzip on;\ngzip_vary on;\ngzip_min_length 1024;\ngzip_types text/plain text/css application/json \n  application/javascript text/xml application/xml \n  image/svg+xml;\n\n# For Brotli (if module installed)\nbrotli on;\nbrotli_types text/plain text/css application/json \n  application/javascript text/xml;`,
+            lang: 'nginx'
+        },
+        {
+            title: 'Set up proper caching headers',
+            detail: 'Cache static assets for 1 year with versioned filenames. Use shorter cache times for HTML. This makes return visits nearly instant.',
+            code: `# Nginx caching configuration\nlocation ~* \\.(css|js|jpg|jpeg|png|gif|webp|svg|woff2)$ {\n    expires 1y;\n    add_header Cache-Control "public, immutable";\n}\n\nlocation ~* \\.html$ {\n    expires 1h;\n    add_header Cache-Control "public, must-revalidate";\n}`,
+            lang: 'nginx'
+        },
+        {
+            title: 'Optimize Largest Contentful Paint (LCP)',
+            detail: 'LCP measures when the largest visible element loads. Preload your hero image, use responsive images, and avoid lazy-loading above-the-fold content.',
+            code: `<!-- Preload the LCP image -->\n<head>\n  <link rel="preload" as="image" href="hero.webp" \n        type="image/webp">\n  <link rel="preconnect" href="https://fonts.googleapis.com" \n        crossorigin>\n</head>\n\n<!-- Hero image: NO lazy loading, explicit dimensions -->\n<img src="hero.webp" alt="..." width="1200" height="600"\n     fetchpriority="high">`,
+            lang: 'html'
+        },
+        {
+            title: 'Prevent Cumulative Layout Shift (CLS)',
+            detail: 'CLS measures visual stability. Always set image dimensions, reserve space for ads/embeds, and avoid inserting content above existing content.',
+            code: `<!-- Always specify dimensions -->\n<img src="photo.jpg" width="800" height="600" alt="...">\n\n<!-- Reserve space for dynamic content -->\n<div style="min-height: 250px;">\n  <!-- Ad or dynamic content loads here -->\n</div>\n\n<!-- Use aspect-ratio for responsive containers -->\n<div style="aspect-ratio: 16/9; background: #eee;">\n  <iframe src="..." loading="lazy"></iframe>\n</div>`,
+            lang: 'html'
+        },
+        {
+            title: 'Make JavaScript non-blocking',
+            detail: 'Render-blocking scripts delay page display. Use defer for app scripts and async for independent scripts like analytics.',
+            code: `<!-- Critical: inline in head -->\n<script>/* minimal critical JS */</script>\n\n<!-- App scripts: defer (runs after HTML parsing) -->\n<script src="app.js" defer></script>\n\n<!-- Analytics: async (runs independently) -->\n<script src="analytics.js" async></script>\n\n<!-- Never do this (blocks rendering): -->\n<script src="heavy-library.js"></script>`,
+            lang: 'html'
+        }
+    ]
+},
+{
+    cat: 'social',
+    icon: '📣',
+    title: 'Social SEO & Open Graph',
+    desc: 'Control how your pages appear when shared on social media',
+    steps: [
+        {
+            title: 'Add Open Graph meta tags',
+            detail: 'Open Graph tags control how your page appears when shared on Facebook, LinkedIn, and WhatsApp. Without them, platforms auto-generate often ugly previews.',
+            code: `<head>\n  <!-- Open Graph -->\n  <meta property="og:title" content="Your Page Title (40-60 chars)">\n  <meta property="og:description" content="Compelling description (100-200 chars)">\n  <meta property="og:image" content="https://yoursite.com/og-image.jpg">\n  <meta property="og:url" content="https://yoursite.com/page">\n  <meta property="og:type" content="website">\n  <meta property="og:site_name" content="Your Brand">\n</head>\n\n<!-- Image requirements: 1200x630px, under 8MB -->`,
+            lang: 'html'
+        },
+        {
+            title: 'Add Twitter/X Card tags',
+            detail: 'Twitter Cards control your preview on X/Twitter. Use summary_large_image for maximum visual impact in the feed.',
+            code: `<head>\n  <!-- Twitter/X Card -->\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="Your Page Title">\n  <meta name="twitter:description" content="Compelling description">\n  <meta name="twitter:image" content="https://yoursite.com/twitter-image.jpg">\n  <meta name="twitter:site" content="@YourHandle">\n</head>\n\n<!-- Image: 1200x675px for summary_large_image -->`,
+            lang: 'html'
+        },
+        {
+            title: 'Add social profile schema (sameAs)',
+            detail: 'Link your social profiles in structured data so search engines and AI systems can connect your brand entity across platforms.',
+            code: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Your Business",\n  "url": "https://yoursite.com",\n  "sameAs": [\n    "https://facebook.com/yourbusiness",\n    "https://twitter.com/yourbusiness",\n    "https://linkedin.com/company/yourbusiness",\n    "https://instagram.com/yourbusiness",\n    "https://youtube.com/@yourbusiness"\n  ]\n}\n<\/script>`,
+            lang: 'html'
+        }
+    ]
+},
+{
+    cat: 'local',
+    icon: '📍',
+    title: 'Local SEO Implementation',
+    desc: 'Optimize for local search results and Google Maps',
+    steps: [
+        {
+            title: 'Display NAP consistently',
+            detail: 'NAP (Name, Address, Phone) must be identical everywhere — your website, Google Business Profile, directories, and social media. Inconsistencies confuse search engines.',
+            code: `<!-- Footer NAP (on every page) -->\n<footer>\n  <div itemscope itemtype="https://schema.org/LocalBusiness">\n    <strong itemprop="name">Your Business Name</strong><br>\n    <span itemprop="address" itemscope \n          itemtype="https://schema.org/PostalAddress">\n      <span itemprop="streetAddress">123 Main St, Suite 100</span><br>\n      <span itemprop="addressLocality">Ottawa</span>, \n      <span itemprop="addressRegion">ON</span> \n      <span itemprop="postalCode">K1A 0B1</span>\n    </span><br>\n    <a href="tel:+16135551234" itemprop="telephone">(613) 555-1234</a>\n  </div>\n</footer>`,
+            lang: 'html'
+        },
+        {
+            title: 'Add LocalBusiness schema markup',
+            detail: 'LocalBusiness schema is the top ranking factor for the Google Map Pack. Include address, coordinates, hours, and contact info.',
+            code: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business Name",\n  "image": "https://yoursite.com/storefront.jpg",\n  "address": {\n    "@type": "PostalAddress",\n    "streetAddress": "123 Main St",\n    "addressLocality": "Ottawa",\n    "addressRegion": "ON",\n    "postalCode": "K1A 0B1",\n    "addressCountry": "CA"\n  },\n  "geo": {\n    "@type": "GeoCoordinates",\n    "latitude": 45.4215,\n    "longitude": -75.6972\n  },\n  "telephone": "+16135551234",\n  "openingHours": "Mo-Fr 09:00-17:00",\n  "priceRange": "$$",\n  "url": "https://yoursite.com"\n}\n<\/script>`,
+            lang: 'html'
+        },
+        {
+            title: 'Embed Google Maps and add directions',
+            detail: 'An embedded map verifies your location to search engines and provides convenience to users. Add a "Get Directions" link alongside it.',
+            code: `<!-- Google Maps embed -->\n<iframe \n  src="https://www.google.com/maps/embed?pb=YOUR_EMBED_CODE"\n  width="100%" height="300" style="border:0;" \n  allowfullscreen="" loading="lazy"\n  referrerpolicy="no-referrer-when-downgrade">\n</iframe>\n\n<!-- Get Directions link -->\n<a href="https://www.google.com/maps/dir/?api=1&destination=Your+Business+Name+Ottawa"\n   target="_blank" rel="noopener">\n  📍 Get Directions\n</a>`,
+            lang: 'html'
+        }
+    ]
+},
+{
+    cat: 'geo',
+    icon: '🤖',
+    title: 'GEO/AEO - AI Search Optimization',
+    desc: 'Optimize your content for AI search engines and LLM citations',
+    steps: [
+        {
+            title: 'Structure content for AI comprehension',
+            detail: 'AI systems prefer clear, well-structured content with definitions, Q&A patterns, and answer-first formatting. Write so an LLM can extract and cite your content.',
+            code: `<!-- Answer-first pattern (AI-friendly) -->\n<h2>What is AEO (Answer Engine Optimization)?</h2>\n<p><strong>AEO is the practice of optimizing content \nto be cited by AI search engines</strong> like ChatGPT, \nPerplexity, and Google AI Overviews. Unlike traditional \nSEO which targets link-based rankings, AEO focuses on \nmaking content easily extractable by large language models.</p>\n\n<!-- Definition pattern -->\n<dl>\n  <dt>AEO</dt>\n  <dd>Answer Engine Optimization - optimizing content \n  for AI-powered search systems</dd>\n</dl>\n\n<!-- FAQ pattern (highly cited by AI) -->\n<h2>Frequently Asked Questions</h2>\n<h3>How does AEO differ from SEO?</h3>\n<p>While SEO focuses on ranking in traditional search \nresults, AEO focuses on being cited by AI systems...</p>`,
+            lang: 'html'
+        },
+        {
+            title: 'Add FAQ and HowTo schema',
+            detail: 'FAQ and HowTo schemas are directly consumed by AI systems and enable rich results in Google. They make your content machine-readable.',
+            code: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "FAQPage",\n  "mainEntity": [\n    {\n      "@type": "Question",\n      "name": "What is SEO?",\n      "acceptedAnswer": {\n        "@type": "Answer",\n        "text": "SEO (Search Engine Optimization) is the \n        practice of improving a website to increase its \n        visibility in search engine results pages."\n      }\n    },\n    {\n      "@type": "Question",\n      "name": "How long does SEO take?",\n      "acceptedAnswer": {\n        "@type": "Answer",\n        "text": "SEO typically takes 3-6 months to show \n        significant results, depending on competition \n        and the current state of the website."\n      }\n    }\n  ]\n}\n<\/script>`,
+            lang: 'html'
+        },
+        {
+            title: 'Add Speakable schema for voice search',
+            detail: 'Speakable schema tells voice assistants which sections of your page are most suitable for text-to-speech reading. This is key for voice search optimization.',
+            code: `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Article",\n  "headline": "Complete Guide to SEO Auditing",\n  "speakable": {\n    "@type": "SpeakableSpecification",\n    "cssSelector": [".article-summary", ".key-takeaways"]\n  },\n  "author": {\n    "@type": "Person",\n    "name": "Your Name"\n  }\n}\n<\/script>\n\n<!-- Mark speakable content -->\n<div class="article-summary">\n  <p>This guide covers the essential steps to audit \n  your website for SEO issues and fix them.</p>\n</div>`,
+            lang: 'html'
+        },
+        {
+            title: 'Optimize for AI crawlers',
+            detail: 'Ensure AI crawlers (GPTBot, ClaudeBot, PerplexityBot) can access your content. Check robots.txt and add AI-specific meta tags.',
+            code: `# robots.txt - Allow AI crawlers\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Google-Extended\nAllow: /\n\n# Block AI from private areas only\nUser-agent: GPTBot\nDisallow: /admin/\nDisallow: /private/`,
+            lang: 'text'
+        }
+    ]
+},
+{
+    cat: 'security',
+    icon: '🔒',
+    title: 'Security Headers & HTTPS',
+    desc: 'Protect your site and boost trust signals for search engines',
+    steps: [
+        {
+            title: 'Enable HTTPS and HSTS',
+            detail: 'HTTPS is a confirmed ranking factor. HSTS tells browsers to always use HTTPS, preventing downgrade attacks. Get a free SSL cert from Let\'s Encrypt.',
+            code: `# Nginx HTTPS + HSTS configuration\nserver {\n    listen 80;\n    server_name yoursite.com;\n    return 301 https://$server_name$request_uri;\n}\n\nserver {\n    listen 443 ssl http2;\n    server_name yoursite.com;\n    \n    ssl_certificate /etc/letsencrypt/live/yoursite.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/yoursite.com/privkey.pem;\n    \n    # HSTS - enforce HTTPS for 1 year\n    add_header Strict-Transport-Security \n      "max-age=31536000; includeSubDomains; preload" always;\n}`,
+            lang: 'nginx'
+        },
+        {
+            title: 'Add all security headers',
+            detail: 'Security headers protect against XSS, clickjacking, and MIME sniffing attacks. Add them all in your server configuration.',
+            code: `# Nginx security headers\nadd_header X-Content-Type-Options "nosniff" always;\nadd_header X-Frame-Options "SAMEORIGIN" always;\nadd_header X-XSS-Protection "1; mode=block" always;\nadd_header Referrer-Policy "strict-origin-when-cross-origin" always;\nadd_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;\n\n# Content Security Policy (start with report-only)\nadd_header Content-Security-Policy-Report-Only \n  "default-src 'self'; script-src 'self' 'unsafe-inline' \n   https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';" always;`,
+            lang: 'nginx'
+        }
+    ]
+}
+];
+
+// ============ RENDERING LOGIC ============
+let currentCat = 'all';
+
+function showGuide(cat) {
+    currentCat = cat;
+    // Update nav buttons
+    document.querySelectorAll('#guideNav .nav-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderGuides();
+}
+
+function renderGuides() {
+    const container = document.getElementById('guides');
+    const filtered = currentCat === 'all' ? guides : guides.filter(g => g.cat === currentCat);
+    
+    container.innerHTML = filtered.map(g => `
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <span style="font-size:2rem;">${g.icon}</span>
+                <div>
+                    <h2 style="font-size:1.3rem;margin:0;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${g.title}</h2>
+                    <p style="color:rgba(255,255,255,0.6);margin:4px 0 0;font-size:0.9rem;">${g.desc}</p>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                ${g.steps.map((s, i) => `
+                    <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">
+                        <div onclick="this.parentElement.classList.toggle('expanded')" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                            <span style="color:#00d4ff;font-weight:bold;min-width:28px;">${i+1}.</span>
+                            <span style="flex:1;font-weight:500;">${s.title}</span>
+                            <span class="step-arrow" style="color:rgba(255,255,255,0.4);transition:transform .2s;font-size:0.8rem;">▼</span>
+                        </div>
+                        <div class="step-content" style="max-height:0;overflow:hidden;transition:max-height .3s ease;">
+                            <div style="padding:0 18px 16px 56px;">
+                                <p style="color:rgba(255,255,255,0.75);margin-bottom:12px;font-size:0.9rem;line-height:1.7;">${s.detail}</p>
+                                <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(0,212,255,0.15);border-radius:6px;padding:14px;overflow-x:auto;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                        <span style="color:rgba(255,255,255,0.4);font-size:0.75rem;text-transform:uppercase;">${s.lang}</span>
+                                        <button onclick="copyCode(this)" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.75rem;">Copy</button>
+                                    </div>
+                                    <pre style="margin:0;color:#e0e0e0;font-size:0.82rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;font-family:'Fira Code',Consolas,monospace;">${escapeHtml(s.code)}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyCode(btn) {
+    const pre = btn.closest('div').parentElement.querySelector('pre');
+    navigator.clipboard.writeText(pre.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        btn.style.background = 'rgba(0,255,100,0.2)';
+        btn.style.borderColor = 'rgba(0,255,100,0.4)';
+        btn.style.color = '#00ff64';
+        setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.style.background = 'rgba(0,212,255,0.15)';
+            btn.style.borderColor = 'rgba(0,212,255,0.3)';
+            btn.style.color = '#00d4ff';
+        }, 1500);
+    });
+}
+
+// Expand/collapse with CSS class
+document.addEventListener('click', function(e) {
+    const arrow = e.target.closest('.step-arrow');
+    if (!arrow) return;
+    const card = arrow.closest('div').parentElement;
+    const content = card.querySelector('.step-content');
+    if (card.classList.contains('expanded')) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+    } else {
+        content.style.maxHeight = '0';
+    }
+});
+
+// Use MutationObserver-like approach for expand
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+            const content = m.target.querySelector('.step-content');
+            if (m.target.classList.contains('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+    });
+});
+
+// Initial render
+renderGuides();
+
+// Observe all step cards after render
+setTimeout(() => {
+    document.querySelectorAll('#guides div[style*="overflow:hidden"]').forEach(card => {
+        if (card.querySelector('.step-content')) {
+            observer.observe(card, { attributes: true });
+        }
+    });
+}, 100);
+</script>
+</body>
+</html>

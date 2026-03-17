@@ -785,7 +785,10 @@ def analyze_security_seo(url, soup, response, load_time):
     
     # 1-4: HTTPS & SSL
     add_check(checks, 'HTTPS Protocol', 'pass' if parsed.scheme == 'https' else 'fail',
-              'Secure connection', parsed.scheme.upper(), 'Enable HTTPS', 'Critical', 'HTTPS')
+              'Checks whether the site uses HTTPS (TLS/SSL encryption) for all connections. HTTPS is a confirmed Google ranking factor and protects user data in transit. Without it, browsers display "Not Secure" warnings that destroy user trust.',
+              f'Protocol: {parsed.scheme.upper()} — {"Encrypted connection verified" if parsed.scheme == "https" else "WARNING: Unencrypted HTTP detected"}',
+              'Enable HTTPS immediately: 1) Get a free SSL certificate from Let\'s Encrypt (certbot). 2) Configure your web server to serve over port 443. 3) Set up automatic certificate renewal. 4) Update all internal links to use https://.',
+              'Critical', 'HTTPS')
     
     # Check for HTTP links on HTTPS page
     if parsed.scheme == 'https':
@@ -793,57 +796,94 @@ def analyze_security_seo(url, soup, response, load_time):
         http_src = soup.find_all(src=re.compile(r'^http://'))
         mixed_content = len(http_links) + len(http_src)
         add_check(checks, 'No Mixed Content', 'pass' if mixed_content == 0 else 'warning',
-                  'Mixed content', f'{mixed_content} insecure resources', 'Fix mixed content issues', 'High', 'HTTPS')
+                  'Detects insecure HTTP resources (images, scripts, stylesheets) loaded on an HTTPS page. Mixed content triggers browser warnings, breaks the padlock icon, and can expose users to man-in-the-middle attacks.',
+                  f'{mixed_content} insecure HTTP resources found on this HTTPS page — {"Clean: no mixed content detected" if mixed_content == 0 else "These resources are loaded over unencrypted HTTP"}',
+                  'Fix all mixed content: 1) Search your HTML/CSS for http:// URLs and change them to https:// or protocol-relative //. 2) Update any hardcoded asset URLs in your CMS. 3) Use Content-Security-Policy: upgrade-insecure-requests as a safety net. 4) Test with browser DevTools > Console for remaining warnings.',
+                  'High', 'HTTPS')
     else:
-        add_check(checks, 'No Mixed Content', 'fail', 'Mixed content', 'Site not on HTTPS', 'Enable HTTPS first', 'High', 'HTTPS')
+        add_check(checks, 'No Mixed Content', 'fail',
+                  'Cannot check for mixed content because the site itself is not served over HTTPS. Mixed content analysis requires an HTTPS base page to detect insecure sub-resources.',
+                  'Site not on HTTPS — mixed content check not applicable until HTTPS is enabled',
+                  'Enable HTTPS first, then re-run this audit to check for mixed content issues.',
+                  'High', 'HTTPS')
     
     # Check for secure cookies
     cookies = response.headers.get('Set-Cookie', '')
     secure_cookie = 'Secure' in cookies if cookies else True
     add_check(checks, 'Secure Cookies', 'pass' if secure_cookie else 'warning',
-              'Cookie security', 'Secure flag set' if secure_cookie else 'Missing Secure flag', 'Add Secure flag to cookies', 'Medium', 'HTTPS')
+              'Verifies that cookies include the Secure flag, which ensures they are only sent over HTTPS connections. Without this flag, cookies (including session tokens) can be intercepted on insecure networks, enabling session hijacking attacks.',
+              f'{"Secure flag detected on cookies — cookies only transmitted over HTTPS" if secure_cookie else "WARNING: Cookies missing Secure flag — vulnerable to interception on HTTP connections"}',
+              'Add the Secure flag to all cookies: 1) In your server config, set cookie attributes to include Secure and HttpOnly. 2) Also add SameSite=Lax or SameSite=Strict to prevent CSRF. 3) For session cookies, use: Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Lax.',
+              'Medium', 'HTTPS')
     
-    # HTTP to HTTPS redirect check (we can only infer this)
+    # HTTP to HTTPS redirect check
     add_check(checks, 'HTTPS Redirect', 'pass' if parsed.scheme == 'https' else 'warning',
-              'HTTP redirects to HTTPS', 'Yes' if parsed.scheme == 'https' else 'Unknown', 'Redirect HTTP to HTTPS', 'High', 'HTTPS')
+              'Checks whether HTTP requests are automatically redirected to HTTPS using a 301 permanent redirect. Without this redirect, users who type your domain without https:// will land on an insecure version, and search engines may index duplicate HTTP/HTTPS pages.',
+              f'{"Site accessed via HTTPS — redirect likely in place" if parsed.scheme == "https" else "Site accessed via HTTP — no automatic HTTPS redirect detected"}',
+              'Set up a 301 redirect from HTTP to HTTPS: 1) In Nginx: add "return 301 https://$server_name$request_uri;" in the port 80 server block. 2) In Apache: use RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]. 3) Test by visiting http://yoursite.com and confirming it redirects.',
+              'High', 'HTTPS')
     
     # 5-8: Security Headers
     hsts = response.headers.get('Strict-Transport-Security', '')
     add_check(checks, 'HSTS Header', 'pass' if hsts else 'warning',
-              'HTTP Strict Transport Security', 'Enabled' if hsts else 'Not set', 'Enable HSTS header', 'High', 'Security Headers')
+              'Checks for the Strict-Transport-Security (HSTS) header, which tells browsers to always use HTTPS for your domain. Once set, browsers will refuse to connect over HTTP even if a user types http://. This prevents SSL-stripping attacks and protocol downgrade attacks.',
+              f'{"HSTS enabled: " + hsts[:100] if hsts else "HSTS header not set — browsers will still allow HTTP connections"}',
+              'Enable HSTS: 1) Add header: Strict-Transport-Security: max-age=31536000; includeSubDomains; preload. 2) Start with a short max-age (300) to test, then increase to 31536000 (1 year). 3) Once stable, submit to hstspreload.org for browser preload list inclusion.',
+              'High', 'Security Headers')
     
     xcto = response.headers.get('X-Content-Type-Options', '')
     add_check(checks, 'X-Content-Type-Options', 'pass' if xcto == 'nosniff' else 'warning',
-              'MIME sniffing protection', xcto or 'Not set', 'Add X-Content-Type-Options: nosniff', 'Medium', 'Security Headers')
+              'Checks for the X-Content-Type-Options: nosniff header, which prevents browsers from MIME-sniffing a response away from the declared Content-Type. Without it, browsers may interpret files as executable scripts, enabling XSS attacks through uploaded files.',
+              f'{"Protected: X-Content-Type-Options set to nosniff" if xcto == "nosniff" else "Missing or incorrect — value is: " + (xcto or "not set")}',
+              'Add this header to your server config: 1) Nginx: add_header X-Content-Type-Options "nosniff" always; 2) Apache: Header always set X-Content-Type-Options "nosniff". 3) This is a simple, zero-risk header — add it immediately.',
+              'Medium', 'Security Headers')
     
     xfo = response.headers.get('X-Frame-Options', '')
     add_check(checks, 'X-Frame-Options', 'pass' if xfo else 'warning',
-              'Clickjacking protection', xfo or 'Not set', 'Add X-Frame-Options header', 'Medium', 'Security Headers')
+              'Checks for the X-Frame-Options header, which prevents your site from being embedded in iframes on other domains. Without it, attackers can overlay your site in a hidden iframe to trick users into clicking malicious elements (clickjacking).',
+              f'{"Clickjacking protection active: " + xfo if xfo else "X-Frame-Options not set — site can be embedded in iframes on any domain"}',
+              'Add clickjacking protection: 1) Nginx: add_header X-Frame-Options "SAMEORIGIN" always; 2) Use SAMEORIGIN to allow your own iframes, or DENY to block all framing. 3) For modern browsers, also use CSP frame-ancestors directive as a more flexible alternative.',
+              'Medium', 'Security Headers')
     
     csp = response.headers.get('Content-Security-Policy', '')
     add_check(checks, 'Content-Security-Policy', 'pass' if csp else 'info',
-              'CSP header', 'Configured' if csp else 'Not set', 'Implement Content Security Policy', 'Medium', 'Security Headers')
+              'Checks for a Content-Security-Policy (CSP) header, which controls which resources (scripts, styles, images) the browser is allowed to load. CSP is the most powerful defense against XSS attacks, as it prevents unauthorized script execution even if an attacker injects code.',
+              f'{"CSP configured: " + csp[:150] if csp else "No Content-Security-Policy header detected — no restrictions on resource loading"}',
+              'Implement CSP gradually: 1) Start with Content-Security-Policy-Report-Only to monitor without breaking anything. 2) Begin with: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'. 3) Review violation reports and whitelist legitimate sources. 4) Switch from Report-Only to enforcing once stable.',
+              'Medium', 'Security Headers')
     
     # 9-12: Additional Security
     referrer = response.headers.get('Referrer-Policy', '')
     add_check(checks, 'Referrer-Policy', 'pass' if referrer else 'info',
-              'Referrer policy', referrer or 'Not set', 'Set Referrer-Policy header', 'Low', 'Security Headers')
+              'Checks for the Referrer-Policy header, which controls how much URL information is sent to other sites when users click links. Without it, full URLs (including query parameters with sensitive data) may leak to third-party sites via the Referer header.',
+              f'{"Referrer-Policy set: " + referrer if referrer else "No Referrer-Policy header — full URLs may be sent to external sites"}',
+              'Set a Referrer-Policy: 1) Recommended: strict-origin-when-cross-origin (sends origin only to cross-origin, full URL to same-origin). 2) For maximum privacy: no-referrer. 3) Add via server config: add_header Referrer-Policy "strict-origin-when-cross-origin" always;',
+              'Low', 'Security Headers')
     
     permissions = response.headers.get('Permissions-Policy', '') or response.headers.get('Feature-Policy', '')
     add_check(checks, 'Permissions-Policy', 'pass' if permissions else 'info',
-              'Permissions policy', 'Set' if permissions else 'Not set', 'Configure Permissions-Policy', 'Low', 'Security Headers')
+              'Checks for the Permissions-Policy header (formerly Feature-Policy), which controls which browser features (camera, microphone, geolocation, payment) your site and embedded iframes can access. This limits the attack surface if third-party scripts are compromised.',
+              f'{"Permissions-Policy configured: " + (permissions[:120] if permissions else "") if permissions else "No Permissions-Policy header — all browser features available to scripts and iframes"}',
+              'Configure Permissions-Policy: 1) Disable features you don\'t use: Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(). 2) Allow only for your origin if needed: camera=(self). 3) Add via Nginx: add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;',
+              'Low', 'Security Headers')
     
     # Check for password fields
     password_fields = soup.find_all('input', {'type': 'password'})
     add_check(checks, 'Secure Login Forms', 'pass' if not password_fields or parsed.scheme == 'https' else 'fail',
-              'Password fields on HTTPS', f'{len(password_fields)} fields', 'Use HTTPS for login pages', 'Critical', 'Forms')
+              'Checks whether any login forms with password fields are served over HTTPS. Transmitting passwords over unencrypted HTTP exposes credentials to anyone monitoring the network. This is a critical security vulnerability that can lead to account compromise.',
+              f'{len(password_fields)} password field(s) found — {"all served securely over HTTPS" if parsed.scheme == "https" else "WARNING: served over insecure HTTP — credentials exposed in plaintext"}',
+              'Secure all login forms immediately: 1) Enable HTTPS site-wide (see HTTPS Protocol check above). 2) Ensure login pages specifically use https:// in form action URLs. 3) Add HSTS to prevent any HTTP fallback. 4) Consider adding autocomplete="current-password" for password manager support.',
+              'Critical', 'Forms')
     
     # Check for external scripts from untrusted sources
     external_scripts = soup.find_all('script', src=re.compile(r'^https?://'))
     trusted_domains = ['google', 'facebook', 'twitter', 'cloudflare', 'jquery', 'bootstrap', 'cdn']
     untrusted = [s for s in external_scripts if not any(t in str(s.get('src', '')) for t in trusted_domains)]
     add_check(checks, 'Trusted Scripts', 'pass' if len(untrusted) < 3 else 'warning',
-              'External scripts', f'{len(untrusted)} from unknown sources', 'Review external script sources', 'Medium', 'Scripts')
+              'Analyzes external JavaScript sources loaded on the page and flags scripts from unrecognized domains. Third-party scripts have full access to your page DOM and user data. Compromised or malicious scripts can steal credentials, inject ads, or redirect users.',
+              f'{len(external_scripts)} external scripts total, {len(untrusted)} from unrecognized sources{" — " + ", ".join([s.get("src", "")[:60] for s in untrusted[:3]]) if untrusted else ""}',
+              'Review all external scripts: 1) Audit each script source — remove any you don\'t recognize or no longer need. 2) Add Subresource Integrity (SRI) hashes: <script src="..." integrity="sha384-..." crossorigin="anonymous">. 3) Use CSP to whitelist only approved script sources. 4) Consider self-hosting critical third-party scripts.',
+              'Medium', 'Scripts')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -867,117 +907,154 @@ def analyze_social_seo(url, soup, response, load_time):
     og_title = soup.find('meta', property='og:title')
     og_title_content = og_title.get('content', '') if og_title else ''
     add_check(checks, 'OG Title', 'pass' if og_title else 'fail',
-              'Open Graph title', og_title_content[:50] + '...' if len(og_title_content) > 50 else og_title_content or 'Missing',
-              'Add og:title - appears as headline when shared on Facebook/LinkedIn', 'Critical', 'Open Graph')
+              'Checks for the og:title meta tag, which controls the headline displayed when your page is shared on Facebook, LinkedIn, WhatsApp, and other platforms. Without it, platforms auto-generate a title from your page content, often producing ugly or misleading previews that reduce click-through rates.',
+              f'{"Found: " + (og_title_content[:80] + "..." if len(og_title_content) > 80 else og_title_content) if og_title else "MISSING — social shares will use auto-generated title"}',
+              'Add <meta property="og:title" content="Your Compelling Title"> in the <head>. 1) Keep it 40-60 characters for full display. 2) Front-load your primary keyword. 3) Make it different from your <title> tag if needed — og:title can be more engaging/clickable.',
+              'Critical', 'Open Graph')
     
     # OG Title length optimization (40-60 chars ideal)
     add_check(checks, 'OG Title Length', 'pass' if 40 <= len(og_title_content) <= 60 else 'warning',
-              'Title character count', f'{len(og_title_content)} chars',
-              'Optimize to 40-60 characters for best display across platforms', 'Medium', 'Open Graph')
+              'Evaluates whether the og:title length falls within the optimal 40-60 character range. Titles under 40 characters waste valuable preview space, while titles over 60 characters get truncated on most platforms, cutting off your message mid-sentence.',
+              f'{len(og_title_content)} characters — {"within optimal 40-60 range" if 40 <= len(og_title_content) <= 60 else ("too short, wasting preview space" if len(og_title_content) < 40 else "may be truncated on some platforms")}',
+              'Optimize to 40-60 characters: 1) Facebook truncates at ~88 chars but shows best at 40-60. 2) LinkedIn truncates at ~70 chars. 3) WhatsApp shows even fewer. 4) Test your preview at metatags.io or opengraph.xyz.',
+              'Medium', 'Open Graph')
     
     og_desc = soup.find('meta', property='og:description')
     og_desc_content = og_desc.get('content', '') if og_desc else ''
     add_check(checks, 'OG Description', 'pass' if og_desc else 'fail',
-              'Open Graph description', 'Set' if og_desc else 'Missing',
-              'Add og:description - preview text on social shares', 'Critical', 'Open Graph')
+              'Checks for the og:description meta tag, which provides the preview text shown below the title when your page is shared on social media. This is your chance to write compelling copy that convinces people to click through from their social feed.',
+              f'{"Found: " + (og_desc_content[:100] + "..." if len(og_desc_content) > 100 else og_desc_content) if og_desc else "MISSING — platforms will auto-extract text, often poorly"}',
+              'Add <meta property="og:description" content="...">. 1) Write 100-200 characters of compelling preview text. 2) Include a call-to-action. 3) Don\'t just copy your meta description — tailor it for social engagement.',
+              'Critical', 'Open Graph')
     
     # OG Description length (155-200 chars ideal)
     add_check(checks, 'OG Description Length', 'pass' if 100 <= len(og_desc_content) <= 200 else 'warning',
-              'Description length', f'{len(og_desc_content)} chars',
-              'Optimize to 100-200 characters for full visibility', 'Medium', 'Open Graph')
+              'Evaluates whether the og:description length is optimized for social platform display. Descriptions under 100 characters look sparse in previews, while those over 200 characters get cut off, potentially losing your call-to-action.',
+              f'{len(og_desc_content)} characters — {"within optimal 100-200 range" if 100 <= len(og_desc_content) <= 200 else ("too short for impactful preview" if len(og_desc_content) < 100 else "may be truncated on some platforms")}',
+              'Optimize to 100-200 characters: 1) Facebook shows ~300 chars but 100-200 is the sweet spot. 2) LinkedIn shows ~100 chars in feed. 3) Include value proposition + CTA within first 100 chars.',
+              'Medium', 'Open Graph')
     
     og_image = soup.find('meta', property='og:image')
     og_image_url = og_image.get('content', '') if og_image else ''
     add_check(checks, 'OG Image', 'pass' if og_image else 'fail',
-              'Open Graph image', 'Set' if og_image else 'Missing',
-              'Add og:image (1200x630px recommended for Facebook/LinkedIn)', 'Critical', 'Open Graph')
+              'Checks for the og:image meta tag, which sets the preview image displayed in social shares. Posts with images get 2-3x more engagement than text-only posts. Without og:image, platforms either show no image or grab a random one from your page.',
+              f'{"Found: " + (og_image_url[:100] + "..." if len(og_image_url) > 100 else og_image_url) if og_image else "MISSING — social shares will have no image or a random one"}',
+              'Add <meta property="og:image" content="https://yoursite.com/image.jpg">. 1) Use 1200x630px for Facebook/LinkedIn (1.91:1 ratio). 2) Keep file size under 8MB. 3) Use JPG or PNG format. 4) Use an absolute URL starting with https://.',
+              'Critical', 'Open Graph')
     
     # Check if OG image is absolute URL
     og_image_absolute = og_image_url.startswith('http') if og_image_url else False
     add_check(checks, 'OG Image Absolute URL', 'pass' if og_image_absolute or not og_image else 'warning',
-              'Image URL format', 'Absolute' if og_image_absolute else 'Relative/Missing',
-              'Use absolute URL for og:image (https://...)', 'High', 'Open Graph')
+              'Verifies that the og:image URL is absolute (starts with https://). Social platforms fetch images from external servers and cannot resolve relative paths like /images/og.jpg. A relative URL means your image will never display in social previews.',
+              f'{"Absolute URL — platforms can fetch this image" if og_image_absolute else "Relative or missing URL — social platforms cannot resolve this path"}',
+              'Use a full absolute URL: 1) Change from /images/og.jpg to https://yoursite.com/images/og.jpg. 2) Ensure the URL is accessible without authentication. 3) Test by pasting the image URL directly in a browser.',
+              'High', 'Open Graph')
     
     og_url = soup.find('meta', property='og:url')
     add_check(checks, 'OG URL', 'pass' if og_url else 'warning',
-              'Canonical social URL', 'Set' if og_url else 'Not set',
-              'Add og:url to prevent duplicate share tracking', 'Medium', 'Open Graph')
+              'Checks for the og:url meta tag, which tells social platforms the canonical URL for this content. Without it, shares from different URL variations (with/without www, query params, etc.) are tracked separately, splitting your engagement metrics.',
+              f'{"Set: " + (og_url.get("content", "")[:80] if og_url else "") if og_url else "Not set — share counts may be split across URL variations"}',
+              'Add <meta property="og:url" content="https://yoursite.com/page">. 1) Use the same URL as your canonical tag. 2) Don\'t include query parameters or tracking codes. 3) This consolidates all share counts to one URL.',
+              'Medium', 'Open Graph')
     
     og_type = soup.find('meta', property='og:type')
     og_type_content = og_type.get('content', '') if og_type else ''
     valid_types = ['website', 'article', 'product', 'profile', 'video.other', 'music.song']
     add_check(checks, 'OG Type', 'pass' if og_type_content in valid_types else ('warning' if og_type else 'info'),
-              'Content type', og_type_content or 'Not set (defaults to website)',
-              'Set og:type (website, article, product) for rich previews', 'Medium', 'Open Graph')
+              'Checks for the og:type meta tag, which tells platforms what kind of content this is. Different types unlock different preview formats — "article" shows author and publish date, "product" can show price, "video" enables inline playback.',
+              f'{"Type: " + og_type_content if og_type_content else "Not set — defaults to \"website\" type"}',
+              'Set og:type based on your content: 1) Use "website" for homepages. 2) Use "article" for blog posts (enables article:author, article:published_time). 3) Use "product" for product pages. 4) Add as: <meta property="og:type" content="website">.',
+              'Medium', 'Open Graph')
     
     # ===== 9-10: OG Advanced Tags =====
     og_site_name = soup.find('meta', property='og:site_name')
     add_check(checks, 'OG Site Name', 'pass' if og_site_name else 'info',
-              'Brand name in shares', og_site_name.get('content', '')[:30] if og_site_name else 'Not set',
-              'Add og:site_name for brand visibility in shares', 'Low', 'Open Graph')
+              'Checks for the og:site_name meta tag, which displays your brand name alongside the page title in social previews. This helps users identify the source of shared content and builds brand recognition across social platforms.',
+              f'{"Brand: " + og_site_name.get("content", "")[:50] if og_site_name else "Not set — shared content won\'t show your brand name"}',
+              'Add <meta property="og:site_name" content="Your Brand Name">. This appears as small text above or below the title in social previews, reinforcing brand identity with every share.',
+              'Low', 'Open Graph')
     
     og_locale = soup.find('meta', property='og:locale')
     add_check(checks, 'OG Locale', 'pass' if og_locale else 'info',
-              'Language/region', og_locale.get('content', '') if og_locale else 'Not set',
-              'Add og:locale (e.g., en_US) for international targeting', 'Low', 'Open Graph')
+              'Checks for the og:locale meta tag, which specifies the language and region of your content (e.g., en_US, fr_FR). This helps social platforms serve your content to the right audience and is essential for multilingual sites targeting different markets.',
+              f'{"Locale: " + og_locale.get("content", "") if og_locale else "Not set — defaults to en_US on most platforms"}',
+              'Add <meta property="og:locale" content="en_US">. For multilingual sites, also add og:locale:alternate for each additional language to enable proper content targeting.',
+              'Low', 'Open Graph')
     
     # ===== 11-15: Twitter/X Cards =====
     twitter_card = soup.find('meta', attrs={'name': 'twitter:card'})
     twitter_card_type = twitter_card.get('content', '') if twitter_card else ''
     valid_cards = ['summary', 'summary_large_image', 'player', 'app']
     add_check(checks, 'Twitter Card Type', 'pass' if twitter_card_type in valid_cards else 'warning',
-              'Card format', twitter_card_type or 'Not set',
-              'Add twitter:card (use summary_large_image for best engagement)', 'High', 'Twitter/X')
+              'Checks for the twitter:card meta tag, which controls how your page appears when shared on X (Twitter). The "summary_large_image" type displays a large preview image that dominates the feed, getting significantly more engagement than the small "summary" card.',
+              f'{"Card type: " + twitter_card_type + (" — large image preview enabled" if twitter_card_type == "summary_large_image" else "") if twitter_card_type else "Not set — X will use a minimal text-only preview"}',
+              'Add <meta name="twitter:card" content="summary_large_image">. 1) summary_large_image: large image above title (best for engagement). 2) summary: small square image beside title. 3) player: for video/audio embeds. 4) app: for mobile app promotion.',
+              'High', 'Twitter/X')
     
     twitter_title = soup.find('meta', attrs={'name': 'twitter:title'})
     add_check(checks, 'Twitter Title', 'pass' if twitter_title or og_title else 'warning',
-              'X/Twitter title', 'Set' if twitter_title else ('Falls back to OG' if og_title else 'Missing'),
-              'Add twitter:title or ensure og:title exists', 'Medium', 'Twitter/X')
+              'Checks for a twitter:title meta tag or og:title fallback. X/Twitter uses twitter:title first, then falls back to og:title. Having a dedicated twitter:title lets you customize the headline specifically for X\'s audience and character constraints.',
+              f'{"Dedicated twitter:title set" if twitter_title else ("Falls back to og:title" if og_title else "MISSING — no title for X/Twitter previews")}',
+              'Add <meta name="twitter:title" content="Your X-Optimized Title">. Keep it under 70 characters. If you don\'t need a separate title for X, ensure og:title is set as a fallback.',
+              'Medium', 'Twitter/X')
     
     twitter_desc = soup.find('meta', attrs={'name': 'twitter:description'})
     add_check(checks, 'Twitter Description', 'pass' if twitter_desc or og_desc else 'warning',
-              'X/Twitter description', 'Set' if twitter_desc else ('Falls back to OG' if og_desc else 'Missing'),
-              'Add twitter:description for custom X previews', 'Medium', 'Twitter/X')
+              'Checks for a twitter:description meta tag or og:description fallback. This text appears below the title in X/Twitter card previews. A compelling description increases click-through from the X feed.',
+              f'{"Dedicated twitter:description set" if twitter_desc else ("Falls back to og:description" if og_desc else "MISSING — no description for X/Twitter previews")}',
+              'Add <meta name="twitter:description" content="...">. Keep it under 200 characters. Write it as a hook that makes X users want to click through.',
+              'Medium', 'Twitter/X')
     
     twitter_image = soup.find('meta', attrs={'name': 'twitter:image'})
     add_check(checks, 'Twitter Image', 'pass' if twitter_image or og_image else 'warning',
-              'X/Twitter image', 'Set' if twitter_image else ('Falls back to OG' if og_image else 'Missing'),
-              'Add twitter:image (1200x675px for summary_large_image)', 'High', 'Twitter/X')
+              'Checks for a twitter:image meta tag or og:image fallback. X/Twitter has specific image requirements — summary_large_image needs 1200x675px (16:9 ratio). Using the wrong size results in cropped or distorted previews.',
+              f'{"Dedicated twitter:image set" if twitter_image else ("Falls back to og:image" if og_image else "MISSING — no image for X/Twitter cards")}',
+              'Add <meta name="twitter:image" content="https://yoursite.com/twitter-image.jpg">. 1) Use 1200x675px for summary_large_image. 2) Use 144x144px minimum for summary. 3) Max file size: 5MB. 4) Must be absolute URL.',
+              'High', 'Twitter/X')
     
     twitter_site = soup.find('meta', attrs={'name': 'twitter:site'})
     add_check(checks, 'Twitter Site Handle', 'pass' if twitter_site else 'info',
-              'Brand X handle', twitter_site.get('content', '') if twitter_site else 'Not set',
-              'Add twitter:site (@handle) for brand attribution', 'Low', 'Twitter/X')
+              'Checks for the twitter:site meta tag, which attributes the card to your brand\'s X/Twitter account. When set, your @handle appears in the card footer, driving followers to your profile and building brand authority on the platform.',
+              f'{"Handle: " + twitter_site.get("content", "") if twitter_site else "Not set — cards won\'t show your @handle"}',
+              'Add <meta name="twitter:site" content="@YourHandle">. This links every shared card back to your X profile, increasing brand visibility and follower growth.',
+              'Low', 'Twitter/X')
     
     # ===== 16-18: LinkedIn Specific =====
-    # LinkedIn uses OG tags but has specific preferences
     article_author = soup.find('meta', property='article:author')
     add_check(checks, 'Article Author', 'pass' if article_author else 'info',
-              'Content author', 'Set' if article_author else 'Not set',
-              'Add article:author for LinkedIn article attribution', 'Low', 'LinkedIn')
+              'Checks for the article:author meta tag, which LinkedIn uses to attribute content to a specific author. On LinkedIn, author attribution increases credibility and engagement, especially for thought leadership and B2B content.',
+              f'{"Author set: " + article_author.get("content", "")[:60] if article_author else "Not set — LinkedIn shares won\'t show author attribution"}',
+              'Add <meta property="article:author" content="https://yoursite.com/about/author-name"> or a Facebook profile URL. This is especially valuable for B2B content shared on LinkedIn.',
+              'Low', 'LinkedIn')
     
     article_published = soup.find('meta', property='article:published_time')
     add_check(checks, 'Article Published Time', 'pass' if article_published else 'info',
-              'Publish date', 'Set' if article_published else 'Not set',
-              'Add article:published_time for content freshness signals', 'Low', 'LinkedIn')
+              'Checks for the article:published_time meta tag, which signals content freshness on social platforms. LinkedIn and Facebook display this date in article previews, and users are more likely to engage with recently published content.',
+              f'{"Published: " + article_published.get("content", "")[:30] if article_published else "Not set — no publish date shown in social previews"}',
+              'Add <meta property="article:published_time" content="2026-03-17T10:00:00Z">. Use ISO 8601 format. Also add article:modified_time to show content is actively maintained.',
+              'Low', 'LinkedIn')
     
-    # Check for LinkedIn-optimized image (1200x627 or 1.91:1 ratio)
     add_check(checks, 'LinkedIn Image Optimization', 'pass' if og_image else 'warning',
-              'LinkedIn preview image', 'OG image set' if og_image else 'Missing',
-              'Use 1200x627px image for optimal LinkedIn feed display', 'Medium', 'LinkedIn')
+              'Checks whether an og:image is set for LinkedIn feed display. LinkedIn uses og:image for both feed posts and article previews. The optimal size is 1200x627px (1.91:1 ratio). Without an image, LinkedIn shares appear as plain text links with minimal engagement.',
+              f'{"OG image available for LinkedIn previews" if og_image else "MISSING — LinkedIn shares will appear as plain text links"}',
+              'Ensure og:image is set with a 1200x627px image for LinkedIn. 1) Use high-contrast, branded images. 2) Include text overlay with your headline for visual impact. 3) Test at linkedin.com/post-inspector.',
+              'Medium', 'LinkedIn')
     
     # ===== 19-21: Social Schema Markup (sameAs) =====
     json_ld = soup.find_all('script', {'type': 'application/ld+json'})
     has_sameas = any('sameAs' in str(j) for j in json_ld)
     add_check(checks, 'SameAs Schema', 'pass' if has_sameas else 'warning',
-              'Social profile schema', 'Found' if has_sameas else 'Not found',
-              'Add sameAs schema linking to social profiles for E-E-A-T', 'High', 'Social Schema')
+              'Checks for sameAs schema markup that links your website to your social media profiles. This is a critical E-E-A-T signal — it helps Google and AI systems connect your brand entity across platforms, strengthening your knowledge graph presence and authority.',
+              f'{"sameAs schema found — social profiles linked in structured data" if has_sameas else "No sameAs schema — search engines can\'t connect your social profiles to your site entity"}',
+              'Add sameAs to your Organization JSON-LD: "sameAs": ["https://facebook.com/yourbusiness", "https://twitter.com/yourbusiness", "https://linkedin.com/company/yourbusiness"]. Include all active social profiles.',
+              'High', 'Social Schema')
     
-    # Check for Organization/Person schema with social links
     has_org_social = any('"@type"' in str(j) and ('Organization' in str(j) or 'Person' in str(j)) for j in json_ld)
     add_check(checks, 'Organization Social Schema', 'pass' if has_org_social else 'info',
-              'Entity social markup', 'Found' if has_org_social else 'Not found',
-              'Add Organization schema with sameAs for AI entity recognition', 'Medium', 'Social Schema')
+              'Checks for Organization or Person schema that includes social profile information. This structured data helps AI systems and search engines build a complete entity profile for your brand, improving your chances of appearing in knowledge panels and AI-generated answers.',
+              f'{"Organization/Person schema with social context found" if has_org_social else "No Organization/Person schema detected — AI systems have limited entity information"}',
+              'Add Organization schema with social links: 1) Include @type: Organization with name, url, logo, and sameAs array. 2) For personal brands, use @type: Person with name, jobTitle, and sameAs. 3) This directly feeds Google\'s Knowledge Graph.',
+              'Medium', 'Social Schema')
     
     # ===== 22-25: Social Integration & Engagement =====
     social_platforms = {
@@ -997,8 +1074,10 @@ def analyze_social_seo(url, soup, response, load_time):
     
     platforms_found = list(set([s[0] for s in social_links]))
     add_check(checks, 'Social Profile Links', 'pass' if len(platforms_found) >= 3 else ('warning' if platforms_found else 'info'),
-              'Linked platforms', f'{len(platforms_found)} platforms: {", ".join(platforms_found[:4])}' if platforms_found else 'None found',
-              'Link to at least 3 social profiles (footer/header)', 'Medium', 'Social Integration')
+              'Scans the page for links to major social media platforms (Facebook, X/Twitter, LinkedIn, Instagram, YouTube, TikTok, Pinterest). Having visible social links builds trust, enables cross-platform discovery, and signals to search engines that your brand has an active online presence.',
+              f'{len(platforms_found)} platform(s) linked: {", ".join(platforms_found[:5]) if platforms_found else "none found"} — {"good cross-platform presence" if len(platforms_found) >= 3 else "consider adding more social profile links"}',
+              'Link to at least 3 social profiles: 1) Add social icons in your header or footer. 2) Use recognizable platform icons with proper aria-labels for accessibility. 3) Ensure links open in new tabs (target="_blank" rel="noopener"). 4) Prioritize platforms where your audience is most active.',
+              'Medium', 'Social Integration')
     
     # Share buttons detection
     share_patterns = ['share', 'social-share', 'sharing', 'addthis', 'sharethis', 'shareaholic']
@@ -1006,20 +1085,26 @@ def analyze_social_seo(url, soup, response, load_time):
     share_links = soup.find_all('a', href=re.compile(r'share|intent/tweet|sharer\.php', re.I))
     total_share = len(share_buttons) + len(share_links)
     add_check(checks, 'Share Buttons', 'pass' if total_share > 0 else 'info',
-              'Social sharing', f'{total_share} share elements found',
-              'Add share buttons to increase content distribution', 'Medium', 'Social Integration')
+              'Detects social sharing buttons or share intent links on the page. Share buttons make it effortless for visitors to distribute your content across their networks, amplifying reach organically. Pages with share buttons get shared 7x more than those without.',
+              f'{total_share} share element(s) detected — {"sharing functionality available" if total_share > 0 else "no share buttons found"}',
+              'Add share buttons to your content: 1) Use native share URLs (no heavy third-party scripts needed): Facebook: https://www.facebook.com/sharer/sharer.php?u=URL, X: https://twitter.com/intent/tweet?url=URL&text=TITLE. 2) Place them above and below long content. 3) Consider the Web Share API for mobile.',
+              'Medium', 'Social Integration')
     
     # Social proof signals
     social_proof = any(term in html.lower() for term in ['followers', 'likes', 'shares', 'social proof', 'follow us'])
     add_check(checks, 'Social Proof Signals', 'pass' if social_proof else 'info',
-              'Social credibility', 'Found' if social_proof else 'Not found',
-              'Display follower counts or social proof for credibility', 'Low', 'Social Integration')
+              'Scans for social proof elements like follower counts, share counts, or "follow us" calls-to-action. Social proof leverages the psychological principle that people trust what others endorse. Displaying engagement metrics builds credibility and encourages further interaction.',
+              f'{"Social proof elements detected on page" if social_proof else "No social proof signals found — consider adding follower counts or engagement metrics"}',
+              'Display social proof: 1) Show follower/subscriber counts if impressive. 2) Display share counts on popular content. 3) Add "Join X,000+ subscribers" to email signups. 4) Embed social media feeds showing real engagement.',
+              'Low', 'Social Integration')
     
-    # WhatsApp/Messaging optimization (important for mobile sharing)
+    # WhatsApp/Messaging optimization
     whatsapp_link = soup.find('a', href=re.compile(r'wa\.me|whatsapp|api\.whatsapp', re.I))
     add_check(checks, 'WhatsApp Integration', 'pass' if whatsapp_link else 'info',
-              'Messaging share', 'Found' if whatsapp_link else 'Not found',
-              'Add WhatsApp share/contact for mobile engagement', 'Low', 'Social Integration')
+              'Checks for WhatsApp contact or share links. WhatsApp has 2+ billion users and is the primary communication channel in many markets. A WhatsApp link enables instant customer contact on mobile and is especially valuable for local businesses and e-commerce.',
+              f'{"WhatsApp link found — mobile messaging enabled" if whatsapp_link else "No WhatsApp integration — missing a major mobile engagement channel"}',
+              'Add WhatsApp integration: 1) Contact link: <a href="https://wa.me/1234567890">Chat on WhatsApp</a>. 2) Share link: https://wa.me/?text=Check+this+out:+URL. 3) Add a floating WhatsApp button for mobile users. 4) Pre-fill messages with your business context.',
+              'Low', 'Social Integration')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -1042,66 +1127,74 @@ def analyze_local_seo(url, soup, response, load_time):
     parsed = urlparse(url)
     
     # ===== 1-8: NAP (Name, Address, Phone) Consistency =====
-    # Phone number detection (multiple formats)
     phone_patterns = [
-        r'\b(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})\b',  # US format
-        r'\b(\d{3}[-.\s]?\d{4})\b',  # 7-digit local
-        r'\b(\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})\b'  # International
+        r'\b(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})\b',
+        r'\b(\d{3}[-.\s]?\d{4})\b',
+        r'\b(\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})\b'
     ]
     phone_found = any(re.search(p, text) for p in phone_patterns)
     add_check(checks, 'Phone Number Visible', 'pass' if phone_found else 'warning',
-              'Phone displayed on page', 'Found' if phone_found else 'Not found',
-              'Display phone number prominently for local trust', 'High', 'NAP')
+              'Scans the page for a visible phone number in common formats (US, international). For local businesses, a prominently displayed phone number is a top trust signal. Google uses phone numbers to verify NAP consistency across the web and match your site to your Google Business Profile.',
+              f'{"Phone number detected on page — local trust signal present" if phone_found else "No phone number found — missing a critical local SEO trust signal"}',
+              'Display your phone number prominently: 1) Add it to the header and footer of every page. 2) Use consistent formatting across your entire web presence. 3) Match it exactly to your Google Business Profile listing. 4) Use the same number on all directory listings.',
+              'High', 'NAP')
     
-    # Click-to-call links (critical for mobile)
     tel_links = soup.find_all('a', href=re.compile(r'^tel:'))
     add_check(checks, 'Click-to-Call Links', 'pass' if tel_links else 'warning',
-              'Tel: links for mobile', f'{len(tel_links)} found',
-              'Add tel: links - 88% of local mobile searches lead to calls within 24hrs', 'Critical', 'NAP')
+              'Checks for tel: links that enable one-tap calling on mobile devices. 88% of local mobile searches result in a call or visit within 24 hours. Without click-to-call links, mobile users must manually copy and dial your number, creating friction that loses leads.',
+              f'{len(tel_links)} click-to-call link(s) found — {"mobile users can tap to call" if tel_links else "mobile users cannot tap to call"}',
+              'Add click-to-call links: 1) Wrap phone numbers in <a href="tel:+16135551234">(613) 555-1234</a>. 2) Include the country code with + prefix. 3) Add to header, footer, and contact sections. 4) Style as a visible button on mobile for maximum conversions.',
+              'Critical', 'NAP')
     
-    # Address detection (street address patterns)
     address_patterns = [
         r'\b\d+\s+[\w\s]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|drive|dr|lane|ln|way|court|ct|place|pl)\b',
         r'\b(?:suite|ste|unit|apt|#)\s*\d+\b',
-        r'\b[A-Z][a-z]+,\s*[A-Z]{2}\s+\d{5}\b'  # City, ST ZIP
+        r'\b[A-Z][a-z]+,\s*[A-Z]{2}\s+\d{5}\b'
     ]
     address_found = any(re.search(p, text, re.I) for p in address_patterns)
     add_check(checks, 'Physical Address', 'pass' if address_found else 'info',
-              'Street address displayed', 'Found' if address_found else 'Not found',
-              'Display full address for local businesses (NAP consistency)', 'High', 'NAP')
+              'Scans for a physical street address on the page. For local businesses, displaying your full address is essential for NAP consistency — the #1 local SEO ranking factor. Google cross-references your website address with your Google Business Profile and directory listings.',
+              f'{"Street address detected on page" if address_found else "No street address pattern found — acceptable for service-area businesses, critical for storefront businesses"}',
+              'Display your full address: 1) Include street, city, state/province, and postal code. 2) Match it character-for-character with your Google Business Profile. 3) Use Schema.org PostalAddress markup. 4) For service-area businesses, display your service region instead.',
+              'High', 'NAP')
     
-    # ZIP/Postal code
     zip_pattern = re.search(r'\b\d{5}(?:-\d{4})?\b|\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b', text)
     add_check(checks, 'ZIP/Postal Code', 'pass' if zip_pattern else 'info',
-              'Postal code visible', 'Found' if zip_pattern else 'Not found',
-              'Include ZIP code for geo-targeting precision', 'Medium', 'NAP')
+              'Checks for a visible ZIP or postal code on the page. Postal codes are used by search engines for precise geo-targeting and help match your business to "near me" searches. They also validate your address data across citation sources.',
+              f'{"Postal/ZIP code found on page" if zip_pattern else "No postal code detected — reduces geo-targeting precision"}',
+              'Include your postal/ZIP code: 1) Display it as part of your full address. 2) Ensure it matches your Google Business Profile exactly. 3) For Canadian businesses, use the A1A 1A1 format consistently.',
+              'Medium', 'NAP')
     
-    # Email detection
     email_pattern = re.search(r'\b[\w.-]+@[\w.-]+\.\w+\b', text)
     add_check(checks, 'Contact Email', 'pass' if email_pattern else 'info',
-              'Email displayed', 'Found' if email_pattern else 'Not found',
-              'Display contact email for trust signals', 'Medium', 'NAP')
+              'Scans for a visible email address on the page. A displayed email address adds to your contact information completeness and provides an alternative communication channel. It also contributes to trust signals that search engines use to evaluate business legitimacy.',
+              f'{"Email address found on page" if email_pattern else "No email address detected — consider adding a contact email"}',
+              'Display a professional contact email: 1) Use a domain-based email (info@yourbusiness.com) rather than Gmail/Yahoo. 2) Add it to your contact page and footer. 3) Also add a mailto: link for easy clicking.',
+              'Medium', 'NAP')
     
-    # Mailto links
     mailto_links = soup.find_all('a', href=re.compile(r'^mailto:'))
     add_check(checks, 'Click-to-Email Links', 'pass' if mailto_links else 'info',
-              'Mailto: links', f'{len(mailto_links)} found',
-              'Add mailto: links for easy contact', 'Low', 'NAP')
+              'Checks for mailto: links that open the user\'s email client with your address pre-filled. Like click-to-call, this removes friction from the contact process and improves conversion rates, especially on mobile devices.',
+              f'{len(mailto_links)} mailto link(s) found — {"users can click to email" if mailto_links else "users must manually copy your email address"}',
+              'Add mailto links: 1) Wrap email addresses in <a href="mailto:info@yourbusiness.com">info@yourbusiness.com</a>. 2) Optionally pre-fill subject: mailto:info@yourbusiness.com?subject=Inquiry. 3) Add to contact page and footer.',
+              'Low', 'NAP')
     
-    # NAP in footer (best practice)
     footer = soup.find('footer') or soup.find(class_=re.compile(r'footer', re.I))
     footer_text = footer.get_text() if footer else ''
     nap_in_footer = phone_found and (re.search(r'\b\d+\s+\w+', footer_text) if footer_text else False)
     add_check(checks, 'NAP in Footer', 'pass' if nap_in_footer else 'info',
-              'Contact info in footer', 'Found' if nap_in_footer else 'Not found',
-              'Place NAP in footer for site-wide consistency', 'Medium', 'NAP')
+              'Checks whether your Name, Address, and Phone (NAP) information appears in the page footer. Footer NAP ensures your contact information is visible on every page of your site, providing consistent local signals that search engines use to verify your business identity.',
+              f'{"NAP information detected in footer — site-wide consistency" if nap_in_footer else "NAP not found in footer — contact info may not be visible on all pages"}',
+              'Place full NAP in your footer: 1) Include business name, full address, and phone number. 2) Wrap in Schema.org LocalBusiness markup. 3) This ensures every page on your site reinforces your local presence. 4) Keep formatting identical to your Google Business Profile.',
+              'Medium', 'NAP')
     
-    # Business hours mention
     hours_patterns = ['hours', 'open', 'closed', 'monday', 'tuesday', 'am', 'pm', '24/7', '24 hours']
     has_hours = any(term in text.lower() for term in hours_patterns)
     add_check(checks, 'Business Hours', 'pass' if has_hours else 'info',
-              'Operating hours displayed', 'Found' if has_hours else 'Not found',
-              'Display business hours - critical for local search intent', 'High', 'NAP')
+              'Scans for business hours or schedule-related content on the page. Displaying operating hours is critical for local search intent — users searching locally often need to know if you\'re open now. Google also uses this data for the "Open now" filter in Maps results.',
+              f'{"Business hours or schedule information detected" if has_hours else "No business hours found — users can\'t tell when you\'re open"}',
+              'Display your business hours: 1) List hours for each day of the week. 2) Include holiday hours and special schedules. 3) Add OpeningHoursSpecification schema markup. 4) Keep hours updated — incorrect hours lead to negative reviews.',
+              'High', 'NAP')
     
     # ===== 9-17: LocalBusiness Schema Markup =====
     json_ld = soup.find_all('script', {'type': 'application/ld+json'})
@@ -1112,100 +1205,125 @@ def analyze_local_seo(url, soup, response, load_time):
                           'HomeAndConstructionBusiness', 'SportsActivityLocation']
     has_local_schema = any(t in json_ld_content for t in local_schema_types)
     add_check(checks, 'LocalBusiness Schema', 'pass' if has_local_schema else 'fail',
-              'Local business markup', 'Found' if has_local_schema else 'Missing',
-              'Add LocalBusiness schema - top ranking factor for Map Pack', 'Critical', 'Schema')
+              'Checks for LocalBusiness (or subtype) schema markup in JSON-LD. This is the single most important structured data for local SEO — it directly feeds Google\'s Map Pack results and enables rich local search features like hours, ratings, and directions.',
+              f'{"LocalBusiness schema detected — eligible for Map Pack rich results" if has_local_schema else "MISSING LocalBusiness schema — severely limits Map Pack visibility"}',
+              'Add LocalBusiness JSON-LD schema: 1) Choose the most specific subtype (Restaurant, LegalService, MedicalBusiness, etc.). 2) Include name, address, phone, geo coordinates, hours, and priceRange. 3) Validate at search.google.com/test/rich-results.',
+              'Critical', 'Schema')
     
     # Organization schema
     has_org_schema = 'Organization' in json_ld_content or 'Corporation' in json_ld_content
     add_check(checks, 'Organization Schema', 'pass' if has_org_schema or has_local_schema else 'warning',
-              'Organization markup', 'Found' if has_org_schema else 'Not found',
-              'Add Organization schema for entity recognition', 'High', 'Schema')
+              'Checks for Organization or Corporation schema markup. This establishes your business as a recognized entity in Google\'s Knowledge Graph, enabling knowledge panels and improving how AI systems understand and reference your brand.',
+              f'{"Organization/Corporation schema found — entity recognition enabled" if has_org_schema else ("LocalBusiness schema serves as organization entity" if has_local_schema else "No organization entity schema — limited Knowledge Graph presence")}',
+              'Add Organization schema: 1) Include name, url, logo, description, and sameAs (social profiles). 2) If you already have LocalBusiness schema, it inherits from Organization. 3) Add contactPoint for customer service details.',
+              'High', 'Schema')
     
     # Address in schema
     has_address_schema = 'PostalAddress' in json_ld_content or 'address' in json_ld_content
     add_check(checks, 'Address Schema', 'pass' if has_address_schema else 'warning',
-              'Structured address', 'Found' if has_address_schema else 'Not found',
-              'Add PostalAddress schema for NAP consistency', 'High', 'Schema')
+              'Checks for PostalAddress schema within your structured data. Structured address data ensures search engines parse your location correctly — street, city, state, postal code, and country as separate fields rather than guessing from unstructured text.',
+              f'{"PostalAddress schema found — address is machine-readable" if has_address_schema else "No structured address — search engines must guess your location from page text"}',
+              'Add PostalAddress schema: 1) Include streetAddress, addressLocality (city), addressRegion (state/province), postalCode, and addressCountry. 2) Match every field exactly to your Google Business Profile.',
+              'High', 'Schema')
     
     # GeoCoordinates
     has_geo = 'GeoCoordinates' in json_ld_content or '"latitude"' in json_ld_content or '"geo"' in json_ld_content
     add_check(checks, 'GeoCoordinates Schema', 'pass' if has_geo else 'warning',
-              'Location coordinates', 'Found' if has_geo else 'Not found',
-              'Add geo coordinates for precise map placement', 'High', 'Schema')
+              'Checks for GeoCoordinates (latitude/longitude) in your structured data. Precise coordinates enable exact map placement and improve "near me" search matching. Without coordinates, search engines must geocode your address, which can be inaccurate.',
+              f'{"GeoCoordinates found — precise map placement enabled" if has_geo else "No geo coordinates — map placement relies on address geocoding (less precise)"}',
+              'Add GeoCoordinates to your LocalBusiness schema: "geo": {"@type": "GeoCoordinates", "latitude": 45.4215, "longitude": -75.6972}. Get exact coordinates from Google Maps by right-clicking your location.',
+              'High', 'Schema')
     
     # Opening hours schema
     has_hours_schema = 'openingHours' in json_ld_content or 'OpeningHoursSpecification' in json_ld_content
     add_check(checks, 'Opening Hours Schema', 'pass' if has_hours_schema else 'info',
-              'Hours in schema', 'Found' if has_hours_schema else 'Not found',
-              'Add openingHours schema for rich results', 'Medium', 'Schema')
+              'Checks for openingHours or OpeningHoursSpecification in structured data. Schema-based hours enable the "Open now" badge in search results and Google Maps, which significantly increases click-through rates for local searches.',
+              f'{"Opening hours in schema — eligible for Open now badge" if has_hours_schema else "No hours in schema — missing Open now badge opportunity"}',
+              'Add opening hours to schema: 1) Simple: "openingHours": "Mo-Fr 09:00-17:00". 2) Detailed: use OpeningHoursSpecification with dayOfWeek, opens, and closes. 3) Include special hours for holidays.',
+              'Medium', 'Schema')
     
     # Contact point schema
     has_contact_schema = 'ContactPoint' in json_ld_content or 'contactPoint' in json_ld_content
     add_check(checks, 'ContactPoint Schema', 'pass' if has_contact_schema else 'info',
-              'Contact schema', 'Found' if has_contact_schema else 'Not found',
-              'Add ContactPoint schema with phone/email', 'Medium', 'Schema')
+              'Checks for ContactPoint schema, which provides structured contact information including phone type (customer service, sales, support), available languages, and contact options. This helps search engines display the right contact method for user intent.',
+              f'{"ContactPoint schema found — structured contact info available" if has_contact_schema else "No ContactPoint schema — contact details not structured for search engines"}',
+              'Add ContactPoint schema: "contactPoint": {"@type": "ContactPoint", "telephone": "+1-613-555-1234", "contactType": "customer service", "availableLanguage": "English"}.',
+              'Medium', 'Schema')
     
     # Price range
     has_price_range = 'priceRange' in json_ld_content
     add_check(checks, 'Price Range Schema', 'pass' if has_price_range else 'info',
-              'Price indicator', 'Found' if has_price_range else 'Not found',
-              'Add priceRange ($, $$, $$$) for search filters', 'Low', 'Schema')
+              'Checks for priceRange in your LocalBusiness schema. Price range indicators ($, $$, $$$) appear in Google search results and Maps, helping users filter businesses by budget and pre-qualifying visitors to improve conversion rates.',
+              f'{"Price range set in schema — visible in search filters" if has_price_range else "No price range — business won\'t appear in price-filtered searches"}',
+              'Add priceRange to your LocalBusiness schema: "priceRange": "$$". Use $ (budget), $$ (moderate), $$$ (upscale), or $$$$ (luxury).',
+              'Low', 'Schema')
     
     # Aggregate rating schema
     has_rating_schema = 'AggregateRating' in json_ld_content or 'aggregateRating' in json_ld_content
     add_check(checks, 'Rating Schema', 'pass' if has_rating_schema else 'info',
-              'Review rating markup', 'Found' if has_rating_schema else 'Not found',
-              'Add AggregateRating schema for star ratings in search', 'High', 'Schema')
+              'Checks for AggregateRating schema, which enables star ratings to appear directly in search results. Listings with star ratings get up to 35% higher click-through rates. This is one of the most visually impactful rich result types available.',
+              f'{"AggregateRating schema found — star ratings can appear in search results" if has_rating_schema else "No rating schema — missing star ratings in search results"}',
+              'Add AggregateRating schema: "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "127"}. Only use real review data — Google penalizes fake ratings.',
+              'High', 'Schema')
     
     # ===== 18-24: Local Signals & Trust =====
     # Google Maps embed
     maps_embed = soup.find('iframe', src=re.compile(r'google.*maps|maps\.google', re.I))
     add_check(checks, 'Google Maps Embed', 'pass' if maps_embed else 'info',
-              'Map embedded', 'Found' if maps_embed else 'Not found',
-              'Embed Google Maps for location verification', 'Medium', 'Local Signals')
+              'Checks for an embedded Google Maps iframe on the page. An embedded map verifies your physical location to search engines and provides convenience to users. It also signals to Google that your business has a real, verifiable location.',
+              f'{"Google Maps embed found — location visually verified" if maps_embed else "No Google Maps embed — consider adding one to your contact or about page"}',
+              'Embed Google Maps: 1) Go to Google Maps, search your business, click Share > Embed. 2) Add the iframe to your contact page. 3) Include a "Get Directions" link alongside it. 4) Use loading="lazy" to avoid impacting page speed.',
+              'Medium', 'Local Signals')
     
-    # Directions link
     directions = soup.find('a', href=re.compile(r'maps\.google|google.*maps.*dir|directions', re.I))
     add_check(checks, 'Get Directions Link', 'pass' if directions else 'info',
-              'Directions link', 'Found' if directions else 'Not found',
-              'Add "Get Directions" link for user convenience', 'Low', 'Local Signals')
+              'Checks for a "Get Directions" link that opens Google Maps navigation to your business. This is a strong local intent signal and provides immediate utility to mobile users who are ready to visit your location.',
+              f'{"Directions link found — users can navigate to your location" if directions else "No directions link — mobile users can\'t easily navigate to you"}',
+              'Add a directions link: <a href="https://www.google.com/maps/dir/?api=1&destination=Your+Business+Name+City" target="_blank">Get Directions</a>. Place it near your address and map embed.',
+              'Low', 'Local Signals')
     
     # Service area mentions
     service_area_terms = ['serving', 'service area', 'we serve', 'locations', 'coverage area', 
                           'available in', 'servicing', 'proudly serving']
     has_service_area = any(term in text.lower() for term in service_area_terms)
     add_check(checks, 'Service Area Mentioned', 'pass' if has_service_area else 'info',
-              'Service coverage', 'Found' if has_service_area else 'Not found',
-              'Mention service areas/cities for geo-relevance', 'Medium', 'Local Signals')
+              'Scans for service area or coverage mentions on the page. Explicitly stating which cities, neighborhoods, or regions you serve helps search engines match your business to location-specific queries and "near me" searches in those areas.',
+              f'{"Service area/coverage language found on page" if has_service_area else "No service area mentions — search engines can\'t determine your coverage region"}',
+              'Mention your service areas naturally: 1) Add a "Service Areas" section listing cities/neighborhoods you serve. 2) Create location-specific landing pages for each major area. 3) Include service area in your LocalBusiness schema with areaServed.',
+              'Medium', 'Local Signals')
     
-    # Local keywords (city, neighborhood, region)
     local_terms = ['near me', 'local', 'nearby', 'in your area', 'neighborhood', 'community']
     has_local_terms = any(term in text.lower() for term in local_terms)
     add_check(checks, 'Local Keywords', 'pass' if has_local_terms else 'info',
-              'Local terms used', 'Found' if has_local_terms else 'Not found',
-              'Include local/geo keywords naturally in content', 'Medium', 'Local Signals')
+              'Scans for local-intent keywords like "near me," "local," and "nearby" in your content. These terms align your page with the way users actually search for local businesses. Google processes billions of "near me" searches monthly.',
+              f'{"Local-intent keywords found in content" if has_local_terms else "No local keywords detected — content may not match local search intent"}',
+              'Include local keywords naturally: 1) Use "[service] near me" and "[service] in [city]" in headings and content. 2) Mention your neighborhood and surrounding areas. 3) Don\'t keyword-stuff — write naturally for local users.',
+              'Medium', 'Local Signals')
     
-    # Reviews/testimonials section
     review_terms = ['review', 'testimonial', 'rating', 'stars', 'customer feedback', 'what our customers say']
     has_reviews = any(term in html.lower() for term in review_terms)
     add_check(checks, 'Reviews Section', 'pass' if has_reviews else 'warning',
-              'Customer reviews', 'Found' if has_reviews else 'Not found',
-              'Display reviews - 4.5+ stars get 94% more clicks', 'High', 'Local Signals')
+              'Checks for a reviews or testimonials section on the page. Customer reviews are the #2 local ranking factor after Google Business Profile signals. Businesses with 4.5+ star ratings get 94% more clicks than those with lower ratings.',
+              f'{"Reviews/testimonials section detected" if has_reviews else "No reviews section found — missing a top local ranking signal"}',
+              'Add a reviews section: 1) Display your best Google/Yelp reviews on your site. 2) Add Review schema markup for star ratings in search results. 3) Include reviewer name and date for authenticity. 4) Actively request reviews from satisfied customers.',
+              'High', 'Local Signals')
     
-    # Trust badges/certifications
     trust_terms = ['certified', 'licensed', 'insured', 'bonded', 'accredited', 'bbb', 'member of', 
                    'association', 'award', 'years in business', 'established', 'since']
     has_trust = any(term in text.lower() for term in trust_terms)
     add_check(checks, 'Trust Signals', 'pass' if has_trust else 'info',
-              'Credibility indicators', 'Found' if has_trust else 'Not found',
-              'Display certifications, awards, years in business', 'Medium', 'Local Signals')
+              'Scans for trust and credibility indicators like certifications, licenses, awards, BBB accreditation, and years in business. These signals build confidence with both users and search engines, contributing to E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).',
+              f'{"Trust/credibility signals found on page" if has_trust else "No trust signals detected — consider adding certifications, awards, or years of experience"}',
+              'Display trust signals prominently: 1) Show certification badges and license numbers. 2) Mention years in business ("Serving Ottawa since 2010"). 3) Display BBB rating or industry association memberships. 4) Add award badges with dates.',
+              'Medium', 'Local Signals')
     
-    # Local content/community involvement
     community_terms = ['community', 'local event', 'sponsor', 'charity', 'give back', 'neighborhood']
     has_community = any(term in text.lower() for term in community_terms)
     add_check(checks, 'Community Involvement', 'pass' if has_community else 'info',
-              'Local engagement', 'Found' if has_community else 'Not found',
-              'Mention community involvement for local authority', 'Low', 'Local Signals')
+              'Scans for community engagement signals like sponsorships, local events, charity work, and neighborhood involvement. Community content builds local authority and generates natural backlinks from local organizations, events, and news outlets.',
+              f'{"Community involvement content found" if has_community else "No community engagement signals — consider highlighting local involvement"}',
+              'Showcase community involvement: 1) Create a page about your community partnerships. 2) Sponsor local events and link to them. 3) Write blog posts about local topics. 4) This generates natural local backlinks and builds authority.',
+              'Low', 'Local Signals')
     
     # ===== 25-30: Citation & Directory Signals =====
     # Links to major directories
@@ -1213,47 +1331,56 @@ def analyze_local_seo(url, soup, response, load_time):
                           'thumbtack', 'houzz', 'tripadvisor', 'healthgrades', 'avvo']
     directory_links = soup.find_all('a', href=re.compile('|'.join(directory_patterns), re.I))
     add_check(checks, 'Directory Profile Links', 'pass' if directory_links else 'info',
-              'Citation links', f'{len(directory_links)} found',
-              'Link to your profiles on major directories', 'Low', 'Citations')
+              'Scans for links to major business directories (Yelp, BBB, Yellow Pages, TripAdvisor, etc.). Linking to your directory profiles from your website helps search engines verify your business across multiple sources and strengthens your citation network.',
+              f'{len(directory_links)} directory link(s) found — {"citation network connected" if directory_links else "no directory profile links detected"}',
+              'Link to your directory profiles: 1) Claim and optimize profiles on Yelp, BBB, Yellow Pages, and industry-specific directories. 2) Add links to these profiles from your website footer or "Find Us" page. 3) Ensure NAP is identical across all directories.',
+              'Low', 'Citations')
     
-    # Social proof from platforms
     platform_mentions = ['google reviews', 'yelp', 'facebook reviews', 'trustpilot', 'g2']
     has_platform_proof = any(term in text.lower() for term in platform_mentions)
     add_check(checks, 'Review Platform Mentions', 'pass' if has_platform_proof else 'info',
-              'Platform social proof', 'Found' if has_platform_proof else 'Not found',
-              'Reference reviews from Google, Yelp, etc.', 'Medium', 'Citations')
+              'Checks for mentions of review platforms (Google Reviews, Yelp, Trustpilot, etc.) on your page. Referencing your presence on these platforms signals to users and search engines that your business has been reviewed and validated by real customers.',
+              f'{"Review platform references found — social proof from external platforms" if has_platform_proof else "No review platform mentions — consider referencing your Google/Yelp ratings"}',
+              'Reference your review platforms: 1) Display "Rated 4.8/5 on Google Reviews" with a link. 2) Embed review widgets from Google, Yelp, or Trustpilot. 3) Add review platform badges to build trust.',
+              'Medium', 'Citations')
     
     # ===== 31-35: AI/Voice Search Local Optimization =====
     # FAQ for voice search
     faq_patterns = ['faq', 'frequently asked', 'common questions', 'q&a', 'questions']
     has_faq = any(term in text.lower() for term in faq_patterns) or 'FAQPage' in json_ld_content
     add_check(checks, 'Local FAQ Content', 'pass' if has_faq else 'info',
-              'FAQ section', 'Found' if has_faq else 'Not found',
-              'Add FAQ for voice search queries ("Where is...", "What time...")', 'Medium', 'AI/Voice')
+              'Checks for FAQ content or FAQPage schema, which is critical for voice search optimization. Voice assistants answer "Where is...," "What time does... open," and "How do I get to..." queries by extracting FAQ content. Local FAQs directly target these high-intent voice searches.',
+              f'{"FAQ content or FAQPage schema found — voice search optimized" if has_faq else "No FAQ content — missing voice search optimization opportunity"}',
+              'Add a local FAQ section: 1) Answer common questions: "Where are you located?", "What are your hours?", "Do you offer free parking?". 2) Add FAQPage schema markup. 3) Use natural, conversational language that matches voice queries.',
+              'Medium', 'AI/Voice')
     
-    # Conversational content for AI
     question_words = text.lower().count('where') + text.lower().count('when') + text.lower().count('how to get')
     add_check(checks, 'Conversational Content', 'pass' if question_words >= 2 else 'info',
-              'Question-based content', f'{question_words} question phrases',
-              'Include conversational phrases for AI/voice search', 'Medium', 'AI/Voice')
+              'Counts question-based phrases (where, when, how to get) that match how people speak to voice assistants and AI chatbots. Conversational content aligns with natural language queries, making your page more likely to be cited by AI answer engines.',
+              f'{question_words} conversational question phrase(s) found — {"good alignment with voice/AI queries" if question_words >= 2 else "consider adding more question-based content"}',
+              'Include conversational phrases: 1) Write content that answers "Where can I find...", "When is... open", "How do I get to...". 2) Use question-and-answer format. 3) Write at a natural reading level (8th-10th grade).',
+              'Medium', 'AI/Voice')
     
-    # SameAs for local entity recognition
     has_sameas = 'sameAs' in json_ld_content
     add_check(checks, 'SameAs Local Links', 'pass' if has_sameas else 'warning',
-              'Entity connections', 'Found' if has_sameas else 'Not found',
-              'Add sameAs linking to GBP, directories for AI entity recognition', 'High', 'AI/Voice')
+              'Checks for sameAs schema linking your website to your Google Business Profile, directory listings, and social profiles. This is how AI systems connect your website entity to your business entity across the web, enabling accurate citations in AI-generated answers.',
+              f'{"sameAs schema found — entity connections established for AI recognition" if has_sameas else "No sameAs schema — AI systems can\'t connect your site to your business listings"}',
+              'Add sameAs to your LocalBusiness schema: "sameAs": ["https://www.google.com/maps/place/...", "https://www.yelp.com/biz/...", "https://facebook.com/..."]. Include your GBP URL, directory profiles, and social accounts.',
+              'High', 'AI/Voice')
     
-    # Area served schema
     has_area_served = 'areaServed' in json_ld_content or 'serviceArea' in json_ld_content
     add_check(checks, 'Area Served Schema', 'pass' if has_area_served else 'info',
-              'Service area markup', 'Found' if has_area_served else 'Not found',
-              'Add areaServed schema for service-area businesses', 'Medium', 'AI/Voice')
+              'Checks for areaServed or serviceArea schema, which explicitly tells search engines and AI systems which geographic areas your business covers. This is especially important for service-area businesses that don\'t have a storefront customers visit.',
+              f'{"areaServed/serviceArea schema found — service coverage defined" if has_area_served else "No area served schema — search engines must infer your coverage area"}',
+              'Add areaServed to your schema: "areaServed": [{"@type": "City", "name": "Ottawa"}, {"@type": "City", "name": "Gatineau"}]. Use City, State, or GeoCircle types to define your coverage.',
+              'Medium', 'AI/Voice')
     
-    # Mobile-first local (responsive check)
     viewport = soup.find('meta', attrs={'name': 'viewport'})
     add_check(checks, 'Mobile-First Local', 'pass' if viewport else 'fail',
-              'Mobile optimization', 'Viewport set' if viewport else 'Missing',
-              'Mobile-first is critical - 76% of local searches are mobile', 'Critical', 'AI/Voice')
+              'Checks for a viewport meta tag, which is the foundation of mobile responsiveness. 76% of local searches happen on mobile devices, and Google uses mobile-first indexing. Without a viewport tag, your site renders at desktop width on phones, destroying the mobile experience.',
+              f'{"Viewport meta tag set — mobile rendering enabled" if viewport else "MISSING viewport tag — site is not mobile-friendly, severely impacting local search visibility"}',
+              'Add the viewport meta tag: <meta name="viewport" content="width=device-width, initial-scale=1.0">. 1) This is the minimum requirement for mobile-friendliness. 2) Test at search.google.com/test/mobile-friendly. 3) Ensure tap targets are at least 48x48px.',
+              'Critical', 'AI/Voice')
     
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -1281,242 +1408,310 @@ def analyze_geo_aeo(url, soup, response, load_time):
     # ===== 1-6: Structured Data for AI Parsing =====
     json_ld = soup.find_all('script', {'type': 'application/ld+json'})
     add_check(checks, 'JSON-LD Structured Data', 'pass' if json_ld else 'fail',
-              'Schema.org markup for AI', f'{len(json_ld)} blocks',
-              'Add JSON-LD schema for AI understanding', 'Critical', 'AI Parsing')
+              'Checks for JSON-LD structured data (Schema.org markup), which is the primary way AI systems and search engines understand your content programmatically. Without it, AI must infer meaning from unstructured HTML, leading to less accurate citations and missed rich result opportunities.',
+              f'{len(json_ld)} JSON-LD block(s) found — {"structured data available for AI parsing" if json_ld else "no structured data — AI systems have limited understanding of your content"}',
+              'Add JSON-LD schema: 1) Start with Organization/WebPage schema on every page. 2) Add Article schema for blog posts. 3) Add FAQPage for Q&A content. 4) Use Google\'s Rich Results Test to validate. 5) Place in <script type="application/ld+json"> tags.',
+              'Critical', 'AI Parsing')
 
     faq_schema = 'FAQPage' in html or '"Question"' in html
     add_check(checks, 'FAQ Schema', 'pass' if faq_schema else 'warning',
-              'FAQPage structured data', 'Present' if faq_schema else 'Not found',
-              'Add FAQPage schema for AI snippets', 'Critical', 'AI Parsing')
+              'Checks for FAQPage schema markup, which is one of the most AI-cited structured data types. AI answer engines like ChatGPT, Perplexity, and Google AI Overviews directly extract FAQ content for their responses. This is your highest-impact AEO optimization.',
+              f'{"FAQPage schema detected — content is directly extractable by AI answer engines" if faq_schema else "No FAQ schema — missing the most AI-cited structured data type"}',
+              'Add FAQPage schema: 1) Identify your top 5-10 customer questions. 2) Write clear, concise answers (2-3 sentences each). 3) Wrap in FAQPage JSON-LD with Question/Answer pairs. 4) Also display the Q&A visually on the page.',
+              'Critical', 'AI Parsing')
 
     howto_schema = 'HowTo' in html
     add_check(checks, 'HowTo Schema', 'pass' if howto_schema else 'info',
-              'Step-by-step schema', 'Present' if howto_schema else 'Not found',
-              'Add HowTo schema for instructions', 'High', 'AI Parsing')
+              'Checks for HowTo schema markup, which structures step-by-step instructions for AI consumption. HowTo content is heavily featured in Google AI Overviews and voice assistant responses. It enables rich results with numbered steps and images.',
+              f'{"HowTo schema detected — step-by-step content is AI-readable" if howto_schema else "No HowTo schema — instructional content not structured for AI extraction"}',
+              'Add HowTo schema for instructional content: 1) Break processes into numbered steps with name and text. 2) Include estimatedCost, totalTime, and supply if applicable. 3) Add images per step for rich results.',
+              'High', 'AI Parsing')
 
     entity_schemas = ['Person', 'Organization', 'Product', 'Place', 'Event', 'Article', 'WebPage']
     entities_found = [s for s in entity_schemas if s in html]
     add_check(checks, 'Entity Schema Markup', 'pass' if entities_found else 'warning',
-              'Schema.org entities', ', '.join(entities_found) if entities_found else 'None found',
-              'Add entity schemas (Person, Organization, Article)', 'High', 'AI Parsing')
+              'Checks for entity-type schemas (Person, Organization, Product, Article, etc.) that help AI systems build knowledge graphs about your content. Entity markup is how your brand, products, and people become recognized entities in AI systems.',
+              f'Entities found: {", ".join(entities_found) if entities_found else "None"} — {"AI can identify key entities on this page" if entities_found else "no entity schemas — AI systems can\'t identify what this page is about"}',
+              'Add entity schemas: 1) Organization for your business. 2) Person for team members/authors. 3) Article/BlogPosting for content. 4) Product for offerings. 5) Each entity should have name, description, and sameAs links.',
+              'High', 'AI Parsing')
 
     speakable = 'speakable' in html.lower()
     add_check(checks, 'Speakable Schema', 'pass' if speakable else 'info',
-              'Voice assistant optimization', 'Present' if speakable else 'Not found',
-              'Add Speakable schema for voice search', 'Medium', 'AI Parsing')
+              'Checks for Speakable schema, which tells voice assistants (Google Assistant, Alexa, Siri) which sections of your page are best suited for text-to-speech reading. This is key for voice search optimization and audio content delivery.',
+              f'{"Speakable schema found — voice assistants know which content to read aloud" if speakable else "No Speakable schema — voice assistants must guess which content to read"}',
+              'Add Speakable schema: 1) Use cssSelector to point to your summary and key takeaways sections. 2) Keep speakable content concise (2-3 sentences). 3) Write in a natural, conversational tone suitable for audio.',
+              'Medium', 'AI Parsing')
 
     sameas = 'sameAs' in html
     add_check(checks, 'Entity sameAs Links', 'pass' if sameas else 'info',
-              'Entity disambiguation', 'Present' if sameas else 'Not found',
-              'Add sameAs links to Wikipedia/social profiles', 'Medium', 'AI Parsing')
+              'Checks for sameAs links in your structured data, which connect your entity to authoritative external profiles (Wikipedia, Wikidata, social media, directories). This is how AI systems disambiguate your brand from others with similar names and build accurate knowledge graph entries.',
+              f'{"sameAs links found — entity disambiguation enabled for AI systems" if sameas else "No sameAs links — AI systems may confuse your entity with others"}',
+              'Add sameAs to your Organization schema: 1) Link to your Wikipedia page (if you have one). 2) Link to Wikidata entry. 3) Include all social media profile URLs. 4) Add industry directory profile URLs.',
+              'Medium', 'AI Parsing')
 
     # ===== 7-12: Semantic HTML & Structure =====
     semantic_tags = soup.find_all(['article', 'section', 'aside', 'nav', 'header', 'footer', 'main'])
     add_check(checks, 'Semantic HTML5', 'pass' if len(semantic_tags) >= 3 else 'warning',
-              'Semantic structure', f'{len(semantic_tags)} elements',
-              'Use semantic HTML for AI comprehension', 'High', 'Semantic Structure')
+              'Counts semantic HTML5 elements (article, section, aside, nav, header, footer, main) that give AI systems structural context about your content. Semantic HTML helps AI distinguish navigation from content, sidebars from main text, and articles from page chrome.',
+              f'{len(semantic_tags)} semantic element(s) found — {"good structural context for AI" if len(semantic_tags) >= 3 else "limited semantic structure — AI must guess content boundaries"}',
+              'Use semantic HTML5 elements: 1) Wrap main content in <main> and <article>. 2) Use <section> for distinct content blocks. 3) Use <aside> for supplementary content. 4) Use <nav> for navigation. 5) This helps AI extract the right content.',
+              'High', 'Semantic Structure')
 
     tables = soup.find_all('table')
     add_check(checks, 'Data Tables', 'pass' if tables else 'info',
-              'Tabular data', f'{len(tables)} tables',
-              'Use tables for structured comparisons', 'Medium', 'Semantic Structure')
+              'Checks for HTML tables, which AI systems extract more reliably than prose for structured comparisons, pricing, specifications, and feature lists. Tables are one of the most commonly cited content formats in AI-generated answers.',
+              f'{len(tables)} table(s) found — {"structured data available for AI extraction" if tables else "no tables — consider adding comparison or specification tables"}',
+              'Add data tables for structured information: 1) Use tables for feature comparisons, pricing tiers, and specifications. 2) Include <thead> with clear column headers. 3) Use <caption> to describe the table. 4) AI systems extract table data with high accuracy.',
+              'Medium', 'Semantic Structure')
 
     lists = soup.find_all(['ul', 'ol'])
     add_check(checks, 'Structured Lists', 'pass' if len(lists) >= 2 else 'warning',
-              'Lists for AI extraction', f'{len(lists)} lists',
-              'Use bullet/numbered lists for key points', 'High', 'Semantic Structure')
+              'Counts ordered and unordered lists on the page. Lists are the second most AI-extractable content format after tables. AI answer engines frequently cite bulleted and numbered lists because they provide concise, scannable information.',
+              f'{len(lists)} list(s) found — {"good list usage for AI extraction" if len(lists) >= 2 else "few lists — AI prefers content structured as bullet points and numbered steps"}',
+              'Use lists for key information: 1) Use <ul> for feature lists, benefits, and requirements. 2) Use <ol> for step-by-step processes and rankings. 3) Keep list items concise (1-2 sentences each). 4) AI extracts lists more accurately than long paragraphs.',
+              'High', 'Semantic Structure')
 
     figures = soup.find_all('figure')
     figcaptions = soup.find_all('figcaption')
     add_check(checks, 'Figure Captions', 'pass' if figcaptions else 'info',
-              'Image context for AI', f'{len(figcaptions)} captions',
-              'Use figcaption for image descriptions', 'Medium', 'Semantic Structure')
+              'Checks for <figure> and <figcaption> elements that provide context for images and diagrams. AI systems use figcaptions to understand what images represent, enabling more accurate multimodal content analysis and image search optimization.',
+              f'{len(figcaptions)} figcaption(s) found — {"images have contextual descriptions for AI" if figcaptions else "no figcaptions — AI has limited understanding of your images"}',
+              'Use figure/figcaption for images: 1) Wrap images in <figure> tags. 2) Add <figcaption> with descriptive text explaining what the image shows. 3) This is more semantically meaningful than alt text alone for AI systems.',
+              'Medium', 'Semantic Structure')
 
     dl_tags = soup.find_all('dl')
     add_check(checks, 'Definition Lists', 'pass' if dl_tags else 'info',
-              'Term definitions', f'{len(dl_tags)} definition lists',
-              'Use <dl> for glossary/definitions', 'Low', 'Semantic Structure')
+              'Checks for definition lists (<dl>/<dt>/<dd>), which are the semantic HTML way to present term-definition pairs. AI systems can directly extract definitions from <dl> elements, making them ideal for glossaries, FAQs, and technical terminology.',
+              f'{len(dl_tags)} definition list(s) found — {"term-definition pairs available for AI extraction" if dl_tags else "no definition lists — consider using <dl> for glossary terms"}',
+              'Use definition lists for terminology: 1) Wrap glossary terms in <dl><dt>Term</dt><dd>Definition</dd></dl>. 2) Ideal for industry jargon, product features, and FAQ-style content. 3) AI systems extract these with high precision.',
+              'Low', 'Semantic Structure')
 
     blockquotes = soup.find_all('blockquote')
     add_check(checks, 'Blockquote Citations', 'pass' if blockquotes else 'info',
-              'Quoted content', f'{len(blockquotes)} blockquotes',
-              'Use blockquote for expert citations', 'Low', 'Semantic Structure')
+              'Checks for <blockquote> elements used for expert quotes and citations. AI systems recognize blockquotes as authoritative third-party statements, which strengthens E-E-A-T signals and provides citable expert opinions for AI-generated answers.',
+              f'{len(blockquotes)} blockquote(s) found — {"expert citations available for AI to reference" if blockquotes else "no blockquotes — consider adding expert quotes for authority"}',
+              'Use blockquotes for expert citations: 1) Wrap expert quotes in <blockquote> with <cite> for attribution. 2) Include the expert\'s name and credentials. 3) AI systems use these as authoritative supporting evidence in answers.',
+              'Low', 'Semantic Structure')
 
     # ===== 13-18: LLM Interpretability & Content =====
     questions = re.findall(r'(what|how|why|when|where|who|which|can|does|is|are)\s+[^.?]*\?', text.lower())
     add_check(checks, 'Q&A Patterns', 'pass' if len(questions) >= 2 else 'warning',
-              'Question-answer format', f'{len(questions)} questions',
-              'Include Q&A format for AI snippets', 'Critical', 'LLM Interpretability')
+              'Counts question-and-answer patterns in your content. Q&A format is the most AI-cited content structure because it directly matches how users query AI systems. Pages with clear Q&A patterns are 3x more likely to be cited in AI-generated answers.',
+              f'{len(questions)} Q&A pattern(s) found — {"strong alignment with AI query patterns" if len(questions) >= 2 else "few Q&A patterns — AI systems prefer explicit question-answer format"}',
+              'Add Q&A patterns: 1) Use questions as subheadings (H2/H3). 2) Answer immediately in the first sentence after the heading. 3) Target "People Also Ask" questions from Google. 4) Match the exact phrasing users type into AI chatbots.',
+              'Critical', 'LLM Interpretability')
 
     definitions = re.findall(r'\b\w+\s+(?:is|are|means|refers to|defined as|is defined as)\s+[^.]+\.', text)
     add_check(checks, 'Direct Definitions', 'pass' if definitions else 'warning',
-              'Clear definitions', f'{len(definitions)} found',
-              'Provide direct "X is..." definitions', 'Critical', 'LLM Interpretability')
+              'Scans for direct definition patterns ("X is...", "X means...", "X refers to..."). These are the most extractable content patterns for AI systems. When an AI needs to define a concept, it looks for these exact sentence structures.',
+              f'{len(definitions)} definition pattern(s) found — {"clear definitions available for AI extraction" if definitions else "no direct definitions — AI systems can\'t easily extract concept explanations"}',
+              'Write direct definitions: 1) Start key paragraphs with "X is [definition]." 2) Use "refers to," "means," and "is defined as" patterns. 3) Keep definitions to 1-2 sentences. 4) Place them near the top of relevant sections.',
+              'Critical', 'LLM Interpretability')
 
     paragraphs = soup.find_all('p')
     first_para = paragraphs[0].get_text() if paragraphs else ''
     has_answer_first = any(w in first_para.lower() for w in ['is', 'are', 'means', 'provides', 'helps', 'allows'])
     add_check(checks, 'Answer-First Writing', 'pass' if has_answer_first else 'warning',
-              'Inverted pyramid style', 'Key info upfront' if has_answer_first else 'Buried lede',
-              'Lead with the answer, not background', 'High', 'LLM Interpretability')
+              'Checks whether your content leads with the answer (inverted pyramid style) rather than building up to it. AI systems extract the first relevant sentence they find. If your answer is buried after paragraphs of context, AI will cite a competitor who answers first.',
+              f'{"First paragraph contains answer-first language — key information is upfront" if has_answer_first else "First paragraph may bury the lede — consider leading with your main point"}',
+              'Write answer-first: 1) Start each section with the key takeaway. 2) Follow with supporting details and examples. 3) Think "if AI only reads the first sentence, does it get the answer?" 4) This is the inverted pyramid style used in journalism.',
+              'High', 'LLM Interpretability')
 
     sentences = re.split(r'[.!?]+', text)
     pronoun_heavy = sum(1 for s in sentences if s.lower().strip().startswith(('it ', 'this ', 'that ', 'they ')))
     pronoun_ratio = pronoun_heavy / len(sentences) if sentences else 0
     add_check(checks, 'Self-Contained Sentences', 'pass' if pronoun_ratio < 0.2 else 'warning',
-              'Extractable sentences', f'{pronoun_ratio*100:.0f}% start with pronouns',
-              'Avoid starting sentences with it/this/that', 'High', 'LLM Interpretability')
+              'Measures how many sentences start with pronouns (it, this, that, they) that require context from previous sentences to understand. AI systems extract individual passages — if a sentence starts with "It" or "This," the extracted passage is meaningless without its predecessor.',
+              f'{pronoun_ratio*100:.0f}% of sentences start with pronouns — {"good: most sentences are self-contained and extractable" if pronoun_ratio < 0.2 else "high pronoun usage — many sentences lose meaning when extracted individually"}',
+              'Write self-contained sentences: 1) Replace "It is important..." with "SEO auditing is important..." 2) Replace "This helps..." with "Schema markup helps..." 3) Each sentence should make sense if read in isolation by an AI system.',
+              'High', 'LLM Interpretability')
 
     complex_words = [w for w in words if len(w) > 12]
     complex_ratio = len(complex_words) / word_count if word_count else 0
     add_check(checks, 'Plain Language', 'pass' if complex_ratio < 0.05 else 'warning',
-              'Accessible language', f'{complex_ratio*100:.1f}% complex words',
-              'Use simple, clear language for AI', 'High', 'LLM Interpretability')
+              'Measures the ratio of complex words (13+ characters) in your content. AI systems trained on diverse text perform better with clear, accessible language. Content written at an 8th-10th grade reading level gets cited more frequently by AI answer engines.',
+              f'{complex_ratio*100:.1f}% complex words — {"accessible reading level for broad AI citation" if complex_ratio < 0.05 else "high complexity — may reduce AI citation frequency"}',
+              'Simplify your language: 1) Replace jargon with plain alternatives where possible. 2) Target 8th-10th grade reading level. 3) Use short sentences (15-20 words average). 4) Explain technical terms when you must use them.',
+              'High', 'LLM Interpretability')
 
     conv_words = ['you', 'your', "you're", 'we', 'our', "we're"]
     conv_count = sum(text.lower().count(' ' + w + ' ') for w in conv_words)
     conv_ratio = conv_count / word_count if word_count else 0
     add_check(checks, 'Conversational Tone', 'pass' if conv_ratio > 0.005 else 'info',
-              'Natural language style', f'{conv_ratio*100:.2f}%',
-              'Use conversational you/we language', 'Medium', 'LLM Interpretability')
+              'Measures the use of conversational pronouns (you, your, we, our) that create a natural, engaging tone. AI systems increasingly favor content that reads naturally and conversationally, as it better matches how users phrase their queries.',
+              f'Conversational pronoun ratio: {conv_ratio*100:.2f}% — {"natural, engaging tone detected" if conv_ratio > 0.005 else "formal tone — consider adding more you/your/we language"}',
+              'Add conversational elements: 1) Address the reader directly with "you" and "your." 2) Use "we" to include your brand perspective. 3) Write as if explaining to a colleague, not writing a textbook.',
+              'Medium', 'LLM Interpretability')
 
     # ===== 19-24: Passage Ranking & Snippet Readiness =====
     headings = soup.find_all(['h1', 'h2', 'h3', 'h4'])
     question_headings = [h for h in headings if '?' in h.get_text()]
     add_check(checks, 'Question Headings', 'pass' if question_headings else 'warning',
-              'Prompt-aligned headings', f'{len(question_headings)} question headings',
-              'Use questions as headings (What is X?)', 'Critical', 'Snippet Readiness')
+              'Counts headings that are phrased as questions (containing "?"). Question headings directly match how users query AI systems and search engines. Google\'s passage ranking algorithm specifically looks for headings that match search queries.',
+              f'{len(question_headings)} question heading(s) — {"headings align with AI query patterns" if question_headings else "no question headings — consider rephrasing headings as questions users would ask"}',
+              'Use questions as headings: 1) "What is SEO?" instead of "SEO Overview." 2) "How do I improve page speed?" instead of "Page Speed." 3) Match exact phrases from Google\'s "People Also Ask" boxes. 4) AI systems match these directly to user queries.',
+              'Critical', 'Snippet Readiness')
 
     generic_headings = ['introduction', 'conclusion', 'overview', 'summary', 'more']
     descriptive_h = [h for h in headings if len(h.get_text().split()) >= 3 and h.get_text().lower().strip() not in generic_headings]
     add_check(checks, 'Descriptive Headings', 'pass' if len(descriptive_h) >= len(headings) * 0.5 else 'warning',
-              'Context-rich headings', f'{len(descriptive_h)}/{len(headings)} descriptive',
-              'Use specific, descriptive headings', 'High', 'Snippet Readiness')
+              'Evaluates whether headings are descriptive (3+ words, not generic like "Introduction" or "Summary"). Descriptive headings help AI systems understand section content without reading the full text, improving passage ranking accuracy.',
+              f'{len(descriptive_h)}/{len(headings)} headings are descriptive — {"good heading specificity" if len(descriptive_h) >= len(headings) * 0.5 else "too many generic headings — AI can\'t determine section content from headings alone"}',
+              'Write descriptive headings: 1) Replace "Overview" with "Complete Guide to Technical SEO Auditing." 2) Include key terms in every heading. 3) Each heading should tell the reader (and AI) exactly what the section covers.',
+              'High', 'Snippet Readiness')
 
     long_paras = [p for p in paragraphs if len(p.get_text().split()) > 100]
     add_check(checks, 'Concise Paragraphs', 'pass' if len(long_paras) <= 2 else 'warning',
-              'Paragraph length', f'{len(long_paras)} paragraphs over 100 words',
-              'Keep paragraphs under 100 words', 'High', 'Snippet Readiness')
+              'Counts paragraphs exceeding 100 words. AI systems extract content at the passage level (typically 1-3 sentences). Long paragraphs force AI to extract more text than needed, diluting the answer. Short, focused paragraphs get cited more accurately.',
+              f'{len(long_paras)} paragraph(s) over 100 words — {"content is well-segmented for AI extraction" if len(long_paras) <= 2 else "long paragraphs reduce AI extraction accuracy — break them up"}',
+              'Keep paragraphs concise: 1) Limit to 3-5 sentences (50-80 words). 2) One idea per paragraph. 3) Use line breaks between distinct points. 4) AI passage ranking works best with focused, self-contained paragraphs.',
+              'High', 'Snippet Readiness')
 
     h2_count = len(soup.find_all('h2'))
     h3_count = len(soup.find_all('h3'))
     section_ratio = (h2_count + h3_count) / (word_count / 300) if word_count > 300 else 1
     add_check(checks, 'Section Granularity', 'pass' if section_ratio >= 0.8 else 'warning',
-              'Heading density', f'{h2_count} H2s, {h3_count} H3s',
-              'Add more subheadings for passage ranking', 'High', 'Snippet Readiness')
+              'Measures heading density relative to content length. Google\'s passage ranking indexes individual sections, not whole pages. More granular sections (one heading per ~300 words) give AI more precise passages to cite.',
+              f'{h2_count} H2s, {h3_count} H3s for {word_count} words — {"good section granularity for passage ranking" if section_ratio >= 0.8 else "sections are too long — add more subheadings for better passage ranking"}',
+              'Increase section granularity: 1) Add an H2 or H3 every 200-300 words. 2) Each section should cover one specific subtopic. 3) Use H2 for main topics, H3 for subtopics. 4) This creates more citable passages for AI.',
+              'High', 'Snippet Readiness')
 
     steps = re.findall(r'step\s*\d|first,|second,|third,|finally,|next,|then,', text.lower())
     numbered_lists = soup.find_all('ol')
     add_check(checks, 'Step-by-Step Format', 'pass' if steps or numbered_lists else 'info',
-              'Sequential instructions', f'{len(steps)} step indicators, {len(numbered_lists)} ordered lists',
-              'Structure how-to content with numbered steps', 'Medium', 'Snippet Readiness')
+              'Detects step-by-step instructional patterns (numbered lists, "Step 1," "First/Second/Third" sequences). Step-by-step content is heavily featured in AI Overviews and voice assistant responses because it provides clear, actionable guidance.',
+              f'{len(steps)} step indicator(s), {len(numbered_lists)} ordered list(s) — {"instructional content structured for AI" if steps or numbered_lists else "no step-by-step format — consider structuring how-to content with numbered steps"}',
+              'Structure instructions as steps: 1) Use <ol> for numbered sequences. 2) Start each step with an action verb. 3) Keep steps concise (1-2 sentences). 4) Add HowTo schema for rich results.',
+              'Medium', 'Snippet Readiness')
 
     examples = ['for example', 'such as', 'e.g.', 'for instance', 'like this', 'including', 'specifically']
     example_count = sum(text.lower().count(e) for e in examples)
     add_check(checks, 'Concrete Examples', 'pass' if example_count >= 2 else 'info',
-              'Specific examples', f'{example_count} example phrases',
-              'Include specific examples for clarity', 'Medium', 'Snippet Readiness')
+              'Counts concrete example indicators ("for example," "such as," "e.g.") in your content. AI systems prefer content with specific examples because they make abstract concepts concrete and verifiable, increasing citation confidence.',
+              f'{example_count} example phrase(s) — {"good use of concrete examples" if example_count >= 2 else "few examples — AI prefers content with specific, concrete illustrations"}',
+              'Add concrete examples: 1) Follow every concept with "For example..." or "Such as..." 2) Use real numbers, names, and scenarios. 3) Include code snippets for technical content. 4) Examples make your content more citable and trustworthy.',
+              'Medium', 'Snippet Readiness')
 
     # ===== 25-30: Trust, Freshness & AI Optimization =====
     time_elements = soup.find_all('time')
     date_meta = soup.find('meta', property='article:modified_time') or soup.find('meta', property='article:published_time')
     add_check(checks, 'Content Timestamps', 'pass' if time_elements or date_meta else 'warning',
-              'Freshness signals', f'{len(time_elements)} time elements',
-              'Add visible publish/update dates', 'High', 'Trust & Freshness')
+              'Checks for visible timestamps (<time> elements) or article date meta tags. Content freshness is a critical AI citation factor — AI systems prefer recently updated content and display dates to users. Undated content is perceived as potentially stale.',
+              f'{len(time_elements)} <time> element(s), {"article date meta tag found" if date_meta else "no article date meta"} — {"freshness signals present" if time_elements or date_meta else "no date signals — AI may deprioritize undated content"}',
+              'Add content timestamps: 1) Use <time datetime="2026-03-17">March 17, 2026</time> for visible dates. 2) Add article:published_time and article:modified_time meta tags. 3) Update the modified date whenever you revise content.',
+              'High', 'Trust & Freshness')
 
     last_modified = response.headers.get('Last-Modified', '')
     add_check(checks, 'Last-Modified Header', 'pass' if last_modified else 'info',
-              'HTTP freshness', 'Set' if last_modified else 'Not set',
-              'Set Last-Modified header for freshness', 'Medium', 'Trust & Freshness')
+              'Checks for the Last-Modified HTTP header, which tells crawlers when the page content was last changed. AI crawlers use this to prioritize re-crawling recently updated content and to assess freshness without downloading the full page.',
+              f'{"Last-Modified: " + last_modified if last_modified else "No Last-Modified header — crawlers can\'t determine content freshness from HTTP headers"}',
+              'Set the Last-Modified header: 1) Most web servers set this automatically for static files. 2) For dynamic pages, set it programmatically based on content update time. 3) Also set ETag for efficient conditional requests.',
+              'Medium', 'Trust & Freshness')
 
     author_patterns = soup.find_all(class_=re.compile(r'author|bio|byline|written-by', re.I))
     author_schema = 'author' in html.lower() and ('Person' in html or 'name' in html)
     add_check(checks, 'Author Attribution', 'pass' if author_patterns or author_schema else 'warning',
-              'E-E-A-T author signals', 'Found' if author_patterns else 'Not found',
-              'Add visible author name and bio', 'Critical', 'Trust & Freshness')
+              'Checks for visible author attribution (bylines, author bios) or author schema markup. Author attribution is a core E-E-A-T signal — Google and AI systems use it to evaluate content credibility. Content with named, credentialed authors ranks higher in AI citations.',
+              f'{"Author attribution found — E-E-A-T author signals present" if author_patterns else ("Author schema detected" if author_schema else "No author attribution — content lacks E-E-A-T author signals")}',
+              'Add author attribution: 1) Display author name and photo on every article. 2) Link to an author bio page with credentials. 3) Add Person schema with name, jobTitle, and sameAs links. 4) Include "Reviewed by [Expert]" for YMYL content.',
+              'Critical', 'Trust & Freshness')
 
     citations = ['according to', 'source:', 'cited', 'reference', 'study shows', 'research', 'data from']
     has_citations = any(c in text.lower() for c in citations)
     external_links = [a for a in soup.find_all('a', href=True) if a['href'].startswith('http') and parsed.netloc not in a['href']]
     add_check(checks, 'Source Citations', 'pass' if has_citations or len(external_links) >= 2 else 'warning',
-              'Factual citations', f'{len(external_links)} external links',
-              'Cite authoritative sources with links', 'High', 'Trust & Freshness')
+              'Checks for source citations and external reference links. AI systems evaluate content trustworthiness by checking whether claims are supported by external sources. Well-cited content is more likely to be selected for AI-generated answers.',
+              f'{len(external_links)} external link(s), {"citation language found" if has_citations else "no citation language"} — {"content is well-sourced" if has_citations or len(external_links) >= 2 else "few sources — AI may question content reliability"}',
+              'Cite your sources: 1) Link to authoritative sources (.gov, .edu, research papers). 2) Use "According to [Source]..." attribution. 3) Include a references/sources section. 4) AI systems weight well-cited content more heavily.',
+              'High', 'Trust & Freshness')
 
     llms_txt = safe_get(f"{parsed.scheme}://{parsed.netloc}/llms.txt")
     add_check(checks, 'LLMs.txt File', 'pass' if llms_txt and llms_txt.status_code == 200 else 'info',
-              'AI crawler guidance', 'Found' if llms_txt and llms_txt.status_code == 200 else 'Not found',
-              'Add llms.txt for AI crawler permissions (experimental standard)', 'Low', 'AI Optimization')
+              'Checks for an llms.txt file at your site root, an emerging standard that provides AI crawlers with a structured summary of your site content, purpose, and preferred citation format. Think of it as robots.txt but specifically for AI systems.',
+              f'{"llms.txt found — AI crawlers have structured guidance for your site" if llms_txt and llms_txt.status_code == 200 else "No llms.txt — consider adding one as the standard matures"}',
+              'Create an llms.txt file: 1) Place at yoursite.com/llms.txt. 2) Include site name, description, key pages, and preferred citation format. 3) This is an emerging standard — early adoption signals AI-readiness.',
+              'Low', 'AI Optimization')
 
     add_check(checks, 'AI-Friendly Length', 'pass' if 500 <= word_count <= 3000 else ('warning' if word_count < 300 else 'info'),
-              'Content length', f'{word_count} words',
-              'Aim for 500-3000 words for AI context windows', 'Medium', 'AI Optimization')
+              'Evaluates whether content length falls within the optimal range for AI context windows (500-3000 words). Too short and there\'s insufficient context for AI to cite. Too long and key information gets diluted. The sweet spot provides comprehensive coverage without overwhelming AI extraction.',
+              f'{word_count} words — {"within optimal AI context window range" if 500 <= word_count <= 3000 else ("too short for comprehensive AI citation" if word_count < 500 else "very long — key points may be diluted for AI extraction")}',
+              'Optimize content length: 1) Aim for 500-3000 words for most pages. 2) For competitive topics, 1500-2500 words performs best. 3) If longer, use clear sections so AI can extract relevant passages. 4) Quality and structure matter more than raw word count.',
+              'Medium', 'AI Optimization')
 
-    # ===== 31-37: AI Crawlability & Bot Permissions (NEW) =====
+    # ===== 31-37: AI Crawlability & Bot Permissions =====
     robots_resp = safe_get(f"{parsed.scheme}://{parsed.netloc}/robots.txt")
     robots_text = robots_resp.text if robots_resp and robots_resp.status_code == 200 else ''
 
-    # Check GPTBot permissions
     gptbot_blocked = 'user-agent: gptbot' in robots_text.lower() and 'disallow: /' in robots_text.lower()
     add_check(checks, 'GPTBot Access', 'pass' if robots_text and not gptbot_blocked else ('warning' if gptbot_blocked else 'info'),
-              'OpenAI GPTBot crawler', 'Blocked' if gptbot_blocked else ('Allowed' if robots_text else 'No robots.txt'),
-              'Review GPTBot access in robots.txt — blocking prevents AI Overview citations', 'High', 'AI Crawlability')
+              'Checks whether OpenAI\'s GPTBot crawler is allowed or blocked in robots.txt. GPTBot crawls content for ChatGPT and OpenAI\'s search features. Blocking it prevents your content from being cited in ChatGPT responses and OpenAI-powered search results.',
+              f'{"GPTBot BLOCKED in robots.txt — your content cannot be cited by ChatGPT" if gptbot_blocked else ("GPTBot allowed — content eligible for ChatGPT citations" if robots_text else "No robots.txt found — GPTBot defaults to allowed")}',
+              'Review GPTBot access: 1) To allow: ensure no "User-agent: GPTBot / Disallow: /" in robots.txt. 2) To allow selectively: Disallow specific paths only. 3) Blocking GPTBot means zero visibility in ChatGPT and OpenAI search.',
+              'High', 'AI Crawlability')
 
-    # Check Google-Extended / Google AI bot
     google_ai_blocked = any(x in robots_text.lower() for x in ['user-agent: google-extended', 'user-agent: googleother'])
     google_ai_disallow = google_ai_blocked and 'disallow: /' in robots_text.lower()
     add_check(checks, 'Google AI Crawler', 'pass' if robots_text and not google_ai_disallow else ('warning' if google_ai_disallow else 'info'),
-              'Google-Extended/GoogleOther', 'Blocked' if google_ai_disallow else ('Allowed' if robots_text else 'No robots.txt'),
-              'Google-Extended controls AI training; blocking may reduce AI Overview visibility', 'High', 'AI Crawlability')
+              'Checks whether Google-Extended and GoogleOther crawlers are allowed. Google-Extended controls whether your content is used for AI training and Gemini responses. GoogleOther handles additional AI-related crawling. Blocking these may reduce your visibility in Google AI Overviews.',
+              f'{"Google AI crawlers BLOCKED — may reduce AI Overview visibility" if google_ai_disallow else ("Google AI crawlers allowed — content eligible for AI Overviews" if robots_text else "No robots.txt — Google AI crawlers default to allowed")}',
+              'Review Google AI crawler access: 1) Google-Extended controls AI training data usage. 2) Blocking it may reduce AI Overview citations. 3) GoogleOther handles supplementary AI crawling. 4) Consider allowing both for maximum AI visibility.',
+              'High', 'AI Crawlability')
 
-    # Check ClaudeBot / Anthropic
     claudebot_blocked = 'user-agent: claudebot' in robots_text.lower() or 'user-agent: anthropic' in robots_text.lower()
     add_check(checks, 'ClaudeBot Access', 'pass' if robots_text and not claudebot_blocked else ('warning' if claudebot_blocked else 'info'),
-              'Anthropic ClaudeBot', 'Blocked' if claudebot_blocked else ('Allowed' if robots_text else 'No robots.txt'),
-              'ClaudeBot crawls for Anthropic AI — allow for broader AI discoverability', 'Medium', 'AI Crawlability')
+              'Checks whether Anthropic\'s ClaudeBot crawler is allowed in robots.txt. ClaudeBot crawls content for Claude AI, which powers many enterprise AI applications and search integrations. Blocking it limits your reach in the growing Claude ecosystem.',
+              f'{"ClaudeBot BLOCKED — content excluded from Claude AI citations" if claudebot_blocked else ("ClaudeBot allowed — content eligible for Claude AI citations" if robots_text else "No robots.txt — ClaudeBot defaults to allowed")}',
+              'Review ClaudeBot access: 1) Allow for broader AI discoverability. 2) ClaudeBot respects robots.txt directives. 3) Anthropic\'s Claude powers many enterprise search and analysis tools.',
+              'Medium', 'AI Crawlability')
 
-    # Check for llms-full.txt (extended version of llms.txt)
     llms_full = safe_get(f"{parsed.scheme}://{parsed.netloc}/llms-full.txt")
     add_check(checks, 'LLMs-Full.txt', 'pass' if llms_full and llms_full.status_code == 200 else 'info',
-              'Extended AI content file', 'Found' if llms_full and llms_full.status_code == 200 else 'Not found',
-              'Add llms-full.txt with detailed site content for LLM ingestion', 'Low', 'AI Crawlability')
+              'Checks for an llms-full.txt file, the extended version of llms.txt that provides comprehensive site content in a format optimized for LLM ingestion. This file gives AI systems a complete, structured view of your site content beyond what crawling alone provides.',
+              f'{"llms-full.txt found — comprehensive content available for AI ingestion" if llms_full and llms_full.status_code == 200 else "No llms-full.txt — AI systems rely on standard crawling only"}',
+              'Create llms-full.txt: 1) Include detailed content from your key pages. 2) Structure with clear sections and headings. 3) This is an emerging standard — early adoption gives you an edge in AI discoverability.',
+              'Low', 'AI Crawlability')
 
-    # Check sitemap for AI discoverability
     sitemap_resp = safe_get(f"{parsed.scheme}://{parsed.netloc}/sitemap.xml")
     add_check(checks, 'Sitemap for AI Discovery', 'pass' if sitemap_resp and sitemap_resp.status_code == 200 else 'warning',
-              'XML sitemap accessible', 'Found' if sitemap_resp and sitemap_resp.status_code == 200 else 'Not found',
-              'Sitemap helps AI crawlers discover and index all content efficiently', 'High', 'AI Crawlability')
+              'Checks for an accessible XML sitemap, which helps AI crawlers discover and index all your content efficiently. Without a sitemap, AI crawlers must follow links to find pages, potentially missing important content that isn\'t well-linked.',
+              f'{"XML sitemap found — AI crawlers can discover all content" if sitemap_resp and sitemap_resp.status_code == 200 else "No sitemap found — AI crawlers may miss pages that aren\'t well-linked"}',
+              'Create and submit an XML sitemap: 1) Include all important pages with lastmod dates. 2) Submit to Google Search Console and Bing Webmaster Tools. 3) Reference it in robots.txt: Sitemap: https://yoursite.com/sitemap.xml.',
+              'High', 'AI Crawlability')
 
-    # Check meta robots for AI-specific directives
     meta_robots = soup.find('meta', {'name': 'robots'})
     robots_content = meta_robots.get('content', '').lower() if meta_robots else ''
     noai_directives = any(d in robots_content for d in ['noai', 'noimageai', 'nosnippet'])
     add_check(checks, 'AI Meta Directives', 'pass' if not noai_directives else 'warning',
-              'AI-restrictive meta tags', 'Restricted' if noai_directives else 'No restrictions',
-              'noai/nosnippet meta tags prevent AI from using your content in answers', 'High', 'AI Crawlability')
+              'Checks for AI-restrictive meta robot directives (noai, noimageai, nosnippet) that prevent AI systems from using your content. The nosnippet directive prevents Google from showing any text snippet, including in AI Overviews. noai is an emerging directive to block AI usage entirely.',
+              f'{"AI-restrictive directives found: " + robots_content + " — content restricted from AI use" if noai_directives else "No AI restrictions — content available for AI citation and snippets"}',
+              'Review AI meta directives: 1) Remove nosnippet if you want AI Overview visibility. 2) noai blocks AI from using your content entirely. 3) noimageai blocks AI from using your images. 4) Only use these if you specifically want to opt out of AI.',
+              'High', 'AI Crawlability')
 
-    # ===== 38-42: Knowledge Graph & Entity Authority (NEW) =====
-    # Check for comprehensive entity markup that helps AI build knowledge graphs
+    # ===== 38-42: Knowledge Graph & Entity Authority =====
     json_ld_text = ' '.join([j.string or '' for j in json_ld])
     has_main_entity = 'mainEntity' in json_ld_text or 'mainEntityOfPage' in json_ld_text
     add_check(checks, 'Main Entity Declaration', 'pass' if has_main_entity else 'warning',
-              'mainEntityOfPage schema', 'Declared' if has_main_entity else 'Missing',
-              'Add mainEntityOfPage to help AI identify the primary topic', 'High', 'Knowledge Graph')
+              'Checks for mainEntityOfPage or mainEntity in your schema, which explicitly tells AI systems what the primary topic of this page is. Without it, AI must infer the main topic from content analysis, which can be inaccurate for pages covering multiple subjects.',
+              f'{"mainEntity/mainEntityOfPage declared — AI knows the primary topic" if has_main_entity else "No main entity declared — AI must infer the page\'s primary topic"}',
+              'Add mainEntityOfPage to your schema: 1) For articles: "mainEntityOfPage": {"@type": "WebPage", "@id": "https://yoursite.com/page"}. 2) For FAQ pages: set mainEntity to the FAQPage. 3) This anchors AI understanding of your page\'s purpose.',
+              'High', 'Knowledge Graph')
 
-    # Check for breadcrumb schema (helps AI understand site hierarchy)
     breadcrumb_schema = 'BreadcrumbList' in html
     add_check(checks, 'Breadcrumb Schema', 'pass' if breadcrumb_schema else 'info',
-              'Navigation hierarchy for AI', 'Present' if breadcrumb_schema else 'Not found',
-              'Add BreadcrumbList schema for AI to understand content hierarchy', 'Medium', 'Knowledge Graph')
+              'Checks for BreadcrumbList schema, which maps your site\'s content hierarchy for AI systems. Breadcrumbs help AI understand how pages relate to each other and where content sits in your topic structure, improving topical authority signals.',
+              f'{"BreadcrumbList schema found — site hierarchy mapped for AI" if breadcrumb_schema else "No breadcrumb schema — AI can\'t see your content hierarchy"}',
+              'Add BreadcrumbList schema: 1) Map the path from homepage to current page. 2) Include name and URL for each level. 3) Also display visual breadcrumbs for users. 4) This enables breadcrumb rich results in Google.',
+              'Medium', 'Knowledge Graph')
 
-    # Comparison content (AI loves structured comparisons)
     comparison_terms = ['vs', 'versus', 'compared to', 'comparison', 'difference between', 'pros and cons', 'advantages', 'disadvantages']
     comparison_count = sum(text.lower().count(t) for t in comparison_terms)
     has_comparison_table = any(t for t in tables if any(ct in t.get_text().lower() for ct in ['vs', 'feature', 'comparison', 'pro', 'con']))
     add_check(checks, 'Comparison Content', 'pass' if comparison_count >= 2 or has_comparison_table else 'info',
-              'Structured comparisons', f'{comparison_count} comparison phrases',
-              'Add comparison tables/content — highly cited by AI answer engines', 'Medium', 'Knowledge Graph')
+              'Detects comparison content (vs, pros/cons, difference between) and comparison tables. Comparison queries are among the most common AI search patterns ("X vs Y," "pros and cons of X"). Pages with structured comparisons are heavily cited by AI answer engines.',
+              f'{comparison_count} comparison phrase(s){", comparison table found" if has_comparison_table else ""} — {"strong comparison content for AI citation" if comparison_count >= 2 or has_comparison_table else "no comparison content — consider adding vs/pros-cons sections"}',
+              'Add comparison content: 1) Create "X vs Y" sections for related topics. 2) Use comparison tables with clear columns. 3) Include "Pros and Cons" sections. 4) These directly match high-volume AI query patterns.',
+              'Medium', 'Knowledge Graph')
 
-    # Check for multiple content types (AI prefers rich, multi-format pages)
     content_types = 0
     if paragraphs: content_types += 1
     if lists: content_types += 1
@@ -1525,46 +1720,53 @@ def analyze_geo_aeo(url, soup, response, load_time):
     if soup.find_all('code') or soup.find_all('pre'): content_types += 1
     if soup.find_all(['img', 'video', 'audio']): content_types += 1
     add_check(checks, 'Content Format Diversity', 'pass' if content_types >= 4 else ('warning' if content_types >= 2 else 'fail'),
-              'Mixed content formats', f'{content_types}/6 types (text, lists, tables, quotes, code, media)',
-              'Use diverse formats — AI extracts from tables, lists, and code blocks more reliably', 'High', 'Knowledge Graph')
+              'Counts the variety of content formats on the page (text, lists, tables, quotes, code, media). AI systems extract different types of information from different formats — tables for data, lists for steps, code for implementations. Format diversity increases citation opportunities.',
+              f'{content_types}/6 content types (text, lists, tables, quotes, code, media) — {"rich format diversity for AI extraction" if content_types >= 4 else "limited formats — AI has fewer extraction opportunities"}',
+              'Diversify content formats: 1) Add tables for structured data. 2) Use lists for key points. 3) Include code blocks for technical content. 4) Add images with figcaptions. 5) Use blockquotes for expert opinions. 6) Each format creates a new AI citation opportunity.',
+              'High', 'Knowledge Graph')
 
-    # Check for topic cluster signals (internal links with topical relevance)
     internal_links = [a for a in soup.find_all('a', href=True) if parsed.netloc in urljoin(url, a.get('href', '')) and a.get_text().strip()]
     descriptive_internal = [a for a in internal_links if len(a.get_text().split()) >= 2]
     add_check(checks, 'Topic Cluster Links', 'pass' if len(descriptive_internal) >= 3 else 'warning',
-              'Topical internal linking', f'{len(descriptive_internal)} descriptive internal links',
-              'Build topic clusters with descriptive anchor text for AI entity mapping', 'High', 'Knowledge Graph')
+              'Counts internal links with descriptive anchor text (2+ words). Topic clusters connected by descriptive internal links help AI systems map your topical authority. AI uses link context to understand entity relationships and content depth.',
+              f'{len(descriptive_internal)} descriptive internal link(s) — {"strong topic cluster signals for AI" if len(descriptive_internal) >= 3 else "weak internal linking — AI can\'t map your topical authority"}',
+              'Build topic clusters: 1) Link related pages with descriptive anchor text ("learn about technical SEO" not "click here"). 2) Create pillar pages that link to cluster content. 3) Each cluster page should link back to the pillar. 4) This builds topical authority for AI.',
+              'High', 'Knowledge Graph')
 
-    # Check for structured citation/reference markup (cite elements, data attributes)
     cite_elements = soup.find_all('cite')
     ref_links = [a for a in external_links if any(d in a.get('href', '') for d in ['.gov', '.edu', '.org', 'wikipedia', 'scholar.google'])]
     add_check(checks, 'Authority Citations', 'pass' if cite_elements or len(ref_links) >= 1 else 'warning',
-              'Authoritative source references', f'{len(cite_elements)} cite tags, {len(ref_links)} authority links',
-              'Link to .gov/.edu/.org sources — AI engines weight authoritative citations heavily', 'High', 'Knowledge Graph')
+              'Checks for <cite> elements and links to authoritative domains (.gov, .edu, .org, Wikipedia, Google Scholar). AI answer engines heavily weight content that references authoritative sources, as it signals factual reliability and research depth.',
+              f'{len(cite_elements)} <cite> tag(s), {len(ref_links)} authority link(s) — {"authoritative sourcing detected" if cite_elements or len(ref_links) >= 1 else "no authority citations — AI may question content reliability"}',
+              'Add authority citations: 1) Link to .gov, .edu, and .org sources. 2) Reference peer-reviewed research via Google Scholar. 3) Use <cite> tags for formal citations. 4) AI engines weight these sources heavily when selecting content to cite.',
+              'High', 'Knowledge Graph')
 
-    # ===== 43-45: WordPress & CMS Publishing Readiness (NEW) =====
-    # Check for WP REST API discoverability (signals CMS integration readiness)
+    # ===== 43-45: WordPress & CMS Publishing Readiness =====
     wp_api_link = soup.find('link', rel='https://api.w.org/')
     wp_json_head = response.headers.get('Link', '')
     has_wp_api = wp_api_link is not None or 'api.w.org' in wp_json_head
     add_check(checks, 'CMS API Discoverability', 'pass' if has_wp_api else 'info',
-              'REST API link header', 'WordPress API detected' if has_wp_api else 'No CMS API found',
-              'CMS REST API enables automated content publishing and AEO-optimized draft workflows', 'Low', 'Publishing Readiness')
+              'Checks for WordPress REST API or CMS API discoverability headers. A discoverable CMS API enables automated content publishing workflows, including AI-assisted content optimization pipelines that can programmatically update schema, meta tags, and content structure.',
+              f'{"CMS REST API detected — automated publishing workflows possible" if has_wp_api else "No CMS API detected — manual content updates only"}',
+              'If using WordPress: the REST API is enabled by default. For other CMS platforms, ensure API endpoints are discoverable via Link headers. This enables AEO automation tools to optimize content programmatically.',
+              'Low', 'Publishing Readiness')
 
-    # Check for structured content that could be auto-published with schema
     has_article_schema = 'Article' in html or 'BlogPosting' in html or 'NewsArticle' in html
     add_check(checks, 'Article Schema', 'pass' if has_article_schema else 'warning',
-              'Article/BlogPosting markup', 'Present' if has_article_schema else 'Missing',
-              'Add Article schema with author, datePublished, dateModified for AI freshness signals', 'High', 'Publishing Readiness')
+              'Checks for Article, BlogPosting, or NewsArticle schema markup. Article schema provides AI systems with structured metadata about your content including author, publish date, modified date, and headline — all critical signals for AI freshness evaluation and citation.',
+              f'{"Article/BlogPosting schema found — content metadata structured for AI" if has_article_schema else "No article schema — AI lacks structured content metadata"}',
+              'Add Article schema: 1) Use BlogPosting for blog content, NewsArticle for news. 2) Include author (Person), datePublished, dateModified, headline, and image. 3) This is essential for Google Discover and AI Overview eligibility.',
+              'High', 'Publishing Readiness')
 
-    # Check for content that supports automated AEO optimization pipeline
     has_excerpt = soup.find('meta', attrs={'name': 'description'}) or soup.find('meta', property='og:description')
     has_slug = len(parsed.path.strip('/').split('/')) >= 1 and parsed.path != '/'
     has_categories = soup.find(class_=re.compile(r'category|tag|topic', re.I)) or 'articleSection' in html
     pipeline_score = sum([bool(has_excerpt), bool(has_slug), bool(has_categories), bool(json_ld), bool(has_article_schema)])
     add_check(checks, 'AEO Pipeline Readiness', 'pass' if pipeline_score >= 4 else ('warning' if pipeline_score >= 2 else 'fail'),
-              'Automated optimization signals', f'{pipeline_score}/5 (excerpt, slug, categories, schema, article type)',
-              'Ensure content has excerpt, clean slug, categories, and schema for AEO automation', 'High', 'Publishing Readiness')
+              'Evaluates 5 signals that indicate your content is ready for automated AEO optimization: excerpt/description, clean URL slug, category/topic classification, JSON-LD schema, and article type markup. Higher scores mean AI optimization tools can work more effectively with your content.',
+              f'{pipeline_score}/5 AEO signals (excerpt, slug, categories, schema, article type) — {"content is well-structured for AEO automation" if pipeline_score >= 4 else "missing key signals for automated AEO optimization"}',
+              'Improve AEO pipeline readiness: 1) Add meta description (excerpt). 2) Use clean, descriptive URL slugs. 3) Categorize content with visible tags/categories. 4) Add JSON-LD schema. 5) Use Article/BlogPosting type. All 5 enable automated optimization.',
+              'High', 'Publishing Readiness')
 
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
@@ -1580,6 +1782,10 @@ def serve_index():
 @app.route('/analyze')
 def serve_analyze():
     return send_from_directory('..', 'analyze.html')
+
+@app.route('/guides')
+def serve_guides():
+    return send_from_directory('..', 'guides.html')
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
