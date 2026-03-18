@@ -1638,6 +1638,124 @@ def verify_token():
     except Exception as e:
         return jsonify({'status': 'error', 'valid': False}), 401
 
+
+# ============== ADDITIONAL AUTH FEATURES ==============
+
+def require_auth(f):
+    """Decorator to protect routes — expects JSON body with 'token' field"""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        data = request.get_json() or {}
+        token = data.get('token', '')
+        if not token:
+            auth_header = request.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ', 1)[1]
+        if not token:
+            return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+        result, status_code = cognito_request('GetUser', {'AccessToken': token})
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired token'}), 401
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
+        request.cognito_user = {'username': result.get('Username', ''), 'attributes': user_attrs}
+        request.access_token = token
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/api/refresh-token', methods=['POST'])
+def refresh_token():
+    """Refresh an expired access token using a refresh token (direct HTTP)"""
+    data = request.get_json()
+    refresh = data.get('refreshToken', '')
+    email = data.get('email', '').strip().lower()
+
+    if not refresh or not email:
+        return jsonify({'status': 'error', 'message': 'Refresh token and email are required'}), 400
+
+    try:
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'REFRESH_TOKEN_AUTH',
+            'AuthParameters': {
+                'REFRESH_TOKEN': refresh,
+                'SECRET_HASH': get_secret_hash(email)
+            }
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        return jsonify({
+            'status': 'success',
+            'token': auth_result.get('AccessToken', ''),
+            'idToken': auth_result.get('IdToken', ''),
+            'message': 'Token refreshed'
+        })
+    except Exception as e:
+        print(f"Refresh token error: {e}")
+        return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    """Initiate password reset — sends code to email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    try:
+        result, status_code = cognito_request('ForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        # Always return success to not reveal if email exists
+        return jsonify({
+            'status': 'success',
+            'message': 'If an account exists with this email, a reset code has been sent.'
+        })
+    except Exception as e:
+        print(f"Forgot password error: {e}")
+        return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset code has been sent.'})
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    """Complete password reset with the code from email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+    new_password = data.get('newPassword', '')
+
+    if not email or not code or not new_password:
+        return jsonify({'status': 'error', 'message': 'Email, code, and new password are required'}), 400
+
+    try:
+        result, status_code = cognito_request('ConfirmForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code,
+            'Password': new_password
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid reset code'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            return jsonify({'status': 'error', 'message': result.get('message', 'Password reset failed')}), 400
+
+        return jsonify({'status': 'success', 'message': 'Password reset successful. You can now log in.'})
+    except Exception as e:
+        print(f"Reset password error: {e}")
+        return jsonify({'status': 'error', 'message': 'Password reset failed'}), 500
+
+
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
     """Main SEO analysis endpoint - 170 checks across 9 categories"""
