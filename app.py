@@ -27,8 +27,11 @@ app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
+    'https://d6ugqfyp4h9y3.cloudfront.net',
     'http://localhost:5000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'http://localhost:5001',
+    'http://127.0.0.1:5001'
 ])
 
 # AWS Cognito Configuration
