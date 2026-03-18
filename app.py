@@ -1420,25 +1420,27 @@ def signup():
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
 
     try:
-        response = cognito_client.sign_up(
-            ClientId=COGNITO_CLIENT_ID,
-            SecretHash=get_secret_hash(email),
-            Username=email,
-            Password=password,
-            UserAttributes=[
-                {'Name': 'email', 'Value': email},
-                {'Name': 'name', 'Value': name}
-            ]
-        )
-
-        # Auto-confirm the user so they can login immediately
+        # Use admin_create_user to create and auto-confirm in one step
         try:
-            cognito_client.admin_confirm_sign_up(
+            cognito_client.admin_create_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
-                Username=email
+                Username=email,
+                UserAttributes=[
+                    {'Name': 'email', 'Value': email},
+                    {'Name': 'email_verified', 'Value': 'true'},
+                    {'Name': 'name', 'Value': name}
+                ],
+                MessageAction='SUPPRESS'  # Don't send Cognito's default email
             )
-        except Exception as e:
-            print(f"Auto-confirm failed (may already be confirmed): {e}")
+            # Set the user's password permanently
+            cognito_client.admin_set_user_password(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=email,
+                Password=password,
+                Permanent=True
+            )
+        except cognito_client.exceptions.UsernameExistsException:
+            return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
 
         # Send welcome email via SES
         send_welcome_email(email, name)
