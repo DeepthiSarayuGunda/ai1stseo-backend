@@ -37,9 +37,14 @@ COGNITO_CLIENT_ID = '7scsae79o2g9idc92eputcrvrg'
 COGNITO_CLIENT_SECRET = '1qg2tetso18gkhsmfte0c565ull6lp02la484ojaj5k85pvk9p49'
 AWS_REGION = 'us-east-1'
 SES_SENDER = 'no-reply@ai1stseo.com'
+COGNITO_ENDPOINT = f'https://cognito-idp.{AWS_REGION}.amazonaws.com/'
 
-cognito_client = boto3.client('cognito-idp', region_name=AWS_REGION)
-ses_client = boto3.client('ses', region_name=AWS_REGION)
+# SES client - only works if AWS credentials are available (App Runner instance role)
+ses_client = None
+try:
+    ses_client = boto3.client('ses', region_name=AWS_REGION)
+except Exception:
+    print("SES client not available - welcome emails will be skipped")
 
 def get_secret_hash(username):
     """Compute Cognito SECRET_HASH for client with secret"""
@@ -51,8 +56,20 @@ def get_secret_hash(username):
     ).digest()
     return base64.b64encode(dig).decode()
 
+def cognito_request(action, payload):
+    """Make a direct HTTP request to Cognito (no AWS credentials needed for public APIs)"""
+    headers = {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': f'AWSCognitoIdentityProviderService.{action}'
+    }
+    resp = requests.post(COGNITO_ENDPOINT, json=payload, headers=headers)
+    return resp.json(), resp.status_code
+
 def send_welcome_email(email, name):
     """Send welcome email via SES"""
+    if not ses_client:
+        print(f"SES not available - skipping welcome email for {email}")
+        return False
     try:
         subject = "Welcome to AI1stSEO — Your AI-First SEO Platform"
         html_body = f"""
@@ -1407,7 +1424,7 @@ def serve_assets(filename):
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    """User registration via Cognito"""
+    """User registration via Cognito (direct HTTP - no AWS credentials needed)"""
     data = request.get_json()
     name = data.get('name', '').strip()
     email = data.get('email', '').strip().lower()
@@ -1420,36 +1437,42 @@ def signup():
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
 
     try:
-        # Sign up via client API (no admin permissions needed)
-        cognito_client.sign_up(
-            ClientId=COGNITO_CLIENT_ID,
-            SecretHash=get_secret_hash(email),
-            Username=email,
-            Password=password,
-            UserAttributes=[
+        result, status_code = cognito_request('SignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'Password': password,
+            'UserAttributes': [
                 {'Name': 'email', 'Value': email},
                 {'Name': 'name', 'Value': name}
             ]
-        )
+        })
 
-        # Send welcome email via SES
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Signup failed')
+            if 'UsernameExistsException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            if 'InvalidParameterException' in error_type:
+                return jsonify({'status': 'error', 'message': error_msg}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        # Send welcome email via SES (best-effort)
         send_welcome_email(email, name)
 
         return jsonify({
             'status': 'success',
             'message': 'Account created! Check your email for a verification code.'
         })
-    except cognito_client.exceptions.UsernameExistsException:
-        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
-    except cognito_client.exceptions.InvalidPasswordException as e:
-        return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
     except Exception as e:
         print(f"Signup error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/confirm', methods=['POST'])
 def confirm_signup():
-    """Confirm user signup with verification code"""
+    """Confirm user signup with verification code (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     code = data.get('code', '').strip()
@@ -1458,33 +1481,44 @@ def confirm_signup():
         return jsonify({'status': 'error', 'message': 'Email and code required'}), 400
 
     try:
-        cognito_client.confirm_sign_up(
-            ClientId=COGNITO_CLIENT_ID,
-            SecretHash=get_secret_hash(email),
-            Username=email,
-            ConfirmationCode=code
-        )
+        result, status_code = cognito_request('ConfirmSignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Confirmation failed')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid verification code'}), 400
+            if 'ExpiredCodeException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Code expired. Please request a new one.'}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
         return jsonify({'status': 'success', 'message': 'Email verified! You can now sign in.'})
-    except cognito_client.exceptions.CodeMismatchException:
-        return jsonify({'status': 'error', 'message': 'Invalid verification code'}), 400
-    except cognito_client.exceptions.ExpiredCodeException:
-        return jsonify({'status': 'error', 'message': 'Code expired. Please request a new one.'}), 400
     except Exception as e:
         print(f"Confirm error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/resend-code', methods=['POST'])
 def resend_code():
-    """Resend verification code"""
+    """Resend verification code (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
 
     try:
-        cognito_client.resend_confirmation_code(
-            ClientId=COGNITO_CLIENT_ID,
-            SecretHash=get_secret_hash(email),
-            Username=email
-        )
+        result, status_code = cognito_request('ResendConfirmationCode', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        if status_code != 200:
+            error_msg = result.get('message', 'Failed to resend code')
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
         return jsonify({'status': 'success', 'message': 'New code sent to your email'})
     except Exception as e:
         print(f"Resend error: {e}")
@@ -1492,7 +1526,7 @@ def resend_code():
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    """User login via Cognito"""
+    """User login via Cognito (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
@@ -1501,47 +1535,60 @@ def login():
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
 
     try:
-        response = cognito_client.initiate_auth(
-            ClientId=COGNITO_CLIENT_ID,
-            AuthFlow='USER_PASSWORD_AUTH',
-            AuthParameters={
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'USER_PASSWORD_AUTH',
+            'AuthParameters': {
                 'USERNAME': email,
                 'PASSWORD': password,
                 'SECRET_HASH': get_secret_hash(email)
             }
-        )
+        })
 
-        # Get user attributes
-        access_token = response['AuthenticationResult']['AccessToken']
-        user_info = cognito_client.get_user(AccessToken=access_token)
-        user_attrs = {a['Name']: a['Value'] for a in user_info['UserAttributes']}
-        user_name = user_attrs.get('name', email.split('@')[0])
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'NotAuthorizedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+            if 'UserNotConfirmedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Please verify your email first'}), 401
+            return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        access_token = auth_result.get('AccessToken', '')
+
+        # Get user attributes using the access token
+        user_result, user_status = cognito_request('GetUser', {
+            'AccessToken': access_token
+        })
+
+        user_name = email.split('@')[0]
+        if user_status == 200:
+            user_attrs = {a['Name']: a['Value'] for a in user_result.get('UserAttributes', [])}
+            user_name = user_attrs.get('name', user_name)
 
         return jsonify({
             'status': 'success',
             'token': access_token,
-            'idToken': response['AuthenticationResult']['IdToken'],
-            'refreshToken': response['AuthenticationResult']['RefreshToken'],
+            'idToken': auth_result.get('IdToken', ''),
+            'refreshToken': auth_result.get('RefreshToken', ''),
             'name': user_name,
             'email': email,
             'message': 'Login successful'
         })
-    except cognito_client.exceptions.NotAuthorizedException:
-        return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
-    except cognito_client.exceptions.UserNotConfirmedException:
-        return jsonify({'status': 'error', 'message': 'Please verify your email first'}), 401
     except Exception as e:
         print(f"Login error: {e}")
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    """User logout - invalidate Cognito token"""
+    """User logout - invalidate Cognito token (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
 
     try:
-        cognito_client.global_sign_out(AccessToken=token)
+        cognito_request('GlobalSignOut', {
+            'AccessToken': token
+        })
     except Exception as e:
         print(f"Logout error (token may be expired): {e}")
 
@@ -1549,13 +1596,18 @@ def logout():
 
 @app.route('/api/delete-account', methods=['POST'])
 def delete_account():
-    """Delete user account from Cognito"""
+    """Delete user account from Cognito (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
 
     try:
-        # Delete user using their access token
-        cognito_client.delete_user(AccessToken=token)
+        result, status_code = cognito_request('DeleteUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
+
         return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
     except Exception as e:
         print(f"Delete account error: {e}")
@@ -1563,13 +1615,19 @@ def delete_account():
 
 @app.route('/api/verify', methods=['POST'])
 def verify_token():
-    """Verify if Cognito token is valid"""
+    """Verify if Cognito token is valid (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
 
     try:
-        user_info = cognito_client.get_user(AccessToken=token)
-        user_attrs = {a['Name']: a['Value'] for a in user_info['UserAttributes']}
+        result, status_code = cognito_request('GetUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'valid': False}), 401
+
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
 
         return jsonify({
             'status': 'success',
