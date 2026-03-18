@@ -1420,42 +1420,74 @@ def signup():
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
 
     try:
-        # Use admin_create_user to create and auto-confirm in one step
-        try:
-            cognito_client.admin_create_user(
-                UserPoolId=COGNITO_USER_POOL_ID,
-                Username=email,
-                UserAttributes=[
-                    {'Name': 'email', 'Value': email},
-                    {'Name': 'email_verified', 'Value': 'true'},
-                    {'Name': 'name', 'Value': name}
-                ],
-                MessageAction='SUPPRESS'  # Don't send Cognito's default email
-            )
-            # Set the user's password permanently
-            cognito_client.admin_set_user_password(
-                UserPoolId=COGNITO_USER_POOL_ID,
-                Username=email,
-                Password=password,
-                Permanent=True
-            )
-        except cognito_client.exceptions.UsernameExistsException:
-            return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+        # Sign up via client API (no admin permissions needed)
+        cognito_client.sign_up(
+            ClientId=COGNITO_CLIENT_ID,
+            SecretHash=get_secret_hash(email),
+            Username=email,
+            Password=password,
+            UserAttributes=[
+                {'Name': 'email', 'Value': email},
+                {'Name': 'name', 'Value': name}
+            ]
+        )
 
         # Send welcome email via SES
         send_welcome_email(email, name)
 
         return jsonify({
             'status': 'success',
-            'message': 'Account created successfully'
+            'message': 'Account created! Check your email for a verification code.'
         })
     except cognito_client.exceptions.UsernameExistsException:
         return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
     except cognito_client.exceptions.InvalidPasswordException as e:
-        msg = str(e)
         return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
     except Exception as e:
         print(f"Signup error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/confirm', methods=['POST'])
+def confirm_signup():
+    """Confirm user signup with verification code"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+
+    if not email or not code:
+        return jsonify({'status': 'error', 'message': 'Email and code required'}), 400
+
+    try:
+        cognito_client.confirm_sign_up(
+            ClientId=COGNITO_CLIENT_ID,
+            SecretHash=get_secret_hash(email),
+            Username=email,
+            ConfirmationCode=code
+        )
+        return jsonify({'status': 'success', 'message': 'Email verified! You can now sign in.'})
+    except cognito_client.exceptions.CodeMismatchException:
+        return jsonify({'status': 'error', 'message': 'Invalid verification code'}), 400
+    except cognito_client.exceptions.ExpiredCodeException:
+        return jsonify({'status': 'error', 'message': 'Code expired. Please request a new one.'}), 400
+    except Exception as e:
+        print(f"Confirm error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/resend-code', methods=['POST'])
+def resend_code():
+    """Resend verification code"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    try:
+        cognito_client.resend_confirmation_code(
+            ClientId=COGNITO_CLIENT_ID,
+            SecretHash=get_secret_hash(email),
+            Username=email
+        )
+        return jsonify({'status': 'success', 'message': 'New code sent to your email'})
+    except Exception as e:
+        print(f"Resend error: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/login', methods=['POST'])
