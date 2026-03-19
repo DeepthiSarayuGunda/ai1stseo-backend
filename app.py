@@ -1931,6 +1931,42 @@ Be specific and actionable. Include actual code examples where helpful."""
             'error': f'AI recommendation failed: {str(e)}'
         }), 500
 
+
+@app.route('/api/geo-probe', methods=['POST'])
+def geo_probe():
+    from bedrock_helper import invoke_claude
+    import re as _re, json as _json
+    data = request.get_json() or {}
+    brand = (data.get('brand') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand and keyword are required'}), 400
+    prompt = (
+        f'Answer the following user query naturally and helpfully.\n\n'
+        f'Query: "{keyword}"\n\n'
+        f'After your answer, output ONLY a JSON object on a new line in this exact format '
+        f'(no markdown, no extra text):\n'
+        f'{{"cited": true or false, '
+        f'"citation_context": "one sentence explaining whether {brand} was cited and why"}}'
+    )
+    try:
+        raw = invoke_claude(prompt)
+        m = _re.search(r'\{[^{}]*"cited"[^{}]*\}', raw, _re.DOTALL)
+        if not m:
+            return jsonify({'error': 'Could not parse structured response from Claude'}), 500
+        s = _json.loads(m.group())
+        return jsonify({
+            'keyword': keyword,
+            'ai_model': 'claude-3-haiku',
+            'cited': bool(s.get('cited', False)),
+            'citation_context': s.get('citation_context', ''),
+            'timestamp': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO probe failed: {str(e)}'}), 500
+
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
@@ -1946,4 +1982,6 @@ def catch_all(path):
         return send_from_directory('.', path)
     return send_from_directory('.', 'index.html')
 
-
+if __name__ == '__main__':
+    os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
+    app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
