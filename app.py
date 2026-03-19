@@ -1700,6 +1700,23 @@ def refresh_token():
         print(f"Refresh token error: {e}")
         return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
 
+@app.route('/api/send-welcome', methods=['POST'])
+def send_welcome():
+    """Send welcome email — called by frontend after signup confirmation"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    name = data.get('name', '') or email.split('@')[0]
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    success = send_welcome_email(email, name)
+    if success:
+        return jsonify({'status': 'success', 'message': 'Welcome email sent'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to send welcome email'}), 500
+
+
 @app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
     """Initiate password reset — sends code to email (direct HTTP)"""
