@@ -1,50 +1,46 @@
 """
 bedrock_helper.py
-Thin wrapper around AWS Bedrock Runtime for Claude invocations.
+Thin wrapper around the Anthropic API for Claude invocations.
 Used by the GEO monitoring engine and any future AI probe endpoints.
+
+Requires env var: ANTHROPIC_API_KEY
 """
 
-import json
-import boto3
-from botocore.exceptions import ClientError
+import os
+import anthropic
 
-AWS_REGION = 'us-east-1'
-DEFAULT_MODEL = 'anthropic.claude-3-haiku-20240307-v1:0'
+DEFAULT_MODEL = 'claude-3-haiku-20240307'
 
 _client = None
 
 
-def get_client():
-    """Return a cached Bedrock Runtime client."""
+def get_client() -> anthropic.Anthropic:
+    """Return a cached Anthropic client."""
     global _client
     if _client is None:
-        _client = boto3.client('bedrock-runtime', region_name=AWS_REGION)
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            raise RuntimeError('ANTHROPIC_API_KEY environment variable is not set')
+        _client = anthropic.Anthropic(api_key=api_key)
     return _client
 
 
 def invoke_claude(prompt: str, max_tokens: int = 1024, model_id: str = DEFAULT_MODEL) -> str:
     """
-    Send a prompt to Claude via Bedrock and return the raw text response.
+    Send a prompt to Claude via Anthropic API and return the raw text response.
 
     Raises:
-        RuntimeError: if the Bedrock call fails.
+        RuntimeError: if the API call fails.
     """
-    client = get_client()
-    body = {
-        'anthropic_version': 'bedrock-2023-05-31',
-        'max_tokens': max_tokens,
-        'messages': [{'role': 'user', 'content': prompt}]
-    }
     try:
-        response = client.invoke_model(
-            modelId=model_id,
-            contentType='application/json',
-            accept='application/json',
-            body=json.dumps(body)
+        client = get_client()
+        message = client.messages.create(
+            model=model_id,
+            max_tokens=max_tokens,
+            messages=[{'role': 'user', 'content': prompt}]
         )
-        result = json.loads(response['body'].read())
-        return result['content'][0]['text']
-    except ClientError as e:
-        raise RuntimeError(f'Bedrock ClientError: {e.response["Error"]["Message"]}') from e
+        return message.content[0].text
+    except RuntimeError:
+        raise
     except Exception as e:
-        raise RuntimeError(f'Bedrock invocation failed: {str(e)}') from e
+        raise RuntimeError(f'Anthropic API call failed: {str(e)}') from e
