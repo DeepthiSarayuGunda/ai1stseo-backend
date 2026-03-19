@@ -89,7 +89,7 @@ def _extract_facts(text):
 
 # ── per-provider query functions ──────────────────────────────────────────────
 
-def _query_groq(keyword, model="llama3-8b-8192"):
+def _query_groq(keyword, model="llama-3.3-70b-versatile"):
     client = _groq_client()
     resp = client.chat.completions.create(
         model=model,
@@ -144,7 +144,7 @@ def _query_gemini(keyword, model="gemini-1.5-flash"):
 # ── provider registry ─────────────────────────────────────────────────────────
 
 PROVIDERS = {
-    "groq":       {"fn": _query_groq,       "env": "GROQ_API_KEY",       "default_model": "llama3-8b-8192"},
+    "groq":       {"fn": _query_groq,       "env": "GROQ_API_KEY",       "default_model": "llama-3.3-70b-versatile"},
     "claude":     {"fn": _query_claude,     "env": "ANTHROPIC_API_KEY",  "default_model": "claude-3-haiku-20240307"},
     "openai":     {"fn": _query_openai,     "env": "OPENAI_API_KEY",     "default_model": "gpt-4o-mini"},
     "perplexity": {"fn": _query_perplexity, "env": "PERPLEXITY_API_KEY", "default_model": "llama-3.1-sonar-small-128k-online"},
