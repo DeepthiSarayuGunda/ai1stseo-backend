@@ -2002,6 +2002,54 @@ def ai_citation_probe():
         return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
 
+@app.route('/api/ai/geo-monitor', methods=['POST'])
+def ai_geo_monitor():
+    """
+    GEO Monitor — query all available AI models in parallel for a keyword.
+
+    Request:
+        {
+          "keyword":   "best CRM software 2025",  (required)
+          "brand":     "HubSpot",                 (optional — tracked in scoring)
+          "providers": ["claude", "openai"]        (optional — defaults to all)
+        }
+
+    Response:
+        {
+          "keyword": "...",
+          "brand": "...",
+          "models": {
+            "claude":  { cited probe result },
+            "openai":  { cited probe result },
+            "gemini":  { unavailable or result }
+          },
+          "geo_score": 67,
+          "score_breakdown": { ... },
+          "timestamp": "..."
+        }
+    """
+    from llm_service import geo_monitor
+
+    data = request.get_json() or {}
+    keyword   = (data.get('keyword') or '').strip()
+    brand     = (data.get('brand') or '').strip() or None
+    providers = data.get('providers') or None
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    if providers is not None and not isinstance(providers, list):
+        return jsonify({'error': 'providers must be a list'}), 400
+
+    try:
+        result = geo_monitor(keyword, brand=brand, providers=providers)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO monitor failed: {str(e)}'}), 500
+
+
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
