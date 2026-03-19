@@ -1967,6 +1967,41 @@ def geo_probe():
     except Exception as e:
         return jsonify({'error': f'GEO probe failed: {str(e)}'}), 500
 
+@app.route('/api/ai/citation-probe', methods=['POST'])
+def ai_citation_probe():
+    """
+    AI Citation Probe — GEO monitoring engine seed.
+
+    Request:
+        { "keyword": "best project management tools 2025",
+          "provider": "claude"   (optional, default: claude)
+          "model":    "..."      (optional, overrides provider default) }
+
+    Response:
+        { keyword, citations, mentioned_brands, answer_structure,
+          key_facts, ai_summary, ai_model, provider, timestamp }
+    """
+    from llm_service import citation_probe
+
+    data = request.get_json() or {}
+    keyword  = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'claude').strip().lower()
+    model    = (data.get('model') or '').strip() or None
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    try:
+        result = citation_probe(keyword, provider=provider, model=model)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
+
+
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
