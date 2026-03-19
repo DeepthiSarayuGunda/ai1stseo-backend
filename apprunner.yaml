@@ -13,9 +13,13 @@ run:
   env:
     - name: PYTHONPATH
       value: /app/.local
+    - name: GROQ_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
     - name: ANTHROPIC_API_KEY
       value: REPLACE_WITH_YOUR_KEY
     - name: OPENAI_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
+    - name: GEMINI_API_KEY
       value: REPLACE_WITH_YOUR_KEY
     - name: PERPLEXITY_API_KEY
       value: REPLACE_WITH_YOUR_KEY
