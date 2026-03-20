@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ── config ────────────────────────────────────────────────────────────────────
 
 EC2_GEO_ENGINE_URL = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
-EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "30"))
+EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "120"))
 DB_PATH = os.environ.get("GEO_PROBE_DB", "/tmp/geo_probe.db")
 
 # ── in-memory history (last 20 batch results) ────────────────────────────────
