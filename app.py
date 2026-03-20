@@ -1967,7 +1967,7 @@ def geo_probe_models():
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO Probe — batch keyword probing."""
+    """GEO/AEO batch analysis — probe multiple keywords, return geo_score."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
@@ -1983,14 +1983,20 @@ def geo_probe_batch():
         return jsonify({'error': 'Maximum 20 keywords per batch'}), 400
 
     try:
-        results = _batch(brand, keywords, ai_model=ai_model)
-        return jsonify({'brand_name': brand, 'ai_model': ai_model, 'results': results})
+        return jsonify(_batch(brand, keywords, ai_model=ai_model))
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except NotImplementedError as e:
         return jsonify({'error': str(e), 'ai_model': ai_model, 'status': 'placeholder'}), 501
     except Exception as e:
         return jsonify({'error': f'Batch probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/history', methods=['GET'])
+def geo_probe_history():
+    """Return last 20 batch probe results (newest first)."""
+    from geo_probe_service import get_history
+    return jsonify({'history': get_history()})
 
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():

@@ -1,16 +1,18 @@
 """
 geo_probe_service.py
-GEO Monitoring Engine — Multi-model AI Scanner
+GEO / AEO Monitoring Engine — Multi-model AI Scanner
 
-Probes AI models with a natural user query, then performs a deterministic
-case-insensitive check for brand mentions.
+Probes AI models with natural user queries, performs deterministic
+case-insensitive brand detection, computes a geo_score across batches,
+and keeps a lightweight in-memory history of recent results.
 
 Supported models:
-  - claude-bedrock  (live — AWS Bedrock, no API keys)
+  - claude-bedrock  (live — AWS Bedrock, IAM role)
   - gemini          (placeholder)
   - perplexity      (placeholder)
 """
 
+import collections
 import logging
 import re
 from datetime import datetime, timezone
@@ -19,17 +21,18 @@ from bedrock_helper import invoke_claude
 
 logger = logging.getLogger(__name__)
 
+# ── in-memory history (last 20 batch results) ────────────────────────────────
+
+_history: collections.deque = collections.deque(maxlen=20)
+
 # ── model registry ────────────────────────────────────────────────────────────
 
 def _invoke_gemini(prompt: str) -> str:
-    """Placeholder — will use Gemini API when integrated."""
     raise NotImplementedError(
         "Gemini model is not yet configured. Set GEMINI_API_KEY and complete integration."
     )
 
-
 def _invoke_perplexity(prompt: str) -> str:
-    """Placeholder — will use Perplexity API when integrated."""
     raise NotImplementedError(
         "Perplexity model is not yet configured. Set PERPLEXITY_API_KEY and complete integration."
     )
@@ -63,7 +66,7 @@ def _build_prompt(keyword: str) -> str:
         f"You are a helpful assistant. A user is researching the following topic.\n\n"
         f"User query: {keyword}\n\n"
         f"Provide a thorough, natural answer. Mention specific brands, tools, "
-        f"and products where relevant."
+        f"and products where relevant. Cite sources where possible."
     )
 
 
@@ -84,51 +87,38 @@ def _extract_context(text: str, brand: str, window: int = 150) -> str | None:
     return snippet or None
 
 
+def _extract_sources(text: str) -> list[str]:
+    """Extract URLs and named source references from the response."""
+    urls = re.findall(r'https?://[^\s\)\]\"\']+', text)
+    refs = re.findall(
+        r'(?:Source|Reference|According to|Cited from)[:\s]+([^\n.]+)',
+        text, re.IGNORECASE,
+    )
+    return list(dict.fromkeys(urls + [r.strip() for r in refs]))[:10]
+
+
 def _detect_citation(response_text: str, brand_name: str) -> tuple[bool, str | None]:
-    """Case-insensitive brand match + context extraction."""
     cited = bool(re.search(re.escape(brand_name), response_text, re.IGNORECASE))
     context = _extract_context(response_text, brand_name) if cited else None
     return cited, context
 
 
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def available_models() -> list[dict]:
-    """Return list of registered models with their status."""
-    return [
-        {"model": key, "status": cfg["status"]}
-        for key, cfg in MODEL_REGISTRY.items()
-    ]
+    return [{"model": k, "status": v["status"]} for k, v in MODEL_REGISTRY.items()]
 
 
-# ── public API ────────────────────────────────────────────────────────────────
+# ── single probe ──────────────────────────────────────────────────────────────
 
 def geo_probe(brand_name: str, keyword: str, ai_model: str = DEFAULT_MODEL) -> dict:
-    """
-    Probe an AI model with a natural query and check for brand citation.
-
-    Args:
-        brand_name: Brand to detect in the AI response.
-        keyword:    Natural language query to send.
-        ai_model:   Model key from MODEL_REGISTRY (default: claude-bedrock).
-
-    Returns:
-        {
-            "keyword": str,
-            "ai_model": str,
-            "cited": bool,
-            "citation_context": str | None,
-            "timestamp": str (ISO 8601)
-        }
-
-    Raises:
-        ValueError:          Unknown model key.
-        NotImplementedError: Model is a placeholder (not yet integrated).
-        RuntimeError:        Model invocation failed.
-    """
+    """Probe one keyword and return citation result."""
     model_cfg = MODEL_REGISTRY.get(ai_model)
     if not model_cfg:
         raise ValueError(
-            f"Unknown ai_model: {ai_model!r}. "
-            f"Available: {list(MODEL_REGISTRY.keys())}"
+            f"Unknown ai_model: {ai_model!r}. Available: {list(MODEL_REGISTRY.keys())}"
         )
 
     prompt = _build_prompt(keyword)
@@ -136,9 +126,7 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = DEFAULT_MODEL) -> d
 
     try:
         response_text = model_cfg["invoke"](prompt)
-    except NotImplementedError:
-        raise
-    except RuntimeError:
+    except (NotImplementedError, RuntimeError):
         raise
     except Exception as e:
         raise RuntimeError(f"{ai_model} invocation failed: {e}") from e
@@ -147,26 +135,39 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = DEFAULT_MODEL) -> d
         raise RuntimeError(f"Empty response from {ai_model}")
 
     cited, context = _detect_citation(response_text, brand_name)
+    sources = _extract_sources(response_text)
     logger.info("GEO probe result: model=%s cited=%s", ai_model, cited)
 
     return {
         "keyword": keyword,
         "ai_model": ai_model,
-        "cited": cited,
+        "brand_present": cited,
         "citation_context": context,
-        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "cited_sources": sources,
+        "timestamp": _now_iso(),
     }
 
+
+# ── batch probe with scoring ─────────────────────────────────────────────────
+
 def geo_probe_batch(
     brand_name: str,
     keywords: list[str],
     ai_model: str = DEFAULT_MODEL,
-) -> list[dict]:
+) -> dict:
     """
-    Probe an AI model with multiple keywords and return results for each.
+    Probe multiple keywords, compute geo_score, store in history.
 
-    Keywords that fail individually return an error entry instead of
-    aborting the entire batch.
+    Returns:
+        {
+            "brand_name": str,
+            "ai_model": str,
+            "results": [...],
+            "geo_score": float (0.0 – 1.0),
+            "total_prompts": int,
+            "cited_count": int,
+            "timestamp": str
+        }
     """
     results = []
     for kw in keywords:
@@ -176,64 +177,37 @@ def geo_probe_batch(
             results.append({
                 "keyword": kw,
                 "ai_model": ai_model,
-                "cited": None,
+                "brand_present": None,
                 "citation_context": None,
+                "cited_sources": [],
                 "error": str(e),
-                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "timestamp": _now_iso(),
             })
-    return results
+
+    total = len(results)
+    cited_count = sum(1 for r in results if r.get("brand_present") is True)
+    geo_score = round(cited_count / total, 2) if total else 0.0
+
+    batch_result = {
+        "brand_name": brand_name,
+        "ai_model": ai_model,
+        "results": results,
+        "geo_score": geo_score,
+        "total_prompts": total,
+        "cited_count": cited_count,
+        "timestamp": _now_iso(),
+    }
+
+    _history.append(batch_result)
+    logger.info(
+        "GEO batch: brand=%s score=%.2f (%d/%d)",
+        brand_name, geo_score, cited_count, total,
+    )
+    return batch_result
 
 
+# ── history ───────────────────────────────────────────────────────────────────
 
-def geo_probe_batch(
-    brand_name: str,
-    keywords: list[str],
-    ai_model: str = DEFAULT_MODEL,
-) -> list[dict]:
-    """
-    Probe an AI model with multiple keywords and return results for each.
-
-    Keywords that fail individually return an error entry instead of
-    aborting the entire batch.
-    """
-    results = []
-    for kw in keywords:
-        try:
-            results.append(geo_probe(brand_name, kw, ai_model=ai_model))
-        except Exception as e:
-            results.append({
-                "keyword": kw,
-                "ai_model": ai_model,
-                "cited": None,
-                "citation_context": None,
-                "error": str(e),
-                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            })
-    return results
-
-
-def geo_probe_batch(
-    brand_name: str,
-    keywords: list[str],
-    ai_model: str = DEFAULT_MODEL,
-) -> list[dict]:
-    """
-    Probe an AI model with multiple keywords and return results for each.
-
-    Keywords that fail individually return an error entry instead of
-    aborting the entire batch.
-    """
-    results = []
-    for kw in keywords:
-        try:
-            results.append(geo_probe(brand_name, kw, ai_model=ai_model))
-        except Exception as e:
-            results.append({
-                "keyword": kw,
-                "ai_model": ai_model,
-                "cited": None,
-                "citation_context": None,
-                "error": str(e),
-                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            })
-    return results
+def get_history() -> list[dict]:
+    """Return the last 20 batch probe results (newest first)."""
+    return list(reversed(_history))
