@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO Probe Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e1e4e8; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 32px; width: 480px; max-width: 95vw; }
+  h1 { font-size: 1.3rem; margin-bottom: 4px; }
+  .sub { color: #8b949e; font-size: 0.85rem; margin-bottom: 24px; }
+  label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 4px; margin-top: 16px; }
+  input, select { width: 100%; padding: 10px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e1e4e8; font-size: 0.95rem; }
+  input:focus, select:focus { outline: none; border-color: #58a6ff; }
+  button { margin-top: 20px; width: 100%; padding: 12px; background: #238636; border: none; border-radius: 6px; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+  button:hover { background: #2ea043; }
+  button:disabled { opacity: .5; cursor: wait; }
+  #result { margin-top: 24px; display: none; }
+  .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
+  .row:last-child { border: none; }
+  .lbl { color: #8b949e; }
+  .val { font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+  .cited-true { color: #3fb950; }
+  .cited-false { color: #f85149; }
+  .err { margin-top: 16px; padding: 12px; background: #3d1214; border: 1px solid #f85149; border-radius: 6px; color: #f85149; font-size: 0.85rem; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>GEO Probe Test</h1>
+  <p class="sub">Probe AI models for brand mentions</p>
+
+  <label for="brand">Brand Name</label>
+  <input id="brand" placeholder="e.g. Notion" value="Notion">
+
+  <label for="keyword">Keyword / Query</label>
+  <input id="keyword" placeholder="e.g. best project management tools for remote teams">
+
+  <label for="model">AI Model</label>
+  <select id="model">
+    <option value="claude-bedrock" selected>Claude (Bedrock)</option>
+    <option value="gemini">Gemini (placeholder)</option>
+    <option value="perplexity">Perplexity (placeholder)</option>
+  </select>
+
+  <button id="btn" onclick="runProbe()">Run GEO Probe</button>
+
+  <div id="error" class="err"></div>
+
+  <div id="result">
+    <div class="row"><span class="lbl">Cited</span><span class="val" id="r-cited"></span></div>
+    <div class="row"><span class="lbl">Context</span><span class="val" id="r-ctx"></span></div>
+    <div class="row"><span class="lbl">AI Model</span><span class="val" id="r-model"></span></div>
+    <div class="row"><span class="lbl">Keyword</span><span class="val" id="r-kw"></span></div>
+    <div class="row"><span class="lbl">Timestamp</span><span class="val" id="r-ts"></span></div>
+  </div>
+</div>
+
+<script>
+async function runProbe() {
+  const btn = document.getElementById('btn');
+  const errEl = document.getElementById('error');
+  const resEl = document.getElementById('result');
+  errEl.style.display = 'none';
+  resEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Probing…';
+
+  try {
+    const resp = await fetch('/api/geo-probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand_name: document.getElementById('brand').value.trim(),
+        keyword: document.getElementById('keyword').value.trim(),
+        ai_model: document.getElementById('model').value
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      errEl.textContent = data.error || `HTTP ${resp.status}`;
+      errEl.style.display = 'block';
+      return;
+    }
+    const citedEl = document.getElementById('r-cited');
+    citedEl.textContent = data.cited ? '✓ Yes' : '✗ No';
+    citedEl.className = 'val ' + (data.cited ? 'cited-true' : 'cited-false');
+    document.getElementById('r-ctx').textContent = data.citation_context || '—';
+    document.getElementById('r-model').textContent = data.ai_model;
+    document.getElementById('r-kw').textContent = data.keyword;
+    document.getElementById('r-ts').textContent = data.timestamp;
+    resEl.style.display = 'block';
+  } catch (e) {
+    errEl.textContent = 'Network error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run GEO Probe';
+  }
+}
+</script>
+</body>
+</html>

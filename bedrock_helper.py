@@ -1,46 +1,72 @@
 """
 bedrock_helper.py
-Thin wrapper around the Anthropic API for Claude invocations.
-Used by the GEO monitoring engine and any future AI probe endpoints.
+Thin wrapper around AWS Bedrock Runtime for Claude invocations.
+Uses IAM role credentials (no API keys required).
 
-Requires env var: ANTHROPIC_API_KEY
+On EC2, credentials come from the instance profile / IAM role automatically.
 """
 
+import json
+import logging
 import os
-import anthropic
 
-DEFAULT_MODEL = 'claude-3-haiku-20240307'
+import boto3
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+DEFAULT_REGION = "us-east-1"
 
 _client = None
 
 
-def get_client() -> anthropic.Anthropic:
-    """Return a cached Anthropic client."""
+def get_client():
+    """Return a cached Bedrock Runtime client using IAM credentials."""
     global _client
     if _client is None:
-        api_key = os.environ.get('ANTHROPIC_API_KEY')
-        if not api_key:
-            raise RuntimeError('ANTHROPIC_API_KEY environment variable is not set')
-        _client = anthropic.Anthropic(api_key=api_key)
+        region = os.environ.get("AWS_REGION", DEFAULT_REGION)
+        _client = boto3.client("bedrock-runtime", region_name=region)
+        logger.info("Bedrock runtime client created (region=%s)", region)
     return _client
 
 
-def invoke_claude(prompt: str, max_tokens: int = 1024, model_id: str = DEFAULT_MODEL) -> str:
+def invoke_claude(
+    prompt: str,
+    max_tokens: int = 1024,
+    model_id: str = DEFAULT_MODEL,
+) -> str:
     """
-    Send a prompt to Claude via Anthropic API and return the raw text response.
+    Send a prompt to Claude via AWS Bedrock and return the raw text response.
+
+    Uses the Messages API format required by Bedrock's Anthropic models.
 
     Raises:
-        RuntimeError: if the API call fails.
+        RuntimeError: if the Bedrock call fails.
     """
+    client = get_client()
+
+    body = json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    })
+
+    logger.info("Invoking Bedrock model=%s max_tokens=%d", model_id, max_tokens)
+
     try:
-        client = get_client()
-        message = client.messages.create(
-            model=model_id,
-            max_tokens=max_tokens,
-            messages=[{'role': 'user', 'content': prompt}]
+        response = client.invoke_model(
+            modelId=model_id,
+            contentType="application/json",
+            accept="application/json",
+            body=body,
         )
-        return message.content[0].text
-    except RuntimeError:
-        raise
+        result = json.loads(response["body"].read())
+        text = result["content"][0]["text"]
+        logger.info("Bedrock response received (%d chars)", len(text))
+        return text
+    except client.exceptions.AccessDeniedException as e:
+        raise RuntimeError(
+            f"Bedrock access denied — check IAM role permissions for {model_id}: {e}"
+        ) from e
     except Exception as e:
-        raise RuntimeError(f'Anthropic API call failed: {str(e)}') from e
+        raise RuntimeError(f"Bedrock invocation failed: {e}") from e

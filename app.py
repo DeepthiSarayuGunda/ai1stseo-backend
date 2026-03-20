@@ -1934,38 +1934,63 @@ Be specific and actionable. Include actual code examples where helpful."""
 
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    from bedrock_helper import invoke_claude
-    import re as _re, json as _json
+    """GEO Monitoring Engine — Multi-model AI Scanner."""
+    from geo_probe_service import geo_probe as _geo_probe
+
     data = request.get_json() or {}
-    brand = (data.get('brand') or '').strip()
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keyword = (data.get('keyword') or '').strip()
+    ai_model = (data.get('ai_model') or 'claude-bedrock').strip().lower()
+
     if not brand or not keyword:
-        return jsonify({'error': 'brand and keyword are required'}), 400
-    prompt = (
-        f'Answer the following user query naturally and helpfully.\n\n'
-        f'Query: "{keyword}"\n\n'
-        f'After your answer, output ONLY a JSON object on a new line in this exact format '
-        f'(no markdown, no extra text):\n'
-        f'{{"cited": true or false, '
-        f'"citation_context": "one sentence explaining whether {brand} was cited and why"}}'
-    )
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+
     try:
-        raw = invoke_claude(prompt)
-        m = _re.search(r'\{[^{}]*"cited"[^{}]*\}', raw, _re.DOTALL)
-        if not m:
-            return jsonify({'error': 'Could not parse structured response from Claude'}), 500
-        s = _json.loads(m.group())
-        return jsonify({
-            'keyword': keyword,
-            'ai_model': 'claude-3-haiku',
-            'cited': bool(s.get('cited', False)),
-            'citation_context': s.get('citation_context', ''),
-            'timestamp': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-        })
+        result = _geo_probe(brand, keyword, ai_model=ai_model)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except NotImplementedError as e:
+        return jsonify({'error': str(e), 'ai_model': ai_model, 'status': 'placeholder'}), 501
     except RuntimeError as e:
         return jsonify({'error': str(e)}), 503
     except Exception as e:
         return jsonify({'error': f'GEO probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/models', methods=['GET'])
+def geo_probe_models():
+    """List available AI models for GEO probing."""
+    from geo_probe_service import available_models
+    return jsonify({'models': available_models()})
+
+
+@app.route('/api/geo-probe/batch', methods=['POST'])
+def geo_probe_batch():
+    """GEO Probe — batch keyword probing."""
+    from geo_probe_service import geo_probe_batch as _batch
+
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keywords = data.get('keywords') or []
+    ai_model = (data.get('ai_model') or 'claude-bedrock').strip().lower()
+
+    if not brand:
+        return jsonify({'error': 'brand_name is required'}), 400
+    if not keywords or not isinstance(keywords, list):
+        return jsonify({'error': 'keywords must be a non-empty list'}), 400
+    if len(keywords) > 20:
+        return jsonify({'error': 'Maximum 20 keywords per batch'}), 400
+
+    try:
+        results = _batch(brand, keywords, ai_model=ai_model)
+        return jsonify({'brand_name': brand, 'ai_model': ai_model, 'results': results})
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except NotImplementedError as e:
+        return jsonify({'error': str(e), 'ai_model': ai_model, 'status': 'placeholder'}), 501
+    except Exception as e:
+        return jsonify({'error': f'Batch probe failed: {str(e)}'}), 500
 
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
@@ -2058,6 +2083,10 @@ def serve_uml_diagrams():
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
     return send_from_directory('.', 'audit.html')
+
+@app.route('/geo-test')
+def serve_geo_test():
+    return send_from_directory('.', 'geo-test.html')
 
 @app.route('/<path:path>')
 def catch_all(path):
