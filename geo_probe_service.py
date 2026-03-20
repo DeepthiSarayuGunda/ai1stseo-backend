@@ -45,13 +45,12 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
     """
     Probe by calling the EC2 geo_engine endpoint.
 
-    Enriches the keyword to improve brand detection accuracy by
-    framing it as a category query that naturally surfaces the brand.
+    Sends the raw keyword to EC2 — the geo_engine prompt already asks
+    Claude to include the brand *only if genuinely relevant*, so we
+    don't bias the keyword here (avoids false positives for fake brands).
     """
     url = f"{EC2_GEO_ENGINE_URL}/geo-probe"
-    # Enrich keyword so the EC2 prompt naturally includes the brand
-    enriched_keyword = f"{keyword} — include {brand_name} if it is a relevant option"
-    payload = {"brand_name": brand_name, "keyword": enriched_keyword}
+    payload = {"brand_name": brand_name, "keyword": keyword}
 
     logger.info("GEO probe → EC2: brand=%s keyword=%s url=%s", brand_name, keyword, url)
 
