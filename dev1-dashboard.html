@@ -9,11 +9,13 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;padding:24px}
 h1{font-size:1.4rem;margin-bottom:4px}
 .sub{color:#8b949e;font-size:.85rem;margin-bottom:20px}
+.section-title{font-size:1.1rem;color:#58a6ff;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px}
 @media(max-width:768px){.grid{grid-template-columns:1fr}}
 .card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px}
 .card h2{font-size:1rem;margin-bottom:2px;color:#58a6ff}
 .card .desc{font-size:.78rem;color:#8b949e;margin-bottom:12px}
+.full{grid-column:1/-1}
 label{display:block;font-size:.75rem;color:#8b949e;margin:8px 0 3px}
 input,select,textarea{width:100%;padding:8px 10px;background:#0d1117;border:1px solid #30363d;border-radius:5px;color:#e1e4e8;font-size:.85rem}
 textarea{min-height:50px;resize:vertical;font-family:inherit}
@@ -21,15 +23,20 @@ button{margin-top:10px;padding:10px 16px;border:none;border-radius:6px;color:#ff
 button:disabled{opacity:.5;cursor:wait}
 .btn1{background:#238636}.btn2{background:#1f6feb}.btn3{background:#8b5cf6}
 .btn4{background:#d97706}.btn5{background:#e11d48}.btn6{background:#0891b2}
+.btn7{background:#6366f1}.btn8{background:#059669}
 .out{margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;display:none}
 .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px}
 .tag-live{background:#238636;color:#fff}
-.tag-num{background:#1f6feb;color:#fff}
+.tag-data{background:#6366f1;color:#fff}
+.tag-info{background:#0891b2;color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 </head>
 <body>
 <h1>Developer 1 — AI/ML & Core Engine Dashboard</h1>
-<p class="sub">All 6 primary responsibilities — live on App Runner + EC2 Bedrock</p>
+<p class="sub">All features + monitoring, history, providers — single page</p>
+
+<div class="section-title">Core Features</div>
 <div class="grid">
 
 <!-- 1. GEO Monitoring Engine -->
@@ -115,6 +122,86 @@ button:disabled{opacity:.5;cursor:wait}
 
 </div>
 
+<!-- Monitoring & Data Section -->
+<div class="section-title">Monitoring & Data</div>
+<div class="grid">
+
+<!-- Probe History -->
+<div class="card full">
+  <span class="tag tag-data">DATA</span>
+  <h2>Probe History (Stored Results)</h2>
+  <p class="desc">All past GEO probe results stored in SQLite — filter by brand or provider</p>
+  <div class="row2">
+    <div><label>Filter by Brand</label><input id="h-brand" placeholder="e.g. Nike (optional)"></div>
+    <div><label>Filter by Provider</label>
+      <select id="h-model">
+        <option value="">All Providers</option>
+        <option value="claude">Claude</option>
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="perplexity">Perplexity</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn7" onclick="loadHistory()">Load Probe History</button>
+  <div id="h-out" class="out"></div>
+</div>
+
+<!-- Available Providers -->
+<div class="card">
+  <span class="tag tag-info">INFO</span>
+  <h2>Available AI Providers</h2>
+  <p class="desc">Check which providers are active on the EC2 engine</p>
+  <button class="btn8" onclick="loadModels()">Check Providers</button>
+  <div id="m-out" class="out"></div>
+</div>
+
+<!-- Scheduled Jobs -->
+<div class="card">
+  <span class="tag tag-info">INFO</span>
+  <h2>Scheduled Monitoring Jobs</h2>
+  <p class="desc">Register periodic probes or view existing schedules</p>
+  <button class="btn8" onclick="loadSchedule()">View Scheduled Jobs</button>
+  <label>Brand</label><input id="s-brand" placeholder="e.g. Nike">
+  <label>Keywords (comma-separated)</label><input id="s-kw" placeholder="running shoes, athletic footwear">
+  <label>Provider</label>
+  <select id="s-prov">
+    <option value="claude">Claude</option>
+    <option value="openai">OpenAI</option>
+    <option value="gemini">Gemini</option>
+    <option value="perplexity">Perplexity</option>
+  </select>
+  <label>Interval (minutes)</label><input id="s-int" type="number" value="60">
+  <button class="btn7" onclick="createSchedule()">Register Schedule</button>
+  <div id="s-out" class="out"></div>
+</div>
+
+<!-- Batch Probe -->
+<div class="card full">
+  <span class="tag tag-live">LIVE</span>
+  <h2>Batch GEO Probe</h2>
+  <p class="desc">Probe multiple keywords at once — get GEO score across all</p>
+  <div class="row2">
+    <div><label>Brand</label><input id="b-brand" value="Nike"></div>
+    <div><label>Provider</label>
+      <select id="b-prov">
+        <option value="claude" selected>Claude (Bedrock)</option>
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="perplexity">Perplexity</option>
+      </select>
+    </div>
+  </div>
+  <label>Keywords (one per line)</label>
+  <textarea id="b-kw" style="min-height:80px">running shoes
+best athletic footwear
+marathon training gear</textarea>
+  <button class="btn1" onclick="runBatch()">Run Batch Probe</button>
+  <div id="b-out" class="out"></div>
+</div>
+
+</div>
+
 <script>
 const BASE = window.location.origin;
 let chatSession = null;
@@ -132,6 +219,7 @@ async function api(method, path, body) {
   return r.json();
 }
 
+// -- Core Features --
 async function runGeo() {
   show('g-out', 'Probing...');
   try {
@@ -147,9 +235,7 @@ async function runGeo() {
 async function runAeo() {
   show('a-out', 'Analyzing...');
   try {
-    const d = await api('POST', '/api/aeo/analyze', {
-      url: document.getElementById('a-url').value
-    });
+    const d = await api('POST', '/api/aeo/analyze', { url: document.getElementById('a-url').value });
     show('a-out', d);
   } catch (e) { show('a-out', 'Error: ' + e.message); }
 }
@@ -210,6 +296,63 @@ async function runLlmProbe() {
     });
     show('l-out', d);
   } catch (e) { show('l-out', 'Error: ' + e.message); }
+}
+
+// -- Monitoring & Data --
+async function loadHistory() {
+  show('h-out', 'Loading...');
+  try {
+    let path = '/api/geo-probe/history?limit=50';
+    const brand = document.getElementById('h-brand').value.trim();
+    const model = document.getElementById('h-model').value;
+    if (brand) path += '&brand=' + encodeURIComponent(brand);
+    if (model) path += '&ai_model=' + encodeURIComponent(model);
+    const d = await api('GET', path);
+    show('h-out', d);
+  } catch (e) { show('h-out', 'Error: ' + e.message); }
+}
+
+async function loadModels() {
+  show('m-out', 'Loading...');
+  try {
+    const d = await api('GET', '/api/geo-probe/models');
+    show('m-out', d);
+  } catch (e) { show('m-out', 'Error: ' + e.message); }
+}
+
+async function loadSchedule() {
+  show('s-out', 'Loading...');
+  try {
+    const d = await api('GET', '/api/geo-probe/schedule');
+    show('s-out', d);
+  } catch (e) { show('s-out', 'Error: ' + e.message); }
+}
+
+async function createSchedule() {
+  show('s-out', 'Registering...');
+  try {
+    const kw = document.getElementById('s-kw').value.split(',').map(k => k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/geo-probe/schedule', {
+      brand_name: document.getElementById('s-brand').value.trim(),
+      keywords: kw,
+      provider: document.getElementById('s-prov').value,
+      interval_minutes: parseInt(document.getElementById('s-int').value) || 60
+    });
+    show('s-out', d);
+  } catch (e) { show('s-out', 'Error: ' + e.message); }
+}
+
+async function runBatch() {
+  show('b-out', 'Running batch probe...');
+  try {
+    const kw = document.getElementById('b-kw').value.split('\n').map(k => k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/geo-probe/batch', {
+      brand_name: document.getElementById('b-brand').value.trim(),
+      keywords: kw,
+      provider: document.getElementById('b-prov').value
+    });
+    show('b-out', d);
+  } catch (e) { show('b-out', 'Error: ' + e.message); }
 }
 </script>
 </body>
