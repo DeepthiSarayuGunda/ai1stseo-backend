@@ -68,7 +68,7 @@ def _store_result(result: dict):
                 (
                     result.get("keyword", ""),
                     result.get("brand_name", result.get("brand", "")),
-                    result.get("ai_model", "claude"),
+                    result.get("ai_model", "nova"),
                     1 if result.get("brand_present") else 0,
                     result.get("citation_context"),
                     result.get("confidence", 0.0),
@@ -121,19 +121,17 @@ def available_models() -> list[dict]:
     except Exception:
         pass
     return [
-        {"name": "claude", "available": True, "reason": "ready"},
-        {"name": "openai", "available": False, "reason": "OPENAI_API_KEY not set"},
-        {"name": "gemini", "available": False, "reason": "GEMINI_API_KEY not set"},
-        {"name": "perplexity", "available": False, "reason": "PERPLEXITY_API_KEY not set"},
+        {"name": "nova", "available": True, "reason": "ready"},
+        {"name": "ollama", "available": True, "reason": "free fallback"},
     ]
 
 
 # ── single probe (routes to EC2) ─────────────────────────────────────────────
 
-def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
+def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
     """
     Probe by calling the EC2 geo_engine endpoint.
-    Supports provider selection: claude, openai, gemini, perplexity.
+    Supports provider selection: nova (default), ollama (fallback).
     """
     url = f"{EC2_GEO_ENGINE_URL}/geo-probe"
     payload = {"brand_name": brand_name, "keyword": keyword, "provider": ai_model}
@@ -176,7 +174,7 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
 def geo_probe_batch(
     brand_name: str,
     keywords: list[str],
-    ai_model: str = "claude",
+    ai_model: str = "nova",
 ) -> dict:
     """Probe multiple keywords via EC2, compute geo_score, store in history."""
     results = []
@@ -226,7 +224,7 @@ def get_history() -> list[dict]:
 _scheduled_jobs = []
 
 
-def schedule_probe(brand_name: str, keywords: list[str], ai_model: str = "claude",
+def schedule_probe(brand_name: str, keywords: list[str], ai_model: str = "nova",
                    interval_minutes: int = 60) -> dict:
     """
     Register a scheduled probe job (placeholder — runs in-memory only).

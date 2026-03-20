@@ -48,10 +48,8 @@ button:disabled{opacity:.5;cursor:wait}
   <label>Keyword</label><input id="g-kw" value="running shoes">
   <label>Provider</label>
   <select id="g-prov">
-    <option value="claude" selected>Claude (Bedrock)</option>
-    <option value="openai">OpenAI (GPT-4o-mini)</option>
-    <option value="gemini">Google Gemini</option>
-    <option value="perplexity">Perplexity</option>
+    <option value="nova" selected>Nova Lite (Bedrock)</option>
+    <option value="ollama">Ollama (Free Fallback)</option>
   </select>
   <button class="btn1" onclick="runGeo()">Run GEO Probe</button>
   <div id="g-out" class="out"></div>
@@ -136,10 +134,8 @@ button:disabled{opacity:.5;cursor:wait}
     <div><label>Filter by Provider</label>
       <select id="h-model">
         <option value="">All Providers</option>
-        <option value="claude">Claude</option>
-        <option value="openai">OpenAI</option>
-        <option value="gemini">Gemini</option>
-        <option value="perplexity">Perplexity</option>
+        <option value="nova">Nova Lite</option>
+        <option value="ollama">Ollama</option>
       </select>
     </div>
   </div>
@@ -166,10 +162,8 @@ button:disabled{opacity:.5;cursor:wait}
   <label>Keywords (comma-separated)</label><input id="s-kw" placeholder="running shoes, athletic footwear">
   <label>Provider</label>
   <select id="s-prov">
-    <option value="claude">Claude</option>
-    <option value="openai">OpenAI</option>
-    <option value="gemini">Gemini</option>
-    <option value="perplexity">Perplexity</option>
+    <option value="nova">Nova Lite</option>
+    <option value="ollama">Ollama</option>
   </select>
   <label>Interval (minutes)</label><input id="s-int" type="number" value="60">
   <button class="btn7" onclick="createSchedule()">Register Schedule</button>
@@ -185,10 +179,8 @@ button:disabled{opacity:.5;cursor:wait}
     <div><label>Brand</label><input id="b-brand" value="Nike"></div>
     <div><label>Provider</label>
       <select id="b-prov">
-        <option value="claude" selected>Claude (Bedrock)</option>
-        <option value="openai">OpenAI</option>
-        <option value="gemini">Gemini</option>
-        <option value="perplexity">Perplexity</option>
+        <option value="nova" selected>Nova Lite (Bedrock)</option>
+        <option value="ollama">Ollama (Free Fallback)</option>
       </select>
     </div>
   </div>

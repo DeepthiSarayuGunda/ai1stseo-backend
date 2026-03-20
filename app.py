@@ -1940,7 +1940,7 @@ def geo_probe():
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keyword = (data.get('keyword') or '').strip()
-    provider = (data.get('provider') or data.get('ai_model') or 'claude').strip().lower()
+    provider = (data.get('provider') or data.get('ai_model') or 'nova').strip().lower()
 
     if not brand or not keyword:
         return jsonify({'error': 'brand_name and keyword are required'}), 400
@@ -1969,7 +1969,7 @@ def geo_probe_batch():
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keywords = data.get('keywords') or []
-    provider = (data.get('provider') or data.get('ai_model') or 'claude').strip().lower()
+    provider = (data.get('provider') or data.get('ai_model') or 'nova').strip().lower()
 
     if not brand:
         return jsonify({'error': 'brand_name is required'}), 400
@@ -2004,7 +2004,7 @@ def geo_probe_schedule():
     data = request.get_json() or {}
     brand = (data.get('brand_name') or '').strip()
     keywords = data.get('keywords') or []
-    provider = (data.get('provider') or 'claude').strip()
+    provider = (data.get('provider') or 'nova').strip()
     interval = int(data.get('interval_minutes', 60))
     if not brand or not keywords:
         return jsonify({'error': 'brand_name and keywords are required'}), 400
