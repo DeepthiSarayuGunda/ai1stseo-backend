@@ -67,16 +67,19 @@ def _invoke_claude(prompt):
 
 def _build_prompt(keyword, brand_name):
     """
-    Prompt that encourages natural brand mentions without forcing them.
-    Asks Claude to list top brands and include the target brand if applicable.
+    Prompt that asks for genuine recommendations only.
+    Explicitly tells Claude NOT to invent or assume brands.
     """
     return (
         f"You are a knowledgeable product reviewer. A user wants to know:\n\n"
         f"\"What are the best {keyword}?\"\n\n"
         f"List the top brands and products for this category. "
-        f"Include {brand_name} in your answer if it is a relevant and reputable option. "
-        f"For each brand, briefly explain why it stands out. "
-        f"Be honest — only mention brands that genuinely fit."
+        f"Only include {brand_name} if it is genuinely a well-known and relevant option "
+        f"in this category. Do NOT assume or invent brands. Do NOT include a brand "
+        f"just because it was mentioned in the question. "
+        f"If {brand_name} is not a real or relevant brand for this category, "
+        f"leave it out entirely. "
+        f"For each brand you include, briefly explain why it stands out."
     )
 
 
@@ -94,6 +97,30 @@ _COMPARE_PATTERNS = [
     r"(?:compared?\s+to|alternative|competitor|similar\s+to|versus|vs\.?|alongside)",
     r"(?:however|although|while|on\s+the\s+other\s+hand|but)",
     r"(?:also\s+worth|another\s+option|consider)",
+]
+
+
+# Conditional/hedging phrases that indicate the brand was inserted artificially
+_CONDITIONAL_PHRASES = [
+    r"if it is relevant",
+    r"if applicable",
+    r"if it fits",
+    r"if it is a relevant",
+    r"if it is a reputable",
+    r"if they are relevant",
+    r"if you consider",
+    r"worth mentioning if",
+    r"could be considered if",
+    r"may be relevant",
+    r"might be worth",
+    r"not a well-known",
+    r"not a recognized",
+    r"not typically known",
+    r"i'?m not (?:familiar|aware)",
+    r"doesn'?t appear to be",
+    r"no information available",
+    r"could not find",
+    r"cannot confirm",
 ]
 
 
@@ -144,6 +171,20 @@ def _now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _is_conditional_mention(brand_sentences):
+    """
+    Return True if the brand mention looks artificially inserted
+    (hedging language, conditional phrasing, disclaimers).
+    """
+    if not brand_sentences:
+        return False
+    combined = " ".join(brand_sentences).lower()
+    for pat in _CONDITIONAL_PHRASES:
+        if re.search(pat, combined, re.IGNORECASE):
+            return True
+    return False
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/geo-probe", methods=["POST"])
@@ -175,6 +216,22 @@ def geo_probe():
         cited = len(brand_sentences) > 0
         context = brand_sentences[0] if brand_sentences else None
         confidence = _score_confidence(brand_sentences)
+
+        # ── Strict false-positive rejection ───────────────────────────
+        # 1. Reject if brand appears only in conditional/hedging context
+        if cited and _is_conditional_mention(brand_sentences):
+            logger.info("REJECTED: conditional/hedging mention for brand=%s", brand_name)
+            cited = False
+            confidence = 0.0
+            context = None
+
+        # 2. Reject if citation_context doesn't actually contain the brand
+        if cited and context and brand_name.lower() not in context.lower():
+            logger.info("REJECTED: brand not in citation_context for brand=%s", brand_name)
+            cited = False
+            confidence = 0.0
+            context = None
+
         source = "bedrock"
 
         logger.info(
