@@ -201,6 +201,26 @@ def geo_probe():
     })
 
 
+@app.route("/generate", methods=["POST"])
+def generate():
+    """General-purpose text generation via Bedrock Claude."""
+    data = request.get_json(silent=True) or {}
+    prompt = (data.get("prompt") or "").strip()
+
+    if not prompt:
+        return jsonify({"error": "prompt is required"}), 400
+
+    if not USE_BEDROCK:
+        return jsonify({"text": "[stub] Bedrock not enabled", "source": "stub"})
+
+    try:
+        text = _invoke_claude(prompt)
+        return jsonify({"text": text, "source": "bedrock"})
+    except Exception as e:
+        logger.error("Generate failed: %s", e)
+        return jsonify({"error": f"Generation failed: {e}"}), 503
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok", "service": "geo-engine", "bedrock": USE_BEDROCK})

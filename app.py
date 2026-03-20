@@ -1934,24 +1934,19 @@ Be specific and actionable. Include actual code examples where helpful."""
 
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    """GEO Monitoring Engine — Multi-model AI Scanner."""
+    """GEO Monitoring Engine — routes to EC2 AI engine."""
     from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keyword = (data.get('keyword') or '').strip()
-    ai_model = (data.get('ai_model') or 'claude-bedrock').strip().lower()
 
     if not brand or not keyword:
         return jsonify({'error': 'brand_name and keyword are required'}), 400
 
     try:
-        result = _geo_probe(brand, keyword, ai_model=ai_model)
+        result = _geo_probe(brand, keyword)
         return jsonify(result)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except NotImplementedError as e:
-        return jsonify({'error': str(e), 'ai_model': ai_model, 'status': 'placeholder'}), 501
     except RuntimeError as e:
         return jsonify({'error': str(e)}), 503
     except Exception as e:
@@ -1967,13 +1962,12 @@ def geo_probe_models():
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO/AEO batch analysis — probe multiple keywords, return geo_score."""
+    """GEO/AEO batch analysis — routes to EC2 for each keyword."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keywords = data.get('keywords') or []
-    ai_model = (data.get('ai_model') or 'claude-bedrock').strip().lower()
 
     if not brand:
         return jsonify({'error': 'brand_name is required'}), 400
@@ -1983,11 +1977,7 @@ def geo_probe_batch():
         return jsonify({'error': 'Maximum 20 keywords per batch'}), 400
 
     try:
-        return jsonify(_batch(brand, keywords, ai_model=ai_model))
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except NotImplementedError as e:
-        return jsonify({'error': str(e), 'ai_model': ai_model, 'status': 'placeholder'}), 501
+        return jsonify(_batch(brand, keywords))
     except Exception as e:
         return jsonify({'error': f'Batch probe failed: {str(e)}'}), 500
 
@@ -2001,32 +1991,30 @@ def geo_probe_history():
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
-    AI Citation Probe — GEO monitoring engine seed.
+    AI Citation Probe — routes to EC2 geo_engine for Bedrock access.
 
     Request:
         { "keyword": "best project management tools 2025",
-          "provider": "claude"   (optional, default: claude)
-          "model":    "..."      (optional, overrides provider default) }
+          "brand_name": "Notion" }
 
     Response:
-        { keyword, citations, mentioned_brands, answer_structure,
-          key_facts, ai_summary, ai_model, provider, timestamp }
+        { keyword, ai_model, brand_present, citation_context,
+          confidence, cited_sources, timestamp }
     """
-    from llm_service import citation_probe
+    from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
-    keyword  = (data.get('keyword') or '').strip()
-    provider = (data.get('provider') or 'claude').strip().lower()
-    model    = (data.get('model') or '').strip() or None
+    keyword = (data.get('keyword') or '').strip()
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
 
     if not keyword:
         return jsonify({'error': 'keyword is required'}), 400
+    if not brand:
+        return jsonify({'error': 'brand_name is required'}), 400
 
     try:
-        result = citation_probe(keyword, provider=provider, model=model)
+        result = _geo_probe(brand, keyword)
         return jsonify(result)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
     except RuntimeError as e:
         return jsonify({'error': str(e)}), 503
     except Exception as e:
@@ -2084,6 +2072,199 @@ def ai_geo_monitor():
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
+
+
+# ============== AEO OPTIMIZER ==============
+
+@app.route('/api/aeo/analyze', methods=['POST'])
+def aeo_analyze():
+    """AEO analysis — scan a URL for AI engine optimization issues."""
+    from aeo_optimizer import analyze_aeo
+
+    data = request.get_json() or {}
+    url = (data.get('url') or '').strip()
+    brand = (data.get('brand_name') or '').strip() or None
+
+    if not url:
+        return jsonify({'error': 'url is required'}), 400
+
+    try:
+        result = analyze_aeo(url, brand_name=brand)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'AEO analysis failed: {str(e)}'}), 500
+
+
+# ============== AI RANKING RECOMMENDATIONS ==============
+
+@app.route('/api/ai/ranking-recommendations', methods=['POST'])
+def ai_ranking_recommendations():
+    """
+    AI ranking recommendations for a URL + brand.
+
+    Request: { "url": "https://...", "brand_name": "Nike", "keywords": ["running shoes"] }
+    """
+    from ai_ranking_service import get_ranking_recommendations
+    from geo_probe_service import geo_probe_batch as _batch
+
+    data = request.get_json() or {}
+    url = (data.get('url') or '').strip()
+    brand = (data.get('brand_name') or '').strip()
+    keywords = data.get('keywords') or []
+
+    if not url or not brand:
+        return jsonify({'error': 'url and brand_name are required'}), 400
+
+    # Optionally run GEO probes for the keywords to feed into recommendations
+    geo_results = []
+    if keywords:
+        try:
+            batch = _batch(brand, keywords[:5])
+            geo_results = batch.get('results', [])
+        except Exception:
+            pass  # Recommendations still work without probe data
+
+    try:
+        result = get_ranking_recommendations(url, brand, geo_results=geo_results)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Ranking analysis failed: {str(e)}'}), 500
+
+
+# ============== CONTENT GENERATION PIPELINE ==============
+
+@app.route('/api/content/generate', methods=['POST'])
+def content_generate():
+    """
+    Generate AI-optimized content.
+
+    Request: {
+        "brand_name": "Notion",
+        "content_type": "faq|comparison|meta_description|feature_snippet",
+        "topic": "project management tools",
+        "competitors": ["Asana", "Monday"],  (for comparison type)
+        "count": 5                            (for faq type)
+    }
+    """
+    from content_generator import generate_content
+
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    content_type = (data.get('content_type') or '').strip()
+    topic = (data.get('topic') or '').strip()
+    competitors = data.get('competitors') or []
+    count = data.get('count', 5)
+
+    if not brand or not content_type:
+        return jsonify({'error': 'brand_name and content_type are required'}), 400
+
+    try:
+        result = generate_content(brand, content_type, topic=topic,
+                                   competitors=competitors, count=count)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Content generation failed: {str(e)}'}), 500
+
+
+# ============== AI SEO CHATBOT ==============
+
+@app.route('/api/chatbot/session', methods=['POST'])
+def chatbot_create_session():
+    """Create a new chatbot session."""
+    from ai_chatbot import create_session
+    return jsonify(create_session())
+
+
+@app.route('/api/chatbot/chat', methods=['POST'])
+def chatbot_chat():
+    """
+    Send a message to the AI SEO chatbot.
+
+    Request: { "session_id": "abc123", "message": "How do I optimize for ChatGPT?" }
+    Auto-creates session if session_id is new.
+    """
+    from ai_chatbot import chat
+
+    data = request.get_json() or {}
+    session_id = (data.get('session_id') or '').strip()
+    message = (data.get('message') or '').strip()
+
+    if not message:
+        return jsonify({'error': 'message is required'}), 400
+    if not session_id:
+        session_id = str(__import__('uuid').uuid4())[:12]
+
+    try:
+        result = chat(session_id, message)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Chatbot failed: {str(e)}'}), 500
+
+
+@app.route('/api/chatbot/history/<session_id>', methods=['GET'])
+def chatbot_history(session_id):
+    """Get chat history for a session."""
+    from ai_chatbot import get_session_history
+    return jsonify(get_session_history(session_id))
+
+
+@app.route('/api/chatbot/sessions', methods=['GET'])
+def chatbot_sessions():
+    """List active chatbot sessions."""
+    from ai_chatbot import list_sessions
+    return jsonify({'sessions': list_sessions()})
+
+
+# ============== LLM MULTI-PROVIDER ==============
+
+@app.route('/api/llm/providers', methods=['GET'])
+def llm_providers():
+    """List available LLM providers."""
+    from llm_service import _available_providers, PROVIDERS
+    available = _available_providers()
+    return jsonify({
+        'providers': [
+            {'name': name, 'model': PROVIDERS[name]['default_model'],
+             'available': name in available}
+            for name in PROVIDERS
+        ],
+        'available_count': len(available),
+    })
+
+
+@app.route('/api/llm/citation-probe', methods=['POST'])
+def llm_citation_probe():
+    """
+    Multi-provider citation probe.
+
+    Request: { "keyword": "best CRM tools", "provider": "claude" }
+    """
+    from llm_service import citation_probe
+
+    data = request.get_json() or {}
+    keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'claude').strip()
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    try:
+        result = citation_probe(keyword, provider=provider)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
