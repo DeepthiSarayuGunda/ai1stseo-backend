@@ -138,9 +138,9 @@ def signup():
     except client.exceptions.UsernameExistsException:
         return jsonify({'error': 'An account with this email already exists'}), 409
     except client.exceptions.InvalidPasswordException as e:
-        return jsonify({'error': f'Password does not meet requirements: {str(e)}'}), 400
+        return jsonify({'error': 'Password must be at least 8 characters with uppercase, lowercase, number, and special character.'}), 400
     except Exception as e:
-        return jsonify({'error': f'Signup failed: {str(e)}'}), 500
+        return jsonify({'error': 'Signup failed. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/verify', methods=['POST'])
@@ -174,7 +174,8 @@ def verify_email():
     except client.exceptions.ExpiredCodeException:
         return jsonify({'error': 'Verification code has expired. Request a new one.'}), 400
     except Exception as e:
-        return jsonify({'error': f'Verification failed: {str(e)}'}), 500
+        print(f"Verification error: {e}")
+        return jsonify({'error': 'Verification failed. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/resend-code', methods=['POST'])
@@ -202,7 +203,8 @@ def resend_verification():
         })
 
     except Exception as e:
-        return jsonify({'error': f'Failed to resend code: {str(e)}'}), 500
+        print(f"Resend code error: {e}")
+        return jsonify({'error': 'Failed to resend code. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/login', methods=['POST'])
@@ -252,7 +254,8 @@ def login():
     except client.exceptions.UserNotConfirmedException:
         return jsonify({'error': 'Email not verified. Please check your email for a verification code.'}), 403
     except Exception as e:
-        return jsonify({'error': f'Login failed: {str(e)}'}), 500
+        print(f"Login error: {e}")
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/refresh', methods=['POST'])
@@ -287,7 +290,8 @@ def refresh_token():
         })
 
     except Exception as e:
-        return jsonify({'error': f'Token refresh failed: {str(e)}'}), 401
+        print(f"Token refresh error: {e}")
+        return jsonify({'error': 'Session expired. Please sign in again.'}), 401
 
 
 @auth_bp.route('/api/auth/forgot-password', methods=['POST'])
@@ -321,7 +325,8 @@ def forgot_password():
             'message': 'If an account exists with this email, a reset code has been sent.'
         })
     except Exception as e:
-        return jsonify({'error': f'Password reset failed: {str(e)}'}), 500
+        print(f"Forgot password error: {e}")
+        return jsonify({'error': 'Password reset request failed. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/reset-password', methods=['POST'])
@@ -353,11 +358,12 @@ def reset_password():
         })
 
     except client.exceptions.CodeMismatchException:
-        return jsonify({'error': 'Invalid reset code'}), 400
+        return jsonify({'error': 'That reset code is incorrect. Please double-check and try again.'}), 400
     except client.exceptions.InvalidPasswordException as e:
-        return jsonify({'error': f'Password does not meet requirements: {str(e)}'}), 400
+        return jsonify({'error': 'Password must be at least 8 characters with uppercase, lowercase, number, and special character.'}), 400
     except Exception as e:
-        return jsonify({'error': f'Password reset failed: {str(e)}'}), 500
+        print(f"Reset password error: {e}")
+        return jsonify({'error': 'Password reset failed. Please try again.'}), 500
 
 
 @auth_bp.route('/api/auth/me', methods=['GET'])
@@ -387,4 +393,5 @@ def delete_account():
         })
 
     except Exception as e:
-        return jsonify({'error': f'Account deletion failed: {str(e)}'}), 500
+        print(f"Account deletion error: {e}")
+        return jsonify({'error': 'Account deletion failed. Please try again.'}), 500

@@ -1,0 +1,23 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - pip install -r requirements.txt -t ./lambda_layer/python
+        # Package Lambda function
+        - mkdir -p lambda_package
+        - cp web_ui.py lambda_package/
+        - cp db.py lambda_package/
+        - cp -r tools lambda_package/
+        - cd lambda_package && zip -r ../site-monitor-lambda.zip .
+frontend:
+  phases:
+    build:
+      commands:
+        - echo "Static frontend build"
+  artifacts:
+    baseDirectory: templates
+    files:
+      - '**/*'
+  cache:
+    paths: []

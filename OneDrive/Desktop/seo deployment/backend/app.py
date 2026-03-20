@@ -1,7 +1,8 @@
 """
 SEO Analyzer Backend - Flask API
-216 Comprehensive SEO Checks across 9 categories
-Enhanced GEO/AEO (45 checks) with AI Crawlability, Knowledge Graph, and Publishing Readiness
+231 Comprehensive SEO Checks across 9 categories
+Enhanced GEO/AEO (60 checks) with AI Crawlability, Knowledge Graph, Publishing Readiness,
+Prompt Visibility, Citation Worthiness, and Brand & Trust signals
 Enhanced Local SEO (30 checks) and Social SEO (24 checks) based on 2026 best practices
 Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
@@ -16,7 +17,13 @@ import time
 import json
 
 app = Flask(__name__, static_folder='../assets', static_url_path='/assets')
-CORS(app, origins=['https://ai1stseo.com', 'https://www.ai1stseo.com', 'http://ai1stseo.com', 'http://www.ai1stseo.com', 'http://localhost:5000'], supports_credentials=True)
+CORS(app, origins=[
+    'https://ai1stseo.com', 'https://www.ai1stseo.com',
+    'http://ai1stseo.com', 'http://www.ai1stseo.com',
+    'http://monitor.ai1stseo.com', 'https://monitor.ai1stseo.com',
+    'http://localhost:5000', 'http://localhost:8888',
+    'http://54.226.251.216', 'http://54.226.251.216:8888',
+], supports_credentials=True)
 
 # Register auth blueprint (Cognito + Secrets Manager)
 from auth import auth_bp
@@ -1390,17 +1397,19 @@ def analyze_local_seo(url, soup, response, load_time):
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
 
 
-# ============== GEO/AEO (45 checks) - AI Search Optimization ==============
+# ============== GEO/AEO (60 checks) - AI Search Optimization ==============
 
 def analyze_geo_aeo(url, soup, response, load_time):
     """
-    Comprehensive AI/LLM optimization checks (45 checks) based on:
+    Comprehensive AI/LLM optimization checks (60 checks) based on:
     - Google's AI experiences guidelines & AI Overviews
     - Answer Engine Optimization (AEO) best practices
     - LLM interpretability research & passage ranking readiness
     - AI crawler permissions & llms.txt emerging standard
     - WordPress REST API publishing readiness signals
     - E-E-A-T authority signals for AI citation
+    - AEO market research: prompt visibility, citation worthiness, brand entity signals
+    - Competitive analysis: Scrunch, Peec AI, Semrush, Ahrefs, Conductor, WebFX
     """
     checks = []
     html = str(soup)
@@ -1772,6 +1781,143 @@ def analyze_geo_aeo(url, soup, response, load_time):
               'Improve AEO pipeline readiness: 1) Add meta description (excerpt). 2) Use clean, descriptive URL slugs. 3) Categorize content with visible tags/categories. 4) Add JSON-LD schema. 5) Use Article/BlogPosting type. All 5 enable automated optimization.',
               'High', 'Publishing Readiness')
 
+    # ===== 46-50: Prompt Visibility & AI Answer Readiness (NEW — from AEO market research) =====
+    # Check for "best X" list patterns that match high-volume AI prompts
+    best_patterns = re.findall(r'\b(?:best|top|leading|recommended)\s+\d*\s*\w+', text.lower())
+    has_listicle_format = bool(best_patterns) and len(lists) >= 1
+    add_check(checks, 'Prompt-Aligned Listicle Content', 'pass' if has_listicle_format else 'info',
+              'Checks for "best/top X" list patterns that match the most common AI prompt archetype. Prompts like "best SEO tools" and "top AEO platforms" are among the highest-volume AI queries. Pages with ranked lists and clear criteria are cited most frequently in these responses.',
+              '{} "best/top" pattern(s) found{} — {}'.format(len(best_patterns), ", with list formatting" if has_listicle_format else "", "content matches high-volume AI prompt patterns" if has_listicle_format else "no ranked list content — consider adding 'best/top X' sections"),
+              'Add prompt-aligned list content: 1) Create "Best X for Y" sections with ranked items. 2) Include clear evaluation criteria. 3) Use numbered lists with brief explanations per item. 4) These match the #1 AI prompt archetype across all models.',
+              'High', 'Prompt Visibility')
+
+    # Check for comparison/vs content that matches "X vs Y" prompts
+    vs_patterns = re.findall(r'\b\w+\s+(?:vs\.?|versus|compared to|or)\s+\w+', text.lower())
+    has_comparison_structure = bool(vs_patterns) or has_comparison_table
+    add_check(checks, 'Comparison Query Readiness', 'pass' if has_comparison_structure else 'info',
+              'Detects "X vs Y" comparison patterns and structured comparison tables. Comparison queries are the second most common AI prompt type. AI systems strongly prefer pages with side-by-side tables and explicit pros/cons over narrative comparisons.',
+              '{} comparison pattern(s){} — {}'.format(len(vs_patterns), ", comparison table present" if has_comparison_table else "", "structured comparison content available for AI" if has_comparison_structure else "no comparison structure — add vs/comparison tables for high-citation potential"),
+              'Add comparison content: 1) Create "X vs Y" sections with comparison tables. 2) Include columns for features, pricing, pros, cons. 3) Add a clear recommendation/verdict. 4) This matches the #2 AI prompt archetype.',
+              'High', 'Prompt Visibility')
+
+    # Check for "how to" instructional content matching tutorial prompts
+    howto_patterns = re.findall(r'\b(?:how to|step[- ]by[- ]step|guide to|tutorial)\b', text.lower())
+    add_check(checks, 'How-To Query Readiness', 'pass' if len(howto_patterns) >= 2 else 'info',
+              'Detects instructional "how to" patterns that match tutorial-style AI prompts. "How to" queries are the third most common AI prompt type. Pages with clear step-by-step instructions and numbered processes are preferentially cited.',
+              '{} how-to pattern(s) — {}'.format(len(howto_patterns), "instructional content matches tutorial AI prompts" if len(howto_patterns) >= 2 else "limited how-to content — consider adding step-by-step guides"),
+              'Add how-to content: 1) Structure guides with numbered steps. 2) Start each step with an action verb. 3) Include expected outcomes per step. 4) Add HowTo schema markup for rich results.',
+              'Medium', 'Prompt Visibility')
+
+    # Check for pricing/specs content — highly cited by AI for commercial queries
+    pricing_patterns = re.findall(r'\$\d+|\bpric(?:e|ing)\b|\bfree\b|\bcost\b|\bplan\b|\btier\b', text.lower())
+    has_pricing_table = any(t for t in tables if any(p in t.get_text().lower() for p in ['price', 'cost', 'plan', 'free', 'month', 'year', '$']))
+    add_check(checks, 'Pricing & Specs Transparency', 'pass' if len(pricing_patterns) >= 3 or has_pricing_table else 'info',
+              'Checks for pricing, cost, and plan information. AI systems heavily cite pages with transparent pricing for commercial queries. The research shows pricing pages are among the most extracted content types by AI answer engines, especially for "how much does X cost" prompts.',
+              '{} pricing signal(s){} — {}'.format(len(pricing_patterns), ", pricing table found" if has_pricing_table else "", "pricing/cost information available for AI extraction" if len(pricing_patterns) >= 3 or has_pricing_table else "no pricing content — AI cannot answer cost questions about your offering"),
+              'Add pricing transparency: 1) Display pricing in a structured table. 2) Include plan names, features, and costs. 3) Use clear currency formatting. 4) AI systems extract pricing tables with high accuracy for commercial queries.',
+              'Medium', 'Prompt Visibility')
+
+    # Check for concise intro paragraph (AI Overview extraction pattern)
+    first_para_words = len(first_para.split()) if first_para else 0
+    intro_is_concise = 20 <= first_para_words <= 60
+    add_check(checks, 'AI Overview Intro Block', 'pass' if intro_is_concise and has_answer_first else 'warning',
+              'Evaluates whether the first paragraph is optimized for AI Overview extraction (20-60 words, answer-first). Google AI Overviews and other AI systems preferentially extract concise opening paragraphs that directly answer the page topic. This is the single highest-impact content pattern for AI citation.',
+              '{} words in first paragraph, {} — {}'.format(first_para_words, "answer-first style" if has_answer_first else "does not lead with answer", "optimal for AI Overview extraction" if intro_is_concise and has_answer_first else "intro may not be extracted by AI Overviews — aim for 20-60 words with the answer upfront"),
+              'Optimize your intro for AI Overviews: 1) Write a 20-60 word opening paragraph. 2) Answer the page topic in the first sentence. 3) Include your primary keyword naturally. 4) This paragraph is what AI Overviews most commonly extract.',
+              'Critical', 'Prompt Visibility')
+
+    # ===== 51-55: Citation-Worthiness & Evidence Signals =====
+    # Check for original data/statistics that make content citable
+    stat_patterns = re.findall(r'\d+(?:\.\d+)?%|\d+(?:,\d{3})+|\d+x\b', text)
+    add_check(checks, 'Original Data & Statistics', 'pass' if len(stat_patterns) >= 3 else 'warning',
+              'Counts specific data points (percentages, large numbers, multipliers) in your content. AI systems preferentially cite content containing original data and statistics because it provides verifiable, evidence-backed claims. Content with data is cited 2-3x more than opinion-only content.',
+              '{} data point(s) found — {}'.format(len(stat_patterns), "content contains citable data and statistics" if len(stat_patterns) >= 3 else "few data points — AI prefers evidence-backed content with specific numbers"),
+              'Add original data: 1) Include specific statistics and percentages. 2) Reference studies with numbers ("73% of organizations face..."). 3) Add data tables with measurable metrics. 4) Original research data is the most citable content type.',
+              'High', 'Citation Worthiness')
+
+    # Check for methodology/evidence language
+    evidence_words = ['methodology', 'method', 'approach', 'framework', 'benchmark', 'measured', 'tested', 'analyzed', 'evaluated', 'results show', 'findings', 'data shows', 'evidence']
+    evidence_count = sum(1 for w in evidence_words if w in text.lower())
+    add_check(checks, 'Methodology & Evidence Language', 'pass' if evidence_count >= 3 else 'info',
+              'Checks for methodology and evidence-based language patterns. AI systems evaluate content trustworthiness by looking for research methodology signals. Pages that describe how conclusions were reached are treated as more authoritative and citable sources.',
+              '{}/13 evidence signal(s) — {}'.format(evidence_count, "strong evidence-based language for AI trust" if evidence_count >= 3 else "limited methodology language — AI may not recognize content as evidence-based"),
+              'Add evidence language: 1) Describe your methodology ("We analyzed 500 websites..."). 2) Use "results show," "data indicates," "findings suggest." 3) Include sample sizes and timeframes. 4) This signals research credibility to AI systems.',
+              'Medium', 'Citation Worthiness')
+
+    # Check for contradiction/consistency risk
+    negation_claims = re.findall(r'\b(?:never|always|impossible|guaranteed|100%|every single)\b', text.lower())
+    add_check(checks, 'Claim Consistency & Safety', 'pass' if len(negation_claims) <= 2 else 'warning',
+              'Checks for absolute claims (never, always, guaranteed, 100%) that create contradiction risk in AI outputs. AI systems cross-reference claims across sources — absolute statements that conflict with other sources can trigger negative sentiment or exclusion from AI answers.',
+              '{} absolute claim(s) — {}'.format(len(negation_claims), "minimal absolute claims — low contradiction risk" if len(negation_claims) <= 2 else "multiple absolute claims — AI may flag contradictions with other sources"),
+              'Reduce absolute claims: 1) Replace "always" with "typically" or "in most cases." 2) Replace "never" with "rarely." 3) Replace "guaranteed" with "designed to." 4) Hedged claims are more defensible and less likely to be flagged by AI.',
+              'Medium', 'Citation Worthiness')
+
+    # Check for update/freshness indicators beyond timestamps
+    freshness_words = ['updated', 'latest', 'current', '2026', '2025', 'new', 'recently', 'this year', 'this month']
+    freshness_count = sum(1 for w in freshness_words if w in text.lower())
+    add_check(checks, 'Content Freshness Signals', 'pass' if freshness_count >= 2 else 'warning',
+              'Counts freshness indicator words (updated, latest, current year references) in visible content. Beyond meta timestamps, AI systems scan visible text for freshness cues. Content mentioning current dates and "updated" language is prioritized over undated content.',
+              '{} freshness signal(s) in content — {}'.format(freshness_count, "content signals recency to AI systems" if freshness_count >= 2 else "no freshness language — AI may treat content as potentially outdated"),
+              'Add freshness signals: 1) Include "Updated [Month Year]" near the top. 2) Reference current year in content. 3) Use "latest," "current," and "new" where accurate. 4) Add a visible "Last reviewed" date.',
+              'High', 'Citation Worthiness')
+
+    # Check for "used vs cited" readiness — content that can be both source material AND get linked
+    has_summary_section = bool(re.search(r'(?:summary|key takeaway|tl;?dr|in brief|bottom line|conclusion)', text.lower()))
+    has_deep_content = word_count >= 800
+    used_cited_score = sum([has_summary_section, has_deep_content, bool(json_ld), len(external_links) >= 2, bool(has_article_schema)])
+    add_check(checks, 'Used-vs-Cited Readiness', 'pass' if used_cited_score >= 4 else ('warning' if used_cited_score >= 2 else 'fail'),
+              'Evaluates 5 signals that determine whether AI will both USE your content as source material AND explicitly CITE/link to it. The distinction matters: "used" means AI absorbed your information, "cited" means it linked back to you. Maximizing both requires depth (to be used) plus clear attribution signals (to be cited).',
+              '{}/5 signals (summary section, depth, schema, external refs, article type) — {}'.format(used_cited_score, "strong used-and-cited potential" if used_cited_score >= 4 else "content may be used but not cited — add attribution-friendly signals"),
+              'Improve citation likelihood: 1) Add a summary/key takeaways section. 2) Ensure 800+ words of substantive content. 3) Add JSON-LD schema with author and dates. 4) Link to authoritative external sources. 5) Use Article schema.',
+              'High', 'Citation Worthiness')
+
+    # ===== 56-60: Brand Entity & Trust Stack =====
+    # Check for clear brand entity definition on the page
+    org_schema = 'Organization' in html or 'Corporation' in html
+    brand_mentions = text.lower().count(parsed.netloc.replace('www.', '').split('.')[0])
+    add_check(checks, 'Brand Entity Definition', 'pass' if org_schema and brand_mentions >= 2 else 'warning',
+              'Checks whether your brand is clearly defined as an entity on the page via Organization schema and consistent brand mentions. AI systems build entity profiles from structured data and content. A clearly defined brand entity is more likely to be recognized and cited correctly across AI models.',
+              '{} brand mention(s), {} — {}'.format(brand_mentions, "Organization schema present" if org_schema else "no Organization schema", "brand entity is well-defined for AI" if org_schema and brand_mentions >= 2 else "weak brand entity signals — AI may not recognize or correctly cite your brand"),
+              'Define your brand entity: 1) Add Organization schema with name, url, logo, description, and sameAs. 2) Mention your brand name naturally 3-5 times per page. 3) Use consistent naming (don\'t alternate between abbreviations). 4) This helps AI disambiguate your brand.',
+              'High', 'Brand & Trust')
+
+    # Check for trust stack signals (case studies, testimonials, proof)
+    trust_words = ['case study', 'testimonial', 'review', 'client', 'customer', 'success story', 'results', 'roi', 'certified', 'award', 'recognized']
+    trust_count = sum(1 for w in trust_words if w in text.lower())
+    add_check(checks, 'Trust Stack Signals', 'pass' if trust_count >= 3 else 'info',
+              'Counts trust and social proof signals (case studies, testimonials, certifications, awards). AI systems evaluate E-E-A-T partly through trust indicators. Competitors in the AEO space heavily emphasize case studies, benchmarks, and customer proof to win AI citations.',
+              '{} trust signal(s) — {}'.format(trust_count, "strong trust stack for AI credibility" if trust_count >= 3 else "limited trust signals — consider adding case studies, testimonials, or certifications"),
+              'Build your trust stack: 1) Add customer testimonials with names and companies. 2) Publish case studies with measurable outcomes. 3) Display certifications and awards. 4) Include client logos. 5) AI systems weight these when selecting authoritative sources.',
+              'Medium', 'Brand & Trust')
+
+    # Check for clear value proposition / unique positioning
+    value_words = ['unique', 'only', 'first', 'exclusive', 'proprietary', 'patent', 'unlike', 'different from', 'our approach', 'we built']
+    value_count = sum(1 for w in value_words if w in text.lower())
+    add_check(checks, 'Unique Value Proposition', 'pass' if value_count >= 2 else 'info',
+              'Checks for unique value proposition language that differentiates your offering. AI systems selecting which source to cite for a topic prefer content that offers a unique perspective or proprietary insight over generic information available elsewhere.',
+              '{} differentiation signal(s) — {}'.format(value_count, "clear unique positioning for AI preference" if value_count >= 2 else "generic positioning — AI may prefer more differentiated sources"),
+              'Clarify your unique value: 1) State what makes your approach different. 2) Use "unlike X, we..." or "our proprietary..." language. 3) Highlight original methodology or data. 4) AI cites unique perspectives over commodity information.',
+              'Medium', 'Brand & Trust')
+
+    # Check for content that is extractable without UI noise
+    nav_elements = soup.find_all('nav')
+    main_content = soup.find('main') or soup.find('article')
+    content_to_chrome_ratio = word_count / max(len(html), 1) * 100
+    add_check(checks, 'Content-to-Chrome Ratio', 'pass' if main_content and content_to_chrome_ratio > 15 else 'warning',
+              'Evaluates whether your main content is clearly separated from navigation, sidebars, and UI chrome. AI extraction works best when content is wrapped in semantic <main> or <article> tags. Pages where content is buried in UI noise get lower-quality AI citations.',
+              'Content ratio: {:.1f}%, {} — {}'.format(content_to_chrome_ratio, "main/article wrapper present" if main_content else "no main/article wrapper", "content is cleanly extractable" if main_content and content_to_chrome_ratio > 15 else "content may be hard for AI to extract from UI noise"),
+              'Improve content extractability: 1) Wrap primary content in <main> or <article> tags. 2) Keep navigation in <nav> and sidebars in <aside>. 3) Minimize boilerplate text in the content area. 4) AI systems extract from semantic containers first.',
+              'High', 'Brand & Trust')
+
+    # Check for multi-format summary (TL;DR + detailed content pattern)
+    has_tldr = bool(re.search(r'(?:tl;?dr|key takeaway|summary|in brief|at a glance|quick answer)', text.lower()))
+    has_detailed = word_count >= 500
+    add_check(checks, 'Summary + Depth Pattern', 'pass' if has_tldr and has_detailed else ('warning' if has_detailed else 'fail'),
+              'Checks for the "summary + depth" content pattern: a concise summary/TL;DR section paired with detailed supporting content. This pattern serves both AI extraction (summary gets cited) and source credibility (depth proves expertise). It is the optimal structure for maximizing both AI visibility and citation rate.',
+              '{}, {} — {}'.format("Summary/TL;DR section found" if has_tldr else "No summary section", "{} words of content".format(word_count), "optimal summary + depth pattern" if has_tldr and has_detailed else "missing summary section — add a TL;DR or key takeaways block"),
+              'Add summary + depth: 1) Add a "Key Takeaways" or "TL;DR" section near the top. 2) Keep it to 3-5 bullet points. 3) Follow with detailed sections that support each point. 4) AI extracts the summary; depth builds citation trust.',
+              'High', 'Brand & Trust')
+
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
 
@@ -1852,7 +1998,7 @@ def analyze_url():
 def health_check():
     return jsonify({
         'status': 'ok', 
-        'totalChecks': 216,
+        'totalChecks': 231,
         'categories': {
             'technical': 30,
             'onpage': 24,
@@ -1862,7 +2008,7 @@ def health_check():
             'security': 13,
             'social': 24,
             'local': 30,
-            'geo': 45
+            'geo': 60
         }
     })
 
@@ -2088,7 +2234,7 @@ Based on the Social SEO audit results (25 checks), provide fixes for:
 Include complete Open Graph and Twitter Card meta tag code.
 
 ## 12. AI/GEO OPTIMIZATION (Generative Engine Optimization)
-Based on the GEO/AEO audit results (45 checks across 8 subcategories), provide fixes for:
+Based on the GEO/AEO audit results (60 checks across 11 subcategories), provide fixes for:
 - Structured data for AI parsing (JSON-LD, FAQ schema, HowTo, Speakable)
 - Content formatting for LLM comprehension (Q&A patterns, definitions, answer-first writing)
 - Answer Engine Optimization (featured snippets, PAA, passage ranking)
@@ -2098,6 +2244,9 @@ Based on the GEO/AEO audit results (45 checks across 8 subcategories), provide f
 - Knowledge Graph readiness (mainEntityOfPage, BreadcrumbList, topic clusters)
 - Content format diversity (tables, lists, code blocks, comparisons)
 - CMS/WordPress publishing readiness (Article schema, REST API, AEO pipeline signals)
+- Prompt Visibility (AI Overview intro optimization, listicle/comparison/how-to query readiness, pricing transparency)
+- Citation Worthiness (original data, methodology language, claim consistency, freshness signals, used-vs-cited readiness)
+- Brand & Trust (brand entity definition, trust stack, unique value proposition, content extractability, summary+depth pattern)
 Include FAQ schema, AI-optimized structured data, and robots.txt AI bot configuration.
 
 ---
