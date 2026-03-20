@@ -1,9 +1,10 @@
 """
 bedrock_helper.py
 Thin wrapper around AWS Bedrock Runtime for Claude invocations.
-Uses IAM role credentials (no API keys required).
 
-On EC2, credentials come from the instance profile / IAM role automatically.
+Authentication priority:
+  1. Explicit env vars: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (+ optional AWS_SESSION_TOKEN)
+  2. Default boto3 credential chain (IAM role, instance profile, SSO, etc.)
 """
 
 import json
@@ -21,12 +22,26 @@ _client = None
 
 
 def get_client():
-    """Return a cached Bedrock Runtime client using IAM credentials."""
+    """Return a cached Bedrock Runtime client."""
     global _client
     if _client is None:
         region = os.environ.get("AWS_REGION", DEFAULT_REGION)
-        _client = boto3.client("bedrock-runtime", region_name=region)
-        logger.info("Bedrock runtime client created (region=%s)", region)
+        access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+        secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+        if access_key and secret_key:
+            session_token = os.environ.get("AWS_SESSION_TOKEN")
+            _client = boto3.client(
+                "bedrock-runtime",
+                region_name=region,
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key,
+                aws_session_token=session_token,
+            )
+            logger.info("Bedrock client created with explicit credentials (region=%s)", region)
+        else:
+            _client = boto3.client("bedrock-runtime", region_name=region)
+            logger.info("Bedrock client created with default credential chain (region=%s)", region)
     return _client
 
 
