@@ -32,8 +32,8 @@ logging.basicConfig(
 logger = logging.getLogger("geo_engine")
 
 USE_BEDROCK = os.environ.get("USE_BEDROCK", "0") == "1"
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://ollama.sageaios.com/api/generate")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3")
+OLLAMA_BASE = os.environ.get("OLLAMA_URL", "https://ollama.sageaios.com")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "")  # auto-detect if empty
 
 
 # ── Provider: Nova Lite (Bedrock) ─────────────────────────────────────────────
@@ -80,19 +80,60 @@ def _invoke_nova(prompt):
 # ── Provider: Ollama (free fallback) ──────────────────────────────────────────
 
 def _invoke_ollama(prompt):
-    """Call Ollama endpoint as free fallback."""
+    """Call Ollama endpoint as free fallback. Auto-detects model if not set."""
+    global OLLAMA_MODEL
+
+    base = OLLAMA_BASE.rstrip("/")
+
+    # Auto-detect model if not configured
+    if not OLLAMA_MODEL:
+        try:
+            tags_resp = http_requests.get(f"{base}/api/tags", timeout=10)
+            if tags_resp.status_code == 200:
+                models = tags_resp.json().get("models", [])
+                # Pick first text-generation model (skip embedding models)
+                for m in models:
+                    name = m.get("name", "")
+                    family = m.get("details", {}).get("family", "")
+                    if "embed" not in name and "embed" not in family:
+                        OLLAMA_MODEL = name
+                        logger.info("Ollama auto-detected model: %s", OLLAMA_MODEL)
+                        break
+                if not OLLAMA_MODEL and models:
+                    OLLAMA_MODEL = models[0]["name"]
+                    logger.info("Ollama fallback to first model: %s", OLLAMA_MODEL)
+            if not OLLAMA_MODEL:
+                logger.error("Ollama: no models found at %s/api/tags", base)
+                raise RuntimeError("Ollama has no models available")
+        except http_requests.RequestException as e:
+            logger.error("Ollama /api/tags failed: %s", e)
+            raise RuntimeError(f"Cannot reach Ollama at {base}: {e}")
+
+    # Verify model exists
+    try:
+        tags_resp = http_requests.get(f"{base}/api/tags", timeout=10)
+        if tags_resp.status_code == 200:
+            available = [m["name"] for m in tags_resp.json().get("models", [])]
+            if OLLAMA_MODEL not in available:
+                logger.error("Ollama model '%s' not found. Available: %s", OLLAMA_MODEL, available)
+                raise RuntimeError(f"Ollama model '{OLLAMA_MODEL}' not found. Available: {available}")
+    except http_requests.RequestException:
+        pass  # proceed anyway, let the generate call fail if needed
+
+    logger.info("Ollama calling model=%s", OLLAMA_MODEL)
     t0 = time.time()
     resp = http_requests.post(
-        OLLAMA_URL,
+        f"{base}/api/generate",
         json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
-        timeout=60,
+        timeout=120,
     )
     if resp.status_code != 200:
+        logger.error("Ollama generate failed: %d %s", resp.status_code, resp.text[:300])
         raise RuntimeError(f"Ollama returned {resp.status_code}: {resp.text[:300]}")
     data = resp.json()
     text = data.get("response", "")
     elapsed = round(time.time() - t0, 2)
-    logger.info("Ollama responded in %.2fs (%d chars)", elapsed, len(text))
+    logger.info("Ollama responded in %.2fs (%d chars) model=%s", elapsed, len(text), OLLAMA_MODEL)
     return text
 
 
