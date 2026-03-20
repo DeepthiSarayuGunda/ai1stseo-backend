@@ -2,15 +2,11 @@
 """
 geo_engine.py — EC2 AI Engine for GEO Probe
 
-Standalone Flask service that runs on EC2.
-Phase 1: stub response to verify endpoint works.
-Phase 2: Bedrock integration (already wired, set USE_BEDROCK=1 to enable).
+Standalone Flask service on EC2 with Bedrock access (IAM role).
+Set USE_BEDROCK=1 to call Claude, otherwise returns stub response.
 
 Run:   python3 geo_engine.py
 Port:  5005
-Test:  curl -X POST http://localhost:5005/geo-probe \
-         -H "Content-Type: application/json" \
-         -d '{"brand_name":"nike","keyword":"running shoes"}'
 """
 
 import json
@@ -25,19 +21,32 @@ app = Flask(__name__)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(name)s %(levelname)s %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("/tmp/geo_engine.log"),
+    ],
 )
 logger = logging.getLogger("geo_engine")
 
 USE_BEDROCK = os.environ.get("USE_BEDROCK", "0") == "1"
 
 
-# ── Bedrock (only loaded when enabled) ───────────────────────────────────────
+# ── Bedrock ───────────────────────────────────────────────────────────────────
+
+_bedrock_client = None
+
+def _get_bedrock():
+    global _bedrock_client
+    if _bedrock_client is None:
+        import boto3
+        region = os.environ.get("AWS_REGION", "us-east-1")
+        _bedrock_client = boto3.client("bedrock-runtime", region_name=region)
+        logger.info("Bedrock client initialized (region=%s)", region)
+    return _bedrock_client
+
 
 def _invoke_claude(prompt):
-    import boto3
-
-    region = os.environ.get("AWS_REGION", "us-east-1")
-    client = boto3.client("bedrock-runtime", region_name=region)
+    client = _get_bedrock()
     body = json.dumps({
         "anthropic_version": "bedrock-2023-05-31",
         "max_tokens": 1024,
@@ -53,22 +62,24 @@ def _invoke_claude(prompt):
     return result["content"][0]["text"]
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Citation detection ────────────────────────────────────────────────────────
 
-def _extract_context(text, brand, window=150):
-    match = re.search(re.escape(brand), text, re.IGNORECASE)
-    if not match:
-        return None
-    s = max(0, match.start() - window)
-    e = min(len(text), match.end() + window)
-    snippet = text[s:e].strip()
-    fd = snippet.find(". ")
-    ld = snippet.rfind(".")
-    if fd != -1 and s > 0:
-        snippet = snippet[fd + 2:]
-    if ld != -1 and ld > 0 and e < len(text):
-        snippet = snippet[:ld + 1]
-    return snippet or None
+def _extract_citation_context(text, brand):
+    """
+    Find the sentence(s) containing the brand name.
+    Returns the first matching sentence, or None.
+    """
+    # Split into sentences (handles numbered lists, bullet points, etc.)
+    sentences = re.split(r'(?<=[.!?])\s+|\n+', text)
+    pattern = re.compile(re.escape(brand), re.IGNORECASE)
+
+    for sentence in sentences:
+        if pattern.search(sentence):
+            clean = sentence.strip().strip("-*• 0123456789.")
+            if clean:
+                return clean
+
+    return None
 
 
 def _now():
@@ -86,7 +97,7 @@ def geo_probe():
     if not brand_name or not keyword:
         return jsonify({"error": "brand_name and keyword are required"}), 400
 
-    logger.info("GEO probe: brand=%s keyword=%s bedrock=%s", brand_name, keyword, USE_BEDROCK)
+    logger.info("GEO probe START: brand=%s keyword=%s bedrock=%s", brand_name, keyword, USE_BEDROCK)
 
     if USE_BEDROCK:
         prompt = (
@@ -101,15 +112,25 @@ def geo_probe():
             logger.error("Bedrock failed: %s", e)
             return jsonify({"error": f"Bedrock invocation failed: {e}"}), 503
 
+        # Log raw response so we can verify it's real model output
+        logger.info("RAW CLAUDE RESPONSE (%d chars):\n%s", len(response_text), response_text[:1000])
+
+        if not response_text or not response_text.strip():
+            return jsonify({"error": "Empty response from Claude"}), 503
+
         cited = bool(re.search(re.escape(brand_name), response_text, re.IGNORECASE))
-        context = _extract_context(response_text, brand_name) if cited else None
+        context = _extract_citation_context(response_text, brand_name) if cited else None
         confidence = 1.0 if cited else 0.0
+        source = "bedrock"
+
+        logger.info("DETECTION: brand=%s cited=%s confidence=%.1f context=%s",
+                     brand_name, cited, confidence, context[:80] if context else "null")
     else:
-        # Stub mode — always returns a valid response for endpoint testing
         cited = False
         context = None
         confidence = 0.0
-        logger.info("Stub mode — returning mock response")
+        source = "stub"
+        logger.info("STUB MODE — returning mock response")
 
     return jsonify({
         "keyword": keyword,
@@ -119,6 +140,7 @@ def geo_probe():
         "citation_context": context,
         "timestamp": _now(),
         "confidence": confidence,
+        "source": source,
     })
 
 
