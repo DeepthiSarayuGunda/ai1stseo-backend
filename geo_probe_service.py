@@ -247,3 +247,188 @@ def schedule_probe(brand_name: str, keywords: list[str], ai_model: str = "nova",
 
 def get_scheduled_jobs() -> list[dict]:
     return list(_scheduled_jobs)
+
+
+# ── multi-model comparison ────────────────────────────────────────────────────
+
+def geo_probe_compare(brand_name: str, keyword: str) -> dict:
+    """
+    Probe the SAME keyword across ALL available providers simultaneously.
+    Returns per-provider results + cross-model visibility score.
+    """
+    import concurrent.futures
+
+    # Get available providers from EC2
+    providers = []
+    try:
+        resp = requests.get(f"{EC2_GEO_ENGINE_URL}/geo-probe/providers", timeout=5)
+        if resp.status_code == 200:
+            providers = [p["name"] for p in resp.json().get("providers", []) if p.get("available")]
+    except Exception:
+        providers = ["nova", "ollama"]
+
+    results = {}
+
+    def _probe(provider):
+        try:
+            return provider, geo_probe(brand_name, keyword, ai_model=provider)
+        except Exception as e:
+            return provider, {
+                "keyword": keyword,
+                "ai_model": provider,
+                "brand_present": None,
+                "citation_context": None,
+                "confidence": 0.0,
+                "error": str(e),
+                "timestamp": _now_iso(),
+            }
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(providers)) as pool:
+        futures = {pool.submit(_probe, p): p for p in providers}
+        for f in concurrent.futures.as_completed(futures):
+            provider, result = f.result()
+            results[provider] = result
+
+    # Cross-model visibility score
+    total = len(results)
+    cited_count = sum(1 for r in results.values() if r.get("brand_present") is True)
+    avg_confidence = round(
+        sum(r.get("confidence", 0) for r in results.values()) / total, 2
+    ) if total else 0.0
+    visibility_score = round((cited_count / total) * 100) if total else 0
+
+    return {
+        "brand_name": brand_name,
+        "keyword": keyword,
+        "providers_queried": list(results.keys()),
+        "results": results,
+        "visibility_score": visibility_score,
+        "cited_count": cited_count,
+        "total_providers": total,
+        "avg_confidence": avg_confidence,
+        "timestamp": _now_iso(),
+    }
+
+
+# ── URL/site detection in AI outputs ─────────────────────────────────────────
+
+def geo_probe_site(site_url: str, keyword: str, ai_model: str = "nova") -> dict:
+    """
+    Detect if a specific website/URL is mentioned in AI output.
+    Sends keyword to AI, then checks if the site domain appears in the response.
+    """
+    from urllib.parse import urlparse
+    domain = urlparse(site_url).netloc or site_url
+    # Strip www. for matching
+    domain_clean = domain.replace("www.", "")
+
+    url = f"{EC2_GEO_ENGINE_URL}/generate"
+    prompt = (
+        f"A user asks: \"{keyword}\"\n\n"
+        f"Provide a comprehensive answer with specific website recommendations, "
+        f"tools, and resources. Include URLs where relevant."
+    )
+
+    try:
+        resp = requests.post(url, json={"prompt": prompt, "provider": ai_model}, timeout=EC2_TIMEOUT)
+        if resp.status_code != 200:
+            raise RuntimeError(f"EC2 returned {resp.status_code}")
+        text = resp.json().get("text", "")
+    except Exception as e:
+        return {
+            "site_url": site_url,
+            "keyword": keyword,
+            "ai_model": ai_model,
+            "site_mentioned": None,
+            "error": str(e),
+            "timestamp": _now_iso(),
+        }
+
+    # Check for domain mention
+    import re
+    pattern = re.compile(re.escape(domain_clean), re.IGNORECASE)
+    mentioned = bool(pattern.search(text))
+
+    # Extract the sentence containing the mention
+    context = None
+    if mentioned:
+        sentences = re.split(r'(?<=[.!?])\s+|\n+', text)
+        for s in sentences:
+            if pattern.search(s):
+                context = s.strip()
+                break
+
+    result = {
+        "site_url": site_url,
+        "domain": domain_clean,
+        "keyword": keyword,
+        "ai_model": ai_model,
+        "site_mentioned": mentioned,
+        "mention_context": context,
+        "timestamp": _now_iso(),
+    }
+
+    # Store to DB as well
+    _store_result({
+        "keyword": keyword,
+        "brand_name": domain_clean,
+        "ai_model": ai_model,
+        "brand_present": mentioned,
+        "citation_context": context,
+        "confidence": 1.0 if mentioned else 0.0,
+        "timestamp": _now_iso(),
+    })
+
+    return result
+
+
+# ── visibility trend ──────────────────────────────────────────────────────────
+
+def get_visibility_trend(brand: str, limit: int = 30) -> dict:
+    """
+    Get visibility trend for a brand over time from stored results.
+    Returns daily aggregated scores.
+    """
+    try:
+        with _db_lock:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT timestamp, cited, confidence, ai_model FROM probe_results "
+                "WHERE brand = ? ORDER BY id DESC LIMIT ?",
+                (brand, limit),
+            ).fetchall()
+            conn.close()
+
+        if not rows:
+            return {"brand": brand, "trend": [], "total_probes": 0}
+
+        # Group by date
+        from collections import defaultdict
+        daily = defaultdict(lambda: {"cited": 0, "total": 0, "providers": set()})
+        for r in rows:
+            date = r["timestamp"][:10] if r["timestamp"] else "unknown"
+            daily[date]["total"] += 1
+            if r["cited"]:
+                daily[date]["cited"] += 1
+            daily[date]["providers"].add(r["ai_model"])
+
+        trend = []
+        for date in sorted(daily.keys()):
+            d = daily[date]
+            trend.append({
+                "date": date,
+                "visibility_score": round((d["cited"] / d["total"]) * 100) if d["total"] else 0,
+                "cited": d["cited"],
+                "total": d["total"],
+                "providers": list(d["providers"]),
+            })
+
+        return {
+            "brand": brand,
+            "trend": trend,
+            "total_probes": len(rows),
+        }
+    except Exception as e:
+        logger.error("Failed to get visibility trend: %s", e)
+        return {"brand": brand, "trend": [], "error": str(e)}

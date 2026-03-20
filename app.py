@@ -2018,6 +2018,49 @@ def geo_probe_schedule_list():
     from geo_probe_service import get_scheduled_jobs
     return jsonify({'jobs': get_scheduled_jobs()})
 
+
+@app.route('/api/geo-probe/compare', methods=['POST'])
+def geo_probe_compare():
+    """Compare brand visibility across ALL available AI providers simultaneously."""
+    from geo_probe_service import geo_probe_compare as _compare
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    try:
+        return jsonify(_compare(brand, keyword))
+    except Exception as e:
+        return jsonify({'error': f'Compare failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/site', methods=['POST'])
+def geo_probe_site():
+    """Detect if a website/URL is mentioned in AI output for a keyword."""
+    from geo_probe_service import geo_probe_site as _site
+    data = request.get_json() or {}
+    site_url = (data.get('site_url') or data.get('url') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'nova').strip().lower()
+    if not site_url or not keyword:
+        return jsonify({'error': 'site_url and keyword are required'}), 400
+    try:
+        return jsonify(_site(site_url, keyword, ai_model=provider))
+    except Exception as e:
+        return jsonify({'error': f'Site probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/trend', methods=['GET'])
+def geo_probe_trend():
+    """Get visibility trend for a brand over time."""
+    from geo_probe_service import get_visibility_trend
+    brand = request.args.get('brand', '').strip()
+    limit = int(request.args.get('limit', 30))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    return jsonify(get_visibility_trend(brand, limit=limit))
+
+
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
