@@ -1,4 +1,4 @@
-﻿"""
+"""
 LLM Service - modular abstraction for multi-provider AI queries
 Supports: Groq (free), Claude (Anthropic), OpenAI GPT, Perplexity
 """
@@ -9,7 +9,7 @@ import concurrent.futures
 from datetime import datetime
 
 
-# ── provider clients ──────────────────────────────────────────────────────────
+# -- provider clients ----------------------------------------------------------
 
 def _groq_client():
     from groq import Groq
@@ -48,7 +48,7 @@ def _gemini_client():
     return genai
 
 
-# ── extraction helpers ────────────────────────────────────────────────────────
+# -- extraction helpers --------------------------------------------------------
 
 def _extract_brands(text):
     tokens = re.findall(r'\b[A-Z][a-zA-Z0-9]*(?:\s[A-Z][a-zA-Z0-9]+)*\b', text)
@@ -87,7 +87,7 @@ def _extract_facts(text):
     return re.findall(r'[^.]*\b\d[\d,\.%]*\b[^.]*\.', text)[:5]
 
 
-# ── per-provider query functions ──────────────────────────────────────────────
+# -- per-provider query functions ----------------------------------------------
 
 def _query_groq(keyword, model="llama-3.3-70b-versatile"):
     client = _groq_client()
@@ -102,13 +102,28 @@ def _query_groq(keyword, model="llama-3.3-70b-versatile"):
     return resp.choices[0].message.content
 
 def _query_claude(keyword, model="claude-3-haiku-20240307"):
-    client = _anthropic_client()
-    msg = client.messages.create(
-        model=model,
-        max_tokens=1024,
-        messages=[{"role": "user", "content": f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources."}]
-    )
-    return msg.content[0].text
+    """Route Claude queries through EC2 Bedrock - no API key needed."""
+    import requests as _req
+    ec2_url = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
+    try:
+        resp = _req.post(
+            f"{ec2_url}/generate",
+            json={"prompt": f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources."},
+            timeout=45,
+        )
+        if resp.status_code == 200:
+            return resp.json().get("text", "")
+    except Exception:
+        pass
+    key = os.environ.get("ANTHROPIC_API_KEY")
+    if key:
+        client = _anthropic_client()
+        msg = client.messages.create(
+            model=model, max_tokens=1024,
+            messages=[{"role": "user", "content": f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources."}]
+        )
+        return msg.content[0].text
+    raise RuntimeError("Claude unavailable - EC2 Bedrock down and no ANTHROPIC_API_KEY set")
 
 def _query_openai(keyword, model="gpt-4o-mini"):
     client = _openai_client()
@@ -141,21 +156,27 @@ def _query_gemini(keyword, model="gemini-1.5-flash"):
     return resp.text
 
 
-# ── provider registry ─────────────────────────────────────────────────────────
+# -- provider registry ---------------------------------------------------------
 
 PROVIDERS = {
     "groq":       {"fn": _query_groq,       "env": "GROQ_API_KEY",       "default_model": "llama-3.3-70b-versatile"},
-    "claude":     {"fn": _query_claude,     "env": "ANTHROPIC_API_KEY",  "default_model": "claude-3-haiku-20240307"},
+    "claude":     {"fn": _query_claude,     "env": None,                 "default_model": "claude-3-haiku-20240307"},
     "openai":     {"fn": _query_openai,     "env": "OPENAI_API_KEY",     "default_model": "gpt-4o-mini"},
     "perplexity": {"fn": _query_perplexity, "env": "PERPLEXITY_API_KEY", "default_model": "llama-3.1-sonar-small-128k-online"},
     "gemini":     {"fn": _query_gemini,     "env": "GEMINI_API_KEY",     "default_model": "gemini-1.5-flash"},
 }
 
 def _available_providers():
-    return [name for name, cfg in PROVIDERS.items() if os.environ.get(cfg["env"])]
+    available = []
+    for name, cfg in PROVIDERS.items():
+        if cfg["env"] is None:
+            available.append(name)
+        elif os.environ.get(cfg["env"]):
+            available.append(name)
+    return available
 
 
-# ── public API ────────────────────────────────────────────────────────────────
+# -- public API ----------------------------------------------------------------
 
 def citation_probe(keyword, provider="groq", model=None):
     cfg = PROVIDERS.get(provider)
