@@ -2275,6 +2275,11 @@ def serve_audit(url=None):
 def serve_geo_test():
     return send_from_directory('.', 'geo-test.html')
 
+@app.route('/dev1-dashboard')
+def serve_dev1_dashboard():
+    return send_from_directory('.', 'dev1-dashboard.html')
+
+
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
