@@ -36,9 +36,16 @@ button:disabled{opacity:.5;cursor:wait}
 <div class="card">
   <span class="tag tag-live">LIVE</span>
   <h2>1. GEO Monitoring Engine</h2>
-  <p class="desc">Detect brand mentions in AI outputs (Claude/Bedrock)</p>
+  <p class="desc">Detect brand mentions across Claude, OpenAI, Gemini, Perplexity</p>
   <label>Brand</label><input id="g-brand" value="Nike">
   <label>Keyword</label><input id="g-kw" value="running shoes">
+  <label>Provider</label>
+  <select id="g-prov">
+    <option value="claude" selected>Claude (Bedrock)</option>
+    <option value="openai">OpenAI (GPT-4o-mini)</option>
+    <option value="gemini">Google Gemini</option>
+    <option value="perplexity">Perplexity</option>
+  </select>
   <button class="btn1" onclick="runGeo()">Run GEO Probe</button>
   <div id="g-out" class="out"></div>
 </div>
@@ -130,7 +137,8 @@ async function runGeo() {
   try {
     const d = await api('POST', '/api/geo-probe', {
       brand_name: document.getElementById('g-brand').value,
-      keyword: document.getElementById('g-kw').value
+      keyword: document.getElementById('g-kw').value,
+      provider: document.getElementById('g-prov').value
     });
     show('g-out', d);
   } catch (e) { show('g-out', 'Error: ' + e.message); }

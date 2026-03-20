@@ -1934,18 +1934,19 @@ Be specific and actionable. Include actual code examples where helpful."""
 
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    """GEO Monitoring Engine — routes to EC2 AI engine."""
+    """GEO Monitoring Engine — multi-provider, routes to EC2 AI engine."""
     from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or data.get('ai_model') or 'claude').strip().lower()
 
     if not brand or not keyword:
         return jsonify({'error': 'brand_name and keyword are required'}), 400
 
     try:
-        result = _geo_probe(brand, keyword)
+        result = _geo_probe(brand, keyword, ai_model=provider)
         return jsonify(result)
     except RuntimeError as e:
         return jsonify({'error': str(e)}), 503
@@ -1955,19 +1956,20 @@ def geo_probe():
 
 @app.route('/api/geo-probe/models', methods=['GET'])
 def geo_probe_models():
-    """List available AI models for GEO probing."""
+    """List available AI providers for GEO probing."""
     from geo_probe_service import available_models
     return jsonify({'models': available_models()})
 
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO/AEO batch analysis — routes to EC2 for each keyword."""
+    """GEO/AEO batch analysis — multi-provider, routes to EC2."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
     keywords = data.get('keywords') or []
+    provider = (data.get('provider') or data.get('ai_model') or 'claude').strip().lower()
 
     if not brand:
         return jsonify({'error': 'brand_name is required'}), 400
@@ -1977,16 +1979,44 @@ def geo_probe_batch():
         return jsonify({'error': 'Maximum 20 keywords per batch'}), 400
 
     try:
-        return jsonify(_batch(brand, keywords))
+        return jsonify(_batch(brand, keywords, ai_model=provider))
     except Exception as e:
         return jsonify({'error': f'Batch probe failed: {str(e)}'}), 500
 
 
 @app.route('/api/geo-probe/history', methods=['GET'])
 def geo_probe_history():
-    """Return last 20 batch probe results (newest first)."""
-    from geo_probe_service import get_history
-    return jsonify({'history': get_history()})
+    """Return probe history — batch (in-memory) + stored (SQLite)."""
+    from geo_probe_service import get_history, get_stored_history
+    brand = request.args.get('brand')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 50))
+    return jsonify({
+        'batch_history': get_history(),
+        'stored_results': get_stored_history(limit=limit, brand=brand, ai_model=ai_model),
+    })
+
+
+@app.route('/api/geo-probe/schedule', methods=['POST'])
+def geo_probe_schedule():
+    """Register a scheduled monitoring job (placeholder)."""
+    from geo_probe_service import schedule_probe
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keywords = data.get('keywords') or []
+    provider = (data.get('provider') or 'claude').strip()
+    interval = int(data.get('interval_minutes', 60))
+    if not brand or not keywords:
+        return jsonify({'error': 'brand_name and keywords are required'}), 400
+    job = schedule_probe(brand, keywords, ai_model=provider, interval_minutes=interval)
+    return jsonify(job)
+
+
+@app.route('/api/geo-probe/schedule', methods=['GET'])
+def geo_probe_schedule_list():
+    """List registered scheduled jobs."""
+    from geo_probe_service import get_scheduled_jobs
+    return jsonify({'jobs': get_scheduled_jobs()})
 
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():

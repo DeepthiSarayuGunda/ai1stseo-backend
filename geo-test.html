@@ -54,11 +54,12 @@
     <textarea id="keywords" placeholder="One per line&#10;e.g. best project management tools&#10;tools similar to Notion"></textarea>
     <div class="hint">One keyword per line. Single line = single probe, multiple = batch with geo_score.</div>
 
-    <label for="model">AI Model</label>
+    <label for="model">AI Provider</label>
     <select id="model">
-      <option value="claude-bedrock" selected>Claude (Bedrock)</option>
-      <option value="gemini">Gemini (placeholder)</option>
-      <option value="perplexity">Perplexity (placeholder)</option>
+      <option value="claude" selected>Claude (Bedrock)</option>
+      <option value="openai">OpenAI (GPT-4o-mini)</option>
+      <option value="gemini">Google Gemini</option>
+      <option value="perplexity">Perplexity</option>
     </select>
 
     <div class="btns">
@@ -120,7 +121,7 @@ async function run(mode) {
       const resp = await fetch('/api/geo-probe', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ brand_name: brand, keyword: kws[0], ai_model: model })
+        body: JSON.stringify({ brand_name: brand, keyword: kws[0], provider: model })
       });
       const data = await resp.json();
       if (!resp.ok) { errEl.textContent = data.error || `HTTP ${resp.status}`; errEl.style.display = 'block'; return; }
@@ -129,7 +130,7 @@ async function run(mode) {
       const resp = await fetch('/api/geo-probe/batch', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ brand_name: brand, keywords: kws, ai_model: model })
+        body: JSON.stringify({ brand_name: brand, keywords: kws, provider: model })
       });
       const data = await resp.json();
       if (!resp.ok) { errEl.textContent = data.error || `HTTP ${resp.status}`; errEl.style.display = 'block'; return; }

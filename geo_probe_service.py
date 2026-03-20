@@ -1,16 +1,18 @@
 """
 geo_probe_service.py
-GEO / AEO Monitoring Engine — EC2-routed AI Scanner
+GEO / AEO Monitoring Engine — Multi-Provider with Tracking & Storage
 
-Routes AI probe requests to the EC2 geo_engine (which has Bedrock access),
-performs scoring across batches, and keeps in-memory history.
+Routes AI probe requests to the EC2 geo_engine (multi-provider),
+performs scoring across batches, stores results, and keeps history.
 
-Architecture: App Runner (API gateway) → EC2 (AI engine) → Bedrock (Claude)
+Architecture: App Runner (API gateway) → EC2 (AI engine) → Bedrock/OpenAI/Gemini/Perplexity
 """
 
 import collections
 import logging
 import os
+import sqlite3
+import threading
 
 import requests
 
@@ -20,10 +22,87 @@ logger = logging.getLogger(__name__)
 
 EC2_GEO_ENGINE_URL = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
 EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "30"))
+DB_PATH = os.environ.get("GEO_PROBE_DB", "/tmp/geo_probe.db")
 
 # ── in-memory history (last 20 batch results) ────────────────────────────────
 
 _history: collections.deque = collections.deque(maxlen=20)
+
+# ── SQLite storage ────────────────────────────────────────────────────────────
+
+_db_lock = threading.Lock()
+
+
+def _init_db():
+    """Create the probe_results table if it doesn't exist."""
+    with _db_lock:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS probe_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                keyword TEXT NOT NULL,
+                brand TEXT NOT NULL,
+                ai_model TEXT NOT NULL,
+                cited INTEGER NOT NULL,
+                citation_context TEXT,
+                confidence REAL DEFAULT 0.0,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+        conn.close()
+    logger.info("GEO probe DB initialized at %s", DB_PATH)
+
+
+_init_db()
+
+
+def _store_result(result: dict):
+    """Persist a single probe result to SQLite."""
+    try:
+        with _db_lock:
+            conn = sqlite3.connect(DB_PATH)
+            conn.execute(
+                "INSERT INTO probe_results (keyword, brand, ai_model, cited, citation_context, confidence, timestamp) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    result.get("keyword", ""),
+                    result.get("brand_name", result.get("brand", "")),
+                    result.get("ai_model", "claude"),
+                    1 if result.get("brand_present") else 0,
+                    result.get("citation_context"),
+                    result.get("confidence", 0.0),
+                    result.get("timestamp", _now_iso()),
+                ),
+            )
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        logger.error("Failed to store probe result: %s", e)
+
+
+def get_stored_history(limit: int = 50, brand: str = None, ai_model: str = None) -> list[dict]:
+    """Fetch stored probe results from SQLite with optional filters."""
+    try:
+        with _db_lock:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            query = "SELECT * FROM probe_results WHERE 1=1"
+            params = []
+            if brand:
+                query += " AND brand = ?"
+                params.append(brand)
+            if ai_model:
+                query += " AND ai_model = ?"
+                params.append(ai_model)
+            query += " ORDER BY id DESC LIMIT ?"
+            params.append(limit)
+            rows = conn.execute(query, params).fetchall()
+            conn.close()
+            return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error("Failed to read stored history: %s", e)
+        return []
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -34,8 +113,18 @@ def _now_iso() -> str:
 
 
 def available_models() -> list[dict]:
+    """Query EC2 for available providers, fallback to static list."""
+    try:
+        resp = requests.get(f"{EC2_GEO_ENGINE_URL}/geo-probe/providers", timeout=5)
+        if resp.status_code == 200:
+            return resp.json().get("providers", [])
+    except Exception:
+        pass
     return [
-        {"model": "claude", "status": "live", "engine": "ec2-bedrock"},
+        {"name": "claude", "available": True, "reason": "ready"},
+        {"name": "openai", "available": False, "reason": "OPENAI_API_KEY not set"},
+        {"name": "gemini", "available": False, "reason": "GEMINI_API_KEY not set"},
+        {"name": "perplexity", "available": False, "reason": "PERPLEXITY_API_KEY not set"},
     ]
 
 
@@ -44,15 +133,12 @@ def available_models() -> list[dict]:
 def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
     """
     Probe by calling the EC2 geo_engine endpoint.
-
-    Sends the raw keyword to EC2 — the geo_engine prompt already asks
-    Claude to include the brand *only if genuinely relevant*, so we
-    don't bias the keyword here (avoids false positives for fake brands).
+    Supports provider selection: claude, openai, gemini, perplexity.
     """
     url = f"{EC2_GEO_ENGINE_URL}/geo-probe"
-    payload = {"brand_name": brand_name, "keyword": keyword}
+    payload = {"brand_name": brand_name, "keyword": keyword, "provider": ai_model}
 
-    logger.info("GEO probe → EC2: brand=%s keyword=%s url=%s", brand_name, keyword, url)
+    logger.info("GEO probe → EC2: brand=%s keyword=%s provider=%s", brand_name, keyword, ai_model)
 
     try:
         resp = requests.post(url, json=payload, timeout=EC2_TIMEOUT)
@@ -66,17 +152,23 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
         raise RuntimeError(f"EC2 geo_engine returned {resp.status_code}: {error_msg}")
 
     data = resp.json()
-    logger.info("GEO probe ← EC2: cited=%s confidence=%s", data.get("cited"), data.get("confidence"))
+    logger.info("GEO probe ← EC2: provider=%s cited=%s confidence=%s", ai_model, data.get("cited"), data.get("confidence"))
 
-    return {
+    result = {
         "keyword": keyword,
-        "ai_model": data.get("ai_model", "claude"),
+        "brand_name": brand_name,
+        "ai_model": data.get("ai_model", ai_model),
         "brand_present": data["cited"],
         "citation_context": data.get("citation_context"),
         "confidence": data.get("confidence", 0.0),
         "cited_sources": [],
         "timestamp": data.get("timestamp", _now_iso()),
     }
+
+    # Store to DB
+    _store_result(result)
+
+    return result
 
 
 # ── batch probe with scoring ─────────────────────────────────────────────────
@@ -118,7 +210,7 @@ def geo_probe_batch(
     }
 
     _history.append(batch_result)
-    logger.info("GEO batch: brand=%s score=%.2f (%d/%d)", brand_name, geo_score, cited_count, total)
+    logger.info("GEO batch: brand=%s provider=%s score=%.2f (%d/%d)", brand_name, ai_model, geo_score, cited_count, total)
     return batch_result
 
 
@@ -127,3 +219,33 @@ def geo_probe_batch(
 def get_history() -> list[dict]:
     """Return the last 20 batch probe results (newest first)."""
     return list(reversed(_history))
+
+
+# ── scheduled monitoring placeholder ──────────────────────────────────────────
+
+_scheduled_jobs = []
+
+
+def schedule_probe(brand_name: str, keywords: list[str], ai_model: str = "claude",
+                   interval_minutes: int = 60) -> dict:
+    """
+    Register a scheduled probe job (placeholder — runs in-memory only).
+    In production, replace with APScheduler, Celery, or CloudWatch Events.
+    """
+    job = {
+        "id": len(_scheduled_jobs) + 1,
+        "brand_name": brand_name,
+        "keywords": keywords,
+        "ai_model": ai_model,
+        "interval_minutes": interval_minutes,
+        "status": "registered",
+        "created": _now_iso(),
+        "note": "Placeholder — periodic execution not yet wired. Use batch endpoint manually or integrate with cron/CloudWatch.",
+    }
+    _scheduled_jobs.append(job)
+    logger.info("Scheduled job registered: %s", job)
+    return job
+
+
+def get_scheduled_jobs() -> list[dict]:
+    return list(_scheduled_jobs)

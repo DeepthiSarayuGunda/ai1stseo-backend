@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-geo_engine.py — EC2 AI Engine for GEO Probe
+geo_engine.py — EC2 AI Engine for GEO Probe (Multi-Provider)
 
 Standalone Flask service on EC2 with Bedrock access (IAM role).
-Set USE_BEDROCK=1 to call Claude, otherwise returns stub response.
+Supports: Claude (Bedrock), OpenAI, Gemini, Perplexity.
 
-Run:   python3 geo_engine.py
+Run:   USE_BEDROCK=1 python3 geo_engine.py
 Port:  5005
 """
 
@@ -31,7 +31,7 @@ logger = logging.getLogger("geo_engine")
 USE_BEDROCK = os.environ.get("USE_BEDROCK", "0") == "1"
 
 
-# ── Bedrock ───────────────────────────────────────────────────────────────────
+# ── Provider clients ──────────────────────────────────────────────────────────
 
 _bedrock_client = None
 
@@ -63,12 +63,81 @@ def _invoke_claude(prompt):
     return result["content"][0]["text"]
 
 
+def _invoke_openai(prompt):
+    from openai import OpenAI
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        raise ValueError("OPENAI_API_KEY not set on EC2")
+    client = OpenAI(api_key=key)
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=1024,
+    )
+    return resp.choices[0].message.content
+
+
+def _invoke_gemini(prompt):
+    import google.generativeai as genai
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("GEMINI_API_KEY not set on EC2")
+    genai.configure(api_key=key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    resp = model.generate_content(prompt)
+    return resp.text
+
+
+def _invoke_perplexity(prompt):
+    from openai import OpenAI
+    key = os.environ.get("PERPLEXITY_API_KEY")
+    if not key:
+        raise ValueError("PERPLEXITY_API_KEY not set on EC2")
+    client = OpenAI(api_key=key, base_url="https://api.perplexity.ai")
+    resp = client.chat.completions.create(
+        model="llama-3.1-sonar-small-128k-online",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=1024,
+    )
+    return resp.choices[0].message.content
+
+
+# Provider registry: name → (invoke_fn, requires_env, requires_bedrock)
+PROVIDER_REGISTRY = {
+    "claude":     {"fn": _invoke_claude,     "env": None,              "needs_bedrock": True},
+    "openai":     {"fn": _invoke_openai,     "env": "OPENAI_API_KEY",  "needs_bedrock": False},
+    "gemini":     {"fn": _invoke_gemini,     "env": "GEMINI_API_KEY",  "needs_bedrock": False},
+    "perplexity": {"fn": _invoke_perplexity, "env": "PERPLEXITY_API_KEY", "needs_bedrock": False},
+}
+
+
+def _get_available_providers():
+    """Return list of providers that are currently usable."""
+    available = []
+    for name, cfg in PROVIDER_REGISTRY.items():
+        if cfg["needs_bedrock"] and not USE_BEDROCK:
+            continue
+        if cfg["env"] and not os.environ.get(cfg["env"]):
+            continue
+        available.append(name)
+    return available
+
+
+def _invoke_provider(provider, prompt):
+    """Invoke the specified provider. Raises ValueError/RuntimeError on failure."""
+    cfg = PROVIDER_REGISTRY.get(provider)
+    if not cfg:
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(PROVIDER_REGISTRY.keys())}")
+    if cfg["needs_bedrock"] and not USE_BEDROCK:
+        raise RuntimeError(f"Provider '{provider}' requires USE_BEDROCK=1")
+    if cfg["env"] and not os.environ.get(cfg["env"]):
+        raise RuntimeError(f"Provider '{provider}' requires {cfg['env']} env var")
+    return cfg["fn"](prompt)
+
+
 # ── Prompt builder ────────────────────────────────────────────────────────────
 
 def _build_prompt(keyword, brand_name):
-    """
-    Balanced prompt: strict on fake brands, fair to real ones.
-    """
     return (
         f"You are a knowledgeable product reviewer. A user wants to know:\n\n"
         f"\"What are the best {keyword}?\"\n\n"
@@ -83,52 +152,32 @@ def _build_prompt(keyword, brand_name):
 
 # ── Citation detection ────────────────────────────────────────────────────────
 
-# Recommendation signals (brand is clearly endorsed)
 _RECOMMEND_PATTERNS = [
     r"(?:top|best|leading|excellent|outstanding|highly\s+rated|popular|go-to|premier)",
     r"(?:recommend|stands?\s+out|known\s+for|excels?|dominates?|renowned)",
     r"(?:#\d|number\s+\d|first\s+choice|top\s+pick|editor.?s?\s+choice)",
 ]
 
-# Comparison signals (brand mentioned alongside others)
 _COMPARE_PATTERNS = [
     r"(?:compared?\s+to|alternative|competitor|similar\s+to|versus|vs\.?|alongside)",
     r"(?:however|although|while|on\s+the\s+other\s+hand|but)",
     r"(?:also\s+worth|another\s+option|consider)",
 ]
 
-
-# Conditional/hedging phrases that indicate the brand was inserted artificially
 _CONDITIONAL_PHRASES = [
-    r"if it is relevant",
-    r"if applicable",
-    r"if it fits",
-    r"if it is a relevant",
-    r"if it is a reputable",
-    r"if they are relevant",
-    r"if you consider",
-    r"worth mentioning if",
-    r"could be considered if",
-    r"not a well-known",
-    r"not a recognized",
-    r"not typically known",
-    r"not a real",
-    r"not an established",
-    r"has not been included",
-    r"not included in this",
-    r"do not have.{0,20}information",
-    r"i'?m not (?:familiar|aware)",
-    r"doesn'?t appear to be",
-    r"no information available",
-    r"could not find",
-    r"cannot confirm",
-    r"i cannot (?:verify|confirm)",
+    r"if it is relevant", r"if applicable", r"if it fits",
+    r"if it is a relevant", r"if it is a reputable", r"if they are relevant",
+    r"if you consider", r"worth mentioning if", r"could be considered if",
+    r"not a well-known", r"not a recognized", r"not typically known",
+    r"not a real", r"not an established", r"has not been included",
+    r"not included in this", r"do not have.{0,20}information",
+    r"i'?m not (?:familiar|aware)", r"doesn'?t appear to be",
+    r"no information available", r"could not find",
+    r"cannot confirm", r"i cannot (?:verify|confirm)",
 ]
 
 
 def _split_sentences(text):
-    """Split text into sentences, handling lists and line breaks."""
-    # Normalize bullet/numbered list items into separate sentences
     text = re.sub(r'\n\s*[-*•]\s*', '\n', text)
     text = re.sub(r'\n\s*\d+[.)]\s*', '\n', text)
     parts = re.split(r'(?<=[.!?])\s+|\n{1,}', text)
@@ -136,48 +185,25 @@ def _split_sentences(text):
 
 
 def _find_brand_sentences(text, brand):
-    """Return all sentences that mention the brand (case-insensitive, partial match)."""
     sentences = _split_sentences(text)
-    # Match brand as a word boundary: "Nike" matches "Nike shoes", "Nike running"
     pattern = re.compile(r'\b' + re.escape(brand) + r'\b', re.IGNORECASE)
     return [s for s in sentences if pattern.search(s)]
 
 
 def _score_confidence(brand_sentences):
-    """
-    Score confidence based on how the brand is mentioned.
-    1.0 = clearly recommended / top pick
-    0.5 = mentioned in comparison or neutral context
-    0.0 = not found
-    """
     if not brand_sentences:
         return 0.0
-
     combined = " ".join(brand_sentences).lower()
-
-    # Check for strong recommendation signals
     for pat in _RECOMMEND_PATTERNS:
         if re.search(pat, combined, re.IGNORECASE):
             return 1.0
-
-    # Check for comparison/neutral signals
     for pat in _COMPARE_PATTERNS:
         if re.search(pat, combined, re.IGNORECASE):
             return 0.5
-
-    # Brand is mentioned but no strong signal either way
     return 0.5
 
 
-def _now():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def _is_conditional_mention(brand_sentences):
-    """
-    Return True if the brand mention looks artificially inserted
-    (hedging language, conditional phrasing, disclaimers).
-    """
     if not brand_sentences:
         return False
     combined = " ".join(brand_sentences).lower()
@@ -187,6 +213,32 @@ def _is_conditional_mention(brand_sentences):
     return False
 
 
+def _now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _detect_citation(response_text, brand_name, provider):
+    """Shared citation detection logic for all providers."""
+    brand_sentences = _find_brand_sentences(response_text, brand_name)
+    cited = len(brand_sentences) > 0
+    context = brand_sentences[0] if brand_sentences else None
+    confidence = _score_confidence(brand_sentences)
+
+    if cited and _is_conditional_mention(brand_sentences):
+        logger.info("REJECTED: conditional mention for brand=%s provider=%s", brand_name, provider)
+        cited = False
+        confidence = 0.0
+        context = None
+
+    if cited and context and brand_name.lower() not in context.lower():
+        logger.info("REJECTED: brand not in context for brand=%s provider=%s", brand_name, provider)
+        cited = False
+        confidence = 0.0
+        context = None
+
+    return cited, context, confidence
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/geo-probe", methods=["POST"])
@@ -194,97 +246,94 @@ def geo_probe():
     data = request.get_json(silent=True) or {}
     brand_name = (data.get("brand_name") or "").strip()
     keyword = (data.get("keyword") or "").strip()
+    provider = (data.get("provider") or data.get("ai_model") or "claude").strip().lower()
 
     if not brand_name or not keyword:
         return jsonify({"error": "brand_name and keyword are required"}), 400
 
-    logger.info("GEO probe START: brand=%s keyword=%s bedrock=%s", brand_name, keyword, USE_BEDROCK)
+    if provider not in PROVIDER_REGISTRY:
+        return jsonify({"error": f"Unknown provider: {provider}. Available: {list(PROVIDER_REGISTRY.keys())}"}), 400
 
-    if USE_BEDROCK:
-        prompt = _build_prompt(keyword, brand_name)
-        try:
-            response_text = _invoke_claude(prompt)
-        except Exception as e:
-            logger.error("Bedrock failed: %s", e)
-            return jsonify({"error": f"Bedrock invocation failed: {e}"}), 503
+    logger.info("GEO probe START: brand=%s keyword=%s provider=%s", brand_name, keyword, provider)
 
-        logger.info("RAW CLAUDE RESPONSE (%d chars):\n%s", len(response_text), response_text[:1500])
+    prompt = _build_prompt(keyword, brand_name)
+    try:
+        response_text = _invoke_provider(provider, prompt)
+    except Exception as e:
+        logger.error("Provider %s failed: %s", provider, e)
+        return jsonify({"error": f"{provider} invocation failed: {e}"}), 503
 
-        if not response_text or not response_text.strip():
-            return jsonify({"error": "Empty response from Claude"}), 503
+    logger.info("RAW %s RESPONSE (%d chars):\n%s", provider.upper(), len(response_text), response_text[:1500])
 
-        # Find all sentences mentioning the brand
-        brand_sentences = _find_brand_sentences(response_text, brand_name)
-        cited = len(brand_sentences) > 0
-        context = brand_sentences[0] if brand_sentences else None
-        confidence = _score_confidence(brand_sentences)
+    if not response_text or not response_text.strip():
+        return jsonify({"error": f"Empty response from {provider}"}), 503
 
-        # ── Strict false-positive rejection ───────────────────────────
-        # 1. Reject if brand appears only in conditional/hedging context
-        if cited and _is_conditional_mention(brand_sentences):
-            logger.info("REJECTED: conditional/hedging mention for brand=%s", brand_name)
-            cited = False
-            confidence = 0.0
-            context = None
+    cited, context, confidence = _detect_citation(response_text, brand_name, provider)
 
-        # 2. Reject if citation_context doesn't actually contain the brand
-        if cited and context and brand_name.lower() not in context.lower():
-            logger.info("REJECTED: brand not in citation_context for brand=%s", brand_name)
-            cited = False
-            confidence = 0.0
-            context = None
-
-        source = "bedrock"
-
-        logger.info(
-            "DETECTION: brand=%s cited=%s confidence=%.1f mentions=%d context=%s",
-            brand_name, cited, confidence, len(brand_sentences),
-            context[:100] if context else "null",
-        )
-    else:
-        cited = False
-        context = None
-        confidence = 0.0
-        source = "stub"
-        logger.info("STUB MODE — returning mock response")
+    logger.info(
+        "DETECTION: brand=%s provider=%s cited=%s confidence=%.1f context=%s",
+        brand_name, provider, cited, confidence,
+        context[:100] if context else "null",
+    )
 
     return jsonify({
         "keyword": keyword,
         "brand_name": brand_name,
-        "ai_model": "claude",
+        "ai_model": provider,
         "cited": cited,
         "citation_context": context,
         "timestamp": _now(),
         "confidence": confidence,
-        "source": source,
+        "source": provider,
     })
+
+
+@app.route("/geo-probe/providers", methods=["GET"])
+def geo_probe_providers():
+    """List available providers on this EC2 engine."""
+    providers = []
+    for name, cfg in PROVIDER_REGISTRY.items():
+        available = True
+        reason = "ready"
+        if cfg["needs_bedrock"] and not USE_BEDROCK:
+            available = False
+            reason = "USE_BEDROCK=1 not set"
+        elif cfg["env"] and not os.environ.get(cfg["env"]):
+            available = False
+            reason = f"{cfg['env']} not set"
+        providers.append({"name": name, "available": available, "reason": reason})
+    return jsonify({"providers": providers})
 
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    """General-purpose text generation via Bedrock Claude."""
+    """General-purpose text generation via any provider."""
     data = request.get_json(silent=True) or {}
     prompt = (data.get("prompt") or "").strip()
+    provider = (data.get("provider") or "claude").strip().lower()
 
     if not prompt:
         return jsonify({"error": "prompt is required"}), 400
 
-    if not USE_BEDROCK:
-        return jsonify({"text": "[stub] Bedrock not enabled", "source": "stub"})
-
     try:
-        text = _invoke_claude(prompt)
-        return jsonify({"text": text, "source": "bedrock"})
+        text = _invoke_provider(provider, prompt)
+        return jsonify({"text": text, "source": provider})
     except Exception as e:
-        logger.error("Generate failed: %s", e)
-        return jsonify({"error": f"Generation failed: {e}"}), 503
+        logger.error("Generate failed (%s): %s", provider, e)
+        return jsonify({"error": f"Generation failed ({provider}): {e}"}), 503
 
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "service": "geo-engine", "bedrock": USE_BEDROCK})
+    return jsonify({
+        "status": "ok",
+        "service": "geo-engine",
+        "bedrock": USE_BEDROCK,
+        "available_providers": _get_available_providers(),
+    })
 
 
 if __name__ == "__main__":
-    logger.info("Starting geo_engine on port 5005 (bedrock=%s)", USE_BEDROCK)
+    logger.info("Starting geo_engine on port 5005 (bedrock=%s, providers=%s)",
+                USE_BEDROCK, _get_available_providers())
     app.run(host="0.0.0.0", port=5005, debug=False)
