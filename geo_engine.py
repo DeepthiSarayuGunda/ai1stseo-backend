@@ -35,6 +35,7 @@ USE_BEDROCK = os.environ.get("USE_BEDROCK", "0") == "1"
 
 _bedrock_client = None
 
+
 def _get_bedrock():
     global _bedrock_client
     if _bedrock_client is None:
@@ -62,24 +63,81 @@ def _invoke_claude(prompt):
     return result["content"][0]["text"]
 
 
+# ── Prompt builder ────────────────────────────────────────────────────────────
+
+def _build_prompt(keyword, brand_name):
+    """
+    Prompt that encourages natural brand mentions without forcing them.
+    Asks Claude to list top brands and include the target brand if applicable.
+    """
+    return (
+        f"You are a knowledgeable product reviewer. A user wants to know:\n\n"
+        f"\"What are the best {keyword}?\"\n\n"
+        f"List the top brands and products for this category. "
+        f"Include {brand_name} in your answer if it is a relevant and reputable option. "
+        f"For each brand, briefly explain why it stands out. "
+        f"Be honest — only mention brands that genuinely fit."
+    )
+
+
 # ── Citation detection ────────────────────────────────────────────────────────
 
-def _extract_citation_context(text, brand):
-    """
-    Find the sentence(s) containing the brand name.
-    Returns the first matching sentence, or None.
-    """
-    # Split into sentences (handles numbered lists, bullet points, etc.)
-    sentences = re.split(r'(?<=[.!?])\s+|\n+', text)
-    pattern = re.compile(re.escape(brand), re.IGNORECASE)
+# Recommendation signals (brand is clearly endorsed)
+_RECOMMEND_PATTERNS = [
+    r"(?:top|best|leading|excellent|outstanding|highly\s+rated|popular|go-to|premier)",
+    r"(?:recommend|stands?\s+out|known\s+for|excels?|dominates?|renowned)",
+    r"(?:#\d|number\s+\d|first\s+choice|top\s+pick|editor.?s?\s+choice)",
+]
 
-    for sentence in sentences:
-        if pattern.search(sentence):
-            clean = sentence.strip().strip("-*• 0123456789.")
-            if clean:
-                return clean
+# Comparison signals (brand mentioned alongside others)
+_COMPARE_PATTERNS = [
+    r"(?:compared?\s+to|alternative|competitor|similar\s+to|versus|vs\.?|alongside)",
+    r"(?:however|although|while|on\s+the\s+other\s+hand|but)",
+    r"(?:also\s+worth|another\s+option|consider)",
+]
 
-    return None
+
+def _split_sentences(text):
+    """Split text into sentences, handling lists and line breaks."""
+    # Normalize bullet/numbered list items into separate sentences
+    text = re.sub(r'\n\s*[-*•]\s*', '\n', text)
+    text = re.sub(r'\n\s*\d+[.)]\s*', '\n', text)
+    parts = re.split(r'(?<=[.!?])\s+|\n{1,}', text)
+    return [s.strip() for s in parts if s.strip()]
+
+
+def _find_brand_sentences(text, brand):
+    """Return all sentences that mention the brand (case-insensitive, partial match)."""
+    sentences = _split_sentences(text)
+    # Match brand as a word boundary: "Nike" matches "Nike shoes", "Nike running"
+    pattern = re.compile(r'\b' + re.escape(brand) + r'\b', re.IGNORECASE)
+    return [s for s in sentences if pattern.search(s)]
+
+
+def _score_confidence(brand_sentences):
+    """
+    Score confidence based on how the brand is mentioned.
+    1.0 = clearly recommended / top pick
+    0.5 = mentioned in comparison or neutral context
+    0.0 = not found
+    """
+    if not brand_sentences:
+        return 0.0
+
+    combined = " ".join(brand_sentences).lower()
+
+    # Check for strong recommendation signals
+    for pat in _RECOMMEND_PATTERNS:
+        if re.search(pat, combined, re.IGNORECASE):
+            return 1.0
+
+    # Check for comparison/neutral signals
+    for pat in _COMPARE_PATTERNS:
+        if re.search(pat, combined, re.IGNORECASE):
+            return 0.5
+
+    # Brand is mentioned but no strong signal either way
+    return 0.5
 
 
 def _now():
@@ -100,31 +158,30 @@ def geo_probe():
     logger.info("GEO probe START: brand=%s keyword=%s bedrock=%s", brand_name, keyword, USE_BEDROCK)
 
     if USE_BEDROCK:
-        prompt = (
-            f"You are a helpful assistant. A user is researching the following topic.\n\n"
-            f"User query: What are the best tools for {keyword}?\n\n"
-            f"Provide a thorough, natural answer. Mention specific brands, tools, "
-            f"and products where relevant."
-        )
+        prompt = _build_prompt(keyword, brand_name)
         try:
             response_text = _invoke_claude(prompt)
         except Exception as e:
             logger.error("Bedrock failed: %s", e)
             return jsonify({"error": f"Bedrock invocation failed: {e}"}), 503
 
-        # Log raw response so we can verify it's real model output
-        logger.info("RAW CLAUDE RESPONSE (%d chars):\n%s", len(response_text), response_text[:1000])
+        logger.info("RAW CLAUDE RESPONSE (%d chars):\n%s", len(response_text), response_text[:1500])
 
         if not response_text or not response_text.strip():
             return jsonify({"error": "Empty response from Claude"}), 503
 
-        cited = bool(re.search(re.escape(brand_name), response_text, re.IGNORECASE))
-        context = _extract_citation_context(response_text, brand_name) if cited else None
-        confidence = 1.0 if cited else 0.0
+        # Find all sentences mentioning the brand
+        brand_sentences = _find_brand_sentences(response_text, brand_name)
+        cited = len(brand_sentences) > 0
+        context = brand_sentences[0] if brand_sentences else None
+        confidence = _score_confidence(brand_sentences)
         source = "bedrock"
 
-        logger.info("DETECTION: brand=%s cited=%s confidence=%.1f context=%s",
-                     brand_name, cited, confidence, context[:80] if context else "null")
+        logger.info(
+            "DETECTION: brand=%s cited=%s confidence=%.1f mentions=%d context=%s",
+            brand_name, cited, confidence, len(brand_sentences),
+            context[:100] if context else "null",
+        )
     else:
         cited = False
         context = None
