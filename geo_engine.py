@@ -7,8 +7,8 @@ Phase 1: stub response to verify endpoint works.
 Phase 2: Bedrock integration (already wired, set USE_BEDROCK=1 to enable).
 
 Run:   python3 geo_engine.py
-Port:  5000
-Test:  curl -X POST http://localhost:5000/geo-probe \
+Port:  5005
+Test:  curl -X POST http://localhost:5005/geo-probe \
          -H "Content-Type: application/json" \
          -d '{"brand_name":"nike","keyword":"running shoes"}'
 """
@@ -128,5 +128,5 @@ def health():
 
 
 if __name__ == "__main__":
-    logger.info("Starting geo_engine on port 5000 (bedrock=%s)", USE_BEDROCK)
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    logger.info("Starting geo_engine on port 5005 (bedrock=%s)", USE_BEDROCK)
+    app.run(host="0.0.0.0", port=5005, debug=False)

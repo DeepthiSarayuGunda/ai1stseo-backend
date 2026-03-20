@@ -1,150 +1,80 @@
 """
 geo_probe_service.py
-GEO / AEO Monitoring Engine — Multi-model AI Scanner
+GEO / AEO Monitoring Engine — EC2-routed AI Scanner
 
-Probes AI models with natural user queries, performs deterministic
-case-insensitive brand detection, computes a geo_score across batches,
-and keeps a lightweight in-memory history of recent results.
+Routes AI probe requests to the EC2 geo_engine (which has Bedrock access),
+performs scoring across batches, and keeps in-memory history.
 
-Supported models:
-  - claude-bedrock  (live — AWS Bedrock, IAM role)
-  - gemini          (placeholder)
-  - perplexity      (placeholder)
+Architecture: App Runner (API gateway) → EC2 (AI engine) → Bedrock (Claude)
 """
 
 import collections
 import logging
-import re
-from datetime import datetime, timezone
+import os
 
-from bedrock_helper import invoke_claude
+import requests
 
 logger = logging.getLogger(__name__)
+
+# ── config ────────────────────────────────────────────────────────────────────
+
+EC2_GEO_ENGINE_URL = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
+EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "30"))
 
 # ── in-memory history (last 20 batch results) ────────────────────────────────
 
 _history: collections.deque = collections.deque(maxlen=20)
 
-# ── model registry ────────────────────────────────────────────────────────────
-
-def _invoke_gemini(prompt: str) -> str:
-    raise NotImplementedError(
-        "Gemini model is not yet configured. Set GEMINI_API_KEY and complete integration."
-    )
-
-def _invoke_perplexity(prompt: str) -> str:
-    raise NotImplementedError(
-        "Perplexity model is not yet configured. Set PERPLEXITY_API_KEY and complete integration."
-    )
-
-
-MODEL_REGISTRY: dict[str, dict] = {
-    "claude-bedrock": {
-        "invoke": lambda prompt: invoke_claude(prompt),
-        "label": "claude-bedrock",
-        "status": "live",
-    },
-    "gemini": {
-        "invoke": _invoke_gemini,
-        "label": "gemini",
-        "status": "placeholder",
-    },
-    "perplexity": {
-        "invoke": _invoke_perplexity,
-        "label": "perplexity",
-        "status": "placeholder",
-    },
-}
-
-DEFAULT_MODEL = "claude-bedrock"
-
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
-def _build_prompt(keyword: str) -> str:
-    return (
-        f"You are a helpful assistant. A user is researching the following topic.\n\n"
-        f"User query: {keyword}\n\n"
-        f"Provide a thorough, natural answer. Mention specific brands, tools, "
-        f"and products where relevant. Cite sources where possible."
-    )
-
-
-def _extract_context(text: str, brand: str, window: int = 150) -> str | None:
-    """Return 1-2 lines of surrounding context around the first brand mention."""
-    match = re.search(re.escape(brand), text, re.IGNORECASE)
-    if not match:
-        return None
-    start = max(0, match.start() - window)
-    end = min(len(text), match.end() + window)
-    snippet = text[start:end].strip()
-    first_dot = snippet.find('. ')
-    last_dot = snippet.rfind('.')
-    if first_dot != -1 and start > 0:
-        snippet = snippet[first_dot + 2:]
-    if last_dot != -1 and last_dot > 0 and end < len(text):
-        snippet = snippet[:last_dot + 1]
-    return snippet or None
-
-
-def _extract_sources(text: str) -> list[str]:
-    """Extract URLs and named source references from the response."""
-    urls = re.findall(r'https?://[^\s\)\]\"\']+', text)
-    refs = re.findall(
-        r'(?:Source|Reference|According to|Cited from)[:\s]+([^\n.]+)',
-        text, re.IGNORECASE,
-    )
-    return list(dict.fromkeys(urls + [r.strip() for r in refs]))[:10]
-
-
-def _detect_citation(response_text: str, brand_name: str) -> tuple[bool, str | None]:
-    cited = bool(re.search(re.escape(brand_name), response_text, re.IGNORECASE))
-    context = _extract_context(response_text, brand_name) if cited else None
-    return cited, context
-
-
 def _now_iso() -> str:
+    from datetime import datetime, timezone
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def available_models() -> list[dict]:
-    return [{"model": k, "status": v["status"]} for k, v in MODEL_REGISTRY.items()]
+    return [
+        {"model": "claude", "status": "live", "engine": "ec2-bedrock"},
+    ]
 
 
-# ── single probe ──────────────────────────────────────────────────────────────
+# ── single probe (routes to EC2) ─────────────────────────────────────────────
 
-def geo_probe(brand_name: str, keyword: str, ai_model: str = DEFAULT_MODEL) -> dict:
-    """Probe one keyword and return citation result."""
-    model_cfg = MODEL_REGISTRY.get(ai_model)
-    if not model_cfg:
-        raise ValueError(
-            f"Unknown ai_model: {ai_model!r}. Available: {list(MODEL_REGISTRY.keys())}"
-        )
+def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
+    """
+    Probe by calling the EC2 geo_engine endpoint.
 
-    prompt = _build_prompt(keyword)
-    logger.info("GEO probe: model=%s brand=%s keyword=%s", ai_model, brand_name, keyword)
+    Returns the EC2 response enriched with brand_present field for
+    backward compatibility with the batch/scoring layer.
+    """
+    url = f"{EC2_GEO_ENGINE_URL}/geo-probe"
+    payload = {"brand_name": brand_name, "keyword": keyword}
+
+    logger.info("GEO probe → EC2: brand=%s keyword=%s url=%s", brand_name, keyword, url)
 
     try:
-        response_text = model_cfg["invoke"](prompt)
-    except (NotImplementedError, RuntimeError):
-        raise
-    except Exception as e:
-        raise RuntimeError(f"{ai_model} invocation failed: {e}") from e
+        resp = requests.post(url, json=payload, timeout=EC2_TIMEOUT)
+    except requests.ConnectionError as e:
+        raise RuntimeError(f"EC2 geo_engine unreachable at {url}: {e}") from e
+    except requests.Timeout:
+        raise RuntimeError(f"EC2 geo_engine timed out after {EC2_TIMEOUT}s")
 
-    if not response_text or not response_text.strip():
-        raise RuntimeError(f"Empty response from {ai_model}")
+    if resp.status_code != 200:
+        error_msg = resp.json().get("error", resp.text) if resp.headers.get("content-type", "").startswith("application/json") else resp.text
+        raise RuntimeError(f"EC2 geo_engine returned {resp.status_code}: {error_msg}")
 
-    cited, context = _detect_citation(response_text, brand_name)
-    sources = _extract_sources(response_text)
-    logger.info("GEO probe result: model=%s cited=%s", ai_model, cited)
+    data = resp.json()
+    logger.info("GEO probe ← EC2: cited=%s confidence=%s", data.get("cited"), data.get("confidence"))
 
     return {
-        "keyword": keyword,
-        "ai_model": ai_model,
-        "brand_present": cited,
-        "citation_context": context,
-        "cited_sources": sources,
-        "timestamp": _now_iso(),
+        "keyword": data["keyword"],
+        "ai_model": data.get("ai_model", "claude"),
+        "brand_present": data["cited"],
+        "citation_context": data.get("citation_context"),
+        "confidence": data.get("confidence", 0.0),
+        "cited_sources": [],
+        "timestamp": data.get("timestamp", _now_iso()),
     }
 
 
@@ -153,22 +83,9 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = DEFAULT_MODEL) -> d
 def geo_probe_batch(
     brand_name: str,
     keywords: list[str],
-    ai_model: str = DEFAULT_MODEL,
+    ai_model: str = "claude",
 ) -> dict:
-    """
-    Probe multiple keywords, compute geo_score, store in history.
-
-    Returns:
-        {
-            "brand_name": str,
-            "ai_model": str,
-            "results": [...],
-            "geo_score": float (0.0 – 1.0),
-            "total_prompts": int,
-            "cited_count": int,
-            "timestamp": str
-        }
-    """
+    """Probe multiple keywords via EC2, compute geo_score, store in history."""
     results = []
     for kw in keywords:
         try:
@@ -179,6 +96,7 @@ def geo_probe_batch(
                 "ai_model": ai_model,
                 "brand_present": None,
                 "citation_context": None,
+                "confidence": 0.0,
                 "cited_sources": [],
                 "error": str(e),
                 "timestamp": _now_iso(),
@@ -199,10 +117,7 @@ def geo_probe_batch(
     }
 
     _history.append(batch_result)
-    logger.info(
-        "GEO batch: brand=%s score=%.2f (%d/%d)",
-        brand_name, geo_score, cited_count, total,
-    )
+    logger.info("GEO batch: brand=%s score=%.2f (%d/%d)", brand_name, geo_score, cited_count, total)
     return batch_result
 
 
