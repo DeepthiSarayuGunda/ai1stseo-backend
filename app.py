@@ -19,71 +19,111 @@ from collections import Counter
 import json
 import os
 
+import boto3
+import hmac
+import base64
+
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
+    'https://d6ugqfyp4h9y3.cloudfront.net',
     'http://localhost:5000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'http://localhost:5001',
+    'http://127.0.0.1:5001'
 ])
 
-# File-based storage for persistence
-USERS_FILE = 'users.json'
-TOKENS_FILE = 'tokens.json'
+# AWS Cognito Configuration
+COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
+COGNITO_CLIENT_ID = '7scsae79o2g9idc92eputcrvrg'
+COGNITO_CLIENT_SECRET = '1qg2tetso18gkhsmfte0c565ull6lp02la484ojaj5k85pvk9p49'
+AWS_REGION = 'us-east-1'
+SES_SENDER = 'no-reply@ai1stseo.com'
+COGNITO_ENDPOINT = f'https://cognito-idp.{AWS_REGION}.amazonaws.com/'
 
-def load_users():
-    """Load users from file on every call"""
-    try:
-        if os.path.exists(USERS_FILE):
-            with open(USERS_FILE, 'r') as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"Error loading users: {e}")
-    return {}
+# SES client - only works if AWS credentials are available (App Runner instance role)
+ses_client = None
+try:
+    ses_client = boto3.client('ses', region_name=AWS_REGION)
+except Exception:
+    print("SES client not available - welcome emails will be skipped")
 
-def save_users(users):
-    """Save users to file"""
-    try:
-        with open(USERS_FILE, 'w') as f:
-            json.dump(users, f, indent=2)
-        print(f"Saved {len(users)} users to {USERS_FILE}")
-    except Exception as e:
-        print(f"Error saving users: {e}")
+def get_secret_hash(username):
+    """Compute Cognito SECRET_HASH for client with secret"""
+    msg = username + COGNITO_CLIENT_ID
+    dig = hmac.new(
+        COGNITO_CLIENT_SECRET.encode('utf-8'),
+        msg.encode('utf-8'),
+        hashlib.sha256
+    ).digest()
+    return base64.b64encode(dig).decode()
 
-def load_tokens():
-    """Load tokens from file on every call"""
-    try:
-        if os.path.exists(TOKENS_FILE):
-            with open(TOKENS_FILE, 'r') as f:
-                data = json.load(f)
-                # Convert expiry strings back to datetime
-                for token, info in data.items():
-                    info['expiry'] = datetime.fromisoformat(info['expiry'])
-                return data
-    except Exception as e:
-        print(f"Error loading tokens: {e}")
-    return {}
+def cognito_request(action, payload):
+    """Make a direct HTTP request to Cognito (no AWS credentials needed for public APIs)"""
+    headers = {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': f'AWSCognitoIdentityProviderService.{action}'
+    }
+    resp = requests.post(COGNITO_ENDPOINT, json=payload, headers=headers)
+    return resp.json(), resp.status_code
 
-def save_tokens(tokens):
-    """Save tokens to file"""
+def send_welcome_email(email, name):
+    """Send welcome email via SES"""
+    if not ses_client:
+        print(f"SES not available - skipping welcome email for {email}")
+        return False
     try:
-        # Convert datetime to string for JSON
-        data = {}
-        for token, info in tokens.items():
-            data[token] = {
-                'email': info['email'],
-                'name': info['name'],
-                'expiry': info['expiry'].isoformat()
+        subject = "Welcome to AI1stSEO — Your AI-First SEO Platform"
+        html_body = f"""
+        <html>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #ffffff; padding: 40px;">
+            <div style="max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 40px;">
+                <h1 style="background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; font-size: 2rem;">AISEO Master</h1>
+                <h2 style="color: #00d4ff; text-align: center;">Welcome, {name}!</h2>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
+                    Thank you for joining <strong>AI1stSEO</strong> — the AI-First SEO Platform. We're excited to have you on board!
+                </p>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
+                    Here's what you can do with your account:
+                </p>
+                <ul style="color: rgba(255,255,255,0.8); line-height: 2; font-size: 1rem;">
+                    <li><strong>SEO Analyzer</strong> — Run comprehensive 180-point SEO audits on any website</li>
+                    <li><strong>9 Audit Categories</strong> — Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
+                    <li><strong>AI Optimization</strong> — Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
+                    <li><strong>Detailed Reports</strong> — Actionable recommendations with impact ratings</li>
+                </ul>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing →</a>
+                </div>
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                        AI1stSEO — Optimize for AI Discovery<br>
+                        <a href="https://ai1stseo.com" style="color: #00d4ff; text-decoration: none;">ai1stseo.com</a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        text_body = f"Welcome to AI1stSEO, {name}! Start analyzing websites at https://ai1stseo.com"
+
+        ses_client.send_email(
+            Source=SES_SENDER,
+            Destination={'ToAddresses': [email]},
+            Message={
+                'Subject': {'Data': subject, 'Charset': 'UTF-8'},
+                'Body': {
+                    'Html': {'Data': html_body, 'Charset': 'UTF-8'},
+                    'Text': {'Data': text_body, 'Charset': 'UTF-8'}
+                }
             }
-        with open(TOKENS_FILE, 'w') as f:
-            json.dump(data, f, indent=2)
-        print(f"Saved {len(tokens)} tokens to {TOKENS_FILE}")
+        )
+        print(f"Welcome email sent to {email}")
+        return True
     except Exception as e:
-        print(f"Error saving tokens: {e}")
-
-# Don't load at startup - load on each request instead
-USERS = {}
-ACTIVE_TOKENS = {}
+        print(f"Failed to send welcome email to {email}: {e}")
+        return False
 
 def fetch_website(url):
     """Fetch website content with timing"""
@@ -1387,153 +1427,354 @@ def serve_assets(filename):
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    """User registration endpoint"""
+    """User registration via Cognito (direct HTTP - no AWS credentials needed)"""
     data = request.get_json()
     name = data.get('name', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
-    
+
     if not name or not email or not password:
         return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
-    
-    # Basic email validation
+
     if '@' not in email or '.' not in email:
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
-    
-    # Load users from file
-    users = load_users()
-    
-    # Check if email already exists
-    if email in users:
-        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
-    
-    # Hash password and store user
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    users[email] = {
-        'name': name,
-        'password_hash': password_hash,
-        'created_at': datetime.now().isoformat()
-    }
-    save_users(users)
-    
-    print(f"DEBUG: User created - {email}, Total users: {len(users)}")
-    
-    return jsonify({
-        'status': 'success',
-        'message': 'Account created successfully'
-    })
+
+    try:
+        result, status_code = cognito_request('SignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'Password': password,
+            'UserAttributes': [
+                {'Name': 'email', 'Value': email},
+                {'Name': 'name', 'Value': name}
+            ]
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Signup failed')
+            if 'UsernameExistsException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            if 'InvalidParameterException' in error_type:
+                return jsonify({'status': 'error', 'message': error_msg}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        # Send welcome email via SES (best-effort)
+        send_welcome_email(email, name)
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Account created! Check your email for a verification code.'
+        })
+    except Exception as e:
+        print(f"Signup error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/confirm', methods=['POST'])
+def confirm_signup():
+    """Confirm user signup with verification code (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+
+    if not email or not code:
+        return jsonify({'status': 'error', 'message': 'Email and code required'}), 400
+
+    try:
+        result, status_code = cognito_request('ConfirmSignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Confirmation failed')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid verification code'}), 400
+            if 'ExpiredCodeException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Code expired. Please request a new one.'}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        return jsonify({'status': 'success', 'message': 'Email verified! You can now sign in.'})
+    except Exception as e:
+        print(f"Confirm error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/resend-code', methods=['POST'])
+def resend_code():
+    """Resend verification code (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    try:
+        result, status_code = cognito_request('ResendConfirmationCode', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        if status_code != 200:
+            error_msg = result.get('message', 'Failed to resend code')
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        return jsonify({'status': 'success', 'message': 'New code sent to your email'})
+    except Exception as e:
+        print(f"Resend error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    """User login endpoint"""
+    """User login via Cognito (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
-    
-    # Load users from file on each request
-    users = load_users()
-    
-    print(f"DEBUG LOGIN: Email={email}, Total users in file: {len(users)}")
-    print(f"DEBUG LOGIN: Users in file: {list(users.keys())}")
-    print(f"DEBUG LOGIN: Email in users? {email in users}")
-    
+
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
-    
-    # Hash the password and check
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
-    if email in users:
-        print(f"DEBUG LOGIN: Stored hash: {users[email]['password_hash'][:20]}...")
-        print(f"DEBUG LOGIN: Input hash: {password_hash[:20]}...")
-        print(f"DEBUG LOGIN: Match? {users[email]['password_hash'] == password_hash}")
-    
-    if email in users and users[email]['password_hash'] == password_hash:
-        # Generate token
-        token = secrets.token_urlsafe(32)
-        expiry = datetime.now() + timedelta(hours=24)
-        
-        # Load and save tokens
-        tokens = load_tokens()
-        tokens[token] = {
-            'email': email,
-            'name': users[email]['name'],
-            'expiry': expiry
-        }
-        save_tokens(tokens)
-        
+
+    try:
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'USER_PASSWORD_AUTH',
+            'AuthParameters': {
+                'USERNAME': email,
+                'PASSWORD': password,
+                'SECRET_HASH': get_secret_hash(email)
+            }
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'NotAuthorizedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+            if 'UserNotConfirmedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Please verify your email first'}), 401
+            return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        access_token = auth_result.get('AccessToken', '')
+
+        # Get user attributes using the access token
+        user_result, user_status = cognito_request('GetUser', {
+            'AccessToken': access_token
+        })
+
+        user_name = email.split('@')[0]
+        if user_status == 200:
+            user_attrs = {a['Name']: a['Value'] for a in user_result.get('UserAttributes', [])}
+            user_name = user_attrs.get('name', user_name)
+
         return jsonify({
             'status': 'success',
-            'token': token,
-            'name': users[email]['name'],
+            'token': access_token,
+            'idToken': auth_result.get('IdToken', ''),
+            'refreshToken': auth_result.get('RefreshToken', ''),
+            'name': user_name,
             'email': email,
             'message': 'Login successful'
         })
-    else:
+    except Exception as e:
+        print(f"Login error: {e}")
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    """User logout endpoint"""
+    """User logout - invalidate Cognito token (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token in tokens:
-        del tokens[token]
-        save_tokens(tokens)
-    
+
+    try:
+        cognito_request('GlobalSignOut', {
+            'AccessToken': token
+        })
+    except Exception as e:
+        print(f"Logout error (token may be expired): {e}")
+
     return jsonify({'status': 'success', 'message': 'Logged out successfully'})
 
 @app.route('/api/delete-account', methods=['POST'])
 def delete_account():
-    """Delete user account permanently"""
+    """Delete user account from Cognito (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token not in tokens:
+
+    try:
+        result, status_code = cognito_request('DeleteUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
+
+        return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
+    except Exception as e:
+        print(f"Delete account error: {e}")
         return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
-    
-    # Get user email from token
-    email = tokens[token]['email']
-    
-    # Delete user data
-    users = load_users()
-    if email in users:
-        del users[email]
-        save_users(users)
-    
-    # Delete all tokens for this user
-    tokens_to_delete = [t for t, data in tokens.items() if data['email'] == email]
-    for t in tokens_to_delete:
-        del tokens[t]
-    save_tokens(tokens)
-    
-    return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
 
 @app.route('/api/verify', methods=['POST'])
 def verify_token():
-    """Verify if token is valid"""
+    """Verify if Cognito token is valid (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token in tokens:
-        token_data = tokens[token]
-        if datetime.now() < token_data['expiry']:
-            return jsonify({
-                'status': 'success',
-                'valid': True,
-                'name': token_data['name'],
-                'email': token_data['email']
-            })
-        else:
-            # Token expired
-            del tokens[token]
-            save_tokens(tokens)
-    
-    return jsonify({'status': 'error', 'valid': False}), 401
+
+    try:
+        result, status_code = cognito_request('GetUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'valid': False}), 401
+
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
+
+        return jsonify({
+            'status': 'success',
+            'valid': True,
+            'name': user_attrs.get('name', ''),
+            'email': user_attrs.get('email', '')
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'valid': False}), 401
+
+
+# ============== ADDITIONAL AUTH FEATURES ==============
+
+def require_auth(f):
+    """Decorator to protect routes — expects JSON body with 'token' field"""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        data = request.get_json() or {}
+        token = data.get('token', '')
+        if not token:
+            auth_header = request.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ', 1)[1]
+        if not token:
+            return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+        result, status_code = cognito_request('GetUser', {'AccessToken': token})
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired token'}), 401
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
+        request.cognito_user = {'username': result.get('Username', ''), 'attributes': user_attrs}
+        request.access_token = token
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/api/refresh-token', methods=['POST'])
+def refresh_token():
+    """Refresh an expired access token using a refresh token (direct HTTP)"""
+    data = request.get_json()
+    refresh = data.get('refreshToken', '')
+    email = data.get('email', '').strip().lower()
+
+    if not refresh or not email:
+        return jsonify({'status': 'error', 'message': 'Refresh token and email are required'}), 400
+
+    try:
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'REFRESH_TOKEN_AUTH',
+            'AuthParameters': {
+                'REFRESH_TOKEN': refresh,
+                'SECRET_HASH': get_secret_hash(email)
+            }
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        return jsonify({
+            'status': 'success',
+            'token': auth_result.get('AccessToken', ''),
+            'idToken': auth_result.get('IdToken', ''),
+            'message': 'Token refreshed'
+        })
+    except Exception as e:
+        print(f"Refresh token error: {e}")
+        return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+@app.route('/api/send-welcome', methods=['POST'])
+def send_welcome():
+    """Send welcome email — called by frontend after signup confirmation"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    name = data.get('name', '') or email.split('@')[0]
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    success = send_welcome_email(email, name)
+    if success:
+        return jsonify({'status': 'success', 'message': 'Welcome email sent'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to send welcome email'}), 500
+
+
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    """Initiate password reset — sends code to email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    try:
+        result, status_code = cognito_request('ForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        # Always return success to not reveal if email exists
+        return jsonify({
+            'status': 'success',
+            'message': 'If an account exists with this email, a reset code has been sent.'
+        })
+    except Exception as e:
+        print(f"Forgot password error: {e}")
+        return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset code has been sent.'})
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    """Complete password reset with the code from email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+    new_password = data.get('newPassword', '')
+
+    if not email or not code or not new_password:
+        return jsonify({'status': 'error', 'message': 'Email, code, and new password are required'}), 400
+
+    try:
+        result, status_code = cognito_request('ConfirmForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code,
+            'Password': new_password
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid reset code'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            return jsonify({'status': 'error', 'message': result.get('message', 'Password reset failed')}), 400
+
+        return jsonify({'status': 'success', 'message': 'Password reset successful. You can now log in.'})
+    except Exception as e:
+        print(f"Reset password error: {e}")
+        return jsonify({'status': 'error', 'message': 'Password reset failed'}), 500
+
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
@@ -1690,6 +1931,125 @@ Be specific and actionable. Include actual code examples where helpful."""
             'error': f'AI recommendation failed: {str(e)}'
         }), 500
 
+
+@app.route('/api/geo-probe', methods=['POST'])
+def geo_probe():
+    from bedrock_helper import invoke_claude
+    import re as _re, json as _json
+    data = request.get_json() or {}
+    brand = (data.get('brand') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand and keyword are required'}), 400
+    prompt = (
+        f'Answer the following user query naturally and helpfully.\n\n'
+        f'Query: "{keyword}"\n\n'
+        f'After your answer, output ONLY a JSON object on a new line in this exact format '
+        f'(no markdown, no extra text):\n'
+        f'{{"cited": true or false, '
+        f'"citation_context": "one sentence explaining whether {brand} was cited and why"}}'
+    )
+    try:
+        raw = invoke_claude(prompt)
+        m = _re.search(r'\{[^{}]*"cited"[^{}]*\}', raw, _re.DOTALL)
+        if not m:
+            return jsonify({'error': 'Could not parse structured response from Claude'}), 500
+        s = _json.loads(m.group())
+        return jsonify({
+            'keyword': keyword,
+            'ai_model': 'claude-3-haiku',
+            'cited': bool(s.get('cited', False)),
+            'citation_context': s.get('citation_context', ''),
+            'timestamp': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO probe failed: {str(e)}'}), 500
+
+@app.route('/api/ai/citation-probe', methods=['POST'])
+def ai_citation_probe():
+    """
+    AI Citation Probe — GEO monitoring engine seed.
+
+    Request:
+        { "keyword": "best project management tools 2025",
+          "provider": "claude"   (optional, default: claude)
+          "model":    "..."      (optional, overrides provider default) }
+
+    Response:
+        { keyword, citations, mentioned_brands, answer_structure,
+          key_facts, ai_summary, ai_model, provider, timestamp }
+    """
+    from llm_service import citation_probe
+
+    data = request.get_json() or {}
+    keyword  = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'claude').strip().lower()
+    model    = (data.get('model') or '').strip() or None
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    try:
+        result = citation_probe(keyword, provider=provider, model=model)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/ai/geo-monitor', methods=['POST'])
+def ai_geo_monitor():
+    """
+    GEO Monitor — query all available AI models in parallel for a keyword.
+
+    Request:
+        {
+          "keyword":   "best CRM software 2025",  (required)
+          "brand":     "HubSpot",                 (optional — tracked in scoring)
+          "providers": ["claude", "openai"]        (optional — defaults to all)
+        }
+
+    Response:
+        {
+          "keyword": "...",
+          "brand": "...",
+          "models": {
+            "claude":  { cited probe result },
+            "openai":  { cited probe result },
+            "gemini":  { unavailable or result }
+          },
+          "geo_score": 67,
+          "score_breakdown": { ... },
+          "timestamp": "..."
+        }
+    """
+    from llm_service import geo_monitor
+
+    data = request.get_json() or {}
+    keyword   = (data.get('keyword') or '').strip()
+    brand     = (data.get('brand') or '').strip() or None
+    providers = data.get('providers') or None
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    if providers is not None and not isinstance(providers, list):
+        return jsonify({'error': 'providers must be a list'}), 400
+
+    try:
+        result = geo_monitor(keyword, brand=brand, providers=providers)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO monitor failed: {str(e)}'}), 500
+
+
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
@@ -1705,4 +2065,6 @@ def catch_all(path):
         return send_from_directory('.', path)
     return send_from_directory('.', 'index.html')
 
-
+if __name__ == '__main__':
+    os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
+    app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
