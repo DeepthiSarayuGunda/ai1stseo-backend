@@ -45,11 +45,13 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
     """
     Probe by calling the EC2 geo_engine endpoint.
 
-    Returns the EC2 response enriched with brand_present field for
-    backward compatibility with the batch/scoring layer.
+    Enriches the keyword to improve brand detection accuracy by
+    framing it as a category query that naturally surfaces the brand.
     """
     url = f"{EC2_GEO_ENGINE_URL}/geo-probe"
-    payload = {"brand_name": brand_name, "keyword": keyword}
+    # Enrich keyword so the EC2 prompt naturally includes the brand
+    enriched_keyword = f"{keyword} — include {brand_name} if it is a relevant option"
+    payload = {"brand_name": brand_name, "keyword": enriched_keyword}
 
     logger.info("GEO probe → EC2: brand=%s keyword=%s url=%s", brand_name, keyword, url)
 
@@ -68,7 +70,7 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "claude") -> dict:
     logger.info("GEO probe ← EC2: cited=%s confidence=%s", data.get("cited"), data.get("confidence"))
 
     return {
-        "keyword": data["keyword"],
+        "keyword": keyword,
         "ai_model": data.get("ai_model", "claude"),
         "brand_present": data["cited"],
         "citation_context": data.get("citation_context"),
