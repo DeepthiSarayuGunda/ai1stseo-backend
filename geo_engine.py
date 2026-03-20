@@ -109,17 +109,11 @@ _CONDITIONAL_PHRASES = [
     r"if you consider",
     r"worth mentioning if",
     r"could be considered if",
-    r"may be relevant",
-    r"might be worth",
     r"not a well-known",
     r"not a recognized",
     r"not typically known",
     r"not a real",
     r"not an established",
-    r"does not stand out",
-    r"does not have a significant",
-    r"not a particularly",
-    r"not have a.{0,20}presence",
     r"has not been included",
     r"not included in this",
     r"do not have.{0,20}information",
@@ -129,7 +123,6 @@ _CONDITIONAL_PHRASES = [
     r"could not find",
     r"cannot confirm",
     r"i cannot (?:verify|confirm)",
-    r"not (?:a )?(?:major|leading|prominent|significant) (?:player|brand|name)",
 ]
 
 
