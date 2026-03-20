@@ -67,19 +67,17 @@ def _invoke_claude(prompt):
 
 def _build_prompt(keyword, brand_name):
     """
-    Prompt that asks for genuine recommendations only.
-    Explicitly tells Claude NOT to invent or assume brands.
+    Balanced prompt: strict on fake brands, fair to real ones.
     """
     return (
         f"You are a knowledgeable product reviewer. A user wants to know:\n\n"
         f"\"What are the best {keyword}?\"\n\n"
         f"List the top brands and products for this category. "
-        f"Only include {brand_name} if it is genuinely a well-known and relevant option "
-        f"in this category. Do NOT assume or invent brands. Do NOT include a brand "
-        f"just because it was mentioned in the question. "
-        f"If {brand_name} is not a real or relevant brand for this category, "
-        f"leave it out entirely. "
-        f"For each brand you include, briefly explain why it stands out."
+        f"If {brand_name} is a genuinely well-known brand in this category, "
+        f"include it and explain why it stands out. "
+        f"If {brand_name} is NOT a real, established brand in this space, "
+        f"do not mention it at all — do not invent or fabricate information about it. "
+        f"For each brand, briefly explain why it stands out."
     )
 
 
@@ -116,11 +114,22 @@ _CONDITIONAL_PHRASES = [
     r"not a well-known",
     r"not a recognized",
     r"not typically known",
+    r"not a real",
+    r"not an established",
+    r"does not stand out",
+    r"does not have a significant",
+    r"not a particularly",
+    r"not have a.{0,20}presence",
+    r"has not been included",
+    r"not included in this",
+    r"do not have.{0,20}information",
     r"i'?m not (?:familiar|aware)",
     r"doesn'?t appear to be",
     r"no information available",
     r"could not find",
     r"cannot confirm",
+    r"i cannot (?:verify|confirm)",
+    r"not (?:a )?(?:major|leading|prominent|significant) (?:player|brand|name)",
 ]
 
 
