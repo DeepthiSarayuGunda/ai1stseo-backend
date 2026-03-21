@@ -150,62 +150,59 @@ The static HTML/JS files currently served by Flask/Nginx move to Amplify Hosting
 
 ---
 
-### PHASE 3: site-monitor (web_ui.py) → Lambda
-**Time: 2-3 hours | Risk: Low (already partially refactored)**
+### PHASE 3: site-monitor (web_ui.py) → Lambda ✅ COMPLETE
+**Completed: March 21, 2026**
 
-This was already prepped for Lambda in Task 56 — Mangum wrapper, RDS integration, Cognito auth.
+- [x] Lambda function: `seo-analyzer-api` (repurposed, Python 3.11, 1024MB, 300s timeout)
+- [x] Code: `s3://ai1stseo-lambda-deploy/site-monitor-lambda.zip` (13MB)
+- [x] WSGI-to-ASGI shim via `web_ui_lambda.py` wrapper
+- [x] API Gateway HTTP API: `w2duao5bg0` → `https://w2duao5bg0.execute-api.us-east-1.amazonaws.com`
+- [x] CORS configured (ai1stseo.com, www, monitor, Amplify)
+- [x] Custom domain `monitor.ai1stseo.com` → `d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com`
+- [x] Health endpoint tested: 200 OK, service=site-monitor, version=3.0
+- [x] Scan endpoint tested: SEO score 39, uptime=True for ai1stseo.com
+- [x] Lambda role: `seo-analyzer-lambda-role` (may have more permissions than lambda-basic-execution)
+- [x] DNS NOT switched yet — `monitor.ai1stseo.com` still points to EC2
 
-**Remaining work:**
-1. The current `web_ui.py` on EC2 still uses local JSON auth (not the Cognito version we wrote). Deploy the refactored version.
-2. `template.yaml` (SAM template) already exists — deploy it
-3. Move `templates/index.html` to Amplify Hosting under `/monitor/` path or `monitor.ai1stseo.com` subdomain
-4. EventBridge rule for daily reports (already defined in template.yaml)
-
-**Lambda config:**
-- Runtime: Python 3.11
-- Memory: 512MB
-- Timeout: 60s (scans), 300s (daily reports)
-- VPC: Same as RDS
-
-**API Gateway:**
-- Custom domain: `monitor.ai1stseo.com`
-- Routes: `/api/scan`, `/api/uptime`, `/api/content`, `/api/ai-visibility`, `/api/full-scan`, `/api/subscribe`, `/api/chat`, etc.
+**Testing URLs:**
+- Lambda API: `https://w2duao5bg0.execute-api.us-east-1.amazonaws.com/api/health`
+- EC2 API (still live): `https://monitor.ai1stseo.com/api/health`
 
 ---
 
 ### PHASE 4: seo-audit-tool (Node.js) → Lambda
-**Time: 2-3 hours | Risk: Medium**
+**Status: BLOCKED — needs new Lambda function (iam:PassRole required)**
 
-Node.js service — Lambda supports Node natively, so no Mangum needed.
+Custom domain ready: `seoaudit.ai1stseo.com` → `d-gb39s1cajf.execute-api.us-east-1.amazonaws.com`
 
-**Refactoring needed:**
-1. Export handler function from `run-all-simple.js` (or create a `handler.js` wrapper)
-2. Replace any file-system storage with RDS or S3
-3. Bedrock integration already exists — verify it uses Nova Lite
-4. Package with `node_modules` into deployment zip
+**Remaining work:**
+1. Create Lambda function `ai1stseo-seo-audit` (needs Gurbachan to grant iam:PassRole or create function)
+2. Package Node.js code with handler wrapper
+3. Create API Gateway HTTP API and wire to Lambda
+4. Map custom domain to API
 
 **Lambda config:**
 - Runtime: Node.js 20.x
 - Memory: 512MB
 - Timeout: 60s
 
-**API Gateway:**
-- Custom domain: `seoaudit.ai1stseo.com`
-
 ---
 
 ### PHASE 5: automation-hub + ai-doc-summarizer → Lambda
-**Time: 2-3 hours | Risk: Low (both are minimal)**
+**Status: BLOCKED — needs new Lambda functions (iam:PassRole required)**
 
-Both services are described as "minimal right now" in the migration email.
+Custom domains ready:
+- `automationhub.ai1stseo.com` → `d-c96c1crynj.execute-api.us-east-1.amazonaws.com`
+- `docsummarizer.ai1stseo.com` → `d-3k7jpgl2qj.execute-api.us-east-1.amazonaws.com`
+- `seoanalysis.ai1stseo.com` → `d-2jl900y7pd.execute-api.us-east-1.amazonaws.com`
 
 **automation-hub (Node.js):**
 - Wrap with Lambda handler
-- Custom domain: `automationhub.ai1stseo.com`
+- Create Lambda function (needs iam:PassRole)
 
 **ai-doc-summarizer (FastAPI/Python):**
-- Wrap with Mangum (FastAPI works with Mangum same as Flask)
-- Custom domain: `docsummarizer.ai1stseo.com`
+- Wrap with Mangum + WSGI-to-ASGI shim (same pattern as Phases 2-3)
+- Create Lambda function (needs iam:PassRole)
 
 ---
 
@@ -322,6 +319,55 @@ Phase 7 (DNS Cutover) ──────── only after ALL services verified 
 - Tailscale access for team (needs non-Algonquin email addresses)
 - Ollama GPU server maintenance (ollama.sageaios.com)
 - DDNS cron for Bell router IP changes
+
+---
+
+## IAM Permissions Request for Gurbachan
+
+**BLOCKING ISSUE:** Troy's SSO role (PowerUserAccess) cannot create IAM roles or pass roles to Lambda. The following changes are needed to complete the migration:
+
+### 1. Update `lambda-basic-execution` role (used by `ai1stseo-backend`)
+Add these managed policies or inline statements:
+```json
+{
+  "Effect": "Allow",
+  "Action": ["bedrock:InvokeModel"],
+  "Resource": "*"
+},
+{
+  "Effect": "Allow",
+  "Action": ["secretsmanager:GetSecretValue"],
+  "Resource": "arn:aws:secretsmanager:us-east-1:823766426087:secret:ai1stseo/*"
+},
+{
+  "Effect": "Allow",
+  "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+  "Resource": "*"
+}
+```
+
+### 2. Update `seo-analyzer-lambda-role` (used by `seo-analyzer-api` / site-monitor)
+Same permissions as above (Bedrock, Secrets Manager, SES).
+
+### 3. Create 3 new Lambda functions (or grant iam:PassRole to Troy's SSO role)
+We need Lambda functions for:
+- `ai1stseo-seo-audit` (Node.js 20.x) — for seoaudit.ai1stseo.com
+- `ai1stseo-automation-hub` (Node.js 20.x) — for automationhub.ai1stseo.com
+- `ai1stseo-doc-summarizer` (Python 3.11) — for docsummarizer.ai1stseo.com
+
+Each needs the same role with: Lambda basic execution + Bedrock + Secrets Manager + SES.
+
+**Alternative:** Add `iam:PassRole` to Troy's PowerUserAccess policy so we can create Lambda functions ourselves.
+
+### Summary of API Gateway Custom Domains (all created, ready for DNS cutover)
+| Domain | API Gateway Target | Service |
+|--------|-------------------|---------|
+| api.ai1stseo.com | d-padfgc44dk.execute-api.us-east-1.amazonaws.com | seo-backend |
+| monitor.ai1stseo.com | d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com | site-monitor |
+| seoaudit.ai1stseo.com | d-gb39s1cajf.execute-api.us-east-1.amazonaws.com | seo-audit (pending) |
+| seoanalysis.ai1stseo.com | d-2jl900y7pd.execute-api.us-east-1.amazonaws.com | seo-analysis (pending) |
+| automationhub.ai1stseo.com | d-c96c1crynj.execute-api.us-east-1.amazonaws.com | automation-hub (pending) |
+| docsummarizer.ai1stseo.com | d-3k7jpgl2qj.execute-api.us-east-1.amazonaws.com | doc-summarizer (pending) |
 
 ---
 
