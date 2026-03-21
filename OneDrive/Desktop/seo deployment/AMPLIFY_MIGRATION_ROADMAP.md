@@ -121,38 +121,32 @@ The static HTML/JS files currently served by Flask/Nginx move to Amplify Hosting
 
 ---
 
-### PHASE 2: seo-backend (app.py) → Lambda
-**Time: 3-4 hours | Risk: Medium**
+### PHASE 2: seo-backend (app.py) → Lambda ✅ COMPLETE
+**Completed: March 21, 2026**
 
-This is the core service — 231-check SEO analyzer + Cognito auth + AI recommendations.
+- [x] Lambda function `ai1stseo-backend` deployed (Python 3.11, 1024MB, 300s timeout)
+- [x] Code: `s3://ai1stseo-lambda-deploy/seo-backend-lambda.zip` (26MB)
+- [x] WSGI-to-ASGI shim added for Flask + Mangum 0.17.0 compatibility
+- [x] API Gateway HTTP API: `cwb0hb27bf` → `https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com`
+- [x] CORS configured on API Gateway (ai1stseo.com, www, Amplify domain)
+- [x] Custom domain `api.ai1stseo.com` created on API Gateway → `d-padfgc44dk.execute-api.us-east-1.amazonaws.com`
+- [x] API mapping: `api.ai1stseo.com` → `cwb0hb27bf` ($default stage)
+- [x] ACM wildcard cert: `arn:aws:acm:us-east-1:823766426087:certificate/b53fcc4d-aca6-4add-afb1-102ecfa4bf6a`
+- [x] Health endpoint tested: 200 OK, 231 checks across 9 categories
+- [x] SEO analysis tested: Score 39.3, 230 checks, 80 passed for ai1stseo.com
+- [x] Auth endpoint tested: Cognito integration working (401 for invalid creds = correct)
+- [x] Environment variables: DB, Cognito, Ollama, Nova Lite all configured
+- [x] Lambda role: `lambda-basic-execution` (may need Bedrock/SES/SecretsManager policies added by Gurbachan)
+- [x] DNS NOT switched yet — `api.ai1stseo.com` still points to EC2 (54.226.251.216)
 
-**Refactoring needed:**
-1. Wrap Flask app with Mangum: `handler = Mangum(app)`
-2. Remove static file serving routes (`serve_index`, `serve_analyze`, `serve_guides`, `serve_assets`, `serve_audit`, `catch_all`) — frontend is now on Amplify
-3. Replace Ollama URL (`https://api.databi.io/api`) with dual-path:
-   - Primary: Nova Lite via `boto3.client('bedrock-runtime')`
-   - Fallback: `https://ollama.sageaios.com/api/generate`
-4. `auth.py` — works as-is (already uses boto3 for Cognito + Secrets Manager)
-5. `database.py` — works as-is (already connects to RDS)
-6. Add `requirements.txt` with mangum, psycopg2-binary, boto3, etc.
+**Known limitations:**
+- API Gateway HTTP API max timeout: 30s (AI recommendations may need async pattern for long prompts)
+- Lambda role `lambda-basic-execution` may lack Bedrock InvokeModel, SES, and Secrets Manager permissions
+- DNS cutover deferred to Phase 7
 
-**Lambda config:**
-- Runtime: Python 3.11
-- Memory: 512MB (analysis is CPU-bound for HTML parsing)
-- Timeout: 60s (analysis), 300s (AI recommendations)
-- VPC: Same subnets/SG as RDS
-- IAM: Bedrock InvokeModel, Secrets Manager read, SES send
-
-**API Gateway:**
-- Custom domain: `api.ai1stseo.com`
-- Routes: `POST /api/analyze`, `GET /api/health`, `POST /api/ai-recommendations`, `/api/auth/*`
-- Cognito authorizer on protected routes
-
-**Testing:**
-- Run full SEO analysis against ai1stseo.com
-- Test auth flow (signup, verify, login, refresh, delete)
-- Test AI recommendations with Nova Lite
-- Compare results with current EC2 output
+**Testing URLs:**
+- Lambda API: `https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com/api/health`
+- EC2 API (still live): `https://api.ai1stseo.com/api/health`
 
 ---
 
