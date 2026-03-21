@@ -170,39 +170,22 @@ The static HTML/JS files currently served by Flask/Nginx move to Amplify Hosting
 
 ---
 
-### PHASE 4: seo-audit-tool (Node.js) → Lambda
-**Status: BLOCKED — needs new Lambda function (iam:PassRole required)**
+### PHASE 4: seo-audit-tool (Node.js) — DEFERRED
+**Owner: Other team member. Will remain on EC2 until they migrate it.**
 
-Custom domain ready: `seoaudit.ai1stseo.com` → `d-gb39s1cajf.execute-api.us-east-1.amazonaws.com`
-
-**Remaining work:**
-1. Create Lambda function `ai1stseo-seo-audit` (needs Gurbachan to grant iam:PassRole or create function)
-2. Package Node.js code with handler wrapper
-3. Create API Gateway HTTP API and wire to Lambda
-4. Map custom domain to API
-
-**Lambda config:**
-- Runtime: Node.js 20.x
-- Memory: 512MB
-- Timeout: 60s
+Custom domain pre-created: `seoaudit.ai1stseo.com` → `d-gb39s1cajf.execute-api.us-east-1.amazonaws.com`
 
 ---
 
-### PHASE 5: automation-hub + ai-doc-summarizer → Lambda
-**Status: BLOCKED — needs new Lambda functions (iam:PassRole required)**
+### PHASE 5: automation-hub + ai-doc-summarizer + seo-analysis — DEFERRED
+**Owners: Other team members. Will remain on EC2 until they migrate.**
 
-Custom domains ready:
+Custom domains pre-created:
 - `automationhub.ai1stseo.com` → `d-c96c1crynj.execute-api.us-east-1.amazonaws.com`
 - `docsummarizer.ai1stseo.com` → `d-3k7jpgl2qj.execute-api.us-east-1.amazonaws.com`
 - `seoanalysis.ai1stseo.com` → `d-2jl900y7pd.execute-api.us-east-1.amazonaws.com`
 
-**automation-hub (Node.js):**
-- Wrap with Lambda handler
-- Create Lambda function (needs iam:PassRole)
-
-**ai-doc-summarizer (FastAPI/Python):**
-- Wrap with Mangum + WSGI-to-ASGI shim (same pattern as Phases 2-3)
-- Create Lambda function (needs iam:PassRole)
+**Note:** EC2 must stay running until all team members have migrated their services. DNS for these subdomains stays pointing to EC2 IP `54.226.251.216`.
 
 ---
 
@@ -254,24 +237,22 @@ def generate(prompt, model="amazon.nova-lite-v1:0", max_tokens=4096):
 
 ---
 
-### PHASE 7: DNS Cutover + EC2 Decommission
-**Time: 1-2 hours | Risk: Medium (but fully reversible)**
+### PHASE 7: DNS Cutover (Partial) + EC2 Stays Running
+**Time: 30 minutes | Risk: Low (fully reversible)**
 
-Once all services are verified on Lambda:
+Only switching DNS for the two services we migrated. EC2 stays running for other team members' services.
 
-1. Update Route 53 records:
-   - `ai1stseo.com` → Amplify CloudFront distribution
-   - `api.ai1stseo.com` → API Gateway custom domain
-   - `monitor.ai1stseo.com` → API Gateway custom domain
-   - `seoaudit.ai1stseo.com` → API Gateway custom domain
-   - `seoanalysis.ai1stseo.com` → API Gateway custom domain
-   - `automationhub.ai1stseo.com` → API Gateway custom domain
-   - `docsummarizer.ai1stseo.com` → API Gateway custom domain
+**DNS changes (once Gurbachan confirms permissions):**
+1. `api.ai1stseo.com` → ALIAS to `d-padfgc44dk.execute-api.us-east-1.amazonaws.com` (HostedZoneId: Z1UJRXOUMOOFQ8)
+2. `monitor.ai1stseo.com` → ALIAS to `d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com` (HostedZoneId: Z1UJRXOUMOOFQ8)
 
-2. Keep EC2 running for 48-72 hours as hot standby (DNS TTL propagation)
-3. Monitor CloudWatch logs for errors
-4. After 72 hours with no issues: stop EC2 instance (don't terminate yet)
-5. After 1 week: create final AMI snapshot, then terminate EC2
+**DNS records that STAY on EC2 (54.226.251.216):**
+- `seoaudit.ai1stseo.com`
+- `seoanalysis.ai1stseo.com`
+- `automationhub.ai1stseo.com`
+- `docsummarizer.ai1stseo.com`
+
+**EC2 stays running** — cannot decommission until all team members migrate their services.
 
 **Rollback:** Change DNS records back to EC2 IP `54.226.251.216`. Services are still running on EC2 until we explicitly stop them.
 
@@ -324,10 +305,10 @@ Phase 7 (DNS Cutover) ──────── only after ALL services verified 
 
 ## IAM Permissions Request for Gurbachan
 
-**BLOCKING ISSUE:** Troy's SSO role (PowerUserAccess) cannot create IAM roles or pass roles to Lambda. The following changes are needed to complete the migration:
+**BLOCKING ISSUE:** Troy's SSO role (PowerUserAccess) cannot create IAM roles or pass roles to Lambda. The following changes are needed to complete the migration of seo-backend and site-monitor:
 
 ### 1. Update `lambda-basic-execution` role (used by `ai1stseo-backend`)
-Add these managed policies or inline statements:
+Add these permissions:
 ```json
 {
   "Effect": "Allow",
@@ -349,25 +330,26 @@ Add these managed policies or inline statements:
 ### 2. Update `seo-analyzer-lambda-role` (used by `seo-analyzer-api` / site-monitor)
 Same permissions as above (Bedrock, Secrets Manager, SES).
 
-### 3. Create 3 new Lambda functions (or grant iam:PassRole to Troy's SSO role)
-We need Lambda functions for:
-- `ai1stseo-seo-audit` (Node.js 20.x) — for seoaudit.ai1stseo.com
-- `ai1stseo-automation-hub` (Node.js 20.x) — for automationhub.ai1stseo.com
-- `ai1stseo-doc-summarizer` (Python 3.11) — for docsummarizer.ai1stseo.com
+### What works WITHOUT these permissions (already tested):
+- Full 231-check SEO analysis ✅
+- Cognito auth (signup, login, verify, refresh, delete) ✅ (falls back to env vars)
+- Site-monitor scan, uptime, content checks ✅
+- Health endpoints ✅
 
-Each needs the same role with: Lambda basic execution + Bedrock + Secrets Manager + SES.
-
-**Alternative:** Add `iam:PassRole` to Troy's PowerUserAccess policy so we can create Lambda functions ourselves.
+### What NEEDS these permissions:
+- AI recommendations via Nova Lite (Bedrock InvokeModel)
+- Email notifications via SES
+- Cognito client secret from Secrets Manager (currently using env var fallback)
 
 ### Summary of API Gateway Custom Domains (all created, ready for DNS cutover)
-| Domain | API Gateway Target | Service |
-|--------|-------------------|---------|
-| api.ai1stseo.com | d-padfgc44dk.execute-api.us-east-1.amazonaws.com | seo-backend |
-| monitor.ai1stseo.com | d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com | site-monitor |
-| seoaudit.ai1stseo.com | d-gb39s1cajf.execute-api.us-east-1.amazonaws.com | seo-audit (pending) |
-| seoanalysis.ai1stseo.com | d-2jl900y7pd.execute-api.us-east-1.amazonaws.com | seo-analysis (pending) |
-| automationhub.ai1stseo.com | d-c96c1crynj.execute-api.us-east-1.amazonaws.com | automation-hub (pending) |
-| docsummarizer.ai1stseo.com | d-3k7jpgl2qj.execute-api.us-east-1.amazonaws.com | doc-summarizer (pending) |
+| Domain | API Gateway Target | Service | Status |
+|--------|-------------------|---------|--------|
+| api.ai1stseo.com | d-padfgc44dk.execute-api.us-east-1.amazonaws.com | seo-backend | ✅ Deployed |
+| monitor.ai1stseo.com | d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com | site-monitor | ✅ Deployed |
+| seoaudit.ai1stseo.com | d-gb39s1cajf.execute-api.us-east-1.amazonaws.com | seo-audit | Deferred (other team) |
+| seoanalysis.ai1stseo.com | d-2jl900y7pd.execute-api.us-east-1.amazonaws.com | seo-analysis | Deferred (other team) |
+| automationhub.ai1stseo.com | d-c96c1crynj.execute-api.us-east-1.amazonaws.com | automation-hub | Deferred (other team) |
+| docsummarizer.ai1stseo.com | d-3k7jpgl2qj.execute-api.us-east-1.amazonaws.com | doc-summarizer | Deferred (other team) |
 
 ---
 
