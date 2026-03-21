@@ -30,11 +30,52 @@ button:disabled{opacity:.5;cursor:wait}
 .tag-data{background:#6366f1;color:#fff}
 .tag-info{background:#0891b2;color:#fff}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* Global brand bar */
+.brand-bar{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;max-width:1100px;margin-bottom:24px}
+.brand-bar h2{font-size:1rem;color:#58a6ff;margin-bottom:10px}
+.brand-bar .row3{align-items:end}
+.brand-bar button{max-width:200px}
+.resolve-status{font-size:.75rem;margin-top:6px;min-height:18px}
+.resolve-ok{color:#3fb950}
+.resolve-warn{color:#d29922}
+.resolve-err{color:#f85149}
+.kw-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.kw-chip{padding:4px 10px;background:#21262d;border:1px solid #30363d;border-radius:12px;font-size:.72rem;color:#8b949e;cursor:pointer;transition:all .15s}
+.kw-chip:hover{background:#30363d;color:#e1e4e8;border-color:#58a6ff}
+.alt-dropdown{margin-top:6px}
+.alt-dropdown select{max-width:300px}
 </style>
 </head>
 <body>
 <h1>Developer 1 — AI/ML & Core Engine Dashboard</h1>
-<p class="sub">All features + monitoring, history, providers — single page</p>
+<p class="sub">AI Search Visibility Scanner — Phase 1</p>
+
+<!-- ═══ GLOBAL BRAND / URL BAR ═══ -->
+<div class="brand-bar">
+  <h2>🔍 Brand & Website Setup</h2>
+  <p class="desc">Enter a brand name or website URL. We'll resolve the other automatically and pre-fill all tools below.</p>
+  <div class="row3">
+    <div>
+      <label for="gb-brand">Brand Name</label>
+      <input id="gb-brand" placeholder="e.g. Notion, Shopify, Ahrefs">
+    </div>
+    <div>
+      <label for="gb-url">Website URL</label>
+      <input id="gb-url" placeholder="e.g. https://notion.so">
+    </div>
+    <div>
+      <button class="btn1" onclick="resolveBrand()" id="resolve-btn">Resolve & Auto-Fill</button>
+    </div>
+  </div>
+  <div id="resolve-status" class="resolve-status"></div>
+  <div id="alt-container" class="alt-dropdown" style="display:none">
+    <label>Multiple domains found — pick one:</label>
+    <select id="alt-select" onchange="pickAlternative()"></select>
+  </div>
+  <div id="kw-suggestions" class="kw-chips"></div>
+</div>
 
 <div class="section-title">Core Features</div>
 <div class="grid">
@@ -44,8 +85,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-live">LIVE</span>
   <h2>1. GEO Monitoring Engine</h2>
   <p class="desc">Detect brand mentions across Nova Lite (Bedrock) + Ollama fallback</p>
-  <label>Brand</label><input id="g-brand" value="Nike">
-  <label>Keyword</label><input id="g-kw" value="running shoes">
+  <label>Brand</label><input id="g-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keyword</label><input id="g-kw" placeholder="e.g. best project management tools">
   <label>Provider</label>
   <select id="g-prov">
     <option value="nova" selected>Nova Lite (Bedrock)</option>
@@ -60,7 +101,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-live">LIVE</span>
   <h2>2. AEO Question-Answer Optimizer</h2>
   <p class="desc">Scan URL for AI visibility issues + FAQ schema gaps</p>
-  <label>URL to analyze</label><input id="a-url" value="https://nike.com">
+  <label>URL to analyze</label><input id="a-url" class="sync-url" placeholder="Auto-filled from above">
   <button class="btn2" onclick="runAeo()">Analyze AEO</button>
   <div id="a-out" class="out"></div>
 </div>
@@ -70,8 +111,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-live">LIVE</span>
   <h2>3. AI Ranking Recommendations</h2>
   <p class="desc">E-E-A-T signal analysis + actionable recommendations</p>
-  <label>URL</label><input id="r-url" value="https://nike.com">
-  <label>Brand</label><input id="r-brand" value="Nike">
+  <label>URL</label><input id="r-url" class="sync-url" placeholder="Auto-filled from above">
+  <label>Brand</label><input id="r-brand" class="sync-brand" placeholder="Auto-filled from above">
   <button class="btn3" onclick="runRank()">Get Recommendations</button>
   <div id="r-out" class="out"></div>
 </div>
@@ -81,8 +122,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-live">LIVE</span>
   <h2>4. AI Content Generation Pipeline</h2>
   <p class="desc">One-click FAQ, comparison, meta description, feature snippets</p>
-  <label>Brand</label><input id="c-brand" value="Nike">
-  <label>Topic</label><input id="c-topic" value="running shoes">
+  <label>Brand</label><input id="c-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Topic</label><input id="c-topic" placeholder="e.g. project management tools">
   <label>Type</label>
   <select id="c-type">
     <option value="faq">FAQ (with JSON-LD schema)</option>
@@ -111,7 +152,7 @@ button:disabled{opacity:.5;cursor:wait}
   <h2>6. LLM API Integrations</h2>
   <p class="desc">Multi-provider: Claude (Bedrock), Groq, OpenAI, Gemini, Perplexity</p>
   <button class="btn6" onclick="runProviders()">Check Providers</button>
-  <label>Keyword</label><input id="l-kw" value="best SEO tools 2025">
+  <label>Keyword</label><input id="l-kw" placeholder="e.g. best SEO tools 2025">
   <label>Provider</label>
   <select id="l-prov"><option value="claude">Claude (Bedrock)</option></select>
   <button class="btn6" onclick="runLlmProbe()" style="margin-top:6px">Run Citation Probe</button>
@@ -120,7 +161,7 @@ button:disabled{opacity:.5;cursor:wait}
 
 </div>
 
-<!-- Monitoring & Data Section -->
+<!-- AI Visibility Scanner Section -->
 <div class="section-title">AI Visibility Scanner</div>
 <div class="grid">
 
@@ -128,10 +169,10 @@ button:disabled{opacity:.5;cursor:wait}
 <div class="card full">
   <span class="tag tag-live">LIVE</span>
   <h2>Cross-Model Visibility Compare</h2>
-  <p class="desc">Probe the SAME keyword across ALL AI providers simultaneously — see which models mention your brand</p>
+  <p class="desc">Probe the SAME keyword across ALL AI providers simultaneously</p>
   <div class="row2">
-    <div><label>Brand</label><input id="cmp-brand" value="Nike"></div>
-    <div><label>Keyword</label><input id="cmp-kw" value="best running shoes"></div>
+    <div><label>Brand</label><input id="cmp-brand" class="sync-brand" placeholder="Auto-filled"></div>
+    <div><label>Keyword</label><input id="cmp-kw" placeholder="e.g. best running shoes"></div>
   </div>
   <button class="btn1" onclick="runCompare()">Compare Across All Models</button>
   <div id="cmp-out" class="out"></div>
@@ -142,8 +183,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-live">LIVE</span>
   <h2>Site/URL Detection</h2>
   <p class="desc">Check if your website URL appears in AI outputs</p>
-  <label>Site URL</label><input id="site-url" value="https://nike.com">
-  <label>Keyword</label><input id="site-kw" value="best running shoes online">
+  <label>Site URL</label><input id="site-url" class="sync-url" placeholder="Auto-filled">
+  <label>Keyword</label><input id="site-kw" placeholder="e.g. best tools online">
   <label>Provider</label>
   <select id="site-prov">
     <option value="nova" selected>Nova Lite</option>
@@ -158,7 +199,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span class="tag tag-data">DATA</span>
   <h2>Visibility Trend</h2>
   <p class="desc">Track how your brand visibility changes over time</p>
-  <label>Brand</label><input id="trend-brand" value="Nike">
+  <label>Brand</label><input id="trend-brand" class="sync-brand" placeholder="Auto-filled">
   <button class="btn7" onclick="runTrend()">Load Trend</button>
   <div id="trend-out" class="out"></div>
 </div>
@@ -169,7 +210,7 @@ button:disabled{opacity:.5;cursor:wait}
   <h2>Batch GEO Probe</h2>
   <p class="desc">Probe multiple keywords at once — get GEO score across all</p>
   <div class="row2">
-    <div><label>Brand</label><input id="b-brand" value="Nike"></div>
+    <div><label>Brand</label><input id="b-brand" class="sync-brand" placeholder="Auto-filled"></div>
     <div><label>Provider</label>
       <select id="b-prov">
         <option value="nova" selected>Nova Lite (Bedrock)</option>
@@ -178,9 +219,7 @@ button:disabled{opacity:.5;cursor:wait}
     </div>
   </div>
   <label>Keywords (one per line)</label>
-  <textarea id="b-kw" style="min-height:80px">running shoes
-best athletic footwear
-marathon training gear</textarea>
+  <textarea id="b-kw" style="min-height:80px" placeholder="Keywords will be suggested after resolving brand"></textarea>
   <button class="btn1" onclick="runBatch()">Run Batch Probe</button>
   <div id="b-out" class="out"></div>
 </div>
@@ -194,9 +233,9 @@ marathon training gear</textarea>
 <div class="card full">
   <span class="tag tag-data">DATA</span>
   <h2>Probe History (Stored Results)</h2>
-  <p class="desc">All past GEO probe results stored in SQLite — filter by brand or provider</p>
+  <p class="desc">All past GEO probe results stored in SQLite</p>
   <div class="row2">
-    <div><label>Filter by Brand</label><input id="h-brand" placeholder="e.g. Nike (optional)"></div>
+    <div><label>Filter by Brand</label><input id="h-brand" class="sync-brand" placeholder="Auto-filled (optional)"></div>
     <div><label>Filter by Provider</label>
       <select id="h-model">
         <option value="">All Providers</option>
@@ -224,8 +263,8 @@ marathon training gear</textarea>
   <h2>Scheduled Monitoring Jobs</h2>
   <p class="desc">Register periodic probes or view existing schedules</p>
   <button class="btn8" onclick="loadSchedule()">View Scheduled Jobs</button>
-  <label>Brand</label><input id="s-brand" placeholder="e.g. Nike">
-  <label>Keywords (comma-separated)</label><input id="s-kw" placeholder="running shoes, athletic footwear">
+  <label>Brand</label><input id="s-brand" class="sync-brand" placeholder="Auto-filled">
+  <label>Keywords (comma-separated)</label><input id="s-kw" placeholder="e.g. running shoes, athletic footwear">
   <label>Provider</label>
   <select id="s-prov">
     <option value="nova">Nova Lite</option>
@@ -241,6 +280,8 @@ marathon training gear</textarea>
 <script>
 const BASE = window.location.origin;
 let chatSession = null;
+let resolvedBrand = '';
+let resolvedUrl = '';
 
 function show(id, data) {
   const el = document.getElementById(id);
@@ -255,7 +296,137 @@ async function api(method, path, body) {
   return r.json();
 }
 
-// -- Core Features --
+// ── Global brand/URL sync ────────────────────────────────────────────────────
+
+function syncAllFields() {
+  document.querySelectorAll('.sync-brand').forEach(el => {
+    if (!el.dataset.userEdited) el.value = resolvedBrand;
+  });
+  document.querySelectorAll('.sync-url').forEach(el => {
+    if (!el.dataset.userEdited) el.value = resolvedUrl;
+  });
+}
+
+// Track user edits so we don't overwrite manual changes
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('sync-brand') || e.target.classList.contains('sync-url')) {
+    e.target.dataset.userEdited = 'true';
+  }
+  // Clear edit flag if field is emptied
+  if (e.target.value === '') delete e.target.dataset.userEdited;
+});
+
+async function resolveBrand() {
+  const brand = document.getElementById('gb-brand').value.trim();
+  const url = document.getElementById('gb-url').value.trim();
+  const statusEl = document.getElementById('resolve-status');
+  const altContainer = document.getElementById('alt-container');
+  const kwContainer = document.getElementById('kw-suggestions');
+
+  if (!brand && !url) {
+    statusEl.className = 'resolve-status resolve-err';
+    statusEl.textContent = 'Enter a brand name or website URL';
+    return;
+  }
+
+  const btn = document.getElementById('resolve-btn');
+  btn.disabled = true;
+  btn.textContent = 'Resolving…';
+  statusEl.className = 'resolve-status';
+  statusEl.textContent = 'Looking up…';
+  altContainer.style.display = 'none';
+  kwContainer.innerHTML = '';
+
+  try {
+    const body = {};
+    if (brand) body.brand = brand;
+    if (url) body.url = url;
+    const d = await api('POST', '/api/brand/resolve', body);
+
+    if (d.error) {
+      statusEl.className = 'resolve-status resolve-err';
+      statusEl.textContent = d.error;
+      return;
+    }
+
+    // Update global state
+    resolvedBrand = d.brand || '';
+    resolvedUrl = d.url || '';
+
+    // Fill the global bar itself
+    if (d.brand) document.getElementById('gb-brand').value = d.brand;
+    if (d.url) document.getElementById('gb-url').value = d.url;
+
+    // Sync all downstream fields
+    // Clear userEdited flags so auto-fill works
+    document.querySelectorAll('.sync-brand, .sync-url').forEach(el => delete el.dataset.userEdited);
+    syncAllFields();
+
+    // Status message
+    if (d.consistent === false) {
+      statusEl.className = 'resolve-status resolve-warn';
+      statusEl.textContent = `⚠ Brand "${d.brand}" may not match domain "${d.domain}" — fields filled, but double-check.`;
+    } else if (d.source === 'unresolved') {
+      statusEl.className = 'resolve-status resolve-warn';
+      statusEl.textContent = `⚠ Could not find a live website for "${d.brand}". Enter URL manually.`;
+    } else {
+      statusEl.className = 'resolve-status resolve-ok';
+      statusEl.textContent = `✓ Resolved: ${d.brand} → ${d.domain} (via ${d.source}). All fields auto-filled.`;
+    }
+
+    // Show alternatives dropdown if multiple domains found
+    if (d.alternatives && d.alternatives.length > 1) {
+      altContainer.style.display = 'block';
+      const sel = document.getElementById('alt-select');
+      sel.innerHTML = d.alternatives.map(a =>
+        `<option value="${a.url}">${a.domain}</option>`
+      ).join('');
+    }
+
+    // Show keyword suggestions as clickable chips
+    if (d.suggested_keywords && d.suggested_keywords.length) {
+      kwContainer.innerHTML = '<label style="width:100%;margin-bottom:4px">Suggested keywords (click to use):</label>' +
+        d.suggested_keywords.map(kw =>
+          `<span class="kw-chip" onclick="useKeyword('${kw.replace(/'/g, "\\'")}')">${kw}</span>`
+        ).join('');
+    }
+
+  } catch (e) {
+    statusEl.className = 'resolve-status resolve-err';
+    statusEl.textContent = 'Network error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Resolve & Auto-Fill';
+  }
+}
+
+function pickAlternative() {
+  const url = document.getElementById('alt-select').value;
+  resolvedUrl = url;
+  document.getElementById('gb-url').value = url;
+  document.querySelectorAll('.sync-url').forEach(el => { delete el.dataset.userEdited; });
+  syncAllFields();
+}
+
+function useKeyword(kw) {
+  // Fill the first empty keyword field, or the GEO probe keyword
+  const targets = ['g-kw', 'cmp-kw', 'site-kw'];
+  for (const id of targets) {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.value = kw; return; }
+  }
+  // Fallback: append to batch keywords
+  const batch = document.getElementById('b-kw');
+  if (batch.value.trim()) batch.value += '\n' + kw;
+  else batch.value = kw;
+}
+
+// Auto-resolve on Enter key in global bar
+document.getElementById('gb-brand').addEventListener('keydown', e => { if (e.key === 'Enter') resolveBrand(); });
+document.getElementById('gb-url').addEventListener('keydown', e => { if (e.key === 'Enter') resolveBrand(); });
+
+// ── Core Features ────────────────────────────────────────────────────────────
+
 async function runGeo() {
   show('g-out', 'Probing...');
   try {
@@ -282,7 +453,7 @@ async function runRank() {
     const d = await api('POST', '/api/ai/ranking-recommendations', {
       url: document.getElementById('r-url').value,
       brand_name: document.getElementById('r-brand').value,
-      keywords: ['running shoes', 'athletic footwear']
+      keywords: ['seo tools', 'digital marketing']
     });
     show('r-out', d);
   } catch (e) { show('r-out', 'Error: ' + e.message); }
@@ -334,7 +505,8 @@ async function runLlmProbe() {
   } catch (e) { show('l-out', 'Error: ' + e.message); }
 }
 
-// -- Monitoring & Data --
+// ── Scanner & Monitoring ─────────────────────────────────────────────────────
+
 async function runCompare() {
   show('cmp-out', 'Comparing across all models...');
   try {

@@ -2061,6 +2061,21 @@ def geo_probe_trend():
     return jsonify(get_visibility_trend(brand, limit=limit))
 
 
+@app.route('/api/brand/resolve', methods=['POST'])
+def brand_resolve():
+    """Resolve brand name <-> domain, suggest keywords."""
+    from brand_resolver import resolve_brand
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip() or None
+    url = (data.get('url') or data.get('site_url') or '').strip() or None
+    if not brand and not url:
+        return jsonify({'error': 'Provide brand or url'}), 400
+    try:
+        return jsonify(resolve_brand(brand=brand, url=url))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
