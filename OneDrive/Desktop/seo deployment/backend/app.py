@@ -5,6 +5,8 @@ Enhanced GEO/AEO (60 checks) with AI Crawlability, Knowledge Graph, Publishing R
 Prompt Visibility, Citation Worthiness, and Brand & Trust signals
 Enhanced Local SEO (30 checks) and Social SEO (24 checks) based on 2026 best practices
 Based on SEMrush, Moz, Ahrefs, and industry best practices
+
+Lambda-compatible via Mangum wrapper. Static files served by Amplify, not Flask.
 """
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -15,6 +17,10 @@ from urllib.parse import urlparse, urljoin
 import re
 import time
 import json
+import os
+
+# Detect Lambda environment
+IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
 app = Flask(__name__, static_folder='../assets', static_url_path='/assets')
 CORS(app, origins=[
@@ -23,6 +29,7 @@ CORS(app, origins=[
     'http://monitor.ai1stseo.com', 'https://monitor.ai1stseo.com',
     'http://localhost:5000', 'http://localhost:8888',
     'http://54.226.251.216', 'http://54.226.251.216:8888',
+    'https://main.d30a3tvkvr1a51.amplifyapp.com',
 ], supports_credentials=True)
 
 # Register auth blueprint (Cognito + Secrets Manager)
@@ -2012,12 +2019,12 @@ def health_check():
         }
     })
 
-# Ollama LLM Configuration
-OLLAMA_URL = 'https://api.databi.io/api'  # Reverse proxy to local Ollama server
+# AI Inference — Nova Lite (primary) + Ollama fallback
+from ai_inference import generate as ai_generate
 
 @app.route('/api/ai-recommendations', methods=['POST'])
 def get_ai_recommendations():
-    """Generate AI-powered SEO recommendations using local LLM with full audit context"""
+    """Generate AI-powered SEO recommendations using Nova Lite or Ollama fallback"""
     data = request.get_json()
     audit_results = data.get('auditResults', {})
     url = data.get('url', '')
@@ -2287,49 +2294,16 @@ Prioritized implementation roadmap:
 Be extremely specific and actionable. Every recommendation should include exact steps the website owner can implement immediately. Provide actual code, not placeholders. Reference specific issues found in the audit by name."""
 
     try:
-        llm_response = requests.post(
-            f"{OLLAMA_URL}/generate",
-            headers={'Content-Type': 'application/json'},
-            json={
-                'model': 'llama3.1:latest',
-                'stream': False,
-                'prompt': prompt,
-                'options': {
-                    'num_ctx': 65536,  # Maximize context window for comprehensive analysis
-                    'num_predict': 8192,  # Allow much longer responses for all categories
-                    'temperature': 0.7  # Balanced creativity/accuracy
-                }
-            },
-            timeout=300  # 5 minutes for comprehensive multi-category analysis
-        )
-        
-        if llm_response.status_code == 200:
-            result = llm_response.json()
-            return jsonify({
-                'status': 'success',
-                'recommendations': result.get('response', 'No recommendations generated'),
-                'model': 'llama3.1'
-            })
-        else:
-            return jsonify({
-                'status': 'error',
-                'error': f'LLM service returned status {llm_response.status_code}'
-            }), 500
-            
-    except requests.exceptions.Timeout:
+        recommendations = ai_generate(prompt, max_tokens=8192, temperature=0.7)
         return jsonify({
-            'status': 'error',
-            'error': 'LLM request timed out. The AI server may be busy.'
-        }), 504
-    except requests.exceptions.ConnectionError:
-        return jsonify({
-            'status': 'error', 
-            'error': 'Could not connect to AI server. Please check if the Ollama service is running.'
-        }), 503
+            'status': 'success',
+            'recommendations': recommendations,
+            'model': 'nova-lite-or-ollama'
+        })
     except Exception as e:
         return jsonify({
             'status': 'error',
-            'error': f'AI recommendation failed: {str(e)}'
+            'error': 'AI recommendation failed: {}'.format(str(e))
         }), 500
 
 @app.route('/audit/')
@@ -2343,17 +2317,16 @@ def catch_all(path):
         return send_from_directory('..', path)
     return send_from_directory('..', 'index.html')
 
+# === Lambda handler (Mangum) ===
+if IS_LAMBDA:
+    try:
+        from mangum import Mangum
+        handler = Mangum(app)
+    except ImportError:
+        pass
+
 if __name__ == '__main__':
     print("🚀 AISEO Master Backend starting...")
-    print("📊 Total Checks: 216 across 9 categories")
-    print("   - Technical SEO: 30 checks")
-    print("   - On-Page SEO: 24 checks")
-    print("   - Content SEO: 18 checks")
-    print("   - Mobile SEO: 15 checks")
-    print("   - Performance: 17 checks")
-    print("   - Security: 13 checks")
-    print("   - Social SEO: 24 checks (Enhanced)")
-    print("   - Local SEO: 30 checks (Enhanced)")
-    print("   - GEO/AEO: 45 checks (AI Crawlability + Knowledge Graph + Publishing Readiness)")
+    print("📊 Total Checks: 231 across 9 categories")
     print("📍 http://localhost:5000")
     app.run(debug=True, port=5000)

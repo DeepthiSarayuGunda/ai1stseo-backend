@@ -80,14 +80,15 @@ Other AWS services: Cognito (auth, existing), SES (email, existing), EventBridge
 ### PHASE 0: Pre-Flight Safety Checks (Before touching anything)
 **Time: 1-2 hours**
 
-- [ ] Snapshot the EC2 instance (AMI backup) — full rollback capability
-- [ ] Export all PM2 configs: `pm2 save && pm2 dump`
-- [ ] Backup Nginx configs: `sudo cp -r /etc/nginx /home/ec2-user/nginx-backup`
-- [ ] Verify RDS automated backups are running (7-day retention already set)
-- [ ] Confirm all 6 subdomains are responding (baseline health check)
-- [ ] Document current Ollama endpoint: `https://api.databi.io/api`
-- [ ] Test Gurbachan's Ollama endpoint: `curl https://ollama.sageaios.com/api/tags`
-- [ ] Confirm GitHub repo is up to date with all latest code
+- [x] Snapshot the EC2 instance → AMI `ami-004b9dfb15994307b` (2026-03-21)
+- [x] Export all PM2 configs: `pm2 save` done
+- [x] Backup Nginx configs: copied to `/home/ec2-user/nginx-backup`
+- [x] Verify RDS automated backups: 7-day retention, latest restore point 2026-03-21T14:54
+- [x] Confirm all 7 endpoints responding: ai1stseo.com, api, monitor, seoaudit, seoanalysis, automationhub, docsummarizer — all 200 OK
+- [x] Document current Ollama endpoint: `https://api.databi.io/api`
+- [x] Test Gurbachan's Ollama endpoint: `ollama.sageaios.com` → 200 OK, models: qwen3:30b-a3b, qwen3:235b-a22b, nomic-embed-text (no llama3.1 yet)
+- [x] Nova Lite on Bedrock: ACTIVE (amazon.nova-lite-v1:0, up to 300K context)
+- [x] GitHub repo up to date
 
 **Rollback plan:** Restore AMI snapshot, point DNS back to EC2 IP. Total rollback time: ~10 minutes.
 
