@@ -9,7 +9,7 @@ import io as _io
 IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
 # Import the Flask app from the existing web_ui module
-from web_ui import app, send_daily_reports
+from web_ui import app, send_daily_reports, run_scheduled_scan
 
 
 class _FlaskAsgi:
@@ -92,12 +92,29 @@ class _FlaskAsgi:
 
 if IS_LAMBDA:
     from mangum import Mangum
-    handler = Mangum(_FlaskAsgi(app), lifespan="off")
+    _mangum_handler = Mangum(_FlaskAsgi(app), lifespan="off")
 else:
-    handler = None
+    _mangum_handler = None
 
 
-def scheduled_report_handler(event, context):
-    """Lambda handler for EventBridge scheduled rule (daily reports)."""
-    result = send_daily_reports()
-    return {"statusCode": 200, "body": json.dumps(result)}
+def handler(event, context):
+    """Smart router: EventBridge events go to scheduled handlers, HTTP goes to Mangum."""
+    # EventBridge events have 'source' = 'aws.events' or our custom input
+    source = event.get("source", "")
+    detail_type = event.get("detail-type", "")
+    custom_input = event.get("handler", "")
+
+    if source == "aws.events" or detail_type == "Scheduled Event":
+        # Route based on which rule triggered us (via custom Input JSON)
+        if custom_input == "daily_report":
+            result = send_daily_reports()
+            return {"statusCode": 200, "body": json.dumps(result)}
+        else:
+            # Default scheduled event = scan
+            result = run_scheduled_scan()
+            return {"statusCode": 200, "body": json.dumps(result)}
+
+    # Otherwise it's an HTTP request from API Gateway — pass to Mangum
+    if _mangum_handler:
+        return _mangum_handler(event, context)
+    return {"statusCode": 500, "body": "Not running on Lambda"}
