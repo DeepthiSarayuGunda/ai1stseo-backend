@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/api/health",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {
+    "accountId": "823766426087",
+    "apiId": "cwb0hb27bf",
+    "domainName": "cwb0hb27bf.execute-api.us-east-1.amazonaws.com",
+    "domainPrefix": "cwb0hb27bf",
+    "http": {
+      "method": "GET",
+      "path": "/api/health",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "test"
+    },
+    "requestId": "test-123",
+    "routeKey": "$default",
+    "stage": "$default",
+    "time": "21/Mar/2026:15:00:00 +0000",
+    "timeEpoch": 1774040400000
+  },
+  "isBase64Encoded": false
+}
