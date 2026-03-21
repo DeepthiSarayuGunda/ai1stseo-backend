@@ -1,0 +1,41 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "IAM user with Bedrock InvokeModel access for App Runner",
+  "Resources": {
+    "BedrockUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "UserName": "ai1stseo-bedrock-svc",
+        "Policies": [
+          {
+            "PolicyName": "BedrockInvoke",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["bedrock:InvokeModel"],
+                  "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BedrockAccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "BedrockUser" }
+      }
+    }
+  },
+  "Outputs": {
+    "AccessKeyId": {
+      "Value": { "Ref": "BedrockAccessKey" }
+    },
+    "SecretAccessKey": {
+      "Value": { "Fn::GetAtt": ["BedrockAccessKey", "SecretAccessKey"] }
+    }
+  }
+}
