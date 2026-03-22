@@ -113,6 +113,8 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 22, 2026 | Fixed CSS linting warnings — added standard `background-clip: text` alongside `-webkit-background-clip` in both files. Uploaded to S3, CloudFront invalidated. | `dashboard.html`, `logout.html` |
+| Mar 22, 2026 | Copied PROJECT-STATUS.md to teammate's repo (`DeepthiSarayuGunda/ai1stseo-backend`) so both repos have the context file | `PROJECT-STATUS.md` (both repos) |
 | Mar 22, 2026 | Dashboard theme overhaul — matched homepage dark black (`#0a0a0a`), all CSS uses custom properties, added light/dark mode toggle (🌙/☀️) with localStorage persistence (`ai1stseo_theme`), ANALYZE button gradient matches homepage green-to-cyan | `dashboard.html` |
 | Mar 22, 2026 | Added Site Status (uptime) widget — pings last audited site's favicon, shows ✅ online or ❌ unreachable (8s timeout). Completes all task requirements. | `dashboard.html` |
 | Mar 22, 2026 | Removed "+ New Audit" nav link (redundant), renamed "Quick Scan" button to "ANALYZE" to match homepage styling | `dashboard.html` |

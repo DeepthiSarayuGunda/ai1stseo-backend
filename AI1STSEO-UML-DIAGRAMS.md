@@ -41,7 +41,7 @@ sequenceDiagram
     
     U->>D: Enter Website URL
     D->>A: POST /analyze
-    A->>S: Run 180 SEO Checks
+    A->>S: Run 170 SEO Checks
     S->>A: Return Results
     A->>D: Analysis Complete
     D->>U: Display Report
@@ -80,49 +80,4 @@ flowchart LR
     CF --> AppRunner[AWS App Runner]
     AppRunner --> GitHub[GitHub Repo]
     AppRunner --> RDS[(RDS Database)]
-```
-
-## SEO Analysis Categories
-
-```mermaid
-mindmap
-  root((SEO Analysis))
-    Technical SEO
-      Crawlability
-      Security
-      URL Structure
-      Internal Linking
-    On-Page SEO
-      Title & Meta
-      Headings
-      Images
-      Content Structure
-    Content SEO
-      Content Quality
-      Linking
-      E-E-A-T
-    Mobile SEO
-      Viewport
-      Touch UX
-      Performance
-    Performance
-      Load Time
-      Core Web Vitals
-      Optimization
-    Security
-      HTTPS
-      Headers
-      Certificates
-    Social SEO
-      Open Graph
-      Twitter Cards
-      Social Sharing
-    Local SEO
-      NAP
-      Schema
-      Reviews
-    GEO/AEO
-      AI Optimization
-      Voice Search
-      Citations
 ```
