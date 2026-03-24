@@ -121,9 +121,15 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - **Admin Dashboard** (`admin.html`) — internal management page. Key metrics (Total Users, Active This Week, Total Audits, Briefs Generated, MRR), traffic/sign-up chart placeholders, recent sign-ups table (needs backend endpoint), platform health checks (App Runner, Auth API, CloudFront, SES live status). Auth-gated, links back to user dashboard.
 - Both uploaded to S3, CloudFront invalidated
 
-### 🔨 In Progress: React + Vite Migration
-- By Thursday: main user dashboard rendering in React with at least one working API call pulling live data
-- Tech stack: React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+### ✅ React + Vite Migration (Done — Mar 24)
+- `dashboard.html` now served from React + Vite build (TypeScript + Tailwind CSS)
+- Live API call: AnalyzeBar calls App Runner `/api/analyze` directly, updates dashboard state in-place (no page navigation)
+- Site Status widget: pings last audited site's favicon, shows ✅ Online or ❌ Down
+- Audit results saved to localStorage and dashboard updates immediately after analysis
+- Loading state on ANALYZE button during API call
+- All components: Navbar, ToolCard, AnalyzeBar, ScoreRing, StatWidget, CategoryGrid, RecentAudits
+- Source: `frontend/src/` — builds to `frontend/dist/`, deployed to S3 as `dashboard.html`
+- Tech stack: React 19 + TypeScript + Vite 6 + Tailwind CSS 3
 
 ### ⚠️ Coordination Required
 - Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
@@ -142,6 +148,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | React + Vite migration complete — dashboard.html now served from React build. Live API call to App Runner `/api/analyze` from AnalyzeBar, site status uptime check, audit results save to localStorage in-place. Deployed to S3, CloudFront invalidated. Pushed to both repos. | `frontend/src/*`, `dashboard.html` |
 | Mar 24, 2026 | Dashboard separation complete — restructured `dashboard.html` as tools-first layout (AEO/GEO prioritized, SEO secondary), created new `admin.html` for internal management (metrics, traffic, sign-ups, platform health). Both uploaded to S3, CloudFront invalidated. | `dashboard.html`, `admin.html` |
 | Mar 24, 2026 | Read Gurbachan's product spec (`ai1stseo_product_spec.docx`). Updated sprint tasks per demo feedback: separate user dashboard (tools, AEO/GEO priority) from admin dashboard (sign-ups, traffic, payments). React+Vite migration due Thursday. | `PROJECT-STATUS.md` |
 | Mar 24, 2026 | Integrated Dev 2's 10th category (`citationgap`) into dashboard and index — updated categoryMeta, allCats strings, "10 available" counter. Uploaded to S3, CloudFront invalidated. | `dashboard.html`, `index.html` |
