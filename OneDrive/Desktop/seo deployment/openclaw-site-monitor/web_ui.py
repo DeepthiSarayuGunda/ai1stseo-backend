@@ -19,7 +19,8 @@ app = Flask(__name__)
 CORS(app)
 
 # === Data paths (JSON fallback for EC2) ===
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+DATA_DIR = "/tmp/data" if IS_LAMBDA else os.path.join(os.path.dirname(__file__), "data")
 SUBS_FILE = os.path.join(DATA_DIR, "subscriptions.json")
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -602,41 +603,100 @@ def history_summary():
         return jsonify({"status": "error", "message": "Summary unavailable: {}".format(e)}), 500
 
 
+# ===================== SCAN ERROR TRACKING =====================
+
+@app.route("/api/scan-errors", methods=["GET"])
+def scan_errors():
+    user = _auth_user(request)
+    if not user:
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+    hours = request.args.get("hours", 24, type=int)
+    errors = _get_recent_errors(hours=hours)
+    return jsonify({
+        "status": "success",
+        "errors": [dict(e) for e in errors],
+        "count": len(errors),
+        "hours": hours,
+    })
+
+
+@app.route("/api/scan-errors/resolve", methods=["POST"])
+def resolve_scan_errors():
+    user = _auth_user(request)
+    if not user:
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+    try:
+        from db import execute
+        resolved = execute(
+            "UPDATE scan_errors SET resolved = true "
+            "WHERE project_id = %s AND resolved = false",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return jsonify({"status": "success", "resolved": resolved})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 # ===================== DAILY REPORT SENDER =====================
 
 def send_daily_reports():
     """Called by scheduler / EventBridge - sends reports to all active subscribers."""
     subs = _load_subs()
     sent = 0
+    recent_errors = _get_recent_errors(hours=24)
     for email, sub in subs.items():
         if not sub.get("active", False):
             continue
         try:
             report_parts = []
             for site_url in sub.get("sites", []):
-                seo = scan_site(site_url)
-                up = check_uptime(site_url)
-                _save_scan_history(site_url, "scheduled", seo)
-                _save_uptime_history(site_url, up)
-                report_parts.append(
-                    "=== {} ===\n"
-                    "SEO Score: {}/100\n"
-                    "Status: {}\n"
-                    "Response: {}ms\n"
-                    "Critical Issues: {}\n".format(
-                        site_url,
-                        seo.get("score", "N/A"),
-                        "UP" if up.get("is_up") else "DOWN",
-                        up.get("response_time_ms", "N/A"),
-                        len(seo.get("critical_issues", [])),
+                try:
+                    seo = scan_site(site_url)
+                    up = check_uptime(site_url)
+                    _save_scan_history(site_url, "daily_report", seo)
+                    _save_uptime_history(site_url, up)
+                    report_parts.append(
+                        "=== {} ===\n"
+                        "SEO Score: {}/100\n"
+                        "Status: {}\n"
+                        "Response: {}ms\n"
+                        "Critical Issues: {}\n".format(
+                            site_url,
+                            seo.get("score", "N/A"),
+                            "UP" if up.get("is_up") else "DOWN",
+                            up.get("response_time_ms", "N/A"),
+                            len(seo.get("critical_issues", [])),
+                        )
+                    )
+                except Exception as e:
+                    err_msg = str(e)
+                    _log_scan_error(site_url, "daily_report_scan", err_msg, source="daily_report")
+                    report_parts.append(
+                        "=== {} ===\n"
+                        "ERROR: Scan failed - {}\n".format(site_url, err_msg[:200])
+                    )
+            error_section = ""
+            if recent_errors:
+                error_lines = []
+                for err in recent_errors[:10]:
+                    error_lines.append("  - {} | {} | {}".format(
+                        err.get("url", "unknown"),
+                        err.get("scan_type", "unknown"),
+                        str(err.get("error_message", ""))[:100],
+                    ))
+                error_section = (
+                    "\n--- SCAN ERRORS (last 24h) ---\n"
+                    "{} error(s) detected:\n{}\n".format(
+                        len(recent_errors), "\n".join(error_lines)
                     )
                 )
             report = (
                 "Daily Site Monitor Report - {}\n"
-                "Subscriber: {}\n\n{}".format(
+                "Subscriber: {}\n\n{}{}".format(
                     datetime.now().strftime("%Y-%m-%d"),
                     sub.get("name", email),
                     "\n".join(report_parts),
+                    error_section,
                 )
             )
             for channel in sub.get("channels", []):
@@ -647,7 +707,36 @@ def send_daily_reports():
             sent += 1
         except Exception as e:
             print("Failed to send report to {}: {}".format(email, e))
-    return {"sent": sent, "total_subscribers": len([s for s in subs.values() if s.get("active")])}
+    return {"sent": sent, "total_subscribers": len([s for s in subs.values() if s.get("active")]), "errors_flagged": len(recent_errors)}
+
+
+def _log_scan_error(url, scan_type, error_msg, source="scheduled"):
+    """Log a scan error to the scan_errors table in RDS."""
+    try:
+        from db import execute
+        execute(
+            "INSERT INTO scan_errors (project_id, url, scan_type, error_message, source) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (DEFAULT_PROJECT_ID, url, scan_type, str(error_msg)[:2000], source),
+        )
+    except Exception as e:
+        print("Failed to log scan error: {}".format(e))
+
+
+def _get_recent_errors(hours=24):
+    """Get unresolved scan errors from the last N hours."""
+    try:
+        from db import query
+        rows = query(
+            "SELECT url, scan_type, error_message, source, created_at "
+            "FROM scan_errors WHERE project_id = %s AND resolved = false "
+            "AND created_at >= NOW() - INTERVAL '24 hours' "
+            "ORDER BY created_at DESC",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return rows
+    except Exception:
+        return []
 
 
 def run_scheduled_scan():
@@ -661,6 +750,7 @@ def run_scheduled_scan():
     except Exception:
         sites = [{"url": "https://ai1stseo.com"}]
     scanned = 0
+    errors = []
     for site in sites:
         url = site["url"]
         try:
@@ -670,8 +760,11 @@ def run_scheduled_scan():
             _save_uptime_history(url, up)
             scanned += 1
         except Exception as e:
-            print("Scheduled scan failed for {}: {}".format(url, e))
-    return {"scanned": scanned, "total_sites": len(sites)}
+            err_msg = str(e)
+            print("Scheduled scan failed for {}: {}".format(url, err_msg))
+            _log_scan_error(url, "scheduled_scan", err_msg)
+            errors.append({"url": url, "error": err_msg})
+    return {"scanned": scanned, "total_sites": len(sites), "errors": errors}
 
 
 @app.route("/api/send-report-now", methods=["POST"])

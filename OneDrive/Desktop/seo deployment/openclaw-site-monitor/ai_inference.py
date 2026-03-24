@@ -29,7 +29,7 @@ def generate(prompt, max_tokens=4096, temperature=0.7):
 
 
 def _try_nova_lite(prompt, max_tokens, temperature):
-    """Invoke Amazon Nova Lite via Bedrock."""
+    """Invoke Amazon Nova Lite via Bedrock using the Messages API."""
     try:
         import boto3
         bedrock = boto3.client(
@@ -37,15 +37,12 @@ def _try_nova_lite(prompt, max_tokens, temperature):
             region_name=os.environ.get("AWS_REGION", "us-east-1"),
         )
         body = json.dumps({
-            "inputText": prompt,
-            "textGenerationConfig": {
-                "maxTokenCount": max_tokens,
-                "temperature": temperature,
-            },
+            "messages": [{"role": "user", "content": [{"text": prompt}]}],
+            "inferenceConfig": {"maxNewTokens": max_tokens, "temperature": temperature},
         })
         response = bedrock.invoke_model(modelId=NOVA_MODEL, body=body)
         result = json.loads(response["body"].read())
-        return result["results"][0]["outputText"]
+        return result["output"]["message"]["content"][0]["text"]
     except Exception as e:
         print("Nova Lite failed: {}".format(e))
         return None
