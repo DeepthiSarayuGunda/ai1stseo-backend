@@ -100,6 +100,13 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 ---
 
+### ✅ Light/Dark Mode Fix (Done — Mar 24)
+- Fixed Tailwind CSS class ordering across all 9 React components — base (unprefixed) classes are now light mode values, `dark:` prefixed classes are dark mode values
+- Root cause: patterns like `bg-[#0a0a0a] dark:bg-[#0a0a0a] bg-[#f4f6f9]` where the last unprefixed class always won regardless of dark mode state
+- Components fixed: App.tsx, ToolCard, StatWidget, CategoryGrid, RecentAudits, AnalyzeBar, ScoreRing, Navbar, ScanModal
+- Light mode now shows: white card backgrounds, gray-200 borders, gray-900 text, gray-50 inputs, gray-200 progress bars
+- Deployed to S3, CloudFront invalidated
+
 ### ✅ Dev 2 — Content & NLP Integration (Done — Samar, Mar 23-24)
 - New `/api/content-brief` endpoint — generates structured briefs from SERP scraping + LLM
 - 10th SEO category: `citationgap` — 20 checks for citation gap analysis (total now 236 checks across 10 categories)
