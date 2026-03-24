@@ -1,6 +1,6 @@
 # AI1STSEO Project Status
 
-> **Last Updated:** March 22, 2026
+> **Last Updated:** March 24, 2026
 > **Updated By:** Dev 5 (Frontend & UX) — Amira
 > **Purpose:** This file is the single source of truth for project context. Read this FIRST before making any changes.
 
@@ -13,7 +13,7 @@
 | Frontend (Production) | `https://www.ai1stseo.com` via CloudFront `E16GYTIVXY9IOU` | Static HTML/JS on S3 (`ai1stseo-website`) |
 | Auth API (Production) | `https://api.ai1stseo.com/api/auth/*` | Troy's EC2 (`54.226.251.216`) |
 | App Runner (Dev/Test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` | Flask Python backend |
-| SEO Analyzer Backend | App Runner | Flask — 200 checks across 10 categories |
+| SEO Analyzer Backend | App Runner | Flask — 236 checks across 10 categories |
 | Cognito User Pool | `us-east-1_DVvth47zH` | Client ID: `7scsae79o2g9idc92eputcrvrg` |
 | SES Email | `no-reply@ai1stseo.com` | Production access, 50k/day, domain verified |
 | GitHub (User) | `robinnic/seo-deployment` | Frontend + deployment configs |
@@ -34,6 +34,7 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard — score widgets, category breakdown, audit history, quick scan |
+| `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
 | `login.html` | Standalone login page (points to `api.ai1stseo.com`) |
@@ -57,7 +58,11 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Do NOT create new SES identities or domain verifications — all already configured
 
 ## Team Roles
-- **Dev 5 (Amira):** Frontend & UX — dashboard, content editor, onboarding, white-label reports
+- **Dev 1 (Deepthi):** AI/ML — GEO engine, AEO optimiser, AI recommendations, LLM integrations
+- **Dev 2 (Samar):** Content & NLP — content brief generator, citation gap analysis, LLM integration, content scoring
+- **Dev 3 (Troy):** Data & Infrastructure — auth system (EC2), SERP pipelines, backlink analysis, DB schema, Lambda migration
+- **Dev 4 (Tabasum):** Integrations — social media scheduler, CMS plugins, public API
+- **Dev 5 (Amira):** Frontend & UX — dashboards (user + admin), content editor, onboarding, white-label reports
 
 ---
 
@@ -93,19 +98,43 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 ---
 
-## Current Sprint — Dev 5 Tasks
+### ✅ Dev 2 — Content & NLP Integration (Done — Samar, Mar 23-24)
+- New `/api/content-brief` endpoint — generates structured briefs from SERP scraping + LLM
+- 10th SEO category: `citationgap` — 20 checks for citation gap analysis (total now 236 checks across 10 categories)
+- `call_llm()` helper with fallback: primary Ollama homelab (`ollama.sageaios.com`) → fallback `api.databi.io` (model: llama3.1)
+- Content brief UI in `audit.html` — keyword extraction, content type dropdown, competitor table, heading structure, questions, schema recs
+- Tools dropdown added to `audit.html`
+- ⚠️ Gurbachan's homelab currently unreachable — content generation uses fallback, will auto-recover when homelab is back
+- ⚠️ DO NOT change `call_llm()`, Ollama URLs, or `API_BASE` in S3 `audit.html`
 
-### 🔨 In Progress: Dashboard Enhancements
-- Migrate to React + TypeScript + Vite + Tailwind CSS + shadcn/ui (current v1 is vanilla HTML/JS)
-- Add customizable widget layout (drag-and-drop)
-- Add score-over-time trend charts (Recharts)
+---
+
+## Current Sprint — Dev 5 Tasks (Due Thursday Mar 26)
+
+### 🔧 Cleanup (Immediate)
+- Resend Tailscale team emails to Gurbachan
+- Send AI companion meeting notes to team by email
+
+### ✅ Dashboard Separation (Done — Mar 24)
+- Per Gurbachan's demo feedback: split into two distinct pages
+- **User Dashboard** (`dashboard.html`) — tools-first layout. AEO/GEO tools (GEO Visibility Scanner, AEO Optimizer, Citation Gap Analysis) prioritized at top. SEO & Content tools (Full Audit, Content Brief, Quick Scan) below. Stats widgets, category breakdown, recent audits preserved.
+- **Admin Dashboard** (`admin.html`) — internal management page. Key metrics (Total Users, Active This Week, Total Audits, Briefs Generated, MRR), traffic/sign-up chart placeholders, recent sign-ups table (needs backend endpoint), platform health checks (App Runner, Auth API, CloudFront, SES live status). Auth-gated, links back to user dashboard.
+- Both uploaded to S3, CloudFront invalidated
+
+### 🔨 In Progress: React + Vite Migration
+- By Thursday: main user dashboard rendering in React with at least one working API call pulling live data
+- Tech stack: React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+
+### ⚠️ Coordination Required
+- Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
 
 ### 📋 Upcoming
-1. Onboarding flow / first-run experience
-2. Content editor with live SEO/AEO scoring (TipTap)
-3. White-label reporting (branded PDF + live reports)
-4. Custom dashboard builder (drag-and-drop widgets)
+1. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
+2. White-label reporting (branded PDF + live reports)
+3. Custom dashboard builder (drag-and-drop widgets)
+4. Onboarding flow / first-run experience
 5. Education hub with in-app tutorials
+6. Content brief UI (settings left panel, generated brief right panel — per Section 4.4 of product spec)
 
 ---
 
@@ -113,6 +142,9 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | Dashboard separation complete — restructured `dashboard.html` as tools-first layout (AEO/GEO prioritized, SEO secondary), created new `admin.html` for internal management (metrics, traffic, sign-ups, platform health). Both uploaded to S3, CloudFront invalidated. | `dashboard.html`, `admin.html` |
+| Mar 24, 2026 | Read Gurbachan's product spec (`ai1stseo_product_spec.docx`). Updated sprint tasks per demo feedback: separate user dashboard (tools, AEO/GEO priority) from admin dashboard (sign-ups, traffic, payments). React+Vite migration due Thursday. | `PROJECT-STATUS.md` |
+| Mar 24, 2026 | Integrated Dev 2's 10th category (`citationgap`) into dashboard and index — updated categoryMeta, allCats strings, "10 available" counter. Uploaded to S3, CloudFront invalidated. | `dashboard.html`, `index.html` |
 | Mar 24, 2026 | Re-added localStorage saving code to `audit.html` — Dev 2's deployment overwrote it, breaking dashboard recent audits table. Patched their version (236 checks, content brief features preserved) with the `ai1stseo_audits` save logic. Uploaded to S3, CloudFront invalidated. | `audit.html` |
 | Mar 22, 2026 | Fixed CSS linting warnings — added standard `background-clip: text` alongside `-webkit-background-clip` in both files. Uploaded to S3, CloudFront invalidated. | `dashboard.html`, `logout.html` |
 | Mar 22, 2026 | Copied PROJECT-STATUS.md to teammate's repo (`DeepthiSarayuGunda/ai1stseo-backend`) so both repos have the context file | `PROJECT-STATUS.md` (both repos) |
