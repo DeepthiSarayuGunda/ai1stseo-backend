@@ -83,11 +83,12 @@ Weekly progress meeting focused on EC2 → serverless Amplify migration and indi
 - [ ] Continue Phase 2: content scoring engine groundwork
 
 ### Dev 3 — Troy
-- [ ] Contact Paul directly for IAM permissions (today)
-- [ ] Once permissions granted: test Bedrock + SES on Lambda, flip DNS for `api.ai1stseo.com` and `monitor.ai1stseo.com`
-- [ ] Decommission EC2 once Lambda is confirmed working and team is notified
-- [ ] If still blocked on permissions: add error alerting to EventBridge scheduled scans (log failures to RDS, flag in daily report)
-- [ ] Begin scoping admin dashboard database requirements (user sign-ups, traffic stats, payment status per Gurbachan's direction)
+- [x] Contact Paul directly for IAM permissions — DONE, permissions granted Mar 24
+- [x] Once permissions granted: test Bedrock + SES on Lambda — DONE, Nova Lite Messages API format fixed and deployed
+- [x] Flip DNS for `api.ai1stseo.com` and `monitor.ai1stseo.com` — DONE, both pointing to API Gateway
+- [ ] Decommission EC2 — DEFERRED, other team services still running on it
+- [x] If still blocked on permissions: add error alerting to EventBridge scheduled scans — DONE (scan_errors table + daily report integration)
+- [x] Begin scoping admin dashboard database requirements — DONE (ADMIN_DASHBOARD_SCOPE.md)
 
 ### Dev 4 — Tabasum
 - [ ] Wait for Gurbachan's guidance on Facebook/LinkedIn business account linking
