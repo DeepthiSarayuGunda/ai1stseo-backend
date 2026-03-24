@@ -72,68 +72,86 @@
   </head>
   <body>
     <div id="root"></div>
-    <script src="/assets/auth.js"></script>
     <script>
       // Inject "Tools" dropdown into the React nav bar
       (function() {
         let injected = false;
         function injectToolsNav() {
           if (injected) return;
-          // Find the nav - look for the nav element or header with nav links
-          const nav = document.querySelector('nav') || document.querySelector('header');
-          if (!nav) return;
-          // Look for the right side of the nav (where LOGIN button is)
-          const buttons = nav.querySelectorAll('button, a');
-          let loginBtn = null;
-          buttons.forEach(function(btn) {
-            const t = btn.textContent.trim().toUpperCase();
-            if (t === 'LOGIN' || t === 'SIGN UP' || t.length <= 12) {
-              if (!loginBtn && btn.getBoundingClientRect().right > window.innerWidth * 0.5) {
-                loginBtn = btn;
-              }
-            }
-          });
-          // Find the container that holds nav links
-          const navLinks = nav.querySelectorAll('a[href]');
-          if (navLinks.length < 2) return;
-          // Check if we already injected
           if (document.getElementById('tools-dropdown-wrap')) { injected = true; return; }
+          
+          // Find nav links containing known text
+          const allLinks = document.querySelectorAll('a');
+          let navContainer = null;
+          for (let i = 0; i < allLinks.length; i++) {
+            const text = allLinks[i].textContent.trim().toUpperCase();
+            if (text === 'HOME' || text === 'INSIGHTS' || text === 'RESOURCES' || text === 'DASHBOARD') {
+              navContainer = allLinks[i].parentElement;
+              break;
+            }
+          }
+          if (!navContainer) return;
+
           // Create the Tools dropdown
           const wrap = document.createElement('div');
           wrap.id = 'tools-dropdown-wrap';
-          wrap.style.cssText = 'position:relative;display:inline-block;margin-left:8px;';
+          wrap.style.cssText = 'position:relative;display:inline-flex;align-items:center;margin-left:8px;';
+          
           const btn = document.createElement('button');
-          // Match the style of existing nav links
-          const refLink = navLinks[1] || navLinks[0];
-          const refStyle = window.getComputedStyle(refLink);
-          btn.textContent = 'Tools \u25BE';
-          btn.style.cssText = 'background:none;border:none;cursor:pointer;font-family:inherit;font-size:' + refStyle.fontSize + ';color:' + refStyle.color + ';padding:' + refStyle.padding + ';letter-spacing:' + refStyle.letterSpacing + ';text-transform:' + refStyle.textTransform + ';transition:opacity .2s;';
+          btn.textContent = 'TOOLS \u25BE';
+          btn.style.cssText = 'background:none;border:none;cursor:pointer;font-family:inherit;font-size:0.875rem;color:#fff;padding:8px 12px;letter-spacing:0.05em;text-transform:uppercase;transition:opacity .2s;font-weight:500;';
           btn.onmouseover = function() { btn.style.opacity = '0.7'; };
           btn.onmouseout = function() { btn.style.opacity = '1'; };
+          
           const dd = document.createElement('div');
           dd.style.cssText = 'display:none;position:absolute;top:100%;right:0;background:rgba(20,25,40,.98);border:1px solid rgba(0,212,255,.3);border-radius:8px;min-width:200px;padding:6px 0;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,.4);backdrop-filter:blur(10px);margin-top:4px;';
-          dd.innerHTML = '<a href="https://monitor.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">📊 Website Monitoring</a><a href="https://seoaudit.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">🔍 SEO Audit</a><a href="https://seoanalysis.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">📈 SEO Analysis</a><a href="https://docsummarizer.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">📄 Doc Summarizer</a><a href="https://automationhub.ai1stseo.com" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">⚙️ Automation Hub</a><a href="/guides" style="display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,212,255,.1)\'" onmouseout="this.style.background=\'transparent\'">📚 Implementation Guides</a>';
+          
+          var items = [
+            {icon:'📊', label:'Website Monitoring', url:'https://monitor.ai1stseo.com'},
+            {icon:'🔍', label:'SEO Audit', url:'https://seoaudit.ai1stseo.com'},
+            {icon:'📈', label:'SEO Analysis', url:'https://seoanalysis.ai1stseo.com'},
+            {icon:'📄', label:'Doc Summarizer', url:'https://docsummarizer.ai1stseo.com'},
+            {icon:'⚙️', label:'Automation Hub', url:'https://automationhub.ai1stseo.com'}
+          ];
+          
+          items.forEach(function(item) {
+            var a = document.createElement('a');
+            a.href = item.url;
+            a.textContent = item.icon + ' ' + item.label;
+            a.style.cssText = 'display:block;padding:10px 16px;color:#fff;text-decoration:none;font-size:0.85rem;transition:background .2s;';
+            a.onmouseover = function() { a.style.background = 'rgba(0,212,255,.1)'; };
+            a.onmouseout = function() { a.style.background = 'transparent'; };
+            dd.appendChild(a);
+          });
+          
           btn.onclick = function(e) { e.stopPropagation(); dd.style.display = dd.style.display === 'none' ? 'block' : 'none'; };
           document.addEventListener('click', function() { dd.style.display = 'none'; });
+          
           wrap.appendChild(btn);
           wrap.appendChild(dd);
-          // Insert before the login button or at the end of nav
-          if (loginBtn && loginBtn.parentElement) {
+          
+          // Insert into the nav container - before LOGIN button if found, otherwise append
+          var loginBtn = null;
+          var children = navContainer.querySelectorAll('a, button');
+          children.forEach(function(el) {
+            if (el.textContent.trim().toUpperCase() === 'LOGIN') loginBtn = el;
+          });
+          
+          if (loginBtn) {
             loginBtn.parentElement.insertBefore(wrap, loginBtn);
           } else {
-            // Find the flex container in the nav and append
-            const flexContainers = nav.querySelectorAll('div');
-            let target = nav;
-            flexContainers.forEach(function(d) {
-              const s = window.getComputedStyle(d);
-              if (s.display === 'flex' && d.children.length >= 2) target = d;
-            });
-            target.appendChild(wrap);
+            navContainer.appendChild(wrap);
           }
+          
           injected = true;
         }
-        setInterval(injectToolsNav, 500);
-        injectToolsNav();
+        // Keep trying until React renders the nav
+        var attempts = 0;
+        var interval = setInterval(function() {
+          injectToolsNav();
+          attempts++;
+          if (injected || attempts > 60) clearInterval(interval);
+        }, 500);
       })();
     </script>
   </body>

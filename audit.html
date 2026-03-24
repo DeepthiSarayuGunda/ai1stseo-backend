@@ -572,6 +572,31 @@
                     <div id="aiContent"></div>
                 </div>
 
+                <!-- Content Brief Generator Section -->
+                <div class="ai-section" id="briefSection">
+                    <div class="ai-header">
+                        <span class="ai-icon">📝</span>
+                        <div>
+                            <div class="ai-title">AI Content Brief Generator</div>
+                            <div class="ai-subtitle">Auto-generates a structured content brief by analyzing top Google competitors for your page's primary keyword</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+                        <select id="briefContentType" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;">
+                            <option value="blog">Blog Post</option>
+                            <option value="faq">FAQ Page</option>
+                            <option value="landing_page">Landing Page</option>
+                            <option value="how_to">How-To Guide</option>
+                            <option value="comparison">Comparison Article</option>
+                            <option value="listicle">Listicle</option>
+                        </select>
+                    </div>
+                    <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
+                        <span>📋</span> Generate Content Brief
+                    </button>
+                    <div id="briefContent"></div>
+                </div>
+
                 <div style="text-align: center; padding: 30px;">
                     <a href="/" class="back-btn">← Analyze Another URL</a>
                 </div>
@@ -765,6 +790,55 @@
                 `;
                 btn.innerHTML = '🔄 Retry AI Recommendations';
                 btn.disabled = false;
+            }
+        }
+
+        async function generateContentBrief() {
+            const btn = document.getElementById('briefBtn');
+            const contentDiv = document.getElementById('briefContent');
+            const contentType = document.getElementById('briefContentType').value;
+            const auditUrl = window.auditData?.url || '';
+            let keyword = '';
+            const cats = window.auditData?.categories || {};
+            for (const cat of Object.values(cats)) {
+                for (const check of (cat.checks || [])) {
+                    if (check.name && check.name.toLowerCase().includes('primary keyword') && check.value) { keyword = check.value; break; }
+                }
+                if (keyword) break;
+            }
+            if (!keyword) {
+                for (const cat of Object.values(cats)) {
+                    for (const check of (cat.checks || [])) {
+                        if (check.name && check.name.toLowerCase().includes('title tag') && check.value) { keyword = check.value.replace(/\|.*$/, '').replace(/-.*$/, '').trim().substring(0, 60); break; }
+                    }
+                    if (keyword) break;
+                }
+            }
+            if (!keyword) keyword = auditUrl.replace(/https?:\/\//, '').replace(/\/$/, '');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Analyzing competitors...';
+            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Scraping top 5 Google results for "<strong>' + keyword + '</strong>"...</span></div>';
+            try {
+                const response = await fetch('/api/content-brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword, content_type: contentType }) });
+                const data = await response.json();
+                if (data.status === 'success' && data.brief) {
+                    const b = data.brief; const serp = data.serp_analysis || {};
+                    let html = '<div class="ai-content"><h2>📋 ' + (b.recommended_title || keyword) + '</h2>';
+                    html += '<p style="color:rgba(255,255,255,0.6);">Target: <strong style="color:#00d4ff;">' + (b.target_word_count || 'N/A') + ' words</strong></p>';
+                    if (b.headings && b.headings.length) { html += '<h3>📑 Headings</h3>'; b.headings.forEach(function(h) { html += '<div style="padding:6px 12px;margin-left:' + (h.level==='h3'?'30px':'0') + ';border-left:2px solid rgba(0,212,255,0.3);margin-bottom:4px;"><span style="background:rgba(0,212,255,0.2);padding:2px 6px;border-radius:4px;font-size:0.75rem;margin-right:6px;">' + h.level.toUpperCase() + '</span><strong>' + h.text + '</strong></div>'; }); }
+                    if (b.questions_to_answer && b.questions_to_answer.length) { html += '<h3>❓ Questions</h3>'; b.questions_to_answer.forEach(function(q) { html += '<div style="padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">' + q.question + '</div>'; }); }
+                    if (b.keywords && b.keywords.length) { html += '<h3>🔑 Keywords</h3><div style="display:flex;flex-wrap:wrap;gap:6px;">'; b.keywords.forEach(function(k) { html += '<span style="background:rgba(0,212,255,0.15);padding:4px 10px;border-radius:12px;font-size:0.8rem;">' + k.term + '</span>'; }); html += '</div>'; }
+                    html += '</div>';
+                    contentDiv.innerHTML = html;
+                    btn.innerHTML = '✅ Brief Generated';
+                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                } else {
+                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;">' + (data.error || 'Failed') + '</div>';
+                    btn.innerHTML = '🔄 Retry'; btn.disabled = false;
+                }
+            } catch (e) {
+                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;">' + e.message + '</div>';
+                btn.innerHTML = '🔄 Retry'; btn.disabled = false;
             }
         }
 

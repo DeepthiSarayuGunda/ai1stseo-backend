@@ -12,6 +12,13 @@
             min-height: 100vh;
             color: #fff;
         }
+        .tools-tab { position: fixed; top: 16px; right: 16px; z-index: 10000; }
+        .tools-tab-btn { background: rgba(20,25,40,0.95); border: 1px solid rgba(0,212,255,0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: inherit; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
+        .tools-tab-btn:hover { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.6); }
+        .tools-dropdown { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(20,25,40,0.98); border: 1px solid rgba(0,212,255,0.3); border-radius: 10px; min-width: 210px; padding: 6px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.5); backdrop-filter: blur(12px); }
+        .tools-dropdown.open { display: block; }
+        .tools-dropdown a { display: block; padding: 10px 16px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; transition: background 0.15s; white-space: nowrap; }
+        .tools-dropdown a:hover { background: rgba(0,212,255,0.1); color: #fff; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
@@ -103,13 +110,10 @@
         .category-detail-wrapper {
             grid-column: 1 / -1;
             overflow: hidden;
-            transition: max-height 0.4s ease, opacity 0.3s ease;
-            max-height: 0;
-            opacity: 0;
+            display: none;
         }
         .category-detail-wrapper.open {
-            max-height: 5000px;
-            opacity: 1;
+            display: block;
         }
         .category-detail-inner {
             background: rgba(255,255,255,0.03);
@@ -402,6 +406,18 @@
     </style>
 </head>
 <body>
+    <div class="tools-tab" id="toolsTab">
+        <button class="tools-tab-btn" onclick="document.getElementById('toolsDD').classList.toggle('open')">🛠 Tools ▾</button>
+        <div class="tools-dropdown" id="toolsDD">
+            <a href="https://www.ai1stseo.com">🏠 Home</a>
+            <a href="https://monitor.ai1stseo.com">📊 Website Monitoring</a>
+            <a href="https://seoaudit.ai1stseo.com">🔍 SEO Audit</a>
+            <a href="https://seoanalysis.ai1stseo.com">📈 SEO Analysis</a>
+            <a href="https://docsummarizer.ai1stseo.com">📄 Doc Summarizer</a>
+            <a href="https://automationhub.ai1stseo.com">⚙️ Automation Hub</a>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <div class="logo">🔍 AISEO Master</div>
@@ -418,6 +434,8 @@
     </div>
 
     <script>
+        const API_BASE = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+
         const categoryMeta = {
             'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 30 },
             'onpage': { name: '📄 On-Page SEO', desc: 'Title, Meta, Headings, Images, Content Structure', checks: 24 },
@@ -542,6 +560,31 @@
                         <span>✨</span> Generate AI Recommendations
                     </button>
                     <div id="aiContent"></div>
+                </div>
+
+                <!-- Content Brief Generator Section -->
+                <div class="ai-section" id="briefSection">
+                    <div class="ai-header">
+                        <span class="ai-icon">📝</span>
+                        <div>
+                            <div class="ai-title">AI Content Brief Generator</div>
+                            <div class="ai-subtitle">Auto-generates a structured content brief by analyzing top Google competitors for your page's primary keyword — headings, word count targets, questions to answer, and AI citation tips</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+                        <select id="briefContentType" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;">
+                            <option value="blog">Blog Post</option>
+                            <option value="faq">FAQ Page</option>
+                            <option value="landing_page">Landing Page</option>
+                            <option value="how_to">How-To Guide</option>
+                            <option value="comparison">Comparison Article</option>
+                            <option value="listicle">Listicle</option>
+                        </select>
+                    </div>
+                    <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
+                        <span>📋</span> Generate Content Brief
+                    </button>
+                    <div id="briefContent"></div>
                 </div>
 
                 <div style="text-align: center; padding: 30px;">
@@ -679,7 +722,7 @@
             `;
 
             try {
-                const response = await fetch('/api/ai-recommendations', {
+                const response = await fetch(API_BASE + '/api/ai-recommendations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -729,6 +772,96 @@
             }
         }
 
+        // Close tools dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var tab = document.getElementById('toolsTab');
+            var dd = document.getElementById('toolsDD');
+            if (dd && tab && !tab.contains(e.target)) dd.classList.remove('open');
+        });
+
+        async function generateContentBrief() {
+            const btn = document.getElementById('briefBtn');
+            const contentDiv = document.getElementById('briefContent');
+            const contentType = document.getElementById('briefContentType').value;
+            const auditUrl = window.auditData?.url || '';
+            let keyword = '';
+            const cats = window.auditData?.categories || {};
+            for (const cat of Object.values(cats)) {
+                for (const check of (cat.checks || [])) {
+                    if (check.name && check.name.toLowerCase().includes('primary keyword') && check.value) { keyword = check.value; break; }
+                }
+                if (keyword) break;
+            }
+            if (!keyword) {
+                for (const cat of Object.values(cats)) {
+                    for (const check of (cat.checks || [])) {
+                        if (check.name && check.name.toLowerCase().includes('title tag') && check.value) { keyword = check.value.replace(/\|.*$/, '').replace(/-.*$/, '').trim().substring(0, 60); break; }
+                    }
+                    if (keyword) break;
+                }
+            }
+            if (!keyword) keyword = auditUrl.replace(/https?:\/\//, '').replace(/\/$/, '');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Analyzing top competitors & generating brief...';
+            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Scraping top 5 Google results for "<strong>' + keyword + '</strong>", extracting headings, word counts, and People Also Ask questions... This may take 30-60 seconds.</span></div>';
+            try {
+                const response = await fetch(API_BASE + '/api/content-brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keyword, content_type: contentType }) });
+                const data = await response.json();
+                if (data.status === 'success' && data.brief) {
+                    const b = data.brief; const serp = data.serp_analysis || {};
+                    let html = '<div class="ai-content"><h2>📋 ' + (b.recommended_title || keyword) + '</h2>';
+                    html += '<p style="color:rgba(255,255,255,0.6);margin-bottom:15px;">Target word count: <strong style="color:#00d4ff;">' + (b.target_word_count || 'N/A') + ' words</strong>';
+                    if (data.ai_generated === false) html += ' &nbsp;⚠️ <em>Generated from SERP data (LLM unavailable)</em>';
+                    html += '</p>';
+                    if (serp.competitors && serp.competitors.length > 0) {
+                        html += '<h3>🏆 Top Competitors Analyzed</h3><div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
+                        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.15);"><th style="text-align:left;padding:8px;color:#00d4ff;">URL</th><th style="padding:8px;color:#00d4ff;">Words</th><th style="padding:8px;color:#00d4ff;">Headings</th><th style="padding:8px;color:#00d4ff;">Schema</th></tr>';
+                        serp.competitors.forEach(function(c) { var domain = c.url.replace(/https?:\/\//, '').split('/')[0]; html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:8px;"><a href="' + c.url + '" target="_blank" style="color:#7b9fff;text-decoration:none;">' + domain + '</a></td><td style="padding:8px;text-align:center;">' + c.word_count + '</td><td style="padding:8px;text-align:center;">' + c.headings_count + '</td><td style="padding:8px;text-align:center;">' + (c.schema_types.join(', ') || 'None') + '</td></tr>'; });
+                        html += '</table></div>';
+                    }
+                    if (b.headings && b.headings.length > 0) {
+                        html += '<h3>📑 Recommended Heading Structure</h3><div style="margin-bottom:20px;">';
+                        b.headings.forEach(function(h) { var indent = h.level === 'h3' ? '30px' : '0'; html += '<div style="padding:8px 12px;margin-left:' + indent + ';border-left:2px solid rgba(0,212,255,0.3);margin-bottom:6px;"><span style="background:rgba(0,212,255,0.2);padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-right:8px;">' + h.level.toUpperCase() + '</span><strong>' + h.text + '</strong>' + (h.word_budget ? ' <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">~' + h.word_budget + ' words</span>' : '') + (h.purpose ? '<br><span style="color:rgba(255,255,255,0.5);font-size:0.8rem;">' + h.purpose + '</span>' : '') + '</div>'; });
+                        html += '</div>';
+                    }
+                    if (b.questions_to_answer && b.questions_to_answer.length > 0) {
+                        html += '<h3>❓ Questions to Answer</h3><div style="margin-bottom:20px;">';
+                        b.questions_to_answer.forEach(function(q) { var badge = q.source === 'paa' ? '🔍 PAA' : q.source === 'competitor' ? '🏆 Competitor' : '🤖 AI'; html += '<div style="padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;">' + q.question + ' <span style="font-size:0.75rem;background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:10px;margin-left:8px;">' + badge + '</span></div>'; });
+                        html += '</div>';
+                    }
+                    if (b.keywords && b.keywords.length > 0) {
+                        html += '<h3>🔑 Keyword Map</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">';
+                        b.keywords.forEach(function(k) { var bg = k.type === 'primary' ? 'rgba(0,212,255,0.2)' : 'rgba(255,255,255,0.1)'; html += '<span style="background:' + bg + ';padding:6px 12px;border-radius:16px;font-size:0.8rem;">' + k.term + ' <span style="color:rgba(255,255,255,0.4);">→ ' + (k.placement || '') + '</span></span>'; });
+                        html += '</div>';
+                    }
+                    if (b.schema_recommendations && b.schema_recommendations.length > 0) {
+                        html += '<h3>🏷️ Schema Markup</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">';
+                        b.schema_recommendations.forEach(function(s) { html += '<span style="background:rgba(0,200,83,0.15);padding:6px 12px;border-radius:16px;font-size:0.8rem;border:1px solid rgba(0,200,83,0.3);">' + s + '</span>'; });
+                        html += '</div>';
+                    }
+                    if (b.content_guidelines) {
+                        var g = b.content_guidelines;
+                        html += '<h3>📐 Content Guidelines</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:20px;">';
+                        if (g.tone) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Tone:</strong> ' + g.tone + '</div>';
+                        if (g.target_audience) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Audience:</strong> ' + g.target_audience + '</div>';
+                        if (g.unique_angle) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Unique Angle:</strong> ' + g.unique_angle + '</div>';
+                        if (g.ai_citation_tips) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">AI Citation Tips:</strong> ' + g.ai_citation_tips + '</div>';
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    contentDiv.innerHTML = html;
+                    btn.innerHTML = '✅ Content Brief Generated';
+                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                } else {
+                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Brief Generation Failed</strong><br>' + (data.error || 'Unknown error') + '</div>';
+                    btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
+                btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+            }
+        }
+
         async function runAnalysis() {
             const targetUrl = getTargetUrl();
             const categories = getCategories();
@@ -749,7 +882,7 @@
                     </div>
                 `;
                 
-                const response = await fetch('/api/analyze', {
+                const response = await fetch(API_BASE + '/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: targetUrl, categories: categories })
@@ -776,6 +909,5 @@
             runAnalysis();
         }
     </script>
-    <script src="/assets/auth.js"></script>
 </body>
 </html>
