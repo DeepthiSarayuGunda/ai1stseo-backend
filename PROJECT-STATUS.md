@@ -34,8 +34,8 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-D6TpCyKA.js` | React dashboard JS bundle (Vite build output) |
-| `assets/index-Cd6saFc2.css` | React dashboard Tailwind CSS (Vite build output) |
+| `assets/index-BryRwr7Y.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-g8-7McDd.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
@@ -150,6 +150,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | Cleaned up navbar dropdowns — removed grayed-out "Content Brief" and "GEO Scanner" from Tools (users shouldn't see unbuilt features), removed non-functional "Delete Account". Added ⚙️ Admin Dashboard link to user dropdown for easy team access. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Redesigned `analyze.html` — updated from 180/9 to 236 checks across 10 categories (added Citation Gap). New design matches dashboard theme with nav bar, colored category chips with live check count updates, green gradient button, light/dark mode. Deployed to S3, CloudFront invalidated. | `analyze.html` |
 | Mar 24, 2026 | Fixed Tools dropdown — SEO Audit link changed to "Quick Scan" that focuses the AnalyzeBar input instead of navigating to broken `/audit.html` without a URL. SEO Analysis points to `/analyze.html`. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Added user avatar dropdown (My Account, Sign Out, Delete Account) and Tools dropdown (Home, Dashboard, SEO Audit, SEO Analysis, Content Brief, GEO Scanner) to React dashboard navbar. Click-outside-to-close, fade animation. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx`, `frontend/src/index.css` |
