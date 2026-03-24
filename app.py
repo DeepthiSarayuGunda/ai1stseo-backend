@@ -1605,11 +1605,13 @@ def health_check():
             'local': 15,
             'geo': 30,
             'citationgap': 20
-        }
+        },
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/ai-recommendations', '/api/health']
     })
 
 # Ollama LLM Configuration
-OLLAMA_URL = 'https://api.databi.io/api'  # Reverse proxy to local Ollama server
+OLLAMA_URL = 'https://ollama.sageaios.com/api'  # Primary: free Ollama on homelab GPU
+OLLAMA_FALLBACK_URL = 'https://api.databi.io/api'  # Fallback
 
 @app.route('/api/ai-recommendations', methods=['POST'])
 def get_ai_recommendations():
@@ -1650,45 +1652,317 @@ Provide a response with:
 Be specific and actionable. Include actual code examples where helpful."""
 
     try:
-        llm_response = requests.post(
-            f"{OLLAMA_URL}/generate",
-            headers={'Content-Type': 'application/json'},
-            json={
-                'model': 'llama3.1:latest',
-                'stream': False,
-                'prompt': prompt
-            },
-            timeout=120  # LLM can take time
-        )
+        llm_response = call_llm(prompt, timeout=120)
         
-        if llm_response.status_code == 200:
-            result = llm_response.json()
+        if llm_response:
             return jsonify({
                 'status': 'success',
-                'recommendations': result.get('response', 'No recommendations generated'),
+                'recommendations': llm_response,
                 'model': 'llama3.1'
             })
         else:
             return jsonify({
                 'status': 'error',
-                'error': f'LLM service returned status {llm_response.status_code}'
-            }), 500
+                'error': 'Could not connect to any AI server.'
+            }), 503
             
-    except requests.exceptions.Timeout:
-        return jsonify({
-            'status': 'error',
-            'error': 'LLM request timed out. The AI server may be busy.'
-        }), 504
-    except requests.exceptions.ConnectionError:
-        return jsonify({
-            'status': 'error', 
-            'error': 'Could not connect to AI server. Please check if the Ollama service is running.'
-        }), 503
     except Exception as e:
         return jsonify({
             'status': 'error',
             'error': f'AI recommendation failed: {str(e)}'
         }), 500
+
+def call_llm(prompt, model='llama3.1:latest', timeout=120):
+    """Call LLM with fallback support"""
+    urls = [OLLAMA_URL, OLLAMA_FALLBACK_URL]
+    for url in urls:
+        try:
+            resp = requests.post(
+                f"{url}/generate",
+                headers={'Content-Type': 'application/json'},
+                json={'model': model, 'stream': False, 'prompt': prompt},
+                timeout=timeout
+            )
+            if resp.status_code == 200:
+                return resp.json().get('response', '')
+        except:
+            continue
+    return None
+
+
+# ============== CONTENT BRIEF GENERATOR ==============
+
+def scrape_serp_results(keyword, num_results=5):
+    """Scrape Google search results for a keyword and extract page data"""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+    }
+    
+    serp_data = {'results': [], 'paa_questions': []}
+    
+    try:
+        # Search Google
+        search_url = f"https://www.google.com/search?q={requests.utils.quote(keyword)}&num={num_results + 5}&hl=en"
+        resp = requests.get(search_url, headers=headers, timeout=10)
+        if resp.status_code != 200:
+            return serp_data
+        
+        soup = BeautifulSoup(resp.content, 'html.parser')
+        
+        # Extract People Also Ask questions
+        paa_divs = soup.find_all('div', {'class': 'related-question-pair'})
+        if not paa_divs:
+            # Alternative PAA selectors
+            paa_divs = soup.find_all('div', attrs={'data-q': True})
+        for div in paa_divs:
+            q = div.get('data-q') or div.get_text(strip=True)
+            if q and len(q) > 10:
+                serp_data['paa_questions'].append(q)
+        
+        # Also try extracting from "People also ask" section
+        paa_spans = soup.find_all('span', string=re.compile(r'.+\?$'))
+        for span in paa_spans:
+            text = span.get_text(strip=True)
+            if text and len(text) > 15 and text not in serp_data['paa_questions']:
+                serp_data['paa_questions'].append(text)
+        
+        # Extract organic result URLs
+        result_links = []
+        for a_tag in soup.find_all('a', href=True):
+            href = a_tag['href']
+            if href.startswith('/url?q='):
+                clean_url = href.split('/url?q=')[1].split('&')[0]
+                if clean_url.startswith('http') and 'google.com' not in clean_url:
+                    if clean_url not in result_links:
+                        result_links.append(clean_url)
+        
+        # Scrape each result page
+        for url in result_links[:num_results]:
+            try:
+                page_resp = requests.get(url, headers=headers, timeout=8)
+                if page_resp.status_code != 200:
+                    continue
+                page_soup = BeautifulSoup(page_resp.content, 'html.parser')
+                
+                # Extract title
+                title = ''
+                title_tag = page_soup.find('title')
+                if title_tag:
+                    title = title_tag.get_text(strip=True)
+                
+                # Extract headings
+                headings = {'h1': [], 'h2': [], 'h3': []}
+                for level in ['h1', 'h2', 'h3']:
+                    for h in page_soup.find_all(level):
+                        text = h.get_text(strip=True)
+                        if text and len(text) > 2:
+                            headings[level].append(text)
+                
+                # Word count
+                text = page_soup.get_text()
+                word_count = len(text.split())
+                
+                # Meta description
+                meta_desc = ''
+                meta = page_soup.find('meta', attrs={'name': 'description'})
+                if meta and meta.get('content'):
+                    meta_desc = meta['content']
+                
+                # Schema markup types
+                schemas = []
+                for script in page_soup.find_all('script', type='application/ld+json'):
+                    try:
+                        ld = json.loads(script.string)
+                        if isinstance(ld, dict) and '@type' in ld:
+                            schemas.append(ld['@type'])
+                        elif isinstance(ld, list):
+                            for item in ld:
+                                if isinstance(item, dict) and '@type' in item:
+                                    schemas.append(item['@type'])
+                    except:
+                        pass
+                
+                serp_data['results'].append({
+                    'url': url,
+                    'title': title,
+                    'meta_description': meta_desc[:200],
+                    'headings': headings,
+                    'word_count': word_count,
+                    'schema_types': schemas
+                })
+            except:
+                continue
+    except Exception as e:
+        print(f"SERP scrape error: {e}")
+    
+    return serp_data
+
+
+def generate_brief_with_llm(keyword, content_type, serp_data):
+    """Use LLM to generate a structured content brief from SERP data"""
+    
+    # Build competitor summary
+    competitor_summary = []
+    avg_word_count = 0
+    all_h2s = []
+    
+    for i, r in enumerate(serp_data['results'], 1):
+        competitor_summary.append(f"Result {i}: {r['title']}")
+        competitor_summary.append(f"  URL: {r['url']}")
+        competitor_summary.append(f"  Word count: {r['word_count']}")
+        competitor_summary.append(f"  H2 headings: {', '.join(r['headings']['h2'][:8])}")
+        competitor_summary.append(f"  Schema: {', '.join(r['schema_types']) if r['schema_types'] else 'None'}")
+        avg_word_count += r['word_count']
+        all_h2s.extend(r['headings']['h2'])
+    
+    if serp_data['results']:
+        avg_word_count = avg_word_count // len(serp_data['results'])
+    
+    paa_text = '\n'.join(f"- {q}" for q in serp_data['paa_questions'][:10]) if serp_data['paa_questions'] else 'None found'
+    
+    prompt = f"""You are an expert SEO content strategist. Generate a structured content brief for the following:
+
+TARGET KEYWORD: {keyword}
+CONTENT TYPE: {content_type}
+AVERAGE COMPETITOR WORD COUNT: {avg_word_count}
+
+TOP GOOGLE RESULTS FOR THIS KEYWORD:
+{chr(10).join(competitor_summary)}
+
+PEOPLE ALSO ASK QUESTIONS:
+{paa_text}
+
+Generate a JSON content brief with EXACTLY this structure (no markdown, no code blocks, just raw JSON):
+{{
+  "recommended_title": "SEO-optimized H1 title for this content",
+  "target_word_count": {avg_word_count or 1500},
+  "headings": [
+    {{"level": "h2", "text": "Heading text", "purpose": "Brief description of what this section covers", "word_budget": 200}},
+    {{"level": "h3", "text": "Sub-heading text", "purpose": "Brief description", "word_budget": 150}}
+  ],
+  "questions_to_answer": [
+    {{"question": "Question text", "source": "paa or competitor or ai_suggested", "priority": "high or medium or low"}}
+  ],
+  "keywords": [
+    {{"term": "keyword", "type": "primary or secondary or lsi", "placement": "title or h2 or body or faq"}}
+  ],
+  "schema_recommendations": ["FAQPage", "Article", "HowTo"],
+  "content_guidelines": {{
+    "tone": "informative/conversational/technical",
+    "target_audience": "description of who this content is for",
+    "unique_angle": "what makes this content different from competitors",
+    "ai_citation_tips": "how to format content to get cited by AI chatbots"
+  }}
+}}
+
+IMPORTANT: Return ONLY valid JSON. No explanations, no markdown formatting, no code blocks. Just the JSON object."""
+
+    llm_response = call_llm(prompt, timeout=90)
+    
+    if llm_response:
+        # Try to parse the JSON from LLM response
+        try:
+            # Clean up response - strip markdown code blocks if present
+            cleaned = llm_response.strip()
+            if cleaned.startswith('```'):
+                cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
+                cleaned = re.sub(r'\s*```$', '', cleaned)
+            return json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Try to find JSON in the response
+            match = re.search(r'\{[\s\S]*\}', llm_response)
+            if match:
+                try:
+                    return json.loads(match.group())
+                except:
+                    pass
+    
+    return None
+
+
+@app.route('/api/content-brief', methods=['POST'])
+def generate_content_brief():
+    """Generate an AI-powered content brief from SERP analysis"""
+    data = request.get_json()
+    keyword = data.get('keyword', '').strip()
+    content_type = data.get('content_type', 'blog').strip()
+    
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+    
+    valid_types = ['blog', 'faq', 'landing_page', 'how_to', 'comparison', 'listicle']
+    if content_type not in valid_types:
+        content_type = 'blog'
+    
+    try:
+        # Step 1: Scrape SERP results
+        serp_data = scrape_serp_results(keyword, num_results=5)
+        
+        # Step 2: Generate brief with LLM
+        brief = generate_brief_with_llm(keyword, content_type, serp_data)
+        
+        # Step 3: Build response
+        response_data = {
+            'status': 'success',
+            'keyword': keyword,
+            'content_type': content_type,
+            'serp_analysis': {
+                'results_analyzed': len(serp_data['results']),
+                'avg_word_count': sum(r['word_count'] for r in serp_data['results']) // max(len(serp_data['results']), 1) if serp_data['results'] else 0,
+                'paa_questions': serp_data['paa_questions'],
+                'competitors': [{
+                    'url': r['url'],
+                    'title': r['title'],
+                    'word_count': r['word_count'],
+                    'headings_count': sum(len(r['headings'][h]) for h in ['h1', 'h2', 'h3']),
+                    'schema_types': r['schema_types']
+                } for r in serp_data['results']]
+            }
+        }
+        
+        if brief:
+            response_data['brief'] = brief
+            response_data['ai_generated'] = True
+        else:
+            # Fallback: generate a basic brief from SERP data without LLM
+            all_h2s = []
+            for r in serp_data['results']:
+                all_h2s.extend(r['headings']['h2'][:5])
+            
+            # Deduplicate and pick top headings
+            seen = set()
+            unique_h2s = []
+            for h in all_h2s:
+                h_lower = h.lower().strip()
+                if h_lower not in seen and len(h_lower) > 5:
+                    seen.add(h_lower)
+                    unique_h2s.append(h)
+            
+            avg_wc = response_data['serp_analysis']['avg_word_count'] or 1500
+            
+            response_data['brief'] = {
+                'recommended_title': f"Complete Guide to {keyword.title()}",
+                'target_word_count': avg_wc,
+                'headings': [{'level': 'h2', 'text': h, 'purpose': 'Competitor-derived section', 'word_budget': avg_wc // max(len(unique_h2s), 5)} for h in unique_h2s[:8]],
+                'questions_to_answer': [{'question': q, 'source': 'paa', 'priority': 'high'} for q in serp_data['paa_questions'][:5]],
+                'keywords': [{'term': keyword, 'type': 'primary', 'placement': 'title'}],
+                'schema_recommendations': ['Article', 'FAQPage'] if serp_data['paa_questions'] else ['Article'],
+                'content_guidelines': {
+                    'tone': 'informative',
+                    'target_audience': f'People searching for {keyword}',
+                    'unique_angle': 'Data-driven analysis based on top-ranking content',
+                    'ai_citation_tips': 'Use clear definitions, structured data, and direct answers to questions'
+                }
+            }
+            response_data['ai_generated'] = False
+            response_data['note'] = 'LLM unavailable — brief generated from SERP data analysis'
+        
+        return jsonify(response_data)
+    
+    except Exception as e:
+        return jsonify({'error': f'Brief generation failed: {str(e)}'}), 500
+
 
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
