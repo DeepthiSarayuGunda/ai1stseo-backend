@@ -10,7 +10,7 @@
 
 | Component | URL / Location | Tech |
 |-----------|---------------|------|
-| Frontend (Production) | `https://www.ai1stseo.com` via CloudFront `E16GYTIVXY9IOU` | Static HTML/JS on S3 (`ai1stseo-website`) |
+| Frontend (Production) | `https://www.ai1stseo.com` via CloudFront `E16GYTIVXY9IOU` | React + Vite (dashboard) + static HTML on S3 (`ai1stseo-website`) |
 | Auth API (Production) | `https://api.ai1stseo.com/api/auth/*` | Troy's EC2 (`54.226.251.216`) |
 | App Runner (Dev/Test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` | Flask Python backend |
 | SEO Analyzer Backend | App Runner | Flask — 236 checks across 10 categories |
@@ -33,7 +33,9 @@
 |------|---------|
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
-| `dashboard.html` | Logged-in user dashboard — score widgets, category breakdown, audit history, quick scan |
+| `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
+| `assets/index-Dowm6vOj.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-BAO7CWfy.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
