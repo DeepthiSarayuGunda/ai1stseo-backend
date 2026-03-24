@@ -90,6 +90,52 @@
             border-color: #00d4ff;
             background: rgba(0, 212, 255, 0.1);
         }
+        .category-card .expand-icon {
+            transition: transform 0.3s ease;
+            display: inline-block;
+            font-size: 0.8rem;
+            margin-left: 6px;
+            opacity: 0.6;
+        }
+        .category-card.active .expand-icon {
+            transform: rotate(180deg);
+        }
+        .category-detail-wrapper {
+            grid-column: 1 / -1;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+        }
+        .category-detail-wrapper.open {
+            max-height: 5000px;
+            opacity: 1;
+        }
+        .category-detail-inner {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 5px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+        }
+        .category-detail-inner .detail-filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .category-detail-inner .detail-filter-btn {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .category-detail-inner .detail-filter-btn:hover { background: rgba(255,255,255,0.15); }
+        .category-detail-inner .detail-filter-btn.active { background: linear-gradient(90deg, #00d4ff, #7b2cbf); border-color: transparent; }
         .category-header {
             display: flex;
             justify-content: space-between;
@@ -455,37 +501,33 @@
                 <div class="category-overview">
             `;
 
-            // Add category cards
+            // Add category cards with inline expandable detail wrappers
             for (const [catKey, catData] of Object.entries(data.categories)) {
                 const meta = categoryMeta[catKey] || { name: catKey, desc: '', checks: catData.total };
                 const scoreColor = getScoreColor(catData.score);
+                const failCount = catData.checks.filter(c => c.status === 'fail').length;
+                const warnCount = catData.checks.filter(c => c.status === 'warning').length;
+                let statusSummary = '';
+                if (failCount > 0) statusSummary += `<span style="color:#f44336;margin-left:8px;">${failCount} failed</span>`;
+                if (warnCount > 0) statusSummary += `<span style="color:#ff9800;margin-left:8px;">${warnCount} warnings</span>`;
                 html += `
                     <div class="category-card" data-category="${catKey}">
                         <div class="category-header">
-                            <span class="category-name">${meta.name}</span>
+                            <span class="category-name">${meta.name} <span class="expand-icon">▼</span></span>
                             <span class="category-score" style="color: ${scoreColor}">${Math.round(catData.score)}%</span>
                         </div>
                         <div class="category-bar">
                             <div class="category-bar-fill" style="width: ${catData.score}%; background: ${scoreColor}"></div>
                         </div>
-                        <div class="category-stats">${catData.passed}/${catData.total} passed • ${meta.desc}</div>
+                        <div class="category-stats">${catData.passed}/${catData.total} passed • ${meta.desc}${statusSummary}</div>
+                    </div>
+                    <div class="category-detail-wrapper" id="detail-${catKey}">
+                        <div class="category-detail-inner" id="detail-inner-${catKey}"></div>
                     </div>
                 `;
             }
 
             html += `</div>
-                
-                <!-- Filter Bar -->
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter="all">All Checks</button>
-                    <button class="filter-btn" data-filter="fail">❌ Failed</button>
-                    <button class="filter-btn" data-filter="warning">⚠️ Warnings</button>
-                    <button class="filter-btn" data-filter="pass">✓ Passed</button>
-                    <button class="filter-btn" data-filter="info">ℹ️ Info</button>
-                </div>
-
-                <!-- Detailed Results -->
-                <div id="detailedResults"></div>
 
                 <!-- AI Recommendations Section -->
                 <div class="ai-section" id="aiSection">
@@ -511,55 +553,66 @@
             
             // Store data globally
             window.auditData = data;
-            window.currentFilter = 'all';
-            window.currentCategory = null;
 
-            // Add category card click handlers
+            // Add category card click handlers - accordion expand/collapse
             document.querySelectorAll('.category-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
-                    card.classList.add('active');
-                    window.currentCategory = card.dataset.category;
-                    renderDetailedResults();
+                    const catKey = card.dataset.category;
+                    const wrapper = document.getElementById('detail-' + catKey);
+                    const isOpen = card.classList.contains('active');
+                    
+                    if (isOpen) {
+                        // Collapse this category
+                        card.classList.remove('active');
+                        wrapper.classList.remove('open');
+                    } else {
+                        // Expand this category
+                        card.classList.add('active');
+                        wrapper.classList.add('open');
+                        renderCategoryDetail(catKey, 'all');
+                    }
                 });
             });
-
-            // Add filter button handlers
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    window.currentFilter = btn.dataset.filter;
-                    renderDetailedResults();
-                });
-            });
-
-            // Show all categories by default
-            renderDetailedResults();
         }
 
-        function renderDetailedResults() {
-            const container = document.getElementById('detailedResults');
-            const filter = window.currentFilter;
-            const selectedCategory = window.currentCategory;
+        function renderCategoryDetail(catKey, filter) {
+            const container = document.getElementById('detail-inner-' + catKey);
+            const catData = window.auditData.categories[catKey];
+            const meta = categoryMeta[catKey] || { name: catKey, desc: '' };
             
-            let html = '';
-            
-            const categoriesToShow = selectedCategory 
-                ? { [selectedCategory]: window.auditData.categories[selectedCategory] }
-                : window.auditData.categories;
+            // Filter checks
+            let checks = catData.checks;
+            if (filter !== 'all') {
+                checks = checks.filter(c => c.status === filter);
+            }
 
-            for (const [catKey, catData] of Object.entries(categoriesToShow)) {
-                const meta = categoryMeta[catKey] || { name: catKey, desc: '' };
-                
-                // Filter checks
-                let checks = catData.checks;
-                if (filter !== 'all') {
-                    checks = checks.filter(c => c.status === filter);
-                }
-                
-                if (checks.length === 0) continue;
+            // Count by status for filter badges
+            const counts = { all: catData.checks.length, pass: 0, fail: 0, warning: 0, info: 0 };
+            catData.checks.forEach(c => { if (counts[c.status] !== undefined) counts[c.status]++; });
 
+            let html = `
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">${meta.name}</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">${meta.desc}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="section-score" style="color: ${getScoreColor(catData.score)}">${Math.round(catData.score)}%</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${catData.passed}/${catData.total} passed</div>
+                    </div>
+                </div>
+                <div class="detail-filter-bar">
+                    <button class="detail-filter-btn ${filter === 'all' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','all')">All (${counts.all})</button>
+                    <button class="detail-filter-btn ${filter === 'fail' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','fail')">❌ Failed (${counts.fail})</button>
+                    <button class="detail-filter-btn ${filter === 'warning' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','warning')">⚠️ Warnings (${counts.warning})</button>
+                    <button class="detail-filter-btn ${filter === 'pass' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','pass')">✓ Passed (${counts.pass})</button>
+                    <button class="detail-filter-btn ${filter === 'info' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','info')">ℹ️ Info (${counts.info})</button>
+                </div>
+            `;
+
+            if (checks.length === 0) {
+                html += `<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">No checks match this filter.</div>`;
+            } else {
                 // Group by subcategory
                 const grouped = {};
                 checks.forEach(check => {
@@ -567,20 +620,6 @@
                     if (!grouped[subcat]) grouped[subcat] = [];
                     grouped[subcat].push(check);
                 });
-
-                html += `
-                    <div class="results-section">
-                        <div class="section-header">
-                            <div>
-                                <div class="section-title">${meta.name}</div>
-                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">${meta.desc}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="section-score" style="color: ${getScoreColor(catData.score)}">${Math.round(catData.score)}%</div>
-                                <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${catData.passed}/${catData.total} passed</div>
-                            </div>
-                        </div>
-                `;
 
                 for (const [subcat, subcatChecks] of Object.entries(grouped)) {
                     const subcatPassed = subcatChecks.filter(c => c.status === 'pass').length;
@@ -609,14 +648,6 @@
 
                     html += `</div>`;
                 }
-
-                html += `</div>`;
-            }
-
-            if (!html) {
-                html = `<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
-                    No checks match the current filter.
-                </div>`;
             }
 
             container.innerHTML = html;
@@ -745,5 +776,6 @@
             runAnalysis();
         }
     </script>
+    <script src="/assets/auth.js"></script>
 </body>
 </html>

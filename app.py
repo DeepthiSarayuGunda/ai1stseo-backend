@@ -19,71 +19,111 @@ from collections import Counter
 import json
 import os
 
+import boto3
+import hmac
+import base64
+
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
+    'https://d6ugqfyp4h9y3.cloudfront.net',
     'http://localhost:5000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'http://localhost:5001',
+    'http://127.0.0.1:5001'
 ])
 
-# File-based storage for persistence
-USERS_FILE = 'users.json'
-TOKENS_FILE = 'tokens.json'
+# AWS Cognito Configuration
+COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
+COGNITO_CLIENT_ID = '7scsae79o2g9idc92eputcrvrg'
+COGNITO_CLIENT_SECRET = '1qg2tetso18gkhsmfte0c565ull6lp02la484ojaj5k85pvk9p49'
+AWS_REGION = 'us-east-1'
+SES_SENDER = 'no-reply@ai1stseo.com'
+COGNITO_ENDPOINT = f'https://cognito-idp.{AWS_REGION}.amazonaws.com/'
 
-def load_users():
-    """Load users from file on every call"""
-    try:
-        if os.path.exists(USERS_FILE):
-            with open(USERS_FILE, 'r') as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"Error loading users: {e}")
-    return {}
+# SES client - only works if AWS credentials are available (App Runner instance role)
+ses_client = None
+try:
+    ses_client = boto3.client('ses', region_name=AWS_REGION)
+except Exception:
+    print("SES client not available - welcome emails will be skipped")
 
-def save_users(users):
-    """Save users to file"""
-    try:
-        with open(USERS_FILE, 'w') as f:
-            json.dump(users, f, indent=2)
-        print(f"Saved {len(users)} users to {USERS_FILE}")
-    except Exception as e:
-        print(f"Error saving users: {e}")
+def get_secret_hash(username):
+    """Compute Cognito SECRET_HASH for client with secret"""
+    msg = username + COGNITO_CLIENT_ID
+    dig = hmac.new(
+        COGNITO_CLIENT_SECRET.encode('utf-8'),
+        msg.encode('utf-8'),
+        hashlib.sha256
+    ).digest()
+    return base64.b64encode(dig).decode()
 
-def load_tokens():
-    """Load tokens from file on every call"""
-    try:
-        if os.path.exists(TOKENS_FILE):
-            with open(TOKENS_FILE, 'r') as f:
-                data = json.load(f)
-                # Convert expiry strings back to datetime
-                for token, info in data.items():
-                    info['expiry'] = datetime.fromisoformat(info['expiry'])
-                return data
-    except Exception as e:
-        print(f"Error loading tokens: {e}")
-    return {}
+def cognito_request(action, payload):
+    """Make a direct HTTP request to Cognito (no AWS credentials needed for public APIs)"""
+    headers = {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': f'AWSCognitoIdentityProviderService.{action}'
+    }
+    resp = requests.post(COGNITO_ENDPOINT, json=payload, headers=headers)
+    return resp.json(), resp.status_code
 
-def save_tokens(tokens):
-    """Save tokens to file"""
+def send_welcome_email(email, name):
+    """Send welcome email via SES"""
+    if not ses_client:
+        print(f"SES not available - skipping welcome email for {email}")
+        return False
     try:
-        # Convert datetime to string for JSON
-        data = {}
-        for token, info in tokens.items():
-            data[token] = {
-                'email': info['email'],
-                'name': info['name'],
-                'expiry': info['expiry'].isoformat()
+        subject = "Welcome to AI1stSEO — Your AI-First SEO Platform"
+        html_body = f"""
+        <html>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #ffffff; padding: 40px;">
+            <div style="max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 40px;">
+                <h1 style="background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; font-size: 2rem;">AISEO Master</h1>
+                <h2 style="color: #00d4ff; text-align: center;">Welcome, {name}!</h2>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
+                    Thank you for joining <strong>AI1stSEO</strong> — the AI-First SEO Platform. We're excited to have you on board!
+                </p>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
+                    Here's what you can do with your account:
+                </p>
+                <ul style="color: rgba(255,255,255,0.8); line-height: 2; font-size: 1rem;">
+                    <li><strong>SEO Analyzer</strong> — Run comprehensive 180-point SEO audits on any website</li>
+                    <li><strong>9 Audit Categories</strong> — Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
+                    <li><strong>AI Optimization</strong> — Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
+                    <li><strong>Detailed Reports</strong> — Actionable recommendations with impact ratings</li>
+                </ul>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing →</a>
+                </div>
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                        AI1stSEO — Optimize for AI Discovery<br>
+                        <a href="https://ai1stseo.com" style="color: #00d4ff; text-decoration: none;">ai1stseo.com</a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        text_body = f"Welcome to AI1stSEO, {name}! Start analyzing websites at https://ai1stseo.com"
+
+        ses_client.send_email(
+            Source=SES_SENDER,
+            Destination={'ToAddresses': [email]},
+            Message={
+                'Subject': {'Data': subject, 'Charset': 'UTF-8'},
+                'Body': {
+                    'Html': {'Data': html_body, 'Charset': 'UTF-8'},
+                    'Text': {'Data': text_body, 'Charset': 'UTF-8'}
+                }
             }
-        with open(TOKENS_FILE, 'w') as f:
-            json.dump(data, f, indent=2)
-        print(f"Saved {len(tokens)} tokens to {TOKENS_FILE}")
+        )
+        print(f"Welcome email sent to {email}")
+        return True
     except Exception as e:
-        print(f"Error saving tokens: {e}")
-
-# Don't load at startup - load on each request instead
-USERS = {}
-ACTIVE_TOKENS = {}
+        print(f"Failed to send welcome email to {email}: {e}")
+        return False
 
 def fetch_website(url):
     """Fetch website content with timing"""
@@ -1387,153 +1427,354 @@ def serve_assets(filename):
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    """User registration endpoint"""
+    """User registration via Cognito (direct HTTP - no AWS credentials needed)"""
     data = request.get_json()
     name = data.get('name', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
-    
+
     if not name or not email or not password:
         return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
-    
-    # Basic email validation
+
     if '@' not in email or '.' not in email:
         return jsonify({'status': 'error', 'message': 'Invalid email address'}), 400
-    
-    # Load users from file
-    users = load_users()
-    
-    # Check if email already exists
-    if email in users:
-        return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
-    
-    # Hash password and store user
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    users[email] = {
-        'name': name,
-        'password_hash': password_hash,
-        'created_at': datetime.now().isoformat()
-    }
-    save_users(users)
-    
-    print(f"DEBUG: User created - {email}, Total users: {len(users)}")
-    
-    return jsonify({
-        'status': 'success',
-        'message': 'Account created successfully'
-    })
+
+    try:
+        result, status_code = cognito_request('SignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'Password': password,
+            'UserAttributes': [
+                {'Name': 'email', 'Value': email},
+                {'Name': 'name', 'Value': name}
+            ]
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Signup failed')
+            if 'UsernameExistsException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Email already registered'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            if 'InvalidParameterException' in error_type:
+                return jsonify({'status': 'error', 'message': error_msg}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        # Send welcome email via SES (best-effort)
+        send_welcome_email(email, name)
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Account created! Check your email for a verification code.'
+        })
+    except Exception as e:
+        print(f"Signup error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/confirm', methods=['POST'])
+def confirm_signup():
+    """Confirm user signup with verification code (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+
+    if not email or not code:
+        return jsonify({'status': 'error', 'message': 'Email and code required'}), 400
+
+    try:
+        result, status_code = cognito_request('ConfirmSignUp', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            error_msg = result.get('message', 'Confirmation failed')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid verification code'}), 400
+            if 'ExpiredCodeException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Code expired. Please request a new one.'}), 400
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        return jsonify({'status': 'success', 'message': 'Email verified! You can now sign in.'})
+    except Exception as e:
+        print(f"Confirm error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/resend-code', methods=['POST'])
+def resend_code():
+    """Resend verification code (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    try:
+        result, status_code = cognito_request('ResendConfirmationCode', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        if status_code != 200:
+            error_msg = result.get('message', 'Failed to resend code')
+            return jsonify({'status': 'error', 'message': error_msg}), 400
+
+        return jsonify({'status': 'success', 'message': 'New code sent to your email'})
+    except Exception as e:
+        print(f"Resend error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    """User login endpoint"""
+    """User login via Cognito (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
-    
-    # Load users from file on each request
-    users = load_users()
-    
-    print(f"DEBUG LOGIN: Email={email}, Total users in file: {len(users)}")
-    print(f"DEBUG LOGIN: Users in file: {list(users.keys())}")
-    print(f"DEBUG LOGIN: Email in users? {email in users}")
-    
+
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Email and password required'}), 400
-    
-    # Hash the password and check
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
-    if email in users:
-        print(f"DEBUG LOGIN: Stored hash: {users[email]['password_hash'][:20]}...")
-        print(f"DEBUG LOGIN: Input hash: {password_hash[:20]}...")
-        print(f"DEBUG LOGIN: Match? {users[email]['password_hash'] == password_hash}")
-    
-    if email in users and users[email]['password_hash'] == password_hash:
-        # Generate token
-        token = secrets.token_urlsafe(32)
-        expiry = datetime.now() + timedelta(hours=24)
-        
-        # Load and save tokens
-        tokens = load_tokens()
-        tokens[token] = {
-            'email': email,
-            'name': users[email]['name'],
-            'expiry': expiry
-        }
-        save_tokens(tokens)
-        
+
+    try:
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'USER_PASSWORD_AUTH',
+            'AuthParameters': {
+                'USERNAME': email,
+                'PASSWORD': password,
+                'SECRET_HASH': get_secret_hash(email)
+            }
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'NotAuthorizedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+            if 'UserNotConfirmedException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Please verify your email first'}), 401
+            return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        access_token = auth_result.get('AccessToken', '')
+
+        # Get user attributes using the access token
+        user_result, user_status = cognito_request('GetUser', {
+            'AccessToken': access_token
+        })
+
+        user_name = email.split('@')[0]
+        if user_status == 200:
+            user_attrs = {a['Name']: a['Value'] for a in user_result.get('UserAttributes', [])}
+            user_name = user_attrs.get('name', user_name)
+
         return jsonify({
             'status': 'success',
-            'token': token,
-            'name': users[email]['name'],
+            'token': access_token,
+            'idToken': auth_result.get('IdToken', ''),
+            'refreshToken': auth_result.get('RefreshToken', ''),
+            'name': user_name,
             'email': email,
             'message': 'Login successful'
         })
-    else:
+    except Exception as e:
+        print(f"Login error: {e}")
         return jsonify({'status': 'error', 'message': 'Invalid email or password'}), 401
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    """User logout endpoint"""
+    """User logout - invalidate Cognito token (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token in tokens:
-        del tokens[token]
-        save_tokens(tokens)
-    
+
+    try:
+        cognito_request('GlobalSignOut', {
+            'AccessToken': token
+        })
+    except Exception as e:
+        print(f"Logout error (token may be expired): {e}")
+
     return jsonify({'status': 'success', 'message': 'Logged out successfully'})
 
 @app.route('/api/delete-account', methods=['POST'])
 def delete_account():
-    """Delete user account permanently"""
+    """Delete user account from Cognito (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token not in tokens:
+
+    try:
+        result, status_code = cognito_request('DeleteUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
+
+        return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
+    except Exception as e:
+        print(f"Delete account error: {e}")
         return jsonify({'status': 'error', 'message': 'Invalid or expired session'}), 401
-    
-    # Get user email from token
-    email = tokens[token]['email']
-    
-    # Delete user data
-    users = load_users()
-    if email in users:
-        del users[email]
-        save_users(users)
-    
-    # Delete all tokens for this user
-    tokens_to_delete = [t for t, data in tokens.items() if data['email'] == email]
-    for t in tokens_to_delete:
-        del tokens[t]
-    save_tokens(tokens)
-    
-    return jsonify({'status': 'success', 'message': 'Account deleted successfully'})
 
 @app.route('/api/verify', methods=['POST'])
 def verify_token():
-    """Verify if token is valid"""
+    """Verify if Cognito token is valid (direct HTTP)"""
     data = request.get_json()
     token = data.get('token', '')
-    
-    tokens = load_tokens()
-    if token in tokens:
-        token_data = tokens[token]
-        if datetime.now() < token_data['expiry']:
-            return jsonify({
-                'status': 'success',
-                'valid': True,
-                'name': token_data['name'],
-                'email': token_data['email']
-            })
-        else:
-            # Token expired
-            del tokens[token]
-            save_tokens(tokens)
-    
-    return jsonify({'status': 'error', 'valid': False}), 401
+
+    try:
+        result, status_code = cognito_request('GetUser', {
+            'AccessToken': token
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'valid': False}), 401
+
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
+
+        return jsonify({
+            'status': 'success',
+            'valid': True,
+            'name': user_attrs.get('name', ''),
+            'email': user_attrs.get('email', '')
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'valid': False}), 401
+
+
+# ============== ADDITIONAL AUTH FEATURES ==============
+
+def require_auth(f):
+    """Decorator to protect routes — expects JSON body with 'token' field"""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        data = request.get_json() or {}
+        token = data.get('token', '')
+        if not token:
+            auth_header = request.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ', 1)[1]
+        if not token:
+            return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+        result, status_code = cognito_request('GetUser', {'AccessToken': token})
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Invalid or expired token'}), 401
+        user_attrs = {a['Name']: a['Value'] for a in result.get('UserAttributes', [])}
+        request.cognito_user = {'username': result.get('Username', ''), 'attributes': user_attrs}
+        request.access_token = token
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/api/refresh-token', methods=['POST'])
+def refresh_token():
+    """Refresh an expired access token using a refresh token (direct HTTP)"""
+    data = request.get_json()
+    refresh = data.get('refreshToken', '')
+    email = data.get('email', '').strip().lower()
+
+    if not refresh or not email:
+        return jsonify({'status': 'error', 'message': 'Refresh token and email are required'}), 400
+
+    try:
+        result, status_code = cognito_request('InitiateAuth', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'AuthFlow': 'REFRESH_TOKEN_AUTH',
+            'AuthParameters': {
+                'REFRESH_TOKEN': refresh,
+                'SECRET_HASH': get_secret_hash(email)
+            }
+        })
+
+        if status_code != 200:
+            return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+        auth_result = result.get('AuthenticationResult', {})
+        return jsonify({
+            'status': 'success',
+            'token': auth_result.get('AccessToken', ''),
+            'idToken': auth_result.get('IdToken', ''),
+            'message': 'Token refreshed'
+        })
+    except Exception as e:
+        print(f"Refresh token error: {e}")
+        return jsonify({'status': 'error', 'message': 'Token refresh failed'}), 401
+
+@app.route('/api/send-welcome', methods=['POST'])
+def send_welcome():
+    """Send welcome email — called by frontend after signup confirmation"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    name = data.get('name', '') or email.split('@')[0]
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    success = send_welcome_email(email, name)
+    if success:
+        return jsonify({'status': 'success', 'message': 'Welcome email sent'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Failed to send welcome email'}), 500
+
+
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    """Initiate password reset — sends code to email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+
+    try:
+        result, status_code = cognito_request('ForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email
+        })
+
+        # Always return success to not reveal if email exists
+        return jsonify({
+            'status': 'success',
+            'message': 'If an account exists with this email, a reset code has been sent.'
+        })
+    except Exception as e:
+        print(f"Forgot password error: {e}")
+        return jsonify({'status': 'success', 'message': 'If an account exists with this email, a reset code has been sent.'})
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    """Complete password reset with the code from email (direct HTTP)"""
+    data = request.get_json()
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+    new_password = data.get('newPassword', '')
+
+    if not email or not code or not new_password:
+        return jsonify({'status': 'error', 'message': 'Email, code, and new password are required'}), 400
+
+    try:
+        result, status_code = cognito_request('ConfirmForgotPassword', {
+            'ClientId': COGNITO_CLIENT_ID,
+            'SecretHash': get_secret_hash(email),
+            'Username': email,
+            'ConfirmationCode': code,
+            'Password': new_password
+        })
+
+        if status_code != 200:
+            error_type = result.get('__type', '')
+            if 'CodeMismatchException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Invalid reset code'}), 400
+            if 'InvalidPasswordException' in error_type:
+                return jsonify({'status': 'error', 'message': 'Password must be at least 8 characters with uppercase, lowercase, and numbers'}), 400
+            return jsonify({'status': 'error', 'message': result.get('message', 'Password reset failed')}), 400
+
+        return jsonify({'status': 'success', 'message': 'Password reset successful. You can now log in.'})
+    except Exception as e:
+        print(f"Reset password error: {e}")
+        return jsonify({'status': 'error', 'message': 'Password reset failed'}), 500
+
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
@@ -1964,14 +2205,441 @@ def generate_content_brief():
         return jsonify({'error': f'Brief generation failed: {str(e)}'}), 500
 
 
+@app.route('/api/geo-probe', methods=['POST'])
+def geo_probe():
+    """GEO Monitoring Engine — multi-provider, routes to EC2 AI engine."""
+    from geo_probe_service import geo_probe as _geo_probe
+
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or data.get('ai_model') or 'nova').strip().lower()
+
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+
+    try:
+        result = _geo_probe(brand, keyword, ai_model=provider)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/models', methods=['GET'])
+def geo_probe_models():
+    """List available AI providers for GEO probing."""
+    from geo_probe_service import available_models
+    return jsonify({'models': available_models()})
+
+
+@app.route('/api/geo-probe/batch', methods=['POST'])
+def geo_probe_batch():
+    """GEO/AEO batch analysis — multi-provider, routes to EC2."""
+    from geo_probe_service import geo_probe_batch as _batch
+
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keywords = data.get('keywords') or []
+    provider = (data.get('provider') or data.get('ai_model') or 'nova').strip().lower()
+
+    if not brand:
+        return jsonify({'error': 'brand_name is required'}), 400
+    if not keywords or not isinstance(keywords, list):
+        return jsonify({'error': 'keywords must be a non-empty list'}), 400
+    if len(keywords) > 20:
+        return jsonify({'error': 'Maximum 20 keywords per batch'}), 400
+
+    try:
+        return jsonify(_batch(brand, keywords, ai_model=provider))
+    except Exception as e:
+        return jsonify({'error': f'Batch probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/history', methods=['GET'])
+def geo_probe_history():
+    """Return probe history — batch (in-memory) + stored (SQLite)."""
+    from geo_probe_service import get_history, get_stored_history
+    brand = request.args.get('brand')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 50))
+    return jsonify({
+        'batch_history': get_history(),
+        'stored_results': get_stored_history(limit=limit, brand=brand, ai_model=ai_model),
+    })
+
+
+@app.route('/api/geo-probe/schedule', methods=['POST'])
+def geo_probe_schedule():
+    """Register a scheduled monitoring job (placeholder)."""
+    from geo_probe_service import schedule_probe
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keywords = data.get('keywords') or []
+    provider = (data.get('provider') or 'nova').strip()
+    interval = int(data.get('interval_minutes', 60))
+    if not brand or not keywords:
+        return jsonify({'error': 'brand_name and keywords are required'}), 400
+    job = schedule_probe(brand, keywords, ai_model=provider, interval_minutes=interval)
+    return jsonify(job)
+
+
+@app.route('/api/geo-probe/schedule', methods=['GET'])
+def geo_probe_schedule_list():
+    """List registered scheduled jobs."""
+    from geo_probe_service import get_scheduled_jobs
+    return jsonify({'jobs': get_scheduled_jobs()})
+
+
+@app.route('/api/geo-probe/compare', methods=['POST'])
+def geo_probe_compare():
+    """Compare brand visibility across ALL available AI providers simultaneously."""
+    from geo_probe_service import geo_probe_compare as _compare
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    try:
+        return jsonify(_compare(brand, keyword))
+    except Exception as e:
+        return jsonify({'error': f'Compare failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/site', methods=['POST'])
+def geo_probe_site():
+    """Detect if a website/URL is mentioned in AI output for a keyword."""
+    from geo_probe_service import geo_probe_site as _site
+    data = request.get_json() or {}
+    site_url = (data.get('site_url') or data.get('url') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'nova').strip().lower()
+    if not site_url or not keyword:
+        return jsonify({'error': 'site_url and keyword are required'}), 400
+    try:
+        return jsonify(_site(site_url, keyword, ai_model=provider))
+    except Exception as e:
+        return jsonify({'error': f'Site probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-probe/trend', methods=['GET'])
+def geo_probe_trend():
+    """Get visibility trend for a brand over time."""
+    from geo_probe_service import get_visibility_trend
+    brand = request.args.get('brand', '').strip()
+    limit = int(request.args.get('limit', 30))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    return jsonify(get_visibility_trend(brand, limit=limit))
+
+
+@app.route('/api/brand/resolve', methods=['POST'])
+def brand_resolve():
+    """Resolve brand name <-> domain, suggest keywords."""
+    from brand_resolver import resolve_brand
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip() or None
+    url = (data.get('url') or data.get('site_url') or '').strip() or None
+    if not brand and not url:
+        return jsonify({'error': 'Provide brand or url'}), 400
+    try:
+        return jsonify(resolve_brand(brand=brand, url=url))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/ai/citation-probe', methods=['POST'])
+def ai_citation_probe():
+    """
+    AI Citation Probe — routes to EC2 geo_engine for Bedrock access.
+
+    Request:
+        { "keyword": "best project management tools 2025",
+          "brand_name": "Notion" }
+
+    Response:
+        { keyword, ai_model, brand_present, citation_context,
+          confidence, cited_sources, timestamp }
+    """
+    from geo_probe_service import geo_probe as _geo_probe
+
+    data = request.get_json() or {}
+    keyword = (data.get('keyword') or '').strip()
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+    if not brand:
+        return jsonify({'error': 'brand_name is required'}), 400
+
+    try:
+        result = _geo_probe(brand, keyword)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
+
+
+@app.route('/api/ai/geo-monitor', methods=['POST'])
+def ai_geo_monitor():
+    """
+    GEO Monitor — query all available AI models in parallel for a keyword.
+
+    Request:
+        {
+          "keyword":   "best CRM software 2025",  (required)
+          "brand":     "HubSpot",                 (optional — tracked in scoring)
+          "providers": ["claude", "openai"]        (optional — defaults to all)
+        }
+
+    Response:
+        {
+          "keyword": "...",
+          "brand": "...",
+          "models": {
+            "claude":  { cited probe result },
+            "openai":  { cited probe result },
+            "gemini":  { unavailable or result }
+          },
+          "geo_score": 67,
+          "score_breakdown": { ... },
+          "timestamp": "..."
+        }
+    """
+    from llm_service import geo_monitor
+
+    data = request.get_json() or {}
+    keyword   = (data.get('keyword') or '').strip()
+    brand     = (data.get('brand') or '').strip() or None
+    providers = data.get('providers') or None
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    if providers is not None and not isinstance(providers, list):
+        return jsonify({'error': 'providers must be a list'}), 400
+
+    try:
+        result = geo_monitor(keyword, brand=brand, providers=providers)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'GEO monitor failed: {str(e)}'}), 500
+
+
 @app.route('/resources/AI1STSEO-UML-DIAGRAMS.md')
 def serve_uml_diagrams():
     return send_from_directory('.', 'AI1STSEO-UML-DIAGRAMS.md', mimetype='text/markdown')
+
+
+# ============== AEO OPTIMIZER ==============
+
+@app.route('/api/aeo/analyze', methods=['POST'])
+def aeo_analyze():
+    """AEO analysis — scan a URL for AI engine optimization issues."""
+    from aeo_optimizer import analyze_aeo
+
+    data = request.get_json() or {}
+    url = (data.get('url') or '').strip()
+    brand = (data.get('brand_name') or '').strip() or None
+
+    if not url:
+        return jsonify({'error': 'url is required'}), 400
+
+    try:
+        result = analyze_aeo(url, brand_name=brand)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'AEO analysis failed: {str(e)}'}), 500
+
+
+# ============== AI RANKING RECOMMENDATIONS ==============
+
+@app.route('/api/ai/ranking-recommendations', methods=['POST'])
+def ai_ranking_recommendations():
+    """
+    AI ranking recommendations for a URL + brand.
+
+    Request: { "url": "https://...", "brand_name": "Nike", "keywords": ["running shoes"] }
+    """
+    from ai_ranking_service import get_ranking_recommendations
+    from geo_probe_service import geo_probe_batch as _batch
+
+    data = request.get_json() or {}
+    url = (data.get('url') or '').strip()
+    brand = (data.get('brand_name') or '').strip()
+    keywords = data.get('keywords') or []
+
+    if not url or not brand:
+        return jsonify({'error': 'url and brand_name are required'}), 400
+
+    # Optionally run GEO probes for the keywords to feed into recommendations
+    geo_results = []
+    if keywords:
+        try:
+            batch = _batch(brand, keywords[:5])
+            geo_results = batch.get('results', [])
+        except Exception:
+            pass  # Recommendations still work without probe data
+
+    try:
+        result = get_ranking_recommendations(url, brand, geo_results=geo_results)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Ranking analysis failed: {str(e)}'}), 500
+
+
+# ============== CONTENT GENERATION PIPELINE ==============
+
+@app.route('/api/content/generate', methods=['POST'])
+def content_generate():
+    """
+    Generate AI-optimized content.
+
+    Request: {
+        "brand_name": "Notion",
+        "content_type": "faq|comparison|meta_description|feature_snippet",
+        "topic": "project management tools",
+        "competitors": ["Asana", "Monday"],  (for comparison type)
+        "count": 5                            (for faq type)
+    }
+    """
+    from content_generator import generate_content
+
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    content_type = (data.get('content_type') or '').strip()
+    topic = (data.get('topic') or '').strip()
+    competitors = data.get('competitors') or []
+    count = data.get('count', 5)
+
+    if not brand or not content_type:
+        return jsonify({'error': 'brand_name and content_type are required'}), 400
+
+    try:
+        result = generate_content(brand, content_type, topic=topic,
+                                   competitors=competitors, count=count)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Content generation failed: {str(e)}'}), 500
+
+
+# ============== AI SEO CHATBOT ==============
+
+@app.route('/api/chatbot/session', methods=['POST'])
+def chatbot_create_session():
+    """Create a new chatbot session."""
+    from ai_chatbot import create_session
+    return jsonify(create_session())
+
+
+@app.route('/api/chatbot/chat', methods=['POST'])
+def chatbot_chat():
+    """
+    Send a message to the AI SEO chatbot.
+
+    Request: { "session_id": "abc123", "message": "How do I optimize for ChatGPT?" }
+    Auto-creates session if session_id is new.
+    """
+    from ai_chatbot import chat
+
+    data = request.get_json() or {}
+    session_id = (data.get('session_id') or '').strip()
+    message = (data.get('message') or '').strip()
+
+    if not message:
+        return jsonify({'error': 'message is required'}), 400
+    if not session_id:
+        session_id = str(__import__('uuid').uuid4())[:12]
+
+    try:
+        result = chat(session_id, message)
+        return jsonify(result)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
+    except Exception as e:
+        return jsonify({'error': f'Chatbot failed: {str(e)}'}), 500
+
+
+@app.route('/api/chatbot/history/<session_id>', methods=['GET'])
+def chatbot_history(session_id):
+    """Get chat history for a session."""
+    from ai_chatbot import get_session_history
+    return jsonify(get_session_history(session_id))
+
+
+@app.route('/api/chatbot/sessions', methods=['GET'])
+def chatbot_sessions():
+    """List active chatbot sessions."""
+    from ai_chatbot import list_sessions
+    return jsonify({'sessions': list_sessions()})
+
+
+# ============== LLM MULTI-PROVIDER ==============
+
+@app.route('/api/llm/providers', methods=['GET'])
+def llm_providers():
+    """List available LLM providers."""
+    from llm_service import _available_providers, PROVIDERS
+    available = _available_providers()
+    return jsonify({
+        'providers': [
+            {'name': name, 'model': PROVIDERS[name]['default_model'],
+             'available': name in available}
+            for name in PROVIDERS
+        ],
+        'available_count': len(available),
+    })
+
+
+@app.route('/api/llm/citation-probe', methods=['POST'])
+def llm_citation_probe():
+    """
+    Multi-provider citation probe.
+
+    Request: { "keyword": "best CRM tools", "provider": "claude" }
+    """
+    from llm_service import citation_probe
+
+    data = request.get_json() or {}
+    keyword = (data.get('keyword') or '').strip()
+    provider = (data.get('provider') or 'claude').strip()
+
+    if not keyword:
+        return jsonify({'error': 'keyword is required'}), 400
+
+    try:
+        result = citation_probe(keyword, provider=provider)
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
     return send_from_directory('.', 'audit.html')
+
+@app.route('/geo-test')
+def serve_geo_test():
+    return send_from_directory('.', 'geo-test.html')
+
+@app.route('/dev1-dashboard')
+def serve_dev1_dashboard():
+    return send_from_directory('.', 'dev1-dashboard.html')
+
 
 @app.route('/<path:path>')
 def catch_all(path):
@@ -1979,4 +2647,6 @@ def catch_all(path):
         return send_from_directory('.', path)
     return send_from_directory('.', 'index.html')
 
-
+if __name__ == '__main__':
+    os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
+    app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
