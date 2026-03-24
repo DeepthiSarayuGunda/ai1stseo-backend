@@ -1914,7 +1914,18 @@ Be specific and actionable. Include actual code examples where helpful."""
         }), 500
 
 def call_llm(prompt, model='llama3.1:latest', timeout=120):
-    """Call LLM with fallback support"""
+    """Call LLM with fallback: Nova Lite (Bedrock) → Ollama homelab → Ollama fallback"""
+    # 1. Try Nova Lite via Bedrock (fast, cheap, always up)
+    try:
+        from bedrock_helper import invoke_llm
+        result = invoke_llm(prompt, max_tokens=2048)
+        if result:
+            return result
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Nova Lite failed, falling back to Ollama: {e}")
+
+    # 2. Fall back to Ollama endpoints (free)
     urls = [OLLAMA_URL, OLLAMA_FALLBACK_URL]
     for url in urls:
         try:
