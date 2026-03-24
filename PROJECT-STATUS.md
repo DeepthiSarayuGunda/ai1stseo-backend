@@ -34,8 +34,8 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-DIzHBG9t.js` | React dashboard JS bundle (Vite build output) |
-| `assets/index-BTJ8K1Zy.css` | React dashboard Tailwind CSS (Vite build output) |
+| `assets/index-Ch-1cERH.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-Cd6saFc2.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
@@ -150,6 +150,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | Added user avatar dropdown (My Account, Sign Out, Delete Account) and Tools dropdown (Home, Dashboard, SEO Audit, SEO Analysis, Content Brief, GEO Scanner) to React dashboard navbar. Click-outside-to-close, fade animation. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx`, `frontend/src/index.css` |
 | Mar 24, 2026 | Admin dashboard polish — key metrics now pull from localStorage audits (total audits, this week, avg score, unique sites). Added 7-day audit activity bar chart, score distribution cards (excellent/good/fair/poor), recent audit activity table. Platform health cards now ping services live with response time in ms. "Awaiting backend" sections for user management and traffic analytics clearly labeled with required endpoints. Deployed to S3, CloudFront invalidated. | `admin.html` |
 | Mar 24, 2026 | Replaced browser `prompt()` dialogs on all 6 tool cards with styled ScanModal component — dark glass backdrop, blur, tool-colored accent bar, fade-in animation, Escape/click-outside to close. Deployed to S3, CloudFront invalidated. | `frontend/src/components/ScanModal.tsx`, `frontend/src/App.tsx`, `frontend/src/index.css` |
 | Mar 24, 2026 | React + Vite migration complete — dashboard.html now served from React build. Live API call to App Runner `/api/analyze` from AnalyzeBar, site status uptime check, audit results save to localStorage in-place. Deployed to S3, CloudFront invalidated. Pushed to both repos. | `frontend/src/*`, `dashboard.html` |
