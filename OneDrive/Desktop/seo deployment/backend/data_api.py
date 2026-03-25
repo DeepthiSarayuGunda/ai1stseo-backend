@@ -384,3 +384,180 @@ def delete_social_post(post_id):
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== COMPETITORS & BENCHMARKS (Dev 3 — Troy) =====================
+
+@data_bp.route('/api/data/competitors', methods=['POST'])
+@require_auth
+def create_competitor():
+    """Add a competitor domain to track."""
+    d = request.get_json() or {}
+    domain = d.get('domain', '').strip().lower()
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'domain required'}), 400
+    try:
+        comp_id = insert_returning(
+            "INSERT INTO competitors (project_id, domain, label) VALUES (%s, %s, %s) RETURNING id",
+            (DEFAULT_PROJECT_ID, domain, d.get('label', '')),
+        )
+        return jsonify({'status': 'success', 'id': str(comp_id)}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/competitors', methods=['GET'])
+@require_auth
+def list_competitors():
+    """List all tracked competitor domains."""
+    try:
+        rows = query(
+            "SELECT c.id, c.domain, c.label, c.added_at, "
+            "(SELECT count(*) FROM benchmarks b WHERE b.competitor_id = c.id) as benchmark_count, "
+            "(SELECT b.seo_score FROM benchmarks b WHERE b.competitor_id = c.id ORDER BY b.measured_at DESC LIMIT 1) as latest_seo_score, "
+            "(SELECT b.ai_visibility_score FROM benchmarks b WHERE b.competitor_id = c.id ORDER BY b.measured_at DESC LIMIT 1) as latest_ai_score "
+            "FROM competitors c WHERE c.project_id = %s ORDER BY c.added_at DESC",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return jsonify({'status': 'success', 'competitors': [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/competitors/<comp_id>', methods=['DELETE'])
+@require_auth
+def delete_competitor(comp_id):
+    """Remove a competitor (cascades to benchmarks)."""
+    try:
+        deleted = execute(
+            "DELETE FROM competitors WHERE id = %s AND project_id = %s",
+            (comp_id, DEFAULT_PROJECT_ID),
+        )
+        if deleted == 0:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/competitors/<comp_id>/benchmarks', methods=['POST'])
+@require_auth
+def create_benchmark(comp_id):
+    """Save a benchmark snapshot for a competitor."""
+    d = request.get_json() or {}
+    try:
+        # Verify competitor exists and belongs to project
+        comp = query_one(
+            "SELECT id FROM competitors WHERE id = %s AND project_id = %s",
+            (comp_id, DEFAULT_PROJECT_ID),
+        )
+        if not comp:
+            return jsonify({'status': 'error', 'message': 'Competitor not found'}), 404
+        keyword_overlap = d.get('keyword_overlap')
+        if keyword_overlap and isinstance(keyword_overlap, (dict, list)):
+            keyword_overlap = json.dumps(keyword_overlap)
+        bench_id = insert_returning(
+            "INSERT INTO benchmarks (competitor_id, seo_score, ai_visibility_score, keyword_overlap, domain_authority) "
+            "VALUES (%s, %s, %s, %s, %s) RETURNING id",
+            (comp_id, d.get('seo_score'), d.get('ai_visibility_score'),
+             keyword_overlap, d.get('domain_authority')),
+        )
+        return jsonify({'status': 'success', 'id': str(bench_id)}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/competitors/<comp_id>/benchmarks', methods=['GET'])
+@require_auth
+def list_benchmarks(comp_id):
+    """Get benchmark history for a competitor. ?limit="""
+    limit = request.args.get('limit', 30, type=int)
+    try:
+        rows = query(
+            "SELECT * FROM benchmarks WHERE competitor_id = %s ORDER BY measured_at DESC LIMIT %s",
+            (comp_id, limit),
+        )
+        return jsonify({'status': 'success', 'benchmarks': [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/benchmarks/compare', methods=['GET'])
+@require_auth
+def compare_benchmarks():
+    """Compare latest benchmarks across all competitors. Returns one row per competitor."""
+    try:
+        rows = query(
+            "SELECT DISTINCT ON (c.id) c.id, c.domain, c.label, "
+            "b.seo_score, b.ai_visibility_score, b.domain_authority, b.measured_at "
+            "FROM competitors c "
+            "LEFT JOIN benchmarks b ON b.competitor_id = c.id "
+            "WHERE c.project_id = %s "
+            "ORDER BY c.id, b.measured_at DESC",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return jsonify({'status': 'success', 'comparison': [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== REPORTS (Shared) =====================
+
+@data_bp.route('/api/data/reports', methods=['POST'])
+@require_auth
+def create_report():
+    """Save a generated report (audit, brief, monitoring, competitor)."""
+    d = request.get_json() or {}
+    report_type = d.get('report_type', '').strip()
+    data_payload = d.get('data')
+    if not report_type or not data_payload:
+        return jsonify({'status': 'error', 'message': 'report_type and data required'}), 400
+    try:
+        if isinstance(data_payload, (dict, list)):
+            data_payload = json.dumps(data_payload)
+        report_id = insert_returning(
+            "INSERT INTO reports (project_id, report_type, title, data, format, created_by) "
+            "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+            (DEFAULT_PROJECT_ID, report_type, d.get('title', ''),
+             data_payload, d.get('format', 'json'), _get_user_id()),
+        )
+        return jsonify({'status': 'success', 'id': str(report_id)}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/reports', methods=['GET'])
+@require_auth
+def list_reports():
+    """List reports. ?report_type=&limit=&offset="""
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
+    report_type = request.args.get('report_type', '')
+    try:
+        params = [DEFAULT_PROJECT_ID]
+        sql = "SELECT id, report_type, title, format, created_at FROM reports WHERE project_id = %s"
+        if report_type:
+            sql += " AND report_type = %s"
+            params.append(report_type)
+        sql += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+        rows = query(sql, tuple(params))
+        return jsonify({'status': 'success', 'reports': [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@data_bp.route('/api/data/reports/<report_id>', methods=['GET'])
+@require_auth
+def get_report(report_id):
+    """Get a single report with full data."""
+    try:
+        report = query_one(
+            "SELECT * FROM reports WHERE id = %s AND project_id = %s",
+            (report_id, DEFAULT_PROJECT_ID),
+        )
+        if not report:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+        return jsonify({'status': 'success', 'report': dict(report)})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
