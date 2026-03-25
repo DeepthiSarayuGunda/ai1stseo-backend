@@ -1,6 +1,6 @@
 # AI1STSEO Project Status
 
-> **Last Updated:** March 24, 2026
+> **Last Updated:** March 25, 2026
 > **Updated By:** Dev 5 (Frontend & UX) — Amira
 > **Purpose:** This file is the single source of truth for project context. Read this FIRST before making any changes.
 
@@ -171,6 +171,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 25, 2026 | Restyled admin dashboard to match user dashboard theme — replaced Troy's blue gradient background with `#0a0a0a` dark / `#f4f6f9` light CSS variables, matching card styles, borders, and hover effects. Added dark/light mode toggle synced with user dashboard via `ai1stseo_theme` localStorage. Green-to-cyan active tab gradient. Deployed to S3, CloudFront invalidated. | `admin.html` (S3) |
 | Mar 24, 2026 | Added Troy's Website Monitoring tool card (`monitor.ai1stseo.com`) to dashboard "SEO & Content Tools" section — purple gradient, opens in new tab. Also added to Tools dropdown in navbar. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Deployed Troy's admin.html to S3 — replaces placeholder admin dashboard with his fully wired version (6 tabs: Overview, Users, Usage, AI Costs, Errors, Health). Replaced frontend email allowlist with async `checkAdminRole()` that calls Troy's `GET /api/admin/me` endpoint, caches result in localStorage. Navbar admin link now shows based on server-side role. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` (S3) |
 | Mar 24, 2026 | Admin access control — added frontend email allowlist (`ADMIN_EMAILS`) in `auth.ts` and `admin.html`. Navbar only shows ⚙️ Admin Dashboard link for allowlisted emails. `admin.html` redirects non-admins to user dashboard on page load. Currently only `amira.robleh@gmail.com` in list — team can add their emails. Temporary solution until Troy adds role-based auth. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` |
