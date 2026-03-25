@@ -34,7 +34,7 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-D6hK6jbo.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-DLVYPnfu.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
 | `analyze.html` | SEO analyzer input page |
@@ -157,6 +157,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | Admin access control — added frontend email allowlist (`ADMIN_EMAILS`) in `auth.ts` and `admin.html`. Navbar only shows ⚙️ Admin Dashboard link for allowlisted emails. `admin.html` redirects non-admins to user dashboard on page load. Currently only `amirarobleh@gmail.com` in list — team can add their emails. Temporary solution until Troy adds role-based auth. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` |
 | Mar 24, 2026 | Fixed light mode styling across all React dashboard components — root cause was Tailwind class ordering where `dark:value light-value` pattern caused last unprefixed class to always win. Fixed in App.tsx, ToolCard, StatWidget, CategoryGrid, RecentAudits, AnalyzeBar, ScoreRing, Navbar, ScanModal. Light mode now shows proper white backgrounds, gray borders, dark text. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/*.tsx` |
 | Mar 24, 2026 | Cleaned up navbar dropdowns — removed grayed-out "Content Brief" and "GEO Scanner" from Tools (users shouldn't see unbuilt features), removed non-functional "Delete Account". Added ⚙️ Admin Dashboard link to user dropdown for easy team access. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Redesigned `analyze.html` — updated from 180/9 to 236 checks across 10 categories (added Citation Gap). New design matches dashboard theme with nav bar, colored category chips with live check count updates, green gradient button, light/dark mode. Deployed to S3, CloudFront invalidated. | `analyze.html` |
