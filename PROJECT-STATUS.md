@@ -107,6 +107,17 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Light mode now shows: white card backgrounds, gray-200 borders, gray-900 text, gray-50 inputs, gray-200 progress bars
 - Deployed to S3, CloudFront invalidated
 
+### ✅ Dev 3 — Admin Dashboard Backend (Done — Troy, Mar 24)
+- 9 admin API endpoints on `api.ai1stseo.com`, all behind `@require_admin` decorator
+- Endpoints: `/api/admin/me`, `/api/admin/overview`, `/api/admin/users`, `/api/admin/usage`, `/api/admin/ai-costs`, `/api/admin/metrics`, `/api/admin/errors`, `/api/admin/health`, `PUT /api/admin/users/<id>/role`
+- 3 new RDS tables: `admin_metrics`, `ai_usage_log`, `api_request_log` (DDL in `backend/admin_tables.sql`)
+- AI usage tracking: both `ai_inference.py` and `openclaw-site-monitor/ai_inference.py` log every AI call (provider, model, tokens, cost, latency)
+- Daily aggregation Lambda via EventBridge at 02:00 UTC (`backend/admin_aggregation.py`)
+- Troy's working `admin.html` with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) — wired to all endpoints
+- Role-based auth via `GET /api/admin/me` (returns `role: 'admin'` or `role: 'member'`)
+- Files in repo under `OneDrive/Desktop/seo deployment/` (Troy's local path): `AMIRA_ADMIN_HANDOFF.md`, `backend/admin_api.py`, `backend/admin_tables.sql`, `backend/admin_aggregation.py`, `admin.html`
+- ⚠️ Admin tables DDL needs to be run on RDS once before endpoints return data
+
 ### ✅ Dev 2 — Content & NLP Integration (Done — Samar, Mar 23-24)
 - New `/api/content-brief` endpoint — generates structured briefs from SERP scraping + LLM
 - 10th SEO category: `citationgap` — 20 checks for citation gap analysis (total now 236 checks across 10 categories)
@@ -144,7 +155,9 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
 
 ### 📋 Upcoming
-1. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
+1. Wire up admin dashboard to Troy's live API endpoints — either use Troy's `admin.html` directly or integrate his API calls into existing admin page
+2. Replace frontend email allowlist with Troy's `GET /api/admin/me` role-based auth check
+3. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
 2. White-label reporting (branded PDF + live reports)
 3. Custom dashboard builder (drag-and-drop widgets)
 4. Onboarding flow / first-run experience
