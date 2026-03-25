@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI 1st SEO Site Monitor - Serverless (Lambda + API Gateway)
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        DB_HOST: ai1stseo-db.ca5mm2skodf2.us-east-1.rds.amazonaws.com
+        DB_NAME: ai1stseo
+        DB_USER: ai1stseo_admin
+        DB_PORT: "5432"
+        COGNITO_USER_POOL_ID: us-east-1_DVvth47zH
+        COGNITO_CLIENT_ID: 7scsae79o2g9idc92eputcrvrg
+        DEFAULT_PROJECT_ID: 24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2
+        AWS_REGION_NAME: us-east-1
+        # DB_PASSWORD and SES creds should come from Secrets Manager or SSM
+
+Resources:
+  # Main API Lambda (Flask + Mangum)
+  SiteMonitorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: web_ui.handler
+      CodeUri: .
+      Description: Site Monitor API - Flask wrapped with Mangum
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:ai1stseo/*"
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0859c7cfcb529b8ff  # RDS security group
+        SubnetIds:
+          - !Ref PrivateSubnet1  # Must be in same VPC as RDS
+      Events:
+        ApiProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref SiteMonitorApi
+        ApiRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref SiteMonitorApi
+
+  # Scheduled daily reports (EventBridge)
+  DailyReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: web_ui.scheduled_report_handler
+      CodeUri: .
+      Description: Daily report sender triggered by EventBridge
+      Timeout: 300
+      MemorySize: 1024
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0859c7cfcb529b8ff
+        SubnetIds:
+          - !Ref PrivateSubnet1
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 8 * * ? *)  # 8 AM UTC daily
+            Description: Send daily monitoring reports
+
+  # API Gateway with Cognito Authorizer
+  SiteMonitorApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'https://monitor.ai1stseo.com,https://ai1stseo.com'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/us-east-1_DVvth47zH"
+        # Public routes (no auth required)
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Principal: "*"
+              Action: execute-api:Invoke
+              Resource: "execute-api:/*"
+
+Parameters:
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet in same VPC as RDS
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${SiteMonitorApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  MonitorFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt SiteMonitorFunction.Arn

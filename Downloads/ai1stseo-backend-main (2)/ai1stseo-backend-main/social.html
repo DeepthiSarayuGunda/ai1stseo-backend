@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Media Scheduler — AI1stSEO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;padding:24px;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:900px;margin:0 auto}
+h1{font-size:1.5rem;margin-bottom:4px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:24px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:24px}
+.card h2{font-size:1.1rem;color:#58a6ff;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #21262d}
+label{display:block;font-size:.8rem;color:#8b949e;margin:12px 0 4px;font-weight:600}
+textarea{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.9rem;min-height:100px;resize:vertical;font-family:inherit}
+textarea:focus,input:focus{outline:none;border-color:#58a6ff}
+input[type="date"],input[type="time"]{padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.85rem;width:100%}
+.platforms{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.platforms label{display:flex;align-items:center;gap:6px;font-size:.85rem;color:#e1e4e8;margin:0;cursor:pointer;padding:8px 14px;background:#0d1117;border:1px solid #30363d;border-radius:8px;transition:all .2s}
+.platforms label:hover{border-color:#58a6ff}
+.platforms input[type="checkbox"]{accent-color:#58a6ff;width:16px;height:16px}
+.platforms input[type="checkbox"]:checked + span{color:#58a6ff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+.btn-submit{margin-top:20px;padding:12px 24px;border:none;border-radius:8px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;width:100%;transition:opacity .2s}
+.btn-submit:hover{opacity:.9}
+.btn-submit:disabled{opacity:.5;cursor:wait}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Social Media Scheduler</h1>
+  <p class="sub">Schedule posts across platforms — <a href="/">← Back to Dashboard</a></p>
+
+  <!-- Flash messages -->
+  <div id="flash"></div>
+
+  <!-- Scheduler Form -->
+  <div class="card">
+    <h2>📝 Schedule a New Post</h2>
+    <form id="scheduleForm" method="POST" action="/social">
+      <label for="content">Post Content</label>
+      <textarea id="content" name="content" placeholder="Write your social media post here..." required></textarea>
+
+      <label>Platforms</label>
+      <div class="platforms">
+        <label><input type="checkbox" name="platforms" value="LinkedIn"><span>LinkedIn</span></label>
+        <label><input type="checkbox" name="platforms" value="Facebook"><span>Facebook</span></label>
+        <label><input type="checkbox" name="platforms" value="Instagram"><span>Instagram</span></label>
+        <label><input type="checkbox" name="platforms" value="X (Twitter)"><span>X (Twitter)</span></label>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="sched_date">Date</label>
+          <input type="date" id="sched_date" name="scheduled_date" required>
+        </div>
+        <div>
+          <label for="sched_time">Time</label>
+          <input type="time" id="sched_time" name="scheduled_time" required>
+        </div>
+      </div>
+
+      <label for="image">Image (optional)</label>
+      <div class="upload-area">
+        <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png">
+        <div id="image-preview" class="image-preview"></div>
+      </div>
+
+      <button type="submit" class="btn-submit">Schedule Post</button>
+    </form>
+  </div>
+
+  <!-- Upcoming Posts -->
+  <div class="card">
+    <h2>📅 Upcoming Scheduled Posts</h2>
+    <div id="posts-list"></div>
+  </div>
+</div>
+
+<style>
+.flash-msg{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.85rem;font-weight:500}
+.flash-success{background:rgba(35,134,54,.15);border:1px solid #238636;color:#3fb950}
+.flash-error{background:rgba(248,81,73,.1);border:1px solid #f85149;color:#f85149}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;color:#8b949e;font-weight:600;padding:10px 12px;border-bottom:1px solid #30363d;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid #21262d;vertical-align:top}
+tr:hover{background:rgba(88,166,255,.04)}
+.platform-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin:1px 2px}
+.tag-linkedin{background:#0a66c2;color:#fff}
+.tag-facebook{background:#1877f2;color:#fff}
+.tag-instagram{background:#e4405f;color:#fff}
+.tag-x{background:#333;color:#fff}
+.btn-delete{padding:4px 10px;border:1px solid #f85149;background:transparent;color:#f85149;border-radius:5px;font-size:.75rem;cursor:pointer;transition:all .2s}
+.btn-delete:hover{background:#f85149;color:#fff}
+.empty-state{text-align:center;padding:32px;color:#8b949e;font-size:.9rem}
+.content-preview{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-area{margin-top:4px}
+.upload-area input[type="file"]{padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#8b949e;font-size:.82rem;width:100%;cursor:pointer}
+.upload-area input[type="file"]::file-selector-button{padding:6px 14px;border:none;border-radius:4px;background:#238636;color:#fff;font-size:.78rem;font-weight:600;cursor:pointer;margin-right:10px}
+.image-preview{margin-top:8px}
+.image-preview img{max-height:80px;border-radius:6px;border:1px solid #30363d}
+.thumb{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #30363d}
+.no-img{color:#484f58;font-size:.75rem}
+</style>
+
+<script>
+// Set default date/time to now
+const now = new Date();
+now.setMinutes(now.getMinutes() + 30);
+document.getElementById('sched_date').value = now.toISOString().split('T')[0];
+document.getElementById('sched_time').value = now.toTimeString().slice(0,5);
+
+// Image preview
+document.getElementById('image').addEventListener('change', function() {
+  const preview = document.getElementById('image-preview');
+  if (this.files && this.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
+    reader.readAsDataURL(this.files[0]);
+  } else {
+    preview.innerHTML = '';
+  }
+});
+
+// Load posts on page load
+loadPosts();
+
+// Form submission via FormData (supports file upload)
+document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Scheduling...';
+
+  const platforms = [...form.querySelectorAll('input[name="platforms"]:checked')].map(c => c.value);
+  if (!platforms.length) {
+    showFlash('Please select at least one platform.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Schedule Post';
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('content', form.content.value.trim());
+  fd.append('scheduled_date', form.scheduled_date.value);
+  fd.append('scheduled_time', form.scheduled_time.value);
+  platforms.forEach(p => fd.append('platforms', p));
+  const imageInput = form.querySelector('input[name="image"]');
+  if (imageInput.files.length) fd.append('image', imageInput.files[0]);
+
+  try {
+    const resp = await fetch('/api/social/posts', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (resp.ok) {
+      showFlash('Post scheduled successfully!', 'success');
+      form.reset();
+      document.getElementById('image-preview').innerHTML = '';
+      const n = new Date(); n.setMinutes(n.getMinutes() + 30);
+      document.getElementById('sched_date').value = n.toISOString().split('T')[0];
+      document.getElementById('sched_time').value = n.toTimeString().slice(0,5);
+      loadPosts();
+    } else {
+      showFlash(data.error || 'Failed to schedule post.', 'error');
+    }
+  } catch (err) {
+    showFlash('Network error. Please try again.', 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Schedule Post';
+});
+
+async function loadPosts() {
+  try {
+    const resp = await fetch('/api/social/posts');
+    const data = await resp.json();
+    const container = document.getElementById('posts-list');
+
+    if (!data.posts || data.posts.length === 0) {
+      container.innerHTML = '<div class="empty-state">No scheduled posts yet. Create your first one above.</div>';
+      return;
+    }
+
+    let html = '<table><thead><tr><th>Image</th><th>Content</th><th>Platforms</th><th>Scheduled</th><th>Created</th><th></th></tr></thead><tbody>';
+    for (const p of data.posts) {
+      const platforms = p.platforms.split(',').map(pl => {
+        const key = pl.trim().toLowerCase().replace(/[^a-z]/g,'');
+        let cls = 'tag-x';
+        if (key.includes('linkedin')) cls = 'tag-linkedin';
+        else if (key.includes('facebook')) cls = 'tag-facebook';
+        else if (key.includes('instagram')) cls = 'tag-instagram';
+        return `<span class="platform-tag ${cls}">${pl.trim()}</span>`;
+      }).join(' ');
+
+      const imgCell = p.image_path
+        ? `<img src="${p.image_path}" alt="Post image" class="thumb">`
+        : '<span class="no-img">No Image</span>';
+
+      const sched = new Date(p.scheduled_datetime);
+      const schedStr = sched.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' ' + sched.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+      const created = new Date(p.created_at);
+      const createdStr = created.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' ' + created.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+
+      html += `<tr>
+        <td>${imgCell}</td>
+        <td class="content-preview" title="${p.content.replace(/"/g,'&quot;')}">${escHtml(p.content)}</td>
+        <td>${platforms}</td>
+        <td>${schedStr}</td>
+        <td>${createdStr}</td>
+        <td><button class="btn-delete" onclick="deletePost(${p.id})">Delete</button></td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (err) {
+    document.getElementById('posts-list').innerHTML = '<div class="empty-state">Failed to load posts.</div>';
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this scheduled post?')) return;
+  try {
+    const resp = await fetch(`/api/social/posts/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      showFlash('Post deleted.', 'success');
+      loadPosts();
+    } else {
+      showFlash('Failed to delete post.', 'error');
+    }
+  } catch (err) {
+    showFlash('Network error.', 'error');
+  }
+}
+
+function showFlash(msg, type) {
+  const el = document.getElementById('flash');
+  el.innerHTML = `<div class="flash-msg flash-${type}">${escHtml(msg)}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

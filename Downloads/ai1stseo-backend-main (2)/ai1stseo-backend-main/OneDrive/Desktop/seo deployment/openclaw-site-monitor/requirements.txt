@@ -1,0 +1,20 @@
+# Core
+flask>=3.0.0
+flask-cors>=4.0.0
+mangum>=0.17.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+python-dotenv>=1.0.0
+
+# Database (RDS PostgreSQL)
+psycopg2-binary>=2.9.9
+
+# Auth (Cognito JWT validation)
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# AWS SDK (SES email, Bedrock, etc.)
+boto3>=1.34.0
+
+# Scheduling (EventBridge replaces this on Lambda, kept for local dev)
+schedule>=1.2.0

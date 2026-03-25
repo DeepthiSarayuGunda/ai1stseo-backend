@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI First SEO - Site Monitor | Real-Time SEO, Uptime & AI Citation Tracking</title>
+<meta name="description" content="Free AI-powered site monitoring dashboard. Track SEO scores, uptime, AI citation visibility, content changes, and competitor rankings in real time. Get daily reports via email, Slack, WhatsApp, and more.">
+<meta name="keywords" content="site monitor, SEO monitoring tool, uptime checker, AI citation tracker, AEO monitoring, website health dashboard, SEO audit tool, AI visibility score, content change detection, competitor SEO tracking">
+<meta property="og:title" content="AI First SEO - Site Monitor Dashboard">
+<meta property="og:description" content="Real-time SEO, uptime, and AI citation monitoring. Free daily reports delivered to your inbox, Slack, or WhatsApp.">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://monitor.ai1stseo.com">
+<meta name="author" content="AI 1st SEO">
+<meta name="date" content="2026-03-18">
+<meta name="last-modified" content="2026-03-18">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI 1st SEO Site Monitor",
+  "url": "https://monitor.ai1stseo.com",
+  "description": "Free AI-powered site monitoring dashboard that tracks SEO scores, uptime, AI citation visibility, content changes, and competitor rankings in real time.",
+  "applicationCategory": "SEO Tool",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": "AI 1st SEO", "url": "https://ai1stseo.com" },
+  "datePublished": "2026-01-15",
+  "dateModified": "2026-03-18"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is AI citation tracking and why does it matter for SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI citation tracking monitors how often AI engines like ChatGPT, Perplexity, and Google AI Overviews reference your website. As AI-generated answers replace traditional search results, being cited by AI becomes as important as ranking on page one of Google."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the Site Monitor check uptime and SEO health?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Site Monitor performs real-time HTTP checks to measure response time, status codes, and availability. For SEO health, it analyzes over 60 on-page factors including title tags, meta descriptions, heading structure, schema markup, mobile readiness, and AI-extractable content patterns."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between traditional SEO monitoring and AEO monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Traditional SEO monitoring focuses on Google ranking factors like keywords, backlinks, and page speed. AEO (Answer Engine Optimization) monitoring evaluates how well your content is structured for AI engines to extract and cite, including factual density, definition patterns, and Q&A formatting."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I receive automated monitoring reports via email or Slack?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Members can subscribe to daily or weekly monitoring reports delivered via email, Slack, WhatsApp, Telegram, or Discord. Reports include SEO score changes, uptime incidents, content modifications, and AI citation visibility trends."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "AI-Powered Site Monitoring: SEO, Uptime, and AI Citation Tracking",
+  "author": {
+    "@type": "Organization",
+    "name": "AI 1st SEO",
+    "url": "https://ai1stseo.com",
+    "sameAs": [
+      "https://github.com/DeepthiSarayuGunda/ai1stseo-backend",
+      "https://monitor.ai1stseo.com",
+      "https://seoaudit.ai1stseo.com"
+    ]
+  },
+  "datePublished": "2026-01-15",
+  "dateModified": "2026-03-18",
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI 1st SEO",
+    "url": "https://ai1stseo.com",
+    "sameAs": [
+      "https://github.com/DeepthiSarayuGunda/ai1stseo-backend",
+      "https://monitor.ai1stseo.com",
+      "https://seoaudit.ai1stseo.com"
+    ]
+  },
+  "description": "A comprehensive guide to monitoring your website's SEO health, uptime, and AI citation visibility using the AI 1st SEO Site Monitor dashboard."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".speakable-intro", ".speakable-faq"]
+  },
+  "name": "AI 1st SEO Site Monitor",
+  "url": "https://monitor.ai1stseo.com"
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--mg:#ff00ff;--cy:#00ffff;--or:#ff6600;--dk:#0a0a1a;--pn:#12122a;--txt:#fff;--txt-soft:rgba(255,255,255,.85);--txt-dim:rgba(255,255,255,.7);--txt-faint:rgba(255,255,255,.5);--input-bg:rgba(0,0,0,.4);--res-bg:rgba(0,0,0,.5);--res-border:rgba(0,255,255,.2);--overlay-bg:rgba(0,0,0,.7);--scanline:rgba(0,255,255,.03)}
+body{background:var(--dk);color:var(--txt);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px);pointer-events:none;z-index:9999}
+.grid-bg{position:fixed;bottom:0;left:0;width:100%;height:40%;background:linear-gradient(transparent 65%,rgba(255,0,255,.1));perspective:300px;z-index:0}
+.grid-bg::before{content:'';position:absolute;width:200%;height:200%;left:-50%;bottom:0;background:repeating-linear-gradient(90deg,rgba(255,0,255,.15) 0,transparent 1px,transparent 60px),repeating-linear-gradient(0deg,rgba(0,255,255,.1) 0,transparent 1px,transparent 60px);transform:rotateX(60deg);transform-origin:bottom}
+/* Light mode overrides */
+body.light-mode{--dk:#f0f0f5;--pn:#ffffff;--mg:#9b00cc;--cy:#0077aa;--or:#cc5500;--txt:#1a1a2e;--txt-soft:#2a2a3e;--txt-dim:#444;--txt-faint:#777;--input-bg:rgba(0,0,0,.05);--res-bg:#f8f8fc;--res-border:rgba(0,119,170,.25);--overlay-bg:rgba(255,255,255,.85);--scanline:transparent}
+body.light-mode .grid-bg{display:none}
+body.light-mode .pnl{box-shadow:0 1px 4px rgba(0,0,0,.08);border-color:rgba(155,0,204,.15)}
+body.light-mode .hdr h1{background:linear-gradient(90deg,var(--mg),var(--cy),var(--or))}
+body.light-mode .btn{border-color:var(--mg);color:var(--mg);background:rgba(155,0,204,.06)}
+body.light-mode .btn:hover{background:rgba(155,0,204,.15)}
+body.light-mode .btn.cy{border-color:var(--cy);color:var(--cy);background:rgba(0,119,170,.06)}
+body.light-mode .btn.cy:hover{background:rgba(0,119,170,.15)}
+body.light-mode .btn.or{border-color:var(--or);color:var(--or);background:rgba(204,85,0,.06)}
+body.light-mode .btn.or:hover{background:rgba(204,85,0,.15)}
+body.light-mode .tbtn{border-color:rgba(155,0,204,.2);background:rgba(155,0,204,.03);color:var(--txt)}
+body.light-mode .tbtn:hover{background:rgba(155,0,204,.1)}
+body.light-mode .ubar input{background:var(--input-bg);border-color:rgba(0,119,170,.3);color:var(--cy)}
+body.light-mode .ubar input::placeholder{color:rgba(0,119,170,.5)}
+body.light-mode .res{background:var(--res-bg);border-color:var(--res-border);color:#1a1a2e}
+body.light-mode .modal{background:#fff;border-color:var(--mg)}
+body.light-mode .modal input{background:var(--input-bg);border-color:rgba(0,119,170,.3);color:var(--txt)}
+body.light-mode .modal-overlay{background:var(--overlay-bg)}
+body.light-mode .ch-btn{border-color:rgba(155,0,204,.2);background:rgba(155,0,204,.03);color:var(--txt-dim)}
+body.light-mode .ch-btn.sel{background:rgba(155,0,204,.15);border-color:var(--mg);color:var(--txt)}
+body.light-mode .freq-btn{border-color:rgba(0,119,170,.2);background:rgba(0,119,170,.03);color:var(--txt-dim)}
+body.light-mode .freq-btn.sel{background:rgba(0,119,170,.15);border-color:var(--cy);color:var(--txt)}
+body.light-mode .tab{border-color:rgba(155,0,204,.2);background:rgba(155,0,204,.03);color:var(--txt-dim)}
+body.light-mode .tab.active{background:rgba(155,0,204,.15);border-color:var(--mg);color:var(--txt)}
+body.light-mode .chat-log{background:var(--res-bg);border-color:var(--res-border)}
+body.light-mode .chat-msg.agent{color:var(--cy)}
+body.light-mode .chat-msg.user{color:var(--or)}
+body.light-mode .chat-input input{background:var(--input-bg);border-color:rgba(0,119,170,.3);color:var(--txt)}
+body.light-mode .lock-overlay{background:rgba(240,240,245,.75)}
+body.light-mode .lock-title{color:var(--mg)}
+body.light-mode .lock-sub{color:var(--txt-dim)}
+body.light-mode .lock-overlay .lock-btn{background:linear-gradient(135deg,rgba(0,119,170,.1),rgba(155,0,204,.1));color:var(--txt);border-color:var(--cy)}
+body.light-mode a{color:var(--cy)}
+body.light-mode .res::-webkit-scrollbar-thumb{background:var(--mg)}
+body.light-mode .chat-log::-webkit-scrollbar-thumb{background:var(--mg)}
+body.light-mode p,body.light-mode li,body.light-mode dd,body.light-mode blockquote,body.light-mode figcaption,body.light-mode td{color:var(--txt-soft)}
+body.light-mode .lock-sub,body.light-mode .pw-req.unmet{color:var(--txt-dim)}
+body.light-mode .sub-panel .lock-overlay .lock-btn{color:var(--txt)}
+/* Theme toggle button */
+.theme-toggle{background:none;border:1px solid var(--cy);color:var(--cy);cursor:pointer;font-size:1.1em;padding:4px 9px;line-height:1;transition:all .2s;border-radius:2px}
+.theme-toggle:hover{background:rgba(0,255,255,.15);box-shadow:0 0 8px rgba(0,255,255,.3)}
+body.light-mode .theme-toggle{border-color:var(--or);color:var(--or)}
+body.light-mode .theme-toggle:hover{background:rgba(204,85,0,.1);box-shadow:0 0 8px rgba(204,85,0,.2)}
+.hdr{text-align:center;padding:20px 20px 10px;position:relative;z-index:2}
+.hdr h1{font-family:'Orbitron',sans-serif;font-size:2.2em;background:linear-gradient(90deg,var(--mg),var(--cy),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px}
+.hdr p{color:var(--cy);font-size:.85em;margin-top:4px;opacity:.8}
+.hdr h1{background-clip:text}
+.auth-bar{position:absolute;top:20px;right:20px;display:flex;gap:10px;align-items:center;z-index:10}
+.auth-bar .uname{color:var(--cy);font-size:.85em}
+.btn{font-family:'Share Tech Mono',monospace;padding:8px 16px;border:1px solid var(--mg);background:rgba(255,0,255,.1);color:var(--mg);cursor:pointer;font-size:.8em;transition:all .2s;text-transform:uppercase;letter-spacing:1px}
+.btn:hover{background:rgba(255,0,255,.3);box-shadow:0 0 10px rgba(255,0,255,.5)}
+.btn.cy{border-color:var(--cy);color:var(--cy);background:rgba(0,255,255,.1)}
+.btn.cy:hover{background:rgba(0,255,255,.3);box-shadow:0 0 10px rgba(0,255,255,.5)}
+.btn.or{border-color:var(--or);color:var(--or);background:rgba(255,102,0,.1)}
+.btn.or:hover{background:rgba(255,102,0,.3);box-shadow:0 0 10px rgba(255,102,0,.5)}
+.btn.active{background:rgba(255,0,255,.4);box-shadow:0 0 10px rgba(255,0,255,.5)}
+.btn.cy.active{background:rgba(0,255,255,.4);box-shadow:0 0 10px rgba(0,255,255,.5)}
+.btn.sm{padding:5px 10px;font-size:.7em}
+.main{max-width:1100px;margin:0 auto;padding:10px 20px 30px;position:relative;z-index:2}
+.pnl{background:var(--pn);border:1px solid rgba(255,0,255,.3);padding:16px;margin-bottom:14px;position:relative}
+.pnl::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mg),var(--cy))}
+.pnl h2{font-family:'Orbitron',sans-serif;font-size:1em;color:var(--mg);margin-bottom:10px;letter-spacing:2px}
+.pnl h2.cyt{color:var(--cy)}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.tbtn{font-family:'Share Tech Mono',monospace;padding:12px;border:1px solid rgba(255,0,255,.4);background:rgba(255,0,255,.05);color:#fff;cursor:pointer;text-align:center;transition:all .2s;font-size:.8em}
+.tbtn:hover{background:rgba(255,0,255,.2);box-shadow:0 0 10px rgba(255,0,255,.5);transform:translateY(-1px)}
+.tbtn .ico{font-size:1.4em;display:block;margin-bottom:4px}
+.ubar{display:flex;gap:8px;margin-bottom:10px}
+.ubar input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.85em;outline:none}
+.ubar input:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,255,255,.3)}
+.ubar input::placeholder{color:rgba(0,255,255,.4)}
+.res{background:rgba(0,0,0,.5);border:1px solid rgba(0,255,255,.2);padding:12px;min-height:120px;max-height:300px;overflow-y:auto;font-size:.8em;line-height:1.5;white-space:pre-wrap;color:rgba(0,255,255,.9)}
+.res::-webkit-scrollbar{width:6px}
+.res::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+.res::-webkit-scrollbar-thumb{background:var(--mg)}
+</style>
+<style>
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--pn);border:1px solid var(--mg);padding:24px;width:360px;max-width:90vw;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mg),var(--cy))}
+.modal h2{font-family:'Orbitron',sans-serif;font-size:1em;color:var(--mg);margin-bottom:16px;text-align:center}
+.modal input{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:10px;font-family:'Share Tech Mono',monospace;font-size:.85em;margin-bottom:10px;outline:none}
+.modal input:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,255,255,.3)}
+.modal .mbtn{width:100%;padding:10px;margin-top:4px}
+.modal .toggle{color:rgba(0,255,255,.6);font-size:.75em;text-align:center;margin-top:10px;cursor:pointer}
+.modal .toggle:hover{color:var(--cy)}
+.modal .close-x{position:absolute;top:8px;right:12px;color:var(--mg);cursor:pointer;font-size:1.2em}
+.modal .err{color:#ff4444;font-size:.75em;margin-bottom:8px;min-height:1em}
+/* Subscription panel */
+.sub-panel{position:relative;display:block}
+.sub-panel .panel-content{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .3s}
+.sub-panel.show .panel-content{filter:none;pointer-events:auto;user-select:auto}
+.sub-panel .lock-overlay{position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,5,30,.55);backdrop-filter:blur(2px);transition:opacity .3s}
+.sub-panel.show .lock-overlay{opacity:0;pointer-events:none}
+.lock-overlay .lock-icon{font-size:2.5em;margin-bottom:10px}
+.lock-overlay .lock-title{font-family:'Orbitron',sans-serif;font-size:1.1em;color:var(--mg);margin-bottom:6px;letter-spacing:2px}
+.lock-overlay .lock-sub{color:rgba(255,255,255,.7);font-size:.8em;margin-bottom:14px;text-align:center;max-width:300px}
+.lock-overlay .lock-btn{font-family:'Share Tech Mono',monospace;padding:10px 28px;border:1px solid var(--cy);background:linear-gradient(135deg,rgba(0,255,255,.15),rgba(255,0,255,.15));color:#fff;cursor:pointer;font-size:.85em;text-transform:uppercase;letter-spacing:2px;transition:all .2s}
+.lock-overlay .lock-btn:hover{background:linear-gradient(135deg,rgba(0,255,255,.3),rgba(255,0,255,.3));box-shadow:0 0 20px rgba(0,255,255,.3)}
+/* Password requirements */
+.pw-reqs{margin-top:6px;display:none}
+.pw-reqs.visible{display:block}
+.pw-req{font-size:.7em;padding:2px 0;display:flex;align-items:center;gap:6px;transition:color .2s}
+.pw-req .ico{width:14px;text-align:center}
+.pw-req.met{color:#0f0}
+.pw-req.unmet{color:rgba(255,255,255,.4)}
+.ch-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.ch-btn{padding:10px 4px;border:1px solid rgba(255,0,255,.3);background:rgba(255,0,255,.05);color:rgba(255,255,255,.7);cursor:pointer;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7em;transition:all .2s}
+.ch-btn:hover{background:rgba(255,0,255,.15)}
+.ch-btn.sel{background:rgba(255,0,255,.35);border-color:var(--mg);color:#fff;box-shadow:0 0 8px rgba(255,0,255,.4)}
+.ch-btn .ch-ico{font-size:1.3em;display:block;margin-bottom:3px}
+.freq-row{display:flex;gap:8px;margin-bottom:12px}
+.freq-btn{flex:1;padding:8px;border:1px solid rgba(0,255,255,.3);background:rgba(0,255,255,.05);color:rgba(0,255,255,.7);cursor:pointer;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.75em;transition:all .2s}
+.freq-btn.sel{background:rgba(0,255,255,.3);border-color:var(--cy);color:#fff}
+.sub-status{font-size:.75em;color:var(--cy);margin-top:8px;min-height:1.2em}
+/* Chat panel */
+.chat-panel{display:none}
+.chat-panel.show{display:block}
+.chat-log{background:rgba(0,0,0,.5);border:1px solid rgba(0,255,255,.2);padding:10px;height:220px;overflow-y:auto;font-size:.8em;line-height:1.5;margin-bottom:8px}
+.chat-log::-webkit-scrollbar{width:6px}
+.chat-log::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+.chat-log::-webkit-scrollbar-thumb{background:var(--mg)}
+.chat-msg{margin-bottom:8px}
+.chat-msg.user{color:var(--or)}
+.chat-msg.agent{color:var(--cy)}
+.chat-msg .sender{font-size:.7em;opacity:.6;margin-bottom:2px}
+.chat-input{display:flex;gap:8px}
+.chat-input input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,255,.3);color:var(--cy);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:.85em;outline:none}
+.chat-input input:focus{border-color:var(--cy)}
+.typing{color:rgba(255,0,255,.6);font-size:.75em;font-style:italic;margin-bottom:4px;min-height:1em}
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{padding:8px 14px;border:1px solid rgba(255,0,255,.3);background:rgba(255,0,255,.05);color:rgba(255,255,255,.6);cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.75em;transition:all .2s;text-transform:uppercase}
+.tab:hover{background:rgba(255,0,255,.15)}
+.tab.active{background:rgba(255,0,255,.3);border-color:var(--mg);color:#fff}
+@media(max-width:600px){.tgrid{grid-template-columns:repeat(2,1fr)}.ch-grid{grid-template-columns:repeat(3,1fr)}.hdr h1{font-size:1.5em}.auth-bar{position:static;justify-content:center;margin-bottom:10px}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+<div class="modal">
+<span class="close-x" onclick="closeAuth()">&times;</span>
+<h2 id="authTitle">LOGIN</h2>
+<div class="err" id="authErr"></div>
+<div class="err" id="authOk" style="color:#0f0"></div>
+<input type="text" id="authName" placeholder="Name" style="display:none">
+<input type="email" id="authEmail" placeholder="Email">
+<input type="password" id="authPass" placeholder="Password" oninput="checkPwReqs()">
+<div class="pw-reqs" id="pwReqs">
+<div class="pw-req unmet" id="pwLen"><span class="ico">&#10007;</span> At least 8 characters</div>
+<div class="pw-req unmet" id="pwUpper"><span class="ico">&#10007;</span> One uppercase letter</div>
+<div class="pw-req unmet" id="pwLower"><span class="ico">&#10007;</span> One lowercase letter</div>
+<div class="pw-req unmet" id="pwNum"><span class="ico">&#10007;</span> One number</div>
+<div class="pw-req unmet" id="pwSpec"><span class="ico">&#10007;</span> One special character (!@#$...)</div>
+</div>
+<input type="text" id="authCode" placeholder="Verification Code" style="display:none" maxlength="6">
+<button class="btn mbtn" id="authAction" onclick="doAuth()">LOGIN</button>
+<div class="toggle" id="authToggle" onclick="toggleAuthMode()">No account? Sign up</div>
+<div class="toggle" id="authVerifyLink" style="display:none" onclick="setVerifyMode()">Have a verification code?</div>
+<div class="toggle" id="authForgotLink" onclick="setForgotMode()">Forgot password?</div>
+</div>
+</div>
+
+<div class="hdr">
+<div class="auth-bar">
+<span class="uname" id="userName" style="display:none"></span>
+<button class="btn sm" id="authBtn" onclick="openAuth()">LOGIN</button>
+<button class="btn sm cy" id="logoutBtn" style="display:none" onclick="doLogout()">LOGOUT</button>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button>
+<a href="https://ai1stseo.com" title="Back to AI 1st SEO" class="btn sm cy" style="text-decoration:none;font-size:1.1em;padding:5px 10px;line-height:1">&#8962;</a>
+</div>
+<h1>SITE MONITOR</h1>
+<p>AI-Powered SEO &amp; Uptime Intelligence // by AI 1st SEO</p>
+</div>
+
+<div class="main">
+<!-- Scanner Panel -->
+<div class="pnl">
+<h2>&#9781; MONITORING TOOLS</h2>
+<div class="tgrid">
+<button class="tbtn" onclick="runTool('scan')"><span class="ico">&#128270;</span>SEO Scan</button>
+<button class="tbtn" onclick="runTool('uptime')"><span class="ico">&#9889;</span>Uptime Check</button>
+<button class="tbtn" onclick="runTool('content')"><span class="ico">&#128196;</span>Content Monitor</button>
+<button class="tbtn" onclick="runTool('ai-visibility')"><span class="ico">&#129302;</span>AI Citations</button>
+<button class="tbtn" onclick="runTool('transaction')"><span class="ico">&#128176;</span>Transaction Test</button>
+<button class="tbtn" onclick="runTool('full-scan')"><span class="ico">&#127776;</span>Full Scan</button>
+</div>
+<div class="ubar">
+<input type="text" id="siteUrl" placeholder="https://yoursite.com" value="https://ai1stseo.com">
+</div>
+<div class="res" id="results">[ READY ] Select a tool and enter a URL to begin scanning...</div>
+</div>
+
+<!-- Member Dashboard (logged-in only) -->
+<div class="sub-panel" id="memberArea">
+<div class="lock-overlay" id="lockOverlay">
+<div class="lock-icon">&#128274;</div>
+<div class="lock-title">MEMBERS ONLY</div>
+<div class="lock-sub">Sign up to unlock daily monitoring reports, OpenClaw agent chat, and multi-channel alerts.</div>
+<button class="lock-btn" onclick="openAuth()">&#9889; SIGN UP FREE</button>
+</div>
+<div class="panel-content">
+<div class="pnl">
+<h2 class="cyt">&#128272; MEMBER DASHBOARD</h2>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('subscribe')">&#128232; Daily Reports</div>
+<div class="tab" onclick="switchTab('chat')">&#129302; OpenClaw Agent</div>
+</div>
+
+<!-- Subscribe Tab -->
+<div id="tabSubscribe">
+<p style="font-size:.8em;color:rgba(255,255,255,.7);margin-bottom:12px">Get your daily monitoring report delivered to your platform of choice.</p>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">CHOOSE YOUR CHANNELS</h2>
+<div class="ch-grid">
+<button class="ch-btn" data-ch="email" onclick="toggleCh(this)"><span class="ch-ico">&#9993;</span>Email</button>
+<button class="ch-btn" data-ch="whatsapp" onclick="toggleCh(this)"><span class="ch-ico">&#128172;</span>WhatsApp</button>
+<button class="ch-btn" data-ch="slack" onclick="toggleCh(this)"><span class="ch-ico">&#128488;</span>Slack</button>
+<button class="ch-btn" data-ch="telegram" onclick="toggleCh(this)"><span class="ch-ico">&#9992;</span>Telegram</button>
+<button class="ch-btn" data-ch="discord" onclick="toggleCh(this)"><span class="ch-ico">&#127918;</span>Discord</button>
+</div>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">SITES TO MONITOR</h2>
+<div class="ubar" style="margin-bottom:12px">
+<input type="text" id="subSites" placeholder="https://yoursite.com (comma-separated for multiple)" value="https://ai1stseo.com">
+</div>
+<h2 style="font-size:.85em;color:var(--mg);margin-bottom:8px">FREQUENCY</h2>
+<div class="freq-row">
+<button class="freq-btn sel" data-freq="daily" onclick="setFreq(this)">Daily</button>
+<button class="freq-btn" data-freq="weekly" onclick="setFreq(this)">Weekly</button>
+<button class="freq-btn" data-freq="realtime" onclick="setFreq(this)">Real-time Alerts</button>
+</div>
+<div style="display:flex;gap:8px">
+<button class="btn" onclick="doSubscribe()">&#10003; SUBSCRIBE</button>
+<button class="btn cy" onclick="doUnsubscribe()">UNSUBSCRIBE</button>
+</div>
+<div class="sub-status" id="subStatus"></div>
+</div>
+
+<!-- Chat Tab -->
+<div id="tabChat" style="display:none">
+<p style="font-size:.8em;color:rgba(255,255,255,.7);margin-bottom:8px">Chat with your OpenClaw agent about your site's SEO, issues, and fixes.</p>
+<div class="typing" id="typing"></div>
+<div class="chat-log" id="chatLog">
+<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>Hi! Send <span style="color:var(--or)">scan yoursite.com</span> to get started, or <span style="color:var(--or)">help</span> for commands.</div>
+</div>
+<div class="chat-input">
+<input type="text" id="chatMsg" placeholder="Ask about your site... (try: scan ai1stseo.com)" onkeydown="if(event.key==='Enter')sendChat()">
+<button class="btn" onclick="sendChat()">SEND</button>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- Content & SEO Sections -->
+<article>
+<section class="pnl" style="margin-bottom:14px">
+<h2 class="cyt">&#128218; WHAT IS AI-POWERED SITE MONITORING?</h2>
+<div style="font-size:.82em;line-height:1.7;color:var(--txt-soft)">
+<p class="speakable-intro" style="margin-bottom:12px"><strong>AI-powered site monitoring</strong> is the automated, continuous tracking of a website's SEO health, uptime, and AI citation visibility. It evaluates over <strong>60 ranking factors</strong> across technical SEO, content quality, and AI citation readiness — going far beyond simple uptime checks. Our <a href="https://ai1stseo.com" style="color:var(--cy)">AI 1st SEO platform</a> was built by a team of SEO engineers and data scientists to address this gap in the market. Published <time datetime="2026-01-15">January 15, 2026</time>. Last updated <time datetime="2026-03-18">March 18, 2026</time>.</p>
+<p style="margin-bottom:12px">The <strong>AI 1st SEO Site Monitor</strong> combines three critical monitoring capabilities into a single dashboard: <strong>real-time uptime checks</strong> with response time tracking, comprehensive <a href="https://seoaudit.ai1stseo.com" style="color:var(--cy)">SEO audits</a> covering on-page and technical factors, and <strong>AI citation analysis</strong> that measures how well your content performs in AI engines like ChatGPT, Perplexity, and Google AI Overviews. According to <a href="https://www.gartner.com" style="color:var(--cy)" rel="nofollow noopener" target="_blank">Gartner research</a>, by 2026 over 40% of search queries will be answered by AI-generated responses, making AI visibility monitoring essential for any serious SEO strategy.</p>
+
+<figure style="margin:16px 0">
+<table style="width:100%;border-collapse:collapse;font-size:.85em">
+<caption style="color:var(--mg);font-family:'Orbitron',sans-serif;font-size:.9em;margin-bottom:8px;letter-spacing:1px;text-align:left">SEO Monitoring vs. AEO Monitoring: Feature Comparison</caption>
+<thead><tr style="border-bottom:1px solid rgba(255,0,255,.3)">
+<th style="text-align:left;padding:8px;color:var(--cy)">Feature</th>
+<th style="text-align:left;padding:8px;color:var(--cy)">Traditional SEO</th>
+<th style="text-align:left;padding:8px;color:var(--cy)">AEO / AI Monitoring</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid rgba(255,255,255,.08)"><td style="padding:8px">Focus</td><td style="padding:8px">Google rankings</td><td style="padding:8px">AI citation visibility</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.08)"><td style="padding:8px">Key Metrics</td><td style="padding:8px">Keywords, backlinks, page speed</td><td style="padding:8px">Extractable answers, factual density, schema</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.08)"><td style="padding:8px">Content Format</td><td style="padding:8px">Keyword-optimized pages</td><td style="padding:8px">Q&amp;A, definitions, snippet-ready paragraphs</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.08)"><td style="padding:8px">Schema Types</td><td style="padding:8px">Organization, Breadcrumb</td><td style="padding:8px">FAQPage, HowTo, Speakable</td></tr>
+<tr><td style="padding:8px">Goal</td><td style="padding:8px">Page 1 ranking</td><td style="padding:8px">AI-generated answer citation</td></tr>
+</tbody>
+</table>
+<figcaption style="color:rgba(255,255,255,.5);font-size:.75em;margin-top:6px">Figure 1: Key differences between traditional SEO monitoring and AI-focused AEO monitoring approaches.</figcaption>
+</figure>
+
+<h3 style="font-family:'Orbitron',sans-serif;font-size:.9em;color:var(--mg);margin:16px 0 8px;letter-spacing:1px">How Does AI Citation Tracking Work?</h3>
+<p style="margin-bottom:12px"><strong>AI citation tracking</strong> monitors whether AI language models reference your website when generating answers. The process analyzes your content for <strong>extractable answer paragraphs</strong>, factual claim density, definition patterns, and structured data that AI engines prefer to cite. Key factors that increase AI citation scores include:</p>
+<ul style="margin:0 0 12px 20px;color:rgba(255,255,255,.85)">
+<li>Concise <strong>20-50 word answer paragraphs</strong> that AI can directly quote</li>
+<li>Verifiable statistics and <strong>data-backed claims</strong> with source attribution</li>
+<li>Clear definitions using <strong>"X is Y" patterns</strong> for entity extraction</li>
+<li>FAQ-structured content with <strong>question headings</strong> matching user queries</li>
+<li><strong>Schema markup</strong> (FAQPage, HowTo, Article) for machine-readable context</li>
+</ul>
+<p style="margin-bottom:12px">You can run a full <a href="https://seoanalysis.ai1stseo.com" style="color:var(--cy)">SEO analysis</a> to see how your site scores across all citation readiness factors.</p>
+
+<h3 style="font-family:'Orbitron',sans-serif;font-size:.9em;color:var(--mg);margin:16px 0 8px;letter-spacing:1px">SEO Monitoring vs. AEO Monitoring: Key Differences</h3>
+<p style="margin-bottom:12px"><strong>Traditional SEO monitoring</strong> focuses on Google ranking signals: keyword density, backlink profiles, page load speed, and <strong>Core Web Vitals</strong>. <strong>AEO (Answer Engine Optimization)</strong> monitoring evaluates a different set of factors: how well content is structured for AI extraction, whether pages contain snippet-ready paragraphs, the presence of schema markup like <strong>FAQPage</strong> and <strong>HowTo</strong>, and the ratio of original insights to generic content. The most effective monitoring strategy bridges both approaches, tracking Google performance alongside AI citation readiness to ensure visibility across all search interfaces. Our <a href="https://ai1stseo.com/guides" style="color:var(--cy)">AEO implementation guides</a> walk you through optimizing for both channels step by step.</p>
+
+<aside style="border-left:3px solid var(--mg);padding:10px 14px;margin:14px 0;background:rgba(255,0,255,.05)">
+<blockquote cite="https://www.searchenginejournal.com" style="margin:0;font-style:italic;color:rgba(255,255,255,.8)">
+"Pages updated within the last 90 days receive significantly more AI citations than older content. Freshness is no longer just a Google signal — it is a primary factor in AI source selection."
+</blockquote>
+<cite style="display:block;margin-top:6px;font-size:.8em;color:rgba(0,255,255,.7)">— <a href="https://www.searchenginejournal.com" style="color:var(--cy)" rel="nofollow noopener" target="_blank">Search Engine Journal</a>, 2026</cite>
+</aside>
+
+<h3 style="font-family:'Orbitron',sans-serif;font-size:.9em;color:var(--mg);margin:16px 0 8px;letter-spacing:1px">Why Content Freshness Matters for AI Visibility</h3>
+<p style="margin-bottom:12px">AI engines prioritize <strong>recent, up-to-date content</strong> when selecting sources to cite. Pages with visible publish dates, "updated in 2026" references, and recent data points are more likely to be referenced in AI-generated answers. The Site Monitor tracks <strong>content freshness signals</strong> and alerts you when pages become stale, helping maintain both Google rankings and AI citation eligibility.</p>
+
+<h3 style="font-family:'Orbitron',sans-serif;font-size:.9em;color:var(--mg);margin:16px 0 8px;letter-spacing:1px">How to Set Up Your First Site Monitor</h3>
+<ol style="margin:0 0 12px 20px;color:rgba(255,255,255,.85)">
+<li><strong>Enter your URL</strong> in the scanner input field above</li>
+<li><strong>Select a monitoring tool</strong> — start with Full Scan for a comprehensive baseline</li>
+<li><strong>Review your results</strong> — identify critical SEO issues, uptime status, and AI citation gaps</li>
+<li><strong>Create a free account</strong> to unlock automated daily or weekly reports</li>
+<li><strong>Choose your delivery channels</strong> — email, Slack, WhatsApp, Telegram, or Discord</li>
+<li><strong>Pair with deeper tools</strong> — run a <a href="https://seoaudit.ai1stseo.com" style="color:var(--cy)">231-point SEO audit</a> for detailed recommendations</li>
+</ol>
+<p style="margin-bottom:12px">For foundational knowledge on the ranking factors we track, read the <a href="https://www.moz.com/beginners-guide-to-seo" style="color:var(--cy)" rel="nofollow noopener" target="_blank">Moz Beginner's Guide to SEO</a>.</p>
+</div>
+</section>
+
+<section class="pnl" style="margin-bottom:14px">
+<h2 class="cyt">&#128214; KEY TERMS GLOSSARY</h2>
+<div style="font-size:.82em;line-height:1.7;color:rgba(255,255,255,.85)">
+<dl>
+<dt style="color:var(--mg);font-weight:bold;margin-top:10px">SEO (Search Engine Optimization)</dt>
+<dd style="margin:0 0 8px 16px">The practice of optimizing web pages to rank higher in search engine results, primarily Google, through keyword targeting, link building, and technical improvements.</dd>
+<dt style="color:var(--mg);font-weight:bold;margin-top:10px">AEO (Answer Engine Optimization)</dt>
+<dd style="margin:0 0 8px 16px">A strategy focused on structuring content so AI-powered answer engines can extract, interpret, and cite it in generated responses.</dd>
+<dt style="color:var(--mg);font-weight:bold;margin-top:10px">GEO (Generative Engine Optimization)</dt>
+<dd style="margin:0 0 8px 16px">The optimization of content for generative AI search platforms like ChatGPT, Perplexity, and Google AI Overviews to increase citation frequency and visibility.</dd>
+<dt style="color:var(--mg);font-weight:bold;margin-top:10px">AI Citation Score</dt>
+<dd style="margin:0 0 8px 16px">A metric measuring how likely AI language models are to reference your content when answering user queries, based on extractability, factual density, and schema markup.</dd>
+<dt style="color:var(--mg);font-weight:bold;margin-top:10px">Schema Markup</dt>
+<dd style="margin:0 0 8px 16px">Structured data vocabulary from <a href="https://schema.org" style="color:var(--cy)" rel="nofollow noopener" target="_blank">Schema.org</a> that helps search engines and AI models understand page content, including types like FAQPage, HowTo, and Article.</dd>
+</dl>
+</div>
+</section>
+
+<section class="pnl speakable-faq" style="margin-bottom:14px">
+<h2 class="cyt">&#10067; FREQUENTLY ASKED QUESTIONS</h2>
+<div style="font-size:.82em;line-height:1.7;color:rgba(255,255,255,.85)">
+<h3 style="color:var(--or);font-size:.95em;margin:12px 0 6px">What is AI citation tracking and why does it matter for SEO?</h3>
+<p style="margin-bottom:14px"><strong>AI citation tracking</strong> monitors how often AI engines like ChatGPT, Perplexity, and Google AI Overviews reference your website. As AI-generated answers replace traditional search results, being cited by AI becomes as important as ranking on page one of Google. Sites that optimize for AI citations see <strong>increased referral traffic</strong> from AI-powered search interfaces. Learn more in our <a href="https://ai1stseo.com/guides" style="color:var(--cy)">AEO guides</a>.</p>
+<h3 style="color:var(--or);font-size:.95em;margin:12px 0 6px">How does the Site Monitor check uptime and SEO health?</h3>
+<p style="margin-bottom:14px">The Site Monitor performs <strong>real-time HTTP checks</strong> to measure response time, status codes, and availability. For SEO health, it analyzes over <strong>60 on-page factors</strong> including title tags, meta descriptions, heading structure, schema markup, mobile readiness, and AI-extractable content patterns. For a deeper dive, run a full <a href="https://seoaudit.ai1stseo.com" style="color:var(--cy)">231-point SEO audit</a> on your site.</p>
+<h3 style="color:var(--or);font-size:.95em;margin:12px 0 6px">What is the difference between traditional SEO monitoring and AEO monitoring?</h3>
+<p style="margin-bottom:14px"><strong>Traditional SEO monitoring</strong> focuses on Google ranking factors like keywords, backlinks, and page speed. <strong>AEO monitoring</strong> evaluates how well your content is structured for AI engines to extract and cite, including factual density, definition patterns, and Q&A formatting. The best strategy combines both to maximize visibility across Google and AI search.</p>
+<h3 style="color:var(--or);font-size:.95em;margin:12px 0 6px">Can I receive automated monitoring reports via email or Slack?</h3>
+<p style="margin-bottom:14px">Yes. Members can subscribe to <strong>daily or weekly monitoring reports</strong> delivered via email, Slack, WhatsApp, Telegram, or Discord. Reports include SEO score changes, uptime incidents, content modifications, and AI citation visibility trends for all monitored sites.</p>
+<h3 style="color:var(--or);font-size:.95em;margin:12px 0 6px">How many sites can I monitor at once?</h3>
+<p style="margin-bottom:14px">There is no hard limit on the number of sites you can monitor. Enter multiple URLs separated by commas in the monitoring configuration. Each site receives <strong>independent SEO scoring</strong>, uptime tracking, and AI citation analysis with its own trend history.</p>
+</div>
+</section>
+
+<section class="pnl" style="margin-bottom:14px">
+<h2 class="cyt">&#128200; KEY TAKEAWAYS</h2>
+<div style="font-size:.82em;line-height:1.7;color:rgba(255,255,255,.85)">
+<p style="margin-bottom:10px">The <strong>AI 1st SEO Site Monitor</strong> is a free, comprehensive monitoring tool that bridges <strong>traditional SEO</strong> and <strong>AI citation optimization</strong>. It tracks uptime, analyzes 60+ SEO factors, monitors AI visibility, detects content changes, and delivers automated reports across five platforms. As search evolves from keyword-based results to AI-generated answers, monitoring both Google rankings and AI citation readiness is no longer optional — it is the foundation of a <strong>modern SEO strategy</strong>. Pair this tool with our <a href="https://seoaudit.ai1stseo.com" style="color:var(--cy)">SEO audit</a> and <a href="https://seoanalysis.ai1stseo.com" style="color:var(--cy)">analysis tools</a> for a complete optimization workflow. Updated <time datetime="2026-03-18">March 2026</time>.</p>
+</div>
+</section>
+</article>
+
+<footer class="pnl" style="margin-bottom:14px">
+<h2 class="cyt">&#128101; ABOUT AI 1ST SEO</h2>
+<nav style="font-size:.82em;line-height:1.7;color:rgba(255,255,255,.85)">
+<p style="margin-bottom:10px"><strong>AI 1st SEO</strong> is a team of SEO engineers, data scientists, and AI researchers building the next generation of search optimization tools. With combined experience spanning <strong>technical SEO auditing</strong>, <strong>machine learning</strong>, and <strong>natural language processing</strong>, our team develops tools that help businesses stay visible across both traditional search engines and AI-powered answer platforms. We specialize in <strong>Answer Engine Optimization (AEO)</strong> and <strong>Generative Engine Optimization (GEO)</strong>, two emerging disciplines that are reshaping how content gets discovered online.</p>
+<p style="margin-bottom:10px">Explore our full suite of tools: <a href="https://ai1stseo.com" style="color:var(--cy)">AI 1st SEO Home</a> · <a href="https://seoaudit.ai1stseo.com" style="color:var(--cy)">SEO Audit Tool</a> · <a href="https://seoanalysis.ai1stseo.com" style="color:var(--cy)">SEO Analyzer</a> · <a href="https://ai1stseo.com/guides" style="color:var(--cy)">AEO/SEO Guides</a> · <a href="https://docsummarizer.ai1stseo.com" style="color:var(--cy)">Doc Summarizer</a></p>
+<p style="margin-bottom:0;color:rgba(255,255,255,.6);font-size:.9em">&#9993; Contact: <a href="mailto:support@ai1stseo.com" style="color:var(--cy)">support@ai1stseo.com</a> · <a href="https://ai1stseo.com" style="color:var(--cy)">About Us</a></p>
+</nav>
+</footer>
+</div>
+
+<script>
+// === Cognito Auth via api.ai1stseo.com ===
+const AUTH_API = 'https://api.ai1stseo.com';
+let token = localStorage.getItem('ocm_token');
+let refreshToken = localStorage.getItem('ocm_refresh');
+let userEmail = localStorage.getItem('ocm_email');
+let userName = localStorage.getItem('ocm_name');
+let authMode = 'login'; // login, signup, verify, forgot, reset
+let selectedChannels = [];
+let selectedFreq = 'daily';
+
+window.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  if (token) { checkAuth(); } else { showLoggedOut(); }
+});
+
+// === Theme Toggle ===
+function initTheme() {
+  var saved = localStorage.getItem('ocm_theme');
+  if (saved === 'light') { document.body.classList.add('light-mode'); updateThemeIcon(); }
+}
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  var isLight = document.body.classList.contains('light-mode');
+  localStorage.setItem('ocm_theme', isLight ? 'light' : 'dark');
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  var btn = document.getElementById('themeToggle');
+  if (document.body.classList.contains('light-mode')) { btn.innerHTML = '&#9728;'; btn.title = 'Switch to dark mode'; }
+  else { btn.innerHTML = '&#127769;'; btn.title = 'Switch to light mode'; }
+}
+
+function showLoggedIn(name) {
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userName').style.display = '';
+  document.getElementById('authBtn').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = '';
+  document.getElementById('memberArea').classList.add('show');
+  loadSubscription();
+}
+
+function showLoggedOut() {
+  document.getElementById('userName').style.display = 'none';
+  document.getElementById('authBtn').style.display = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('memberArea').classList.remove('show');
+  token = null; refreshToken = null; userName = null; userEmail = null;
+  localStorage.removeItem('ocm_token');
+  localStorage.removeItem('ocm_refresh');
+  localStorage.removeItem('ocm_name');
+  localStorage.removeItem('ocm_email');
+}
+
+async function checkAuth() {
+  try {
+    const r = await fetch(AUTH_API + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    if (d.status === 'success') {
+      userName = d.user.attributes.name || d.user.attributes.email || 'User';
+      localStorage.setItem('ocm_name', userName);
+      showLoggedIn(userName);
+    } else { showLoggedOut(); }
+  } catch(e) { showLoggedOut(); }
+}
+
+function openAuth() { document.getElementById('authModal').classList.add('show'); setLoginMode(); }
+function closeAuth() { document.getElementById('authModal').classList.remove('show'); clearAuthMsg(); }
+function clearAuthMsg() { document.getElementById('authErr').textContent = ''; document.getElementById('authOk').textContent = ''; }
+function showErr(msg) { document.getElementById('authErr').textContent = friendlyError(msg); document.getElementById('authOk').textContent = ''; }
+function showOk(msg) { document.getElementById('authOk').textContent = msg; document.getElementById('authErr').textContent = ''; }
+
+function friendlyError(msg) {
+  if (!msg) return '';
+  var m = msg.toLowerCase();
+  if (m.includes('password') && (m.includes('policy') || m.includes('requirement') || m.includes('invalid')))
+    return 'Password must be at least 8 characters with uppercase, lowercase, number, and special character.';
+  if (m.includes('username exists') || m.includes('already exists'))
+    return 'An account with this email already exists. Try signing in instead.';
+  if (m.includes('not authorized') || m.includes('incorrect'))
+    return 'Incorrect email or password. Please try again.';
+  if (m.includes('not confirmed') || m.includes('not verified'))
+    return 'Your email is not verified yet. Check your inbox for a verification code.';
+  if (m.includes('code mismatch') || m.includes('invalid') && m.includes('code'))
+    return 'That verification code is incorrect. Please double-check and try again.';
+  if (m.includes('expired') && m.includes('code'))
+    return 'That code has expired. Click "Resend code" to get a new one.';
+  if (m.includes('limit exceeded') || m.includes('too many'))
+    return 'Too many attempts. Please wait a few minutes and try again.';
+  if (m.includes('network') || m.includes('fetch'))
+    return 'Connection error. Please check your internet and try again.';
+  // Strip Cognito internal prefixes
+  msg = msg.replace(/^(signup|login|verification|reset|password reset) failed:\s*/i, '');
+  msg = msg.replace(/Password did not conform with policy:\s*/i, '');
+  return msg;
+}
+
+function checkPwReqs() {
+  var pw = document.getElementById('authPass').value;
+  var checks = [
+    { id: 'pwLen', test: pw.length >= 8 },
+    { id: 'pwUpper', test: /[A-Z]/.test(pw) },
+    { id: 'pwLower', test: /[a-z]/.test(pw) },
+    { id: 'pwNum', test: /[0-9]/.test(pw) },
+    { id: 'pwSpec', test: /[^A-Za-z0-9]/.test(pw) }
+  ];
+  checks.forEach(function(c) {
+    var el = document.getElementById(c.id);
+    if (c.test) { el.className = 'pw-req met'; el.querySelector('.ico').innerHTML = '&#10003;'; }
+    else { el.className = 'pw-req unmet'; el.querySelector('.ico').innerHTML = '&#10007;'; }
+  });
+}
+
+function showPwReqs(show) {
+  var el = document.getElementById('pwReqs');
+  if (show) el.classList.add('visible'); else el.classList.remove('visible');
+}
+
+function setLoginMode() {
+  authMode = 'login'; clearAuthMsg();
+  document.getElementById('authTitle').textContent = 'LOGIN';
+  document.getElementById('authName').style.display = 'none';
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPass').style.display = '';
+  document.getElementById('authCode').style.display = 'none';
+  document.getElementById('authAction').textContent = 'LOGIN';
+  document.getElementById('authToggle').style.display = '';
+  document.getElementById('authToggle').textContent = 'No account? Sign up';
+  document.getElementById('authVerifyLink').style.display = '';
+  document.getElementById('authForgotLink').style.display = '';
+  showPwReqs(false);
+}
+
+function toggleAuthMode() {
+  if (authMode === 'login') setSignupMode();
+  else setLoginMode();
+}
+
+function setSignupMode() {
+  authMode = 'signup'; clearAuthMsg();
+  document.getElementById('authTitle').textContent = 'SIGN UP';
+  document.getElementById('authName').style.display = '';
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPass').style.display = '';
+  document.getElementById('authCode').style.display = 'none';
+  document.getElementById('authAction').textContent = 'SIGN UP';
+  document.getElementById('authToggle').textContent = 'Have an account? Log in';
+  document.getElementById('authVerifyLink').style.display = 'none';
+  document.getElementById('authForgotLink').style.display = 'none';
+  showPwReqs(true); checkPwReqs();
+}
+
+function setVerifyMode() {
+  authMode = 'verify'; clearAuthMsg();
+  document.getElementById('authTitle').textContent = 'VERIFY EMAIL';
+  document.getElementById('authName').style.display = 'none';
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPass').style.display = 'none';
+  document.getElementById('authCode').style.display = '';
+  document.getElementById('authAction').textContent = 'VERIFY';
+  document.getElementById('authToggle').textContent = 'Back to login';
+  document.getElementById('authVerifyLink').style.display = 'none';
+  document.getElementById('authForgotLink').style.display = 'none';
+  showPwReqs(false);
+}
+
+function setForgotMode() {
+  authMode = 'forgot'; clearAuthMsg();
+  document.getElementById('authTitle').textContent = 'RESET PASSWORD';
+  document.getElementById('authName').style.display = 'none';
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPass').style.display = 'none';
+  document.getElementById('authCode').style.display = 'none';
+  document.getElementById('authAction').textContent = 'SEND RESET CODE';
+  document.getElementById('authToggle').textContent = 'Back to login';
+  document.getElementById('authVerifyLink').style.display = 'none';
+  document.getElementById('authForgotLink').style.display = 'none';
+  showPwReqs(false);
+}
+
+function setResetMode() {
+  authMode = 'reset'; clearAuthMsg();
+  document.getElementById('authTitle').textContent = 'NEW PASSWORD';
+  document.getElementById('authName').style.display = 'none';
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPass').style.display = '';
+  document.getElementById('authPass').placeholder = 'New Password';
+  document.getElementById('authCode').style.display = '';
+  document.getElementById('authAction').textContent = 'RESET PASSWORD';
+  document.getElementById('authToggle').textContent = 'Back to login';
+  document.getElementById('authVerifyLink').style.display = 'none';
+  document.getElementById('authForgotLink').style.display = 'none';
+  showPwReqs(true); checkPwReqs();
+}
+
+async function doAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPass').value;
+  const name = document.getElementById('authName').value.trim();
+  const code = document.getElementById('authCode').value.trim();
+  const btn = document.getElementById('authAction');
+
+  if (authMode === 'login') {
+    if (!email || !password) return showErr('Email and password required');
+    btn.textContent = 'SIGNING IN...'; btn.disabled = true;
+    try {
+      const r = await fetch(AUTH_API + '/api/auth/login', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      const d = await r.json();
+      btn.textContent = 'LOGIN'; btn.disabled = false;
+      if (d.status === 'success') {
+        token = d.accessToken;
+        refreshToken = d.refreshToken;
+        userName = d.user.name || d.user.email.split('@')[0];
+        userEmail = d.user.email;
+        localStorage.setItem('ocm_token', token);
+        localStorage.setItem('ocm_refresh', refreshToken);
+        localStorage.setItem('ocm_name', userName);
+        localStorage.setItem('ocm_email', userEmail);
+        closeAuth(); showLoggedIn(userName);
+      } else { showErr(d.error || 'Login failed'); }
+    } catch(e) { btn.textContent = 'LOGIN'; btn.disabled = false; showErr('Connection error'); }
+
+  } else if (authMode === 'signup') {
+    if (!email || !password) return showErr('Email and password required');
+    btn.textContent = 'CREATING...'; btn.disabled = true;
+    try {
+      const r = await fetch(AUTH_API + '/api/auth/signup', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email, password, name})
+      });
+      const d = await r.json();
+      btn.textContent = 'SIGN UP'; btn.disabled = false;
+      if (d.status === 'success') {
+        showOk('Account created! Check email for verification code.');
+        setTimeout(() => setVerifyMode(), 1500);
+      } else { showErr(d.error || 'Signup failed'); }
+    } catch(e) { btn.textContent = 'SIGN UP'; btn.disabled = false; showErr('Connection error'); }
+
+  } else if (authMode === 'verify') {
+    if (!email || !code) return showErr('Email and code required');
+    btn.textContent = 'VERIFYING...'; btn.disabled = true;
+    try {
+      const r = await fetch(AUTH_API + '/api/auth/verify', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email, code})
+      });
+      const d = await r.json();
+      btn.textContent = 'VERIFY'; btn.disabled = false;
+      if (d.status === 'success') {
+        showOk('Verified! You can now log in.');
+        setTimeout(() => setLoginMode(), 1500);
+      } else { showErr(d.error || 'Verification failed'); }
+    } catch(e) { btn.textContent = 'VERIFY'; btn.disabled = false; showErr('Connection error'); }
+
+  } else if (authMode === 'forgot') {
+    if (!email) return showErr('Email required');
+    btn.textContent = 'SENDING...'; btn.disabled = true;
+    try {
+      const r = await fetch(AUTH_API + '/api/auth/forgot-password', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email})
+      });
+      const d = await r.json();
+      btn.textContent = 'SEND RESET CODE'; btn.disabled = false;
+      if (d.status === 'success') {
+        showOk('Reset code sent! Check your email.');
+        setTimeout(() => setResetMode(), 1500);
+      } else { showErr(d.error || 'Failed'); }
+    } catch(e) { btn.textContent = 'SEND RESET CODE'; btn.disabled = false; showErr('Connection error'); }
+
+  } else if (authMode === 'reset') {
+    if (!email || !code || !password) return showErr('All fields required');
+    btn.textContent = 'RESETTING...'; btn.disabled = true;
+    try {
+      const r = await fetch(AUTH_API + '/api/auth/reset-password', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email, code, newPassword: password})
+      });
+      const d = await r.json();
+      btn.textContent = 'RESET PASSWORD'; btn.disabled = false;
+      if (d.status === 'success') {
+        showOk('Password reset! You can now log in.');
+        document.getElementById('authPass').placeholder = 'Password';
+        setTimeout(() => setLoginMode(), 1500);
+      } else { showErr(d.error || 'Reset failed'); }
+    } catch(e) { btn.textContent = 'RESET PASSWORD'; btn.disabled = false; showErr('Connection error'); }
+  }
+}
+
+async function doLogout() { showLoggedOut(); }
+</script>
+
+<script>
+// === Subscription ===
+function toggleCh(el) {
+  el.classList.toggle('sel');
+  const ch = el.dataset.ch;
+  if (el.classList.contains('sel')) { if (!selectedChannels.includes(ch)) selectedChannels.push(ch); }
+  else { selectedChannels = selectedChannels.filter(c => c !== ch); }
+}
+
+function setFreq(el) {
+  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedFreq = el.dataset.freq;
+}
+
+function restoreSubscription(sub) {
+  if (sub.channels) {
+    selectedChannels = [...sub.channels];
+    document.querySelectorAll('.ch-btn').forEach(b => {
+      b.classList.toggle('sel', sub.channels.includes(b.dataset.ch));
+    });
+  }
+  if (sub.frequency) {
+    selectedFreq = sub.frequency;
+    document.querySelectorAll('.freq-btn').forEach(b => {
+      b.classList.toggle('sel', b.dataset.freq === sub.frequency);
+    });
+  }
+  if (sub.sites) { document.getElementById('subSites').value = sub.sites.join(', '); }
+  if (sub.active) {
+    document.getElementById('subStatus').textContent = '[ ACTIVE ] Subscribed via ' + sub.channels.join(', ') + ' (' + sub.frequency + ')';
+  }
+}
+
+async function loadSubscription() {
+  try {
+    const r = await fetch('/api/subscription', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    if (d.status === 'success' && d.subscription && d.subscription.active) {
+      restoreSubscription(d.subscription);
+    }
+  } catch(e) {}
+}
+
+async function doSubscribe() {
+  if (!selectedChannels.length) { document.getElementById('subStatus').textContent = '[ ERROR ] Select at least one channel'; return; }
+  const sites = document.getElementById('subSites').value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!sites.length) { document.getElementById('subStatus').textContent = '[ ERROR ] Enter at least one site URL'; return; }
+  try {
+    const r = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ channels: selectedChannels, sites, frequency: selectedFreq })
+    });
+    const d = await r.json();
+    document.getElementById('subStatus').textContent = d.status === 'success' ? '[ OK ] ' + d.message : '[ ERROR ] ' + d.message;
+  } catch(e) { document.getElementById('subStatus').textContent = '[ ERROR ] Connection failed'; }
+}
+
+async function doUnsubscribe() {
+  try {
+    const r = await fetch('/api/unsubscribe', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    document.getElementById('subStatus').textContent = '[ OK ] ' + d.message;
+    selectedChannels = [];
+    document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('sel'));
+  } catch(e) { document.getElementById('subStatus').textContent = '[ ERROR ] Connection failed'; }
+}
+
+// === Tabs ===
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabSubscribe').style.display = tab === 'subscribe' ? '' : 'none';
+  document.getElementById('tabChat').style.display = tab === 'chat' ? '' : 'none';
+}
+
+// === Chat ===
+async function sendChat() {
+  const input = document.getElementById('chatMsg');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const log = document.getElementById('chatLog');
+  log.innerHTML += '<div class="chat-msg user"><div class="sender">YOU</div>' + escHtml(msg) + '</div>';
+  log.scrollTop = log.scrollHeight;
+  document.getElementById('typing').textContent = 'OpenClaw is thinking...';
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ message: msg })
+    });
+    const d = await r.json();
+    document.getElementById('typing').textContent = '';
+    const resp = d.status === 'success' ? d.response : (d.message || 'Error');
+    log.innerHTML += '<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>' + escHtml(resp) + '</div>';
+    log.scrollTop = log.scrollHeight;
+  } catch(e) {
+    document.getElementById('typing').textContent = '';
+    log.innerHTML += '<div class="chat-msg agent"><div class="sender">OPENCLAW AGENT</div>Connection error. Try again.</div>';
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// === Scanner Tools ===
+async function runTool(tool) {
+  const url = document.getElementById('siteUrl').value.trim();
+  const res = document.getElementById('results');
+  res.textContent = '[ SCANNING ] Running ' + tool + ' on ' + url + '...';
+  try {
+    let endpoint = '/api/' + tool + '?url=' + encodeURIComponent(url);
+    if (tool === 'ai-visibility') endpoint += '&brand=AI%201st%20SEO';
+    const r = await fetch(endpoint);
+    const d = await r.json();
+    if (d.error) { res.textContent = '[ ERROR ] ' + d.error; return; }
+    res.textContent = formatResult(tool, d);
+  } catch(e) { res.textContent = '[ ERROR ] ' + e.message; }
+}
+
+function formatResult(tool, d) {
+  let out = '[ COMPLETE ] ' + tool.toUpperCase() + ' Results\n' + '='.repeat(40) + '\n\n';
+  if (tool === 'scan' || tool === 'full-scan') {
+    const seo = d.seo || d;
+    out += 'SEO Score: ' + (seo.score || 'N/A') + '/100\n';
+    if (seo.critical_issues && seo.critical_issues.length) {
+      out += '\nCritical Issues:\n';
+      seo.critical_issues.forEach(i => out += '  ! ' + i + '\n');
+    }
+    if (seo.warnings && seo.warnings.length) {
+      out += '\nWarnings:\n';
+      seo.warnings.slice(0, 5).forEach(w => out += '  ~ ' + w + '\n');
+    }
+    if (seo.recommendations) {
+      out += '\nTop Recommendations:\n';
+      (Array.isArray(seo.recommendations) ? seo.recommendations : []).slice(0, 3).forEach(r => {
+        out += '  > [' + (r.priority || '?') + '] ' + (r.action || r) + '\n';
+      });
+    }
+  }
+  if (d.uptime || tool === 'uptime') {
+    const u = d.uptime || d;
+    out += (tool === 'full-scan' ? '\n--- UPTIME ---\n' : '');
+    out += 'Status: ' + (u.is_up ? 'UP' : 'DOWN') + '\n';
+    out += 'Response: ' + (u.response_time_ms || 'N/A') + 'ms\n';
+    out += 'Status Code: ' + (u.status_code || 'N/A') + '\n';
+  }
+  if (tool === 'content') {
+    out += 'Changed: ' + (d.has_changed ? 'YES' : 'No changes detected') + '\n';
+    if (d.changes) out += 'Details: ' + JSON.stringify(d.changes, null, 2) + '\n';
+  }
+  if (tool === 'ai-visibility') {
+    out += JSON.stringify(d, null, 2);
+  }
+  if (tool === 'transaction') {
+    out += JSON.stringify(d, null, 2);
+  }
+  if (d.content) { out += '\n--- CONTENT ---\n' + JSON.stringify(d.content, null, 2) + '\n'; }
+  if (d.ai) { out += '\n--- AI VISIBILITY ---\n' + JSON.stringify(d.ai, null, 2) + '\n'; }
+  if (d.transaction) { out += '\n--- TRANSACTIONS ---\n' + JSON.stringify(d.transaction, null, 2) + '\n'; }
+  return out;
+}
+</script>
+</body>
+</html>
