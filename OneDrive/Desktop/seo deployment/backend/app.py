@@ -44,6 +44,10 @@ app.register_blueprint(admin_bp)
 from data_api import data_bp
 app.register_blueprint(data_bp)
 
+# Register webhook API blueprint
+from webhook_api import webhook_bp
+app.register_blueprint(webhook_bp)
+
 # === API Request Logging Middleware ===
 import threading
 

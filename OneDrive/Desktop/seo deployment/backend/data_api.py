@@ -36,6 +36,15 @@ data_bp = Blueprint('data', __name__)
 DEFAULT_PROJECT_ID = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
 
 
+def _dispatch(event_type, payload):
+    """Fire webhooks for this event. Fails silently."""
+    try:
+        from webhook_api import dispatch_event
+        dispatch_event(event_type, payload)
+    except Exception:
+        pass
+
+
 def _get_user_id():
     """Extract user ID from the authenticated request."""
     if hasattr(request, 'cognito_user') and request.cognito_user:
@@ -76,6 +85,7 @@ def create_audit():
                 (audit_id, c.get('category', ''), c.get('name', ''), c.get('status', 'info'),
                  c.get('description'), c.get('value'), c.get('recommendation'), c.get('impact')),
             )
+        _dispatch('audit.created', {'id': str(audit_id), 'url': url, 'overall_score': d.get('overall_score'), 'checks_saved': len(checks)})
         return jsonify({'status': 'success', 'id': str(audit_id), 'checks_saved': len(checks)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -138,6 +148,7 @@ def create_geo_probe():
              d.get('cited', False), d.get('citation_context'), d.get('response_snippet'),
              d.get('citation_rank'), d.get('sentiment'), d.get('ai_platform'), d.get('query_text')),
         )
+        _dispatch('geo_probe.created', {'id': str(probe_id), 'keyword': keyword, 'ai_model': ai_model, 'cited': d.get('cited', False)})
         return jsonify({'status': 'success', 'id': str(probe_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -192,6 +203,7 @@ def create_ai_visibility():
              d.get('citation_sentiment_positive', 0), d.get('citation_sentiment_neutral', 0),
              d.get('citation_sentiment_negative', 0)),
         )
+        _dispatch('ai_visibility.created', {'id': str(vid), 'url': url, 'visibility_score': d.get('visibility_score')})
         return jsonify({'status': 'success', 'id': str(vid)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -240,6 +252,7 @@ def create_content_brief():
              d.get('seo_score'), d.get('aeo_score'),
              d.get('status', 'draft'), _get_user_id()),
         )
+        _dispatch('content_brief.created', {'id': str(brief_id), 'keyword': keyword, 'content_type': d.get('content_type', 'blog')})
         return jsonify({'status': 'success', 'id': str(brief_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -304,6 +317,7 @@ def create_social_post():
             (DEFAULT_PROJECT_ID, content, platforms,
              d.get('scheduled_at'), d.get('status', 'draft'), _get_user_id()),
         )
+        _dispatch('social_post.created', {'id': str(post_id), 'platforms': d.get('platforms', []), 'status': d.get('status', 'draft')})
         return jsonify({'status': 'success', 'id': str(post_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -401,6 +415,7 @@ def create_competitor():
             "INSERT INTO competitors (project_id, domain, label) VALUES (%s, %s, %s) RETURNING id",
             (DEFAULT_PROJECT_ID, domain, d.get('label', '')),
         )
+        _dispatch('competitor.created', {'id': str(comp_id), 'domain': domain})
         return jsonify({'status': 'success', 'id': str(comp_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -462,6 +477,7 @@ def create_benchmark(comp_id):
             (comp_id, d.get('seo_score'), d.get('ai_visibility_score'),
              keyword_overlap, d.get('domain_authority')),
         )
+        _dispatch('benchmark.created', {'id': str(bench_id), 'competitor_id': comp_id, 'seo_score': d.get('seo_score')})
         return jsonify({'status': 'success', 'id': str(bench_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -521,6 +537,7 @@ def create_report():
             (DEFAULT_PROJECT_ID, report_type, d.get('title', ''),
              data_payload, d.get('format', 'json'), _get_user_id()),
         )
+        _dispatch('report.created', {'id': str(report_id), 'report_type': report_type, 'title': d.get('title', '')})
         return jsonify({'status': 'success', 'id': str(report_id)}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
