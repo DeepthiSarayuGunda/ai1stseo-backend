@@ -34,7 +34,7 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-CJ3-_OGf.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-BJ3hUe9U.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health), wired to live API endpoints, role-based auth via `GET /api/admin/me` |
 | `analyze.html` | SEO analyzer input page |
