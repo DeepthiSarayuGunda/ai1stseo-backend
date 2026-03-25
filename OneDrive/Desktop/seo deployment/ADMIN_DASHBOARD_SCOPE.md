@@ -146,8 +146,8 @@ All admin endpoints require auth + admin role check (`role = 'admin'` in `users`
 
 ## Implementation Priority
 
-1. **Phase 1 (this sprint)**: Admin queries on existing tables — user count, scan volume, error rate. No new tables needed.
-2. **Phase 2 (next sprint)**: Add `admin_metrics` daily aggregation job (EventBridge), `ai_usage_log` tracking in inference module.
+1. **Phase 1 (this sprint)**: ✅ DONE — Admin queries on existing tables — user count, scan volume, error rate. No new tables needed.
+2. **Phase 2 (this sprint)**: ✅ DONE — `admin_metrics` daily aggregation job (EventBridge), `ai_usage_log` tracking in both inference modules, `/api/admin/ai-costs` + `/api/admin/metrics` endpoints added.
 3. **Phase 3 (future)**: `api_request_log` middleware, payment tracking when Stripe/billing is added.
 
 ---

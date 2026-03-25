@@ -36,6 +36,10 @@ CORS(app, origins=[
 from auth import auth_bp
 app.register_blueprint(auth_bp)
 
+# Register admin API blueprint
+from admin_api import admin_bp
+app.register_blueprint(admin_bp)
+
 def fetch_website(url):
     """Fetch website content with timing"""
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -1943,6 +1947,10 @@ def serve_analyze():
 @app.route('/guides')
 def serve_guides():
     return send_from_directory('..', 'guides.html')
+
+@app.route('/admin')
+def serve_admin():
+    return send_from_directory('..', 'admin.html')
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
