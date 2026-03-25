@@ -40,6 +40,10 @@ app.register_blueprint(auth_bp)
 from admin_api import admin_bp
 app.register_blueprint(admin_bp)
 
+# Register shared data API blueprint
+from data_api import data_bp
+app.register_blueprint(data_bp)
+
 # === API Request Logging Middleware ===
 import threading
 
