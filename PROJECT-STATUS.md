@@ -34,9 +34,9 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-DLVYPnfu.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-ChKocXJZ.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
-| `admin.html` | Admin dashboard — internal management (users, traffic, engagement, payments, platform health) |
+| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health), wired to live API endpoints, role-based auth via `GET /api/admin/me` |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
 | `login.html` | Standalone login page (points to `api.ai1stseo.com`) |
@@ -155,9 +155,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
 
 ### 📋 Upcoming
-1. Wire up admin dashboard to Troy's live API endpoints — either use Troy's `admin.html` directly or integrate his API calls into existing admin page
-2. Replace frontend email allowlist with Troy's `GET /api/admin/me` role-based auth check
-3. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
+1. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
 2. White-label reporting (branded PDF + live reports)
 3. Custom dashboard builder (drag-and-drop widgets)
 4. Onboarding flow / first-run experience
@@ -170,7 +168,8 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
-| Mar 24, 2026 | Admin access control — added frontend email allowlist (`ADMIN_EMAILS`) in `auth.ts` and `admin.html`. Navbar only shows ⚙️ Admin Dashboard link for allowlisted emails. `admin.html` redirects non-admins to user dashboard on page load. Currently only `amirarobleh@gmail.com` in list — team can add their emails. Temporary solution until Troy adds role-based auth. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` |
+| Mar 24, 2026 | Deployed Troy's admin.html to S3 — replaces placeholder admin dashboard with his fully wired version (6 tabs: Overview, Users, Usage, AI Costs, Errors, Health). Replaced frontend email allowlist with async `checkAdminRole()` that calls Troy's `GET /api/admin/me` endpoint, caches result in localStorage. Navbar admin link now shows based on server-side role. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` (S3) |
+| Mar 24, 2026 | Admin access control — added frontend email allowlist (`ADMIN_EMAILS`) in `auth.ts` and `admin.html`. Navbar only shows ⚙️ Admin Dashboard link for allowlisted emails. `admin.html` redirects non-admins to user dashboard on page load. Currently only `amira.robleh@gmail.com` in list — team can add their emails. Temporary solution until Troy adds role-based auth. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` |
 | Mar 24, 2026 | Fixed light mode styling across all React dashboard components — root cause was Tailwind class ordering where `dark:value light-value` pattern caused last unprefixed class to always win. Fixed in App.tsx, ToolCard, StatWidget, CategoryGrid, RecentAudits, AnalyzeBar, ScoreRing, Navbar, ScanModal. Light mode now shows proper white backgrounds, gray borders, dark text. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/*.tsx` |
 | Mar 24, 2026 | Cleaned up navbar dropdowns — removed grayed-out "Content Brief" and "GEO Scanner" from Tools (users shouldn't see unbuilt features), removed non-functional "Delete Account". Added ⚙️ Admin Dashboard link to user dropdown for easy team access. Deployed to S3, CloudFront invalidated. | `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Redesigned `analyze.html` — updated from 180/9 to 236 checks across 10 categories (added Citation Gap). New design matches dashboard theme with nav bar, colored category chips with live check count updates, green gradient button, light/dark mode. Deployed to S3, CloudFront invalidated. | `analyze.html` |
