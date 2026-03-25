@@ -256,6 +256,61 @@ def admin_metrics_history():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@admin_bp.route('/api/admin/requests', methods=['GET'])
+@require_admin
+def admin_requests():
+    """API request log — endpoint usage, volume, and response times."""
+    hours = request.args.get('hours', 24, type=int)
+    try:
+        # Top endpoints by volume
+        top_endpoints = query(
+            "SELECT endpoint, method, count(*) as hits, "
+            "ROUND(AVG(response_time_ms)::numeric, 0) as avg_ms, "
+            "MAX(response_time_ms) as max_ms, "
+            "ROUND(100.0 * SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) / NULLIF(count(*), 0), 1) as error_pct "
+            "FROM api_request_log WHERE created_at >= NOW() - INTERVAL '{} hours' "
+            "GROUP BY endpoint, method ORDER BY hits DESC LIMIT 25".format(hours),
+            (),
+        )
+        # Hourly volume
+        hourly = query(
+            "SELECT DATE_TRUNC('hour', created_at) as hour, count(*) as hits "
+            "FROM api_request_log WHERE created_at >= NOW() - INTERVAL '{} hours' "
+            "GROUP BY DATE_TRUNC('hour', created_at) ORDER BY hour".format(hours),
+            (),
+        )
+        # Recent slow requests (>2s)
+        slow = query(
+            "SELECT endpoint, method, status_code, response_time_ms, created_at "
+            "FROM api_request_log WHERE response_time_ms > 2000 "
+            "AND created_at >= NOW() - INTERVAL '{} hours' "
+            "ORDER BY response_time_ms DESC LIMIT 10".format(hours),
+            (),
+        )
+        # Total stats
+        totals = query_one(
+            "SELECT count(*) as total, "
+            "ROUND(AVG(response_time_ms)::numeric, 0) as avg_ms, "
+            "SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as errors "
+            "FROM api_request_log WHERE created_at >= NOW() - INTERVAL '{} hours'".format(hours),
+            (),
+        )
+        return jsonify({
+            'status': 'success',
+            'top_endpoints': [dict(r) for r in top_endpoints],
+            'hourly': [dict(r) for r in hourly],
+            'slow_requests': [dict(r) for r in slow],
+            'totals': {
+                'requests': totals['total'] if totals else 0,
+                'avg_response_ms': int(totals['avg_ms']) if totals and totals['avg_ms'] else 0,
+                'errors': totals['errors'] if totals else 0,
+            },
+            'hours': hours,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @admin_bp.route('/api/admin/me', methods=['GET'])
 @require_auth
 def admin_me():

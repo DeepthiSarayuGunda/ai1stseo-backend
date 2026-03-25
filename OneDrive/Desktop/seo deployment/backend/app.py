@@ -40,6 +40,40 @@ app.register_blueprint(auth_bp)
 from admin_api import admin_bp
 app.register_blueprint(admin_bp)
 
+# === API Request Logging Middleware ===
+import threading
+
+@app.before_request
+def _log_request_start():
+    request._start_time = time.time()
+
+@app.after_request
+def _log_request(response):
+    # Skip static files, health checks, and OPTIONS preflight
+    path = request.path
+    if path.startswith('/assets/') or path == '/api/health' or request.method == 'OPTIONS':
+        return response
+    try:
+        elapsed = int((time.time() - getattr(request, '_start_time', time.time())) * 1000)
+        user_id = None
+        if hasattr(request, 'cognito_user') and request.cognito_user:
+            user_id = request.cognito_user.get('user_id')
+        # Fire-and-forget in background thread to not slow down responses
+        def _insert(ep, method, uid, status, ms):
+            try:
+                from database import execute
+                execute(
+                    "INSERT INTO api_request_log (endpoint, method, user_id, project_id, status_code, response_time_ms) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (ep, method, uid, '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2', status, ms),
+                )
+            except Exception:
+                pass
+        threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()
+    except Exception:
+        pass
+    return response
+
 def fetch_website(url):
     """Fetch website content with timing"""
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
