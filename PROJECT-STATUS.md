@@ -34,7 +34,7 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-ChKocXJZ.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-PIdBDQsr.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health), wired to live API endpoints, role-based auth via `GET /api/admin/me` |
 | `analyze.html` | SEO analyzer input page |
@@ -116,7 +116,10 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Troy's working `admin.html` with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) — wired to all endpoints
 - Role-based auth via `GET /api/admin/me` (returns `role: 'admin'` or `role: 'member'`)
 - Files in repo under `OneDrive/Desktop/seo deployment/` (Troy's local path): `AMIRA_ADMIN_HANDOFF.md`, `backend/admin_api.py`, `backend/admin_tables.sql`, `backend/admin_aggregation.py`, `admin.html`
-- ⚠️ Admin tables DDL needs to be run on RDS once before endpoints return data
+- ⚠️ ~~Admin tables DDL needs to be run on RDS once before endpoints return data~~ — DONE, tables created
+- ✅ psycopg2 upgraded from Python 3.9 to 3.11 compatible binary (root cause of all 500 errors)
+- ✅ EventBridge rule `ai1stseo-daily-metrics` runs at 02:00 UTC daily for admin metrics aggregation
+- ✅ Auth API (`api.ai1stseo.com`) confirmed healthy — `/api/admin/health` returns 401 (requires auth), `/api/auth/login` returns proper 403 for bad creds
 
 ### ✅ Dev 2 — Content & NLP Integration (Done — Samar, Mar 23-24)
 - New `/api/content-brief` endpoint — generates structured briefs from SERP scraping + LLM
@@ -168,6 +171,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 24, 2026 | Added Troy's Website Monitoring tool card (`monitor.ai1stseo.com`) to dashboard "SEO & Content Tools" section — purple gradient, opens in new tab. Also added to Tools dropdown in navbar. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 24, 2026 | Deployed Troy's admin.html to S3 — replaces placeholder admin dashboard with his fully wired version (6 tabs: Overview, Users, Usage, AI Costs, Errors, Health). Replaced frontend email allowlist with async `checkAdminRole()` that calls Troy's `GET /api/admin/me` endpoint, caches result in localStorage. Navbar admin link now shows based on server-side role. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` (S3) |
 | Mar 24, 2026 | Admin access control — added frontend email allowlist (`ADMIN_EMAILS`) in `auth.ts` and `admin.html`. Navbar only shows ⚙️ Admin Dashboard link for allowlisted emails. `admin.html` redirects non-admins to user dashboard on page load. Currently only `amira.robleh@gmail.com` in list — team can add their emails. Temporary solution until Troy adds role-based auth. Deployed to S3, CloudFront invalidated. | `frontend/src/lib/auth.ts`, `frontend/src/components/Navbar.tsx`, `admin.html` |
 | Mar 24, 2026 | Fixed light mode styling across all React dashboard components — root cause was Tailwind class ordering where `dark:value light-value` pattern caused last unprefixed class to always win. Fixed in App.tsx, ToolCard, StatWidget, CategoryGrid, RecentAudits, AnalyzeBar, ScoreRing, Navbar, ScanModal. Light mode now shows proper white backgrounds, gray borders, dark text. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/*.tsx` |
