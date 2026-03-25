@@ -2418,7 +2418,16 @@ if IS_LAMBDA:
                     "body": body_out,
                 })
 
-        handler = Mangum(_FlaskAsgi(app), lifespan="off")
+        _mangum_handler = Mangum(_FlaskAsgi(app), lifespan="off")
+
+        def handler(event, context):
+            """Route EventBridge scheduled events to aggregation, everything else to Mangum."""
+            if event.get("source") == "aws.events" or event.get("detail-type") == "Scheduled Event":
+                from admin_aggregation import aggregate_daily_metrics
+                result = aggregate_daily_metrics()
+                print("Admin metrics aggregated: {}".format(result))
+                return {"statusCode": 200, "body": str(result)}
+            return _mangum_handler(event, context)
     except ImportError:
         pass
 
