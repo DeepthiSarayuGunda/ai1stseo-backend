@@ -38,6 +38,25 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
+@app.errorhandler(500)
+def handle_500(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Internal server error', 'status': 'error'}), 500
+    return e
+
+@app.errorhandler(404)
+def handle_404(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Endpoint not found', 'status': 'error'}), 404
+    return e
+
+@app.errorhandler(405)
+def handle_405(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Method not allowed', 'status': 'error'}), 405
+    return e
+
 # ── RDS initialization ────────────────────────────────────────────────────────
 try:
     from db import init_db
@@ -1791,9 +1810,14 @@ def reset_password():
 @app.route('/api/analyze', methods=['POST'])
 def analyze_url():
     """Main SEO analysis endpoint - 170 checks across 9 categories"""
-    data = request.get_json()
-    url = data.get('url', '')
-    categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        url = data.get('url', '')
+        categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
+    except Exception:
+        return jsonify({'error': 'Invalid request'}), 400
     
     if not url:
         return jsonify({'error': 'URL is required'}), 400
@@ -1869,9 +1893,14 @@ OLLAMA_FALLBACK_URL = 'https://api.databi.io/api'  # Fallback
 @app.route('/api/ai-recommendations', methods=['POST'])
 def get_ai_recommendations():
     """Generate AI-powered SEO recommendations using local LLM"""
-    data = request.get_json()
-    audit_results = data.get('auditResults', {})
-    url = data.get('url', '')
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        audit_results = data.get('auditResults', {})
+        url = data.get('url', '')
+    except Exception:
+        return jsonify({'error': 'Invalid request'}), 400
     
     if not audit_results:
         return jsonify({'error': 'Audit results required'}), 400
@@ -2148,9 +2177,14 @@ IMPORTANT: Return ONLY valid JSON. No explanations, no markdown formatting, no c
 @app.route('/api/content-brief', methods=['POST'])
 def generate_content_brief():
     """Generate an AI-powered content brief from SERP analysis"""
-    data = request.get_json()
-    keyword = data.get('keyword', '').strip()
-    content_type = data.get('content_type', 'blog').strip()
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        keyword = data.get('keyword', '').strip()
+        content_type = data.get('content_type', 'blog').strip()
+    except Exception:
+        return jsonify({'error': 'Invalid request'}), 400
     
     if not keyword:
         return jsonify({'error': 'keyword is required'}), 400
