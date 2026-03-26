@@ -2229,7 +2229,7 @@ def generate_content_brief():
 
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    """GEO Monitoring Engine — multi-provider, routes to EC2 AI engine."""
+    """GEO Monitoring Engine — multi-provider, direct AI calls."""
     from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
@@ -2258,7 +2258,7 @@ def geo_probe_models():
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO/AEO batch analysis — multi-provider, routes to EC2."""
+    """GEO/AEO batch analysis — multi-provider, direct AI calls."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
@@ -2374,7 +2374,7 @@ def brand_resolve():
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
-    AI Citation Probe — routes to EC2 geo_engine for Bedrock access.
+    AI Citation Probe — calls Bedrock/Ollama directly.
 
     Request:
         { "keyword": "best project management tools 2025",
