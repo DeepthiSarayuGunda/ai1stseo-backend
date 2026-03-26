@@ -34,7 +34,7 @@
 | `index.html` | Homepage (marketing) — redirects logged-in users to `dashboard.html` (on page load AND immediately after auth.js modal login via localStorage.setItem intercept) |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-DCYHgExS.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-DHXIsnai.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
 | `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health), wired to live API endpoints, role-based auth via `GET /api/admin/me` |
 | `analyze.html` | SEO analyzer input page |
@@ -173,6 +173,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 |------|--------|-------|
 | Mar 25, 2026 | Added SEO Audit Dashboard tool card (`seoaudit.ai1stseo.com`) to dashboard "SEO & Content Tools" section — red-to-orange gradient, "Report" tag, opens in new tab. Also added to Tools dropdown in navbar. Generates PDF audit reports. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Doc Intelligence (`docsummarizer.ai1stseo.com`) and Automation Hub (`automationhub.ai1stseo.com`) tool cards to dashboard SEO & Content Tools section. Removed duplicate SEO Audit Dashboard from Tools dropdown. All tools now in both card grid and dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
+| Mar 26, 2026 | Updated SEO Audit Dashboard link to Amplify URL (`main.dyvwpl8fa8swd.amplifyapp.com`) and AEO Platform link to Amplify URL (`main.d3ouus8qzvb5ml.amplifyapp.com`) — both in tool cards and Tools dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Deepthi's AEO Platform tool card (`seoanalysis.ai1stseo.com`) to dashboard "AI Search Optimization" section — purple gradient, opens in new tab. Also added to Tools dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Deployed Troy's updated `auth.js` with cross-subdomain SSO — shared cookie on `.ai1stseo.com` so users stay logged in across `www`, `monitor`, and `seoaudit` subdomains. Uploaded to S3, CloudFront invalidated. | `assets/auth.js` (S3) |
 | Mar 25, 2026 | Added SEO Audit Dashboard tool card (`seoaudit.ai1stseo.com`) to dashboard "SEO & Content Tools" section — red-to-orange gradient, opens in new tab. Also added to Tools dropdown in navbar. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
