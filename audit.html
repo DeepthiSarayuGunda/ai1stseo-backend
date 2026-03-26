@@ -752,7 +752,15 @@
                     })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error (status ' + response.status + ')');
+                }
 
                 if (data.status === 'success') {
                     // Format the AI response with basic markdown-like styling
@@ -820,7 +828,15 @@
             contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Scraping top 5 Google results for "<strong>' + keyword + '</strong>"...</span></div>';
             try {
                 const response = await fetch('/api/content-brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword, content_type: contentType }) });
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error (status ' + response.status + ')');
+                }
                 if (data.status === 'success' && data.brief) {
                     const b = data.brief; const serp = data.serp_analysis || {};
                     let html = '<div class="ai-content"><h2>📋 ' + (b.recommended_title || keyword) + '</h2>';
@@ -868,7 +884,12 @@
                     body: JSON.stringify({ url: targetUrl, categories: categories })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
 
                 if (!response.ok) {
                     renderError(data.error || 'Failed to analyze URL');
