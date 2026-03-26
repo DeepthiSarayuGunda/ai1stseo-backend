@@ -18,8 +18,89 @@ from tools.notifier import send_alert, get_channel_status
 app = Flask(__name__)
 CORS(app)
 
+# === Gzip compression for all responses ===
+import gzip as _gzip
+
+@app.after_request
+def compress_response(response):
+    if (response.status_code < 200 or response.status_code >= 300
+            or response.direct_passthrough
+            or 'Content-Encoding' in response.headers
+            or len(response.get_data()) < 500):
+        return response
+    accept_enc = request.headers.get('Accept-Encoding', '')
+    if 'gzip' not in accept_enc:
+        return response
+    response.set_data(_gzip.compress(response.get_data()))
+    response.headers['Content-Encoding'] = 'gzip'
+    response.headers['Content-Length'] = len(response.get_data())
+    response.headers['Vary'] = 'Accept-Encoding'
+    return response
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Content-Security-Policy'] = "default-src 'self' https://api.ai1stseo.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.ai1stseo.com; font-src 'self'"
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    return response
+
+# === RDS Persistence via Backend Data API ===
+import threading as _threading
+import requests as _http
+
+_BACKEND_API = 'https://api.ai1stseo.com'
+
+def _persist_to_rds(endpoint, payload, auth_token=None):
+    """Fire-and-forget: POST scan results to the backend data API."""
+    def _do():
+        try:
+            headers = {'Content-Type': 'application/json'}
+            if auth_token:
+                headers['Authorization'] = 'Bearer ' + auth_token
+            _http.post(_BACKEND_API + endpoint, json=payload, headers=headers, timeout=10)
+        except Exception:
+            pass
+    _threading.Thread(target=_do, daemon=True).start()
+
+def _fire_webhook_event(event_type, payload):
+    """Dispatch a webhook event via the backend."""
+    def _do():
+        try:
+            from database import query, execute
+            import json, hmac, hashlib
+            rows = query(
+                "SELECT id, url, secret, events FROM webhooks WHERE project_id = %s AND is_active = true",
+                ('24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',),
+            )
+            for wh in rows:
+                events = wh.get('events', [])
+                if '*' not in events and event_type not in events:
+                    continue
+                body = json.dumps({'event': event_type, 'data': payload})
+                hdrs = {'Content-Type': 'application/json', 'X-Webhook-Event': event_type}
+                if wh.get('secret'):
+                    sig = hmac.new(wh['secret'].encode(), body.encode(), hashlib.sha256).hexdigest()
+                    hdrs['X-Webhook-Signature'] = sig
+                try:
+                    r = _http.post(wh['url'], data=body, headers=hdrs, timeout=10)
+                    execute(
+                        "INSERT INTO webhook_deliveries (webhook_id, event_type, payload, status_code, success) VALUES (%s,%s,%s,%s,%s)",
+                        (wh['id'], event_type, body, r.status_code, r.status_code < 400),
+                    )
+                except Exception:
+                    pass
+        except Exception:
+            pass
+    _threading.Thread(target=_do, daemon=True).start()
+
+
 # === Data paths (JSON fallback for EC2) ===
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+DATA_DIR = "/tmp/data" if IS_LAMBDA else os.path.join(os.path.dirname(__file__), "data")
 SUBS_FILE = os.path.join(DATA_DIR, "subscriptions.json")
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -344,6 +425,9 @@ def get_subscription():
 def index():
     resp = make_response(render_template_string(HTML_TEMPLATE))
     resp.headers["Last-Modified"] = "Tue, 18 Mar 2026 12:00:00 GMT"
+    resp.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+    resp.headers["ETag"] = '"monitor-v4.0"'
+    resp.headers["Link"] = "<https://api.ai1stseo.com>; rel=preconnect, <https://api.ai1stseo.com>; rel=dns-prefetch"
     return resp
 
 
@@ -386,6 +470,11 @@ def scan():
             up = check_uptime(url)
             _save_scan_history(url, "scan", seo)
             _save_uptime_history(url, up)
+            # Persist to RDS
+            if seo.get("score"):
+                _persist_to_rds("/api/data/audits", {"url": url, "overall_score": seo.get("score"), "total_checks": seo.get("total_checks", 0), "passed_checks": seo.get("passed_checks", 0)}, token)
+            if not up.get("is_up", True):
+                _fire_webhook_event("uptime.down", {"url": url, "status_code": up.get("status_code")})
             return {"seo": seo, "uptime": up, "url": url}
         return jsonify(_cached_call("scan:" + url, _do_scan))
     except Exception as e:
@@ -410,7 +499,10 @@ def content():
     """Content monitor - NOT cached (needs fresh change detection)."""
     url = request.args.get("url", "https://ai1stseo.com")
     try:
-        return jsonify(check_content_changes(url))
+        result = check_content_changes(url)
+        if result.get("changes_detected"):
+            _fire_webhook_event("content.changed", {"url": url, "changes": result.get("changes", [])})
+        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -420,7 +512,15 @@ def ai_visibility():
     domain = request.args.get("domain", "https://ai1stseo.com")
     brand = request.args.get("brand", "AI 1st SEO")
     try:
-        return jsonify(_cached_call("ai:" + domain + brand, check_ai_visibility, domain, brand))
+        result = _cached_call("ai:" + domain + brand, check_ai_visibility, domain, brand)
+        # Persist AI visibility to RDS
+        if isinstance(result, dict) and result.get("visibility_score") is not None:
+            _persist_to_rds("/api/data/ai-visibility", {
+                "url": domain,
+                "visibility_score": result.get("visibility_score"),
+                "citation_count": result.get("citation_count", 0),
+            }, token)
+        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -466,7 +566,18 @@ def deep_scan():
             result = deep_scan_site(url)
             _save_scan_history(url, "deep-scan", result)
             return result
-        return jsonify(_cached_call("deep:" + url, _do))
+        result = _cached_call("deep:" + url, _do)
+        # Persist deep scan to RDS
+        if isinstance(result, dict) and result.get("overall_score"):
+            _persist_to_rds("/api/data/audits", {
+                "url": url, "overall_score": result.get("overall_score"),
+                "technical_score": result.get("technical_score"),
+                "onpage_score": result.get("onpage_score"),
+                "content_score": result.get("content_score"),
+                "total_checks": result.get("total_checks", 0),
+                "passed_checks": result.get("passed_checks", 0),
+            }, token)
+        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -602,41 +713,100 @@ def history_summary():
         return jsonify({"status": "error", "message": "Summary unavailable: {}".format(e)}), 500
 
 
+# ===================== SCAN ERROR TRACKING =====================
+
+@app.route("/api/scan-errors", methods=["GET"])
+def scan_errors():
+    user = _auth_user(request)
+    if not user:
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+    hours = request.args.get("hours", 24, type=int)
+    errors = _get_recent_errors(hours=hours)
+    return jsonify({
+        "status": "success",
+        "errors": [dict(e) for e in errors],
+        "count": len(errors),
+        "hours": hours,
+    })
+
+
+@app.route("/api/scan-errors/resolve", methods=["POST"])
+def resolve_scan_errors():
+    user = _auth_user(request)
+    if not user:
+        return jsonify({"status": "error", "message": "Not authenticated"}), 401
+    try:
+        from db import execute
+        resolved = execute(
+            "UPDATE scan_errors SET resolved = true "
+            "WHERE project_id = %s AND resolved = false",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return jsonify({"status": "success", "resolved": resolved})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 # ===================== DAILY REPORT SENDER =====================
 
 def send_daily_reports():
     """Called by scheduler / EventBridge - sends reports to all active subscribers."""
     subs = _load_subs()
     sent = 0
+    recent_errors = _get_recent_errors(hours=24)
     for email, sub in subs.items():
         if not sub.get("active", False):
             continue
         try:
             report_parts = []
             for site_url in sub.get("sites", []):
-                seo = scan_site(site_url)
-                up = check_uptime(site_url)
-                _save_scan_history(site_url, "scheduled", seo)
-                _save_uptime_history(site_url, up)
-                report_parts.append(
-                    "=== {} ===\n"
-                    "SEO Score: {}/100\n"
-                    "Status: {}\n"
-                    "Response: {}ms\n"
-                    "Critical Issues: {}\n".format(
-                        site_url,
-                        seo.get("score", "N/A"),
-                        "UP" if up.get("is_up") else "DOWN",
-                        up.get("response_time_ms", "N/A"),
-                        len(seo.get("critical_issues", [])),
+                try:
+                    seo = scan_site(site_url)
+                    up = check_uptime(site_url)
+                    _save_scan_history(site_url, "daily_report", seo)
+                    _save_uptime_history(site_url, up)
+                    report_parts.append(
+                        "=== {} ===\n"
+                        "SEO Score: {}/100\n"
+                        "Status: {}\n"
+                        "Response: {}ms\n"
+                        "Critical Issues: {}\n".format(
+                            site_url,
+                            seo.get("score", "N/A"),
+                            "UP" if up.get("is_up") else "DOWN",
+                            up.get("response_time_ms", "N/A"),
+                            len(seo.get("critical_issues", [])),
+                        )
+                    )
+                except Exception as e:
+                    err_msg = str(e)
+                    _log_scan_error(site_url, "daily_report_scan", err_msg, source="daily_report")
+                    report_parts.append(
+                        "=== {} ===\n"
+                        "ERROR: Scan failed - {}\n".format(site_url, err_msg[:200])
+                    )
+            error_section = ""
+            if recent_errors:
+                error_lines = []
+                for err in recent_errors[:10]:
+                    error_lines.append("  - {} | {} | {}".format(
+                        err.get("url", "unknown"),
+                        err.get("scan_type", "unknown"),
+                        str(err.get("error_message", ""))[:100],
+                    ))
+                error_section = (
+                    "\n--- SCAN ERRORS (last 24h) ---\n"
+                    "{} error(s) detected:\n{}\n".format(
+                        len(recent_errors), "\n".join(error_lines)
                     )
                 )
             report = (
                 "Daily Site Monitor Report - {}\n"
-                "Subscriber: {}\n\n{}".format(
+                "Subscriber: {}\n\n{}{}".format(
                     datetime.now().strftime("%Y-%m-%d"),
                     sub.get("name", email),
                     "\n".join(report_parts),
+                    error_section,
                 )
             )
             for channel in sub.get("channels", []):
@@ -647,7 +817,36 @@ def send_daily_reports():
             sent += 1
         except Exception as e:
             print("Failed to send report to {}: {}".format(email, e))
-    return {"sent": sent, "total_subscribers": len([s for s in subs.values() if s.get("active")])}
+    return {"sent": sent, "total_subscribers": len([s for s in subs.values() if s.get("active")]), "errors_flagged": len(recent_errors)}
+
+
+def _log_scan_error(url, scan_type, error_msg, source="scheduled"):
+    """Log a scan error to the scan_errors table in RDS."""
+    try:
+        from db import execute
+        execute(
+            "INSERT INTO scan_errors (project_id, url, scan_type, error_message, source) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (DEFAULT_PROJECT_ID, url, scan_type, str(error_msg)[:2000], source),
+        )
+    except Exception as e:
+        print("Failed to log scan error: {}".format(e))
+
+
+def _get_recent_errors(hours=24):
+    """Get unresolved scan errors from the last N hours."""
+    try:
+        from db import query
+        rows = query(
+            "SELECT url, scan_type, error_message, source, created_at "
+            "FROM scan_errors WHERE project_id = %s AND resolved = false "
+            "AND created_at >= NOW() - INTERVAL '24 hours' "
+            "ORDER BY created_at DESC",
+            (DEFAULT_PROJECT_ID,),
+        )
+        return rows
+    except Exception:
+        return []
 
 
 def run_scheduled_scan():
@@ -661,6 +860,7 @@ def run_scheduled_scan():
     except Exception:
         sites = [{"url": "https://ai1stseo.com"}]
     scanned = 0
+    errors = []
     for site in sites:
         url = site["url"]
         try:
@@ -670,8 +870,11 @@ def run_scheduled_scan():
             _save_uptime_history(url, up)
             scanned += 1
         except Exception as e:
-            print("Scheduled scan failed for {}: {}".format(url, e))
-    return {"scanned": scanned, "total_sites": len(sites)}
+            err_msg = str(e)
+            print("Scheduled scan failed for {}: {}".format(url, err_msg))
+            _log_scan_error(url, "scheduled_scan", err_msg)
+            errors.append({"url": url, "error": err_msg})
+    return {"scanned": scanned, "total_sites": len(sites), "errors": errors}
 
 
 @app.route("/api/send-report-now", methods=["POST"])

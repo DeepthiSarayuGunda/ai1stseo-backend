@@ -294,6 +294,26 @@ CREATE INDEX idx_reports_type ON reports(report_type);
 CREATE INDEX idx_reports_created ON reports(created_at DESC);
 ```
 
+### Scan Error Tracking Table
+
+```sql
+-- Scan errors logged by EventBridge scheduled scans and daily reports
+CREATE TABLE scan_errors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    url VARCHAR(2048),
+    scan_type VARCHAR(50) NOT NULL,       -- scheduled_scan, daily_report_scan
+    error_message TEXT NOT NULL,
+    source VARCHAR(50) DEFAULT 'scheduled', -- scheduled, daily_report, manual
+    resolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_scan_errors_project ON scan_errors(project_id);
+CREATE INDEX idx_scan_errors_created ON scan_errors(created_at DESC);
+CREATE INDEX idx_scan_errors_resolved ON scan_errors(resolved);
+```
+
 ### Social & Integrations Tables (Dev 4 — Tabasum)
 
 ```sql
@@ -409,6 +429,7 @@ CREATE INDEX idx_citscores_audit ON content_citation_scores(audit_id);
 | content_changes | Monitor | Content change detection log |
 | subscriptions | Monitor | Report delivery subscriptions |
 | reports | Core | Generated reports (all types) |
+| scan_errors | Monitor | Scan failure tracking for EventBridge scheduled scans and daily reports |
 | social_posts | Dev 4 (Tabasum) | Scheduled social media posts |
 | competitors | Dev 3 (Troy) | Competitor domains to benchmark |
 | benchmarks | Dev 3 (Troy) | Competitor benchmark snapshots |

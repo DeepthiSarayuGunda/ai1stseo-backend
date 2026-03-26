@@ -24,6 +24,8 @@
     localStorage.setItem(SK.ID, data.idToken);
     localStorage.setItem(SK.REFRESH, data.refreshToken);
     localStorage.setItem(SK.USER, JSON.stringify(data.user));
+    // Shared cookie for cross-subdomain SSO (monitor.ai1stseo.com, etc.)
+    document.cookie = 'ai1stseo_sso=' + data.accessToken + ';domain=.ai1stseo.com;path=/;max-age=86400;secure;samesite=lax';
   }
 
   function getUser() {
@@ -34,6 +36,7 @@
 
   function clearSession() {
     Object.values(SK).forEach(function(k) { localStorage.removeItem(k); });
+    document.cookie = 'ai1stseo_sso=;domain=.ai1stseo.com;path=/;max-age=0;secure;samesite=lax';
   }
 
   function isLoggedIn() { return !!getAccessToken(); }

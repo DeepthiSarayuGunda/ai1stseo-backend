@@ -36,6 +36,56 @@ CORS(app, origins=[
 from auth import auth_bp
 app.register_blueprint(auth_bp)
 
+# Register admin API blueprint
+from admin_api import admin_bp
+app.register_blueprint(admin_bp)
+
+# Register shared data API blueprint
+from data_api import data_bp
+app.register_blueprint(data_bp)
+
+# Register webhook API blueprint
+from webhook_api import webhook_bp
+app.register_blueprint(webhook_bp)
+
+# Register API key management blueprint
+from apikey_api import apikey_bp
+app.register_blueprint(apikey_bp)
+
+# === API Request Logging Middleware ===
+import threading
+
+@app.before_request
+def _log_request_start():
+    request._start_time = time.time()
+
+@app.after_request
+def _log_request(response):
+    # Skip static files, health checks, and OPTIONS preflight
+    path = request.path
+    if path.startswith('/assets/') or path == '/api/health' or request.method == 'OPTIONS':
+        return response
+    try:
+        elapsed = int((time.time() - getattr(request, '_start_time', time.time())) * 1000)
+        user_id = None
+        if hasattr(request, 'cognito_user') and request.cognito_user:
+            user_id = request.cognito_user.get('user_id')
+        # Fire-and-forget in background thread to not slow down responses
+        def _insert(ep, method, uid, status, ms):
+            try:
+                from database import execute
+                execute(
+                    "INSERT INTO api_request_log (endpoint, method, user_id, project_id, status_code, response_time_ms) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (ep, method, uid, '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2', status, ms),
+                )
+            except Exception:
+                pass
+        threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()
+    except Exception:
+        pass
+    return response
+
 def fetch_website(url):
     """Fetch website content with timing"""
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -1944,6 +1994,10 @@ def serve_analyze():
 def serve_guides():
     return send_from_directory('..', 'guides.html')
 
+@app.route('/admin')
+def serve_admin():
+    return send_from_directory('..', 'admin.html')
+
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory('../assets', filename)
@@ -2410,7 +2464,16 @@ if IS_LAMBDA:
                     "body": body_out,
                 })
 
-        handler = Mangum(_FlaskAsgi(app), lifespan="off")
+        _mangum_handler = Mangum(_FlaskAsgi(app), lifespan="off")
+
+        def handler(event, context):
+            """Route EventBridge scheduled events to aggregation, everything else to Mangum."""
+            if event.get("source") == "aws.events" or event.get("detail-type") == "Scheduled Event":
+                from admin_aggregation import aggregate_daily_metrics
+                result = aggregate_daily_metrics()
+                print("Admin metrics aggregated: {}".format(result))
+                return {"statusCode": 200, "body": str(result)}
+            return _mangum_handler(event, context)
     except ImportError:
         pass
 

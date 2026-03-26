@@ -74,6 +74,30 @@ Resources:
         AllowHeaders: "'Content-Type,Authorization'"
         AllowOrigin: "'https://ai1stseo.com,https://www.ai1stseo.com,https://main.d30a3tvkvr1a51.amplifyapp.com'"
 
+  # Daily admin metrics aggregation (runs at 02:00 UTC)
+  AdminAggregationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: admin_aggregation.lambda_handler
+      CodeUri: .
+      Description: Daily admin metrics aggregation job
+      Timeout: 120
+      MemorySize: 256
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0859c7cfcb529b8ff
+        SubnetIds:
+          - !Ref PrivateSubnet1
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 2 * * ? *)
+            Description: Aggregate admin metrics daily at 02:00 UTC
+            Enabled: true
+
 Parameters:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet::Id

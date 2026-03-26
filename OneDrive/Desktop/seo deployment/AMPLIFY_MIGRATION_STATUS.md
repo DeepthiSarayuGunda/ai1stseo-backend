@@ -1,5 +1,9 @@
 # AI 1st SEO — Amplify Migration Status
-## March 21, 2026
+## Updated March 24, 2026
+
+> **STATUS: Troy's services (seo-backend + site-monitor) are FULLY MIGRATED to Lambda.**
+> DNS cutover complete. `api.ai1stseo.com` and `monitor.ai1stseo.com` now hit API Gateway → Lambda.
+> EC2 remains running for other team members' services only.
 
 This document provides full context on the EC2 → Amplify/Lambda migration so all team members and their agents can understand the current state of the infrastructure.
 
@@ -102,29 +106,33 @@ API Gateway custom domains have been pre-created for these services so team memb
 
 ---
 
-## What's Blocking Completion
+## ~~What's Blocking Completion~~ — RESOLVED (Mar 24)
 
-Troy's SSO role (PowerUserAccess) cannot modify IAM. We need Gurbachan to add 3 permissions to 2 existing Lambda roles:
+Paul added the required permissions to both Lambda roles on Mar 24. All three permissions confirmed working:
 
-**Roles:** `lambda-basic-execution` and `seo-analyzer-lambda-role`
+- ✅ `bedrock:InvokeModel` — Nova Lite invocations working (Messages API format)
+- ✅ `secretsmanager:GetSecretValue` — Cognito config accessible
+- ✅ `ses:SendEmail` / `ses:SendRawEmail` — Email notifications enabled
 
-**Permissions needed:**
-- `bedrock:InvokeModel` (Resource: `*`) — AI recommendations via Nova Lite
-- `secretsmanager:GetSecretValue` (Resource: `arn:aws:secretsmanager:us-east-1:823766426087:secret:ai1stseo/*`) — Cognito client credentials
-- `ses:SendEmail`, `ses:SendRawEmail` (Resource: `*`) — email notifications
+**Nova Lite fix applied:** The original `ai_inference.py` used the old Titan text format (`inputText`). Nova Lite requires the Messages API format (`messages` array with `content` objects). Fixed in both `backend/ai_inference.py` and `openclaw-site-monitor/ai_inference.py`. Both Lambdas redeployed.
 
-**What works without these permissions:** SEO analysis, auth, monitoring scans, health checks — all core functionality.
-
-**What's blocked:** AI-powered recommendations (Bedrock), email notifications (SES), Cognito secret from Secrets Manager (currently using env var fallback which works).
+**Lambda /tmp fix applied:** `web_ui.py` tried to create a `data/` directory at import time, but Lambda's `/var/task` is read-only. Fixed to use `/tmp/data` when running on Lambda.
 
 ---
 
-## What Happens Next (After Permissions)
+## What Happens Next
 
-1. Test AI recommendations and email on Lambda
-2. Switch DNS for `api.ai1stseo.com` and `monitor.ai1stseo.com` from EC2 to API Gateway
-3. EC2 keeps running for other team members' services
-4. Migration complete for seo-backend and site-monitor
+### Completed (Mar 24):
+1. ✅ IAM permissions granted by Paul
+2. ✅ Bedrock (Nova Lite) tested and working on both Lambdas
+3. ✅ DNS switched for `api.ai1stseo.com` → API Gateway (`d-padfgc44dk.execute-api.us-east-1.amazonaws.com`)
+4. ✅ DNS switched for `monitor.ai1stseo.com` → API Gateway (`d-o6a36rgu1d.execute-api.us-east-1.amazonaws.com`)
+5. ✅ Both endpoints verified: health checks, scans, uptime all returning 200 OK
+
+### Still Pending:
+- EC2 keeps running for other team members' services (seo-audit-tool, seo-analysis, automation-hub, ai-doc-summarizer)
+- EC2 can be decommissioned once ALL services are migrated off it
+- Gurbachan wants EC2 shut down ASAP — team members should migrate their services when ready (see migration guide below)
 
 ---
 

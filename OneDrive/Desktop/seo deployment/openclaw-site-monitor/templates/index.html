@@ -506,6 +506,15 @@ let authMode = 'login'; // login, signup, verify, forgot, reset
 let selectedChannels = [];
 let selectedFreq = 'daily';
 
+// Cross-subdomain SSO: read shared cookie from main dashboard if no local token
+if (!token) {
+  var ssoCookie = document.cookie.split(';').map(function(c){return c.trim();}).find(function(c){return c.startsWith('ai1stseo_sso=');});
+  if (ssoCookie) {
+    token = ssoCookie.split('=')[1];
+    if (token) { localStorage.setItem('ocm_token', token); }
+  }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   initTheme();
   if (token) { checkAuth(); } else { showLoggedOut(); }
@@ -547,6 +556,7 @@ function showLoggedOut() {
   localStorage.removeItem('ocm_refresh');
   localStorage.removeItem('ocm_name');
   localStorage.removeItem('ocm_email');
+  document.cookie = 'ai1stseo_sso=;domain=.ai1stseo.com;path=/;max-age=0;secure;samesite=lax';
 }
 
 async function checkAuth() {
@@ -716,6 +726,7 @@ async function doAuth() {
         localStorage.setItem('ocm_refresh', refreshToken);
         localStorage.setItem('ocm_name', userName);
         localStorage.setItem('ocm_email', userEmail);
+        document.cookie = 'ai1stseo_sso=' + token + ';domain=.ai1stseo.com;path=/;max-age=86400;secure;samesite=lax';
         closeAuth(); showLoggedIn(userName);
       } else { showErr(d.error || 'Login failed'); }
     } catch(e) { btn.textContent = 'LOGIN'; btn.disabled = false; showErr('Connection error'); }

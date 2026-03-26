@@ -8,7 +8,7 @@ Generates content snippets optimized for AI engine citation:
 - Feature descriptions
 - Meta descriptions
 
-Routes through EC2 Bedrock (Claude) for generation.
+Routes through Bedrock Nova / Ollama directly. No EC2 dependency.
 """
 
 import json
@@ -16,24 +16,13 @@ import logging
 import os
 from datetime import datetime, timezone
 
-import requests
-
 logger = logging.getLogger(__name__)
 
-EC2_GEO_ENGINE_URL = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
-EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "45"))
 
-
-def _call_ec2_generate(prompt: str) -> str:
-    """Call EC2 /generate endpoint for content generation via Bedrock."""
-    url = f"{EC2_GEO_ENGINE_URL}/generate"
-    try:
-        resp = requests.post(url, json={"prompt": prompt}, timeout=EC2_TIMEOUT)
-        if resp.status_code == 200:
-            return resp.json().get("text", "")
-    except Exception as e:
-        logger.warning("EC2 generate failed, using fallback: %s", e)
-    return ""
+def _call_generate(prompt: str) -> str:
+    """Call AI provider directly for content generation."""
+    from ai_provider import generate
+    return generate(prompt, provider="nova")
 
 
 def _now():
@@ -51,7 +40,7 @@ def generate_faq(brand_name: str, topic: str, count: int = 5) -> dict:
         f"Make answers factual, specific, and authoritative. "
         f"Include concrete details like features, pricing tiers, or use cases."
     )
-    raw = _call_ec2_generate(prompt)
+    raw = _call_generate(prompt)
 
     # Also generate the JSON-LD schema
     schema = {
@@ -93,7 +82,7 @@ def generate_comparison(brand_name: str, competitors: list[str], category: str) 
         f"End with a summary of which is best for different use cases. "
         f"Be factual and balanced."
     )
-    raw = _call_ec2_generate(prompt)
+    raw = _call_generate(prompt)
     return {
         "type": "comparison",
         "brand_name": brand_name,
@@ -111,7 +100,7 @@ def generate_meta_description(brand_name: str, page_topic: str) -> dict:
         f"'{page_topic}' by {brand_name}. Each should be compelling, include the brand, "
         f"and be optimized for AI engine extraction. Return only the 3 options, numbered."
     )
-    raw = _call_ec2_generate(prompt)
+    raw = _call_generate(prompt)
     import re
     options = re.findall(r'\d+[.)]\s*(.+)', raw)
     return {
@@ -130,7 +119,7 @@ def generate_feature_snippet(brand_name: str, feature: str) -> dict:
         f"'{feature}' feature. Include specific capabilities and what makes it "
         f"stand out. Write in third person, suitable for an AI to cite as a source."
     )
-    raw = _call_ec2_generate(prompt)
+    raw = _call_generate(prompt)
     return {
         "type": "feature_snippet",
         "brand_name": brand_name,
