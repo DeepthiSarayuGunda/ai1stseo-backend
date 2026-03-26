@@ -5,12 +5,12 @@ RDS PostgreSQL connection pool for the AEO platform.
 Uses psycopg2 with a simple connection pool. All GEO probe results,
 AI visibility history, and batch results are persisted here.
 
-Environment variables:
-  RDS_HOST     - RDS endpoint (required)
-  RDS_PORT     - default 5432
-  RDS_DB       - database name (default: aeo_platform)
-  RDS_USER     - database user
-  RDS_PASSWORD - database password
+Environment variables (matching Lambda config):
+  DB_HOST     - RDS endpoint
+  DB_PORT     - default 5432
+  DB_NAME     - database name (default: ai1stseo)
+  DB_USER     - database user
+  DB_PASSWORD - database password
 """
 
 import logging
@@ -35,15 +35,15 @@ def _get_pool():
         _pool = psycopg2.pool.ThreadedConnectionPool(
             minconn=1,
             maxconn=10,
-            host=os.environ.get("RDS_HOST", "localhost"),
-            port=int(os.environ.get("RDS_PORT", "5432")),
-            dbname=os.environ.get("RDS_DB", "aeo_platform"),
-            user=os.environ.get("RDS_USER", "postgres"),
-            password=os.environ.get("RDS_PASSWORD", ""),
+            host=os.environ.get("DB_HOST", "localhost"),
+            port=int(os.environ.get("DB_PORT", "5432")),
+            dbname=os.environ.get("DB_NAME", "ai1stseo"),
+            user=os.environ.get("DB_USER", "postgres"),
+            password=os.environ.get("DB_PASSWORD", ""),
         )
         logger.info("RDS connection pool created: %s:%s/%s",
-                     os.environ.get("RDS_HOST"), os.environ.get("RDS_PORT", "5432"),
-                     os.environ.get("RDS_DB", "aeo_platform"))
+                     os.environ.get("DB_HOST"), os.environ.get("DB_PORT", "5432"),
+                     os.environ.get("DB_NAME", "ai1stseo"))
     return _pool
 
 

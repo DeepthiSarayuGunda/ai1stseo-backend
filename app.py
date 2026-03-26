@@ -23,6 +23,9 @@ import boto3
 import hmac
 import base64
 
+# Detect Lambda environment
+IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
@@ -2669,3 +2672,105 @@ def catch_all(path):
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
     app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
+
+# === Lambda handler (Mangum) ===
+if IS_LAMBDA:
+    try:
+        from mangum import Mangum
+        from mangum.adapter import Mangum as _M
+        import asyncio
+        import io as _io
+
+        class _FlaskAsgi:
+            """Minimal WSGI-to-ASGI adapter for Flask on Lambda."""
+            def __init__(self, wsgi_app):
+                self.wsgi_app = wsgi_app
+
+            async def __call__(self, scope, receive, send):
+                if scope["type"] == "lifespan":
+                    while True:
+                        message = await receive()
+                        if message["type"] == "lifespan.startup":
+                            await send({"type": "lifespan.startup.complete"})
+                        elif message["type"] == "lifespan.shutdown":
+                            await send({"type": "lifespan.shutdown.complete"})
+                            return
+                        else:
+                            return
+                elif scope["type"] == "http":
+                    await self._handle_http(scope, receive, send)
+
+            async def _handle_http(self, scope, receive, send):
+                body_parts = []
+                while True:
+                    message = await receive()
+                    body_parts.append(message.get("body", b""))
+                    if not message.get("more_body", False):
+                        break
+                body = b"".join(body_parts)
+
+                headers = dict(scope.get("headers", []))
+                environ = {
+                    "REQUEST_METHOD": scope["method"],
+                    "SCRIPT_NAME": "",
+                    "PATH_INFO": scope["path"],
+                    "QUERY_STRING": scope.get("query_string", b"").decode("utf-8"),
+                    "SERVER_NAME": headers.get(b"host", b"localhost").decode("utf-8").split(":")[0],
+                    "SERVER_PORT": str(scope.get("server", ("", 80))[1]) if scope.get("server") else "80",
+                    "SERVER_PROTOCOL": "HTTP/{}".format(scope.get("http_version", "1.1")),
+                    "wsgi.version": (1, 0),
+                    "wsgi.url_scheme": scope.get("scheme", "https"),
+                    "wsgi.input": _io.BytesIO(body),
+                    "wsgi.errors": _io.BytesIO(),
+                    "wsgi.multithread": False,
+                    "wsgi.multiprocess": False,
+                    "wsgi.run_once": False,
+                    "CONTENT_LENGTH": str(len(body)),
+                }
+                for hdr_name, hdr_val in scope.get("headers", []):
+                    name = hdr_name.decode("utf-8").lower()
+                    val = hdr_val.decode("utf-8")
+                    if name == "content-type":
+                        environ["CONTENT_TYPE"] = val
+                    else:
+                        key = "HTTP_{}".format(name.upper().replace("-", "_"))
+                        environ[key] = val
+
+                response_headers = []
+                status_code = [500]
+
+                def start_response(status, headers, exc_info=None):
+                    status_code[0] = int(status.split(" ", 1)[0])
+                    response_headers.clear()
+                    response_headers.extend(headers)
+
+                output = self.wsgi_app(environ, start_response)
+                body_out = b"".join(output)
+                if hasattr(output, "close"):
+                    output.close()
+
+                await send({
+                    "type": "http.response.start",
+                    "status": status_code[0],
+                    "headers": [(k.lower().encode(), v.encode()) for k, v in response_headers],
+                })
+                await send({
+                    "type": "http.response.body",
+                    "body": body_out,
+                })
+
+        _mangum_handler = Mangum(_FlaskAsgi(app), lifespan="off")
+
+        def handler(event, context):
+            """Route EventBridge scheduled events to aggregation, everything else to Mangum."""
+            if event.get("source") == "aws.events" or event.get("detail-type") == "Scheduled Event":
+                try:
+                    from admin_aggregation import aggregate_daily_metrics
+                    result = aggregate_daily_metrics()
+                    print("Admin metrics aggregated: {}".format(result))
+                    return {"statusCode": 200, "body": str(result)}
+                except Exception as e:
+                    return {"statusCode": 500, "body": str(e)}
+            return _mangum_handler(event, context)
+    except ImportError:
+        pass
