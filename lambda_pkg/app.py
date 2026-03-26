@@ -30,7 +30,6 @@ app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
-    'https://automationhub.ai1stseo.com',
     'https://d6ugqfyp4h9y3.cloudfront.net',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
@@ -1883,7 +1882,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/ai-recommendations', '/api/health']
     })
 
 # Ollama LLM Configuration
@@ -2280,7 +2279,7 @@ def generate_content_brief():
 
 @app.route('/api/content-briefs', methods=['GET'])
 def list_content_briefs():
-    """Retrieve past content briefs, optionally filtered by keyword."""
+    """Retrieve past content briefs."""
     try:
         from db import get_content_briefs, get_content_brief_by_id
         brief_id = request.args.get('id')
@@ -2290,155 +2289,10 @@ def list_content_briefs():
                 return jsonify({'error': 'Brief not found'}), 404
             return jsonify({'status': 'success', 'brief': brief})
         limit = min(int(request.args.get('limit', 20)), 100)
-        keyword_filter = request.args.get('keyword', '').strip()
-        briefs = get_content_briefs(limit=limit, keyword_filter=keyword_filter)
+        briefs = get_content_briefs(limit=limit)
         return jsonify({'status': 'success', 'briefs': briefs, 'count': len(briefs)})
     except Exception as e:
         return jsonify({'error': f'Failed to retrieve briefs: {str(e)}'}), 500
-
-
-# ============== CONTENT SCORING ENGINE (Phase 2) ==============
-def compute_readability_score(text):
-    """Compute readability metrics: Flesch Reading Ease approximation."""
-    words = text.split()
-    word_count = len(words)
-    if word_count < 10:
-        return {'score': 0, 'grade': 'N/A', 'avg_sentence_len': 0, 'avg_word_len': 0, 'word_count': word_count}
-    sentences = [s.strip() for s in re.split(r'[.!?]+', text) if len(s.split()) > 2]
-    sent_count = max(len(sentences), 1)
-    syllable_count = sum(max(1, len(re.findall(r'[aeiouy]+', w.lower()))) for w in words)
-    avg_sent_len = word_count / sent_count
-    avg_syl = syllable_count / word_count
-    flesch = 206.835 - (1.015 * avg_sent_len) - (84.6 * avg_syl)
-    flesch = max(0, min(100, flesch))
-    if flesch >= 80: grade = 'Easy'
-    elif flesch >= 60: grade = 'Standard'
-    elif flesch >= 40: grade = 'Moderate'
-    elif flesch >= 20: grade = 'Difficult'
-    else: grade = 'Very Difficult'
-    return {
-        'score': round(flesch, 1), 'grade': grade,
-        'avg_sentence_len': round(avg_sent_len, 1),
-        'avg_word_len': round(sum(len(w) for w in words) / word_count, 1),
-        'word_count': word_count, 'sentence_count': sent_count,
-    }
-
-
-def compute_seo_score(url, soup, text):
-    """Score on-page SEO factors (0-100)."""
-    points = 0
-    max_points = 0
-    details = []
-    def check(name, passed, weight=1):
-        nonlocal points, max_points
-        max_points += weight
-        if passed:
-            points += weight
-            details.append({'check': name, 'status': 'pass', 'weight': weight})
-        else:
-            details.append({'check': name, 'status': 'fail', 'weight': weight})
-    title = soup.find('title')
-    title_text = title.string.strip() if title and title.string else ''
-    check('Title tag present', bool(title_text), 2)
-    check('Title length 30-60 chars', 30 <= len(title_text) <= 60)
-    meta_desc = soup.find('meta', attrs={'name': 'description'})
-    desc_text = meta_desc.get('content', '').strip() if meta_desc else ''
-    check('Meta description present', bool(desc_text), 2)
-    check('Description length 120-160', 120 <= len(desc_text) <= 160)
-    h1s = soup.find_all('h1')
-    check('Exactly one H1', len(h1s) == 1, 2)
-    h2s = soup.find_all('h2')
-    check('Has H2 headings', len(h2s) >= 2)
-    words = text.split()
-    check('Word count 300+', len(words) >= 300, 2)
-    check('Word count 1000+', len(words) >= 1000)
-    images = soup.find_all('img')
-    imgs_with_alt = [i for i in images if i.get('alt')]
-    check('Images have alt text', len(imgs_with_alt) == len(images) or not images)
-    parsed = urlparse(url)
-    internal_links = [a for a in soup.find_all('a', href=True) if parsed.netloc in urljoin(url, a.get('href', ''))]
-    check('3+ internal links', len(internal_links) >= 3)
-    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
-    check('Has structured data', bool(json_ld))
-    canonical = soup.find('link', {'rel': 'canonical'})
-    check('Has canonical tag', bool(canonical))
-    viewport = soup.find('meta', attrs={'name': 'viewport'})
-    check('Has viewport meta', bool(viewport))
-    score = round((points / max_points) * 100) if max_points else 0
-    return {'score': score, 'points': points, 'max_points': max_points, 'details': details}
-
-
-def compute_aeo_score(soup, text):
-    """Score AI Engine Optimization readiness (0-100)."""
-    points = 0
-    max_points = 0
-    details = []
-    def check(name, passed, weight=1):
-        nonlocal points, max_points
-        max_points += weight
-        if passed:
-            points += weight
-            details.append({'check': name, 'status': 'pass', 'weight': weight})
-        else:
-            details.append({'check': name, 'status': 'fail', 'weight': weight})
-    has_definition = bool(re.search(r'\b(is a|refers to|is defined as|means that)\b', text.lower()))
-    check('Contains direct definitions', has_definition, 2)
-    questions = text.count('?')
-    check('Has Q&A content (3+ questions)', questions >= 3, 2)
-    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
-    has_faq_schema = any('faq' in str(s).lower() for s in json_ld)
-    check('Has FAQ schema', has_faq_schema, 2)
-    check('Has any structured data', bool(json_ld))
-    list_items = soup.find_all('li')
-    check('Has lists (5+ items)', len(list_items) >= 5)
-    tables = soup.find_all('table')
-    check('Has data tables', bool(tables))
-    h2s = soup.find_all('h2')
-    h3s = soup.find_all('h3')
-    check('Good heading structure (3+ H2s)', len(h2s) >= 3)
-    check('Has sub-headings (H3s)', bool(h3s))
-    numbers = re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?%?\b', text)
-    check('Contains statistics/data (5+)', len(numbers) >= 5)
-    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text.lower()))
-    check('Cites sources/research', has_citations)
-    has_date = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text.lower()))
-    check('Has freshness signals', has_date)
-    paragraphs = soup.find_all('p')
-    long_paras = [p for p in paragraphs if len(p.get_text().split()) > 100]
-    check('No overly long paragraphs', len(long_paras) <= 2)
-    score = round((points / max_points) * 100) if max_points else 0
-    return {'score': score, 'points': points, 'max_points': max_points, 'details': details}
-
-
-@app.route('/api/content-score', methods=['POST'])
-def content_score():
-    """Content Scoring Engine — computes SEO score, AEO score, and readability for any URL."""
-    data = request.get_json()
-    url = (data or {}).get('url', '').strip()
-    if not url:
-        return jsonify({'error': 'url is required'}), 400
-    if not url.startswith('http'):
-        url = 'https://' + url
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        start_time = time.time()
-        resp = requests.get(url, headers=headers, timeout=15, verify=False)
-        load_time = time.time() - start_time
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.content, 'html.parser')
-        text = soup.get_text(separator=' ', strip=True)
-        readability = compute_readability_score(text)
-        seo = compute_seo_score(url, soup, text)
-        aeo = compute_aeo_score(soup, text)
-        overall = round(seo['score'] * 0.4 + aeo['score'] * 0.35 + readability['score'] * 0.25)
-        return jsonify({
-            'status': 'success', 'url': url, 'overall_score': overall,
-            'seo': seo, 'aeo': aeo, 'readability': readability,
-            'load_time': round(load_time, 2),
-            'scored_at': datetime.utcnow().isoformat()
-        })
-    except Exception as e:
-        return jsonify({'error': f'Scoring failed: {str(e)}'}), 500
 
 
 @app.route('/api/geo-probe', methods=['POST'])

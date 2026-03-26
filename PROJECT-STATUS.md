@@ -173,6 +173,7 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 26, 2026 | Added `BACKEND-ARCHITECTURE.md` — full backend architecture reference with module map, all API endpoints, DB schema, AI provider config, recent changes, and contributor rules. Covers shared Lambda deployment path and confirms all GEO/AEO/content endpoints are live. | `BACKEND-ARCHITECTURE.md` |
 | Mar 25, 2026 | Added SEO Audit Dashboard tool card (`seoaudit.ai1stseo.com`) to dashboard "SEO & Content Tools" section — red-to-orange gradient, "Report" tag, opens in new tab. Also added to Tools dropdown in navbar. Generates PDF audit reports. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Doc Intelligence (`docsummarizer.ai1stseo.com`) and Automation Hub (`automationhub.ai1stseo.com`) tool cards to dashboard SEO & Content Tools section. Removed duplicate SEO Audit Dashboard from Tools dropdown. All tools now in both card grid and dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 26, 2026 | Updated SEO Audit Dashboard link to Amplify URL (`main.dyvwpl8fa8swd.amplifyapp.com`) and AEO Platform link to Amplify URL (`main.d3ouus8qzvb5ml.amplifyapp.com`) — both in tool cards and Tools dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
