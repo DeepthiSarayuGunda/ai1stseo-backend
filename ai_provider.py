@@ -94,37 +94,65 @@ def call_ollama(prompt: str) -> str:
     return text
 
 
+# ── Groq (fast cloud fallback) ────────────────────────────────────────────────
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+
+def call_groq(prompt: str) -> str:
+    """Call Groq API. Fast cloud LLM fallback."""
+    if not GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY not set")
+    t0 = time.time()
+    resp = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+        json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}], "max_tokens": 1024},
+        timeout=30,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"Groq returned {resp.status_code}: {resp.text[:300]}")
+    text = resp.json()["choices"][0]["message"]["content"]
+    logger.info("Groq responded in %.2fs (%d chars)", time.time() - t0, len(text))
+    return text
+
+
 # ── Unified interface ─────────────────────────────────────────────────────────
 
 def generate(prompt: str, provider: str = "nova") -> str:
-    """Call the specified AI provider with automatic fallback.
+    """Call the specified AI provider with automatic fallback chain.
 
-    If the primary provider fails, falls back to the other provider.
-    Nova → Ollama fallback, Ollama → Nova fallback.
+    Fallback order: requested provider → Groq → Ollama → Nova (skipping the one already tried).
     """
+    # Build fallback chain based on requested provider
     if provider == "ollama":
-        primary, fallback, fallback_name = call_ollama, call_nova, "nova"
-    else:
-        primary, fallback, fallback_name = call_nova, call_ollama, "ollama"
+        chain = [("ollama", call_ollama), ("groq", call_groq), ("nova", call_nova)]
+    elif provider == "groq":
+        chain = [("groq", call_groq), ("nova", call_nova), ("ollama", call_ollama)]
+    else:  # nova (default)
+        chain = [("nova", call_nova), ("groq", call_groq), ("ollama", call_ollama)]
 
-    try:
-        return primary(prompt)
-    except Exception as e:
-        logger.warning("Primary provider '%s' failed: %s — falling back to '%s'",
-                       provider, str(e)[:200], fallback_name)
+    errors = []
+    for name, fn in chain:
         try:
-            return fallback(prompt)
-        except Exception as e2:
-            logger.error("Fallback provider '%s' also failed: %s", fallback_name, str(e2)[:200])
-            raise RuntimeError(
-                f"All AI providers failed. {provider}: {str(e)[:150]}; "
-                f"{fallback_name}: {str(e2)[:150]}"
-            )
+            return fn(prompt)
+        except Exception as e:
+            logger.warning("Provider '%s' failed: %s", name, str(e)[:200])
+            errors.append(f"{name}: {str(e)[:100]}")
+
+    raise RuntimeError(f"All AI providers failed. " + "; ".join(errors))
 
 
 def get_available_providers() -> list[dict]:
     """Check which providers are available."""
     providers = []
+
+    # Check Groq (fastest)
+    if GROQ_API_KEY:
+        providers.append({"name": "groq", "available": True, "reason": f"model: {GROQ_MODEL}"})
+    else:
+        providers.append({"name": "groq", "available": False, "reason": "GROQ_API_KEY not set"})
 
     # Check Ollama
     try:
