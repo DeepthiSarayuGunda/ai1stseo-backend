@@ -42,6 +42,7 @@
 | `brand_resolver.py` | Dev 1 | Brand ↔ domain resolution with caching |
 | `llm_service.py` | Dev 1/2 | Multi-provider LLM abstraction (Groq, Claude/Nova, OpenAI, Perplexity, Gemini) |
 | `ai_chatbot.py` | Dev 1 | SEO chatbot session management |
+| `geo_scanner_agent.py` | Dev 1 | **NEW** — GEO Scanner Agent orchestrator — coordinates 4 scanner agents, returns structured reports with plain-English summaries, persists to RDS |
 | `bedrock_helper.py` | Dev 2 | Bedrock helper — Nova Lite default, supports Nova + Anthropic formats |
 | `build_zip.py` | Dev 3 | Lambda deployment ZIP builder |
 | `patch_app.py` | — | App patching utility |
@@ -50,6 +51,20 @@
 ---
 
 ## API Endpoints — Full Reference
+
+### GEO Scanner Agent (`/api/geo-scanner/*`) — **NEW**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/geo-scanner/scan` | Full orchestrated scan — runs all scanner agents, returns structured report with overall score, executive summary, recommendations, and RDS persistence status |
+| GET | `/api/geo-scanner/agents` | List available scanner agents (brand_visibility, content_readiness, competitor_gap, site_mention) |
+
+### RDS Data Persistence (`/api/data/*`) — **NEW**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/data/geo-probes` | Persist individual GEO probe results to RDS `geo_probes` table |
+| POST | `/api/data/ai-visibility` | Persist batch visibility results to RDS `ai_visibility_history` table |
 
 ### Auth (`/api/auth/*`)
 
@@ -136,6 +151,7 @@
 | `/analyze` | `analyze.html` |
 | `/audit/` | `audit.html` |
 | `/geo-test` | `geo-test.html` |
+| `/geo-scanner` | `geo-scanner.html` — **NEW** GEO Scanner Agent dashboard |
 | `/dev1-dashboard` | `dev1-dashboard.html` |
 | `/dashboard` | Redirects to `/dev1-dashboard` |
 
