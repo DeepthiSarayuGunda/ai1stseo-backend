@@ -6,6 +6,24 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-03-26 18:17 — Content Briefs & Scoring Routes Added (Troy)
+
+**Issue:** GET `/api/content-briefs` was returning index.html instead of JSON. The route was never in the deployed `app.py` — it was in Samarveer's later commits but missed all previous merges.
+
+**Fix:** Added three routes + three compute functions to `app.py`:
+- `GET /api/content-briefs` — list briefs with keyword filter (calls `db.get_content_briefs()`)
+- `GET /api/content-briefs/<id>` — get single brief (calls `db.get_content_brief_by_id()`)
+- `POST /api/content-score` — score a URL for readability + SEO + AEO (40/35/25 weighted)
+- `compute_readability_score()` — Flesch Reading Ease approximation
+- `compute_seo_score()` — 5 on-page SEO checks (title, meta, H1, images, canonical)
+- `compute_aeo_score()` — 5 AI-extractable content checks (FAQ schema, definitions, Q&A headings, lists, tables)
+
+**Status:**
+- `/api/content-score` — fully working (tested: ai1stseo.com → readability 66.4, SEO 40.0, AEO 0.0, overall 32.6)
+- `/api/content-briefs` — route registered, returns JSON, but 500 because `get_content_briefs()` is not yet defined in `db.py`. **Samarveer needs to add this function and push.**
+
+---
+
 ## 2026-03-26 18:07 — Full Team Merge + Deepthi's GEO Routes Fixed (Troy)
 
 **What happened:** Rebuilt the Lambda with everyone's code merged. Used Samarveer's 73MB zip as the base (has all dependencies + Deepthi's GEO modules), injected Troy's blueprints (auth, admin, data API, webhooks, API keys), added Mangum Lambda handler, request logging, and CORS for all subdomains.
