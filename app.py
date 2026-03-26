@@ -2500,9 +2500,20 @@ def geo_probe_history():
     brand = request.args.get('brand')
     ai_model = request.args.get('ai_model')
     limit = int(request.args.get('limit', 50))
+    try:
+        batch = get_history()
+    except Exception as e:
+        batch = []
+        app.logger.error("Failed to load batch history: %s", e)
+    try:
+        stored = get_stored_history(limit=limit, brand=brand, ai_model=ai_model)
+    except Exception as e:
+        stored = []
+        app.logger.error("Failed to load stored history: %s", e)
     return jsonify({
-        'batch_history': get_history(),
-        'stored_results': get_stored_history(limit=limit, brand=brand, ai_model=ai_model),
+        'batch_history': batch,
+        'stored_results': stored,
+        'db_status': 'ok' if (batch or stored) else 'empty_or_unreachable',
     })
 
 
