@@ -18,6 +18,7 @@ import re
 import time
 import json
 import os
+from collections import Counter
 
 # Detect Lambda environment
 IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
@@ -2007,7 +2008,7 @@ def analyze_url():
     """Main SEO analysis endpoint - 216 checks across 9 categories"""
     data = request.get_json()
     url = data.get('url', '')
-    categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo'])
+    categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
     
     if not url:
         return jsonify({'error': 'URL is required'}), 400
@@ -2069,7 +2070,7 @@ def health_check():
             'security': 13,
             'social': 24,
             'local': 30,
-            'geo': 60
+            'geo': 60, 'citationgap': 20
         }
     })
 
@@ -2370,6 +2371,527 @@ def catch_all(path):
     if path.startswith('assets/'):
         return send_from_directory('..', path)
     return send_from_directory('..', 'index.html')
+
+
+# === Citation Gap Analysis (Dev 2 - Samarveer) ===
+def extract_primary_keyword(soup):
+
+    """Extract the primary keyword/topic from page signals"""
+
+    signals = []
+
+    
+
+    # Title tag (strongest signal)
+
+    title = soup.find('title')
+
+    if title and title.string:
+
+        signals.append(title.string.strip())
+
+    
+
+    # H1 tag
+
+    h1 = soup.find('h1')
+
+    if h1:
+
+        signals.append(h1.get_text().strip())
+
+    
+
+    # Meta description
+
+    meta_desc = soup.find('meta', attrs={'name': 'description'})
+
+    if meta_desc and meta_desc.get('content'):
+
+        signals.append(meta_desc['content'].strip())
+
+    
+
+    # Meta keywords (if present)
+
+    meta_kw = soup.find('meta', attrs={'name': 'keywords'})
+
+    if meta_kw and meta_kw.get('content'):
+
+        signals.append(meta_kw['content'].strip())
+
+    
+
+    # OG title
+
+    og_title = soup.find('meta', property='og:title')
+
+    if og_title and og_title.get('content'):
+
+        signals.append(og_title['content'].strip())
+
+    
+
+    # Combine and extract most common meaningful words
+
+    all_text = ' '.join(signals).lower()
+
+    # Remove common stop words
+
+    stop_words = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+
+                  'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+
+                  'should', 'may', 'might', 'can', 'shall', 'to', 'of', 'in', 'for',
+
+                  'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during',
+
+                  'before', 'after', 'above', 'below', 'between', 'and', 'but', 'or',
+
+                  'not', 'no', 'nor', 'so', 'yet', 'both', 'either', 'neither', 'each',
+
+                  'every', 'all', 'any', 'few', 'more', 'most', 'other', 'some', 'such',
+
+                  'than', 'too', 'very', 'just', 'about', 'up', 'out', 'if', 'then',
+
+                  'that', 'this', 'these', 'those', 'it', 'its', 'how', 'what', 'which',
+
+                  'who', 'whom', 'when', 'where', 'why', 'your', 'our', 'my', 'we', 'you',
+
+                  'i', 'me', 'he', 'she', 'they', 'them', 'his', 'her', 'their', 'us', '|', '-', '–'}
+
+    words = re.findall(r'\b[a-z]{3,}\b', all_text)
+
+    meaningful = [w for w in words if w not in stop_words]
+
+    
+
+    # Count frequency
+
+    freq = Counter(meaningful)
+
+    top_words = [w for w, _ in freq.most_common(5)]
+
+    
+
+    return ' '.join(top_words) if top_words else 'unknown topic'
+
+
+
+
+
+def analyze_citation_gap(url, soup, response, load_time):
+
+    """
+
+    Citation Gap Analysis - Compares Google ranking signals vs AI citation readiness.
+
+    Identifies content that may rank well on Google but isn't structured for AI citation,
+
+    and vice versa. Helps bridge the gap between traditional SEO and AI visibility.
+
+    """
+
+    checks = []
+
+    html = str(soup)
+
+    text = soup.get_text()
+
+    words = text.split()
+
+    word_count = len(words)
+
+    parsed = urlparse(url)
+
+    
+
+    # Extract primary keyword for context
+
+    keyword = extract_primary_keyword(soup)
+
+    
+
+    # ===== 1-5: Google Ranking Signal Strength =====
+
+    # Title tag keyword alignment
+
+    title = soup.find('title')
+
+    title_text = (title.string.strip() if title and title.string else '').lower()
+
+    keyword_words = keyword.split()
+
+    title_kw_match = sum(1 for kw in keyword_words if kw in title_text)
+
+    title_kw_ratio = title_kw_match / len(keyword_words) if keyword_words else 0
+
+    add_check(checks, 'Title Keyword Alignment', 'pass' if title_kw_ratio >= 0.6 else 'warning',
+
+              'Primary keyword in title', f'{title_kw_match}/{len(keyword_words)} keyword terms in title',
+
+              'Include primary keyword in title for Google ranking', 'High', 'Google Signals')
+
+    
+
+    # Meta description keyword presence
+
+    meta_desc = soup.find('meta', attrs={'name': 'description'})
+
+    desc_text = (meta_desc.get('content', '') if meta_desc else '').lower()
+
+    desc_kw_match = sum(1 for kw in keyword_words if kw in desc_text)
+
+    add_check(checks, 'Meta Description Keywords', 'pass' if desc_kw_match >= 1 else 'warning',
+
+              'Keywords in meta description', f'{desc_kw_match} keyword terms found',
+
+              'Include target keywords in meta description', 'High', 'Google Signals')
+
+    
+
+    # H1 keyword alignment
+
+    h1 = soup.find('h1')
+
+    h1_text = (h1.get_text().strip() if h1 else '').lower()
+
+    h1_kw_match = sum(1 for kw in keyword_words if kw in h1_text)
+
+    add_check(checks, 'H1 Keyword Match', 'pass' if h1_kw_match >= 1 else 'warning',
+
+              'Primary keyword in H1', f'{h1_kw_match} keyword terms in H1',
+
+              'Align H1 heading with target keyword', 'High', 'Google Signals')
+
+    
+
+    # Keyword density in body content
+
+    text_lower = text.lower()
+
+    kw_occurrences = sum(text_lower.count(kw) for kw in keyword_words)
+
+    kw_density = (kw_occurrences / word_count * 100) if word_count else 0
+
+    add_check(checks, 'Keyword Density', 'pass' if 1.0 <= kw_density <= 4.0 else ('warning' if kw_density < 1.0 else 'info'),
+
+              'Keyword frequency in content', f'{kw_density:.1f}% density',
+
+              'Aim for 1-3% keyword density for Google', 'Medium', 'Google Signals')
+
+    
+
+    # Backlink-worthy content signals (long-form, data, unique value)
+
+    has_data = len(re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?%?\b', text)) >= 5
+
+    has_depth = word_count >= 1000
+
+    has_lists = len(soup.find_all(['ul', 'ol'])) >= 2
+
+    link_worthy_score = sum([has_data, has_depth, has_lists])
+
+    add_check(checks, 'Link-Worthy Content', 'pass' if link_worthy_score >= 2 else 'warning',
+
+              'Content likely to earn backlinks', f'{link_worthy_score}/3 signals (data, depth, structure)',
+
+              'Create comprehensive content with data and structure', 'High', 'Google Signals')
+
+    
+
+    # ===== 6-10: AI Citation Readiness =====
+
+    # Direct answer format (AI engines prefer concise, extractable answers)
+
+    paragraphs = soup.find_all('p')
+
+    short_answer_paras = [p for p in paragraphs if 20 <= len(p.get_text().split()) <= 50]
+
+    add_check(checks, 'AI-Extractable Answers', 'pass' if len(short_answer_paras) >= 3 else 'warning',
+
+              'Concise answer paragraphs (20-50 words)', f'{len(short_answer_paras)} extractable paragraphs',
+
+              'Write concise paragraphs that AI can directly quote', 'Critical', 'AI Citation Readiness')
+
+    
+
+    # Factual claim density (AI cites factual, verifiable statements)
+
+    factual_patterns = re.findall(
+
+        r'(?:according to|studies show|research indicates|data shows|statistics reveal|'
+
+        r'experts say|evidence suggests|reports indicate|surveys show|analysis reveals|'
+
+        r'findings show|results demonstrate|published in|conducted by)\b',
+
+        text.lower()
+
+    )
+
+    add_check(checks, 'Factual Claim Density', 'pass' if len(factual_patterns) >= 2 else 'warning',
+
+              'Verifiable factual statements', f'{len(factual_patterns)} factual attribution phrases',
+
+              'Include cited facts and data that AI can reference', 'Critical', 'AI Citation Readiness')
+
+    
+
+    # Definition-style content (AI loves "X is Y" patterns)
+
+    definitions = re.findall(r'\b\w+\s+(?:is|are|refers to|means|is defined as|is known as)\s+[^.]{10,}\.', text)
+
+    add_check(checks, 'Definition Patterns', 'pass' if len(definitions) >= 2 else 'warning',
+
+              'Clear "X is Y" definitions', f'{len(definitions)} definition patterns',
+
+              'Include clear definitions that AI can extract and cite', 'High', 'AI Citation Readiness')
+
+    
+
+    # Unique insight score (AI cites original analysis, not rehashed content)
+
+    opinion_markers = ['we found', 'our analysis', 'we recommend', 'in our experience',
+
+                       'we believe', 'our research', 'we discovered', 'our data shows',
+
+                       'based on our', 'we tested', 'our team', 'we observed']
+
+    unique_insights = sum(1 for m in opinion_markers if m in text.lower())
+
+    add_check(checks, 'Original Insights', 'pass' if unique_insights >= 2 else 'warning',
+
+              'First-party analysis and opinions', f'{unique_insights} original insight markers',
+
+              'Add original research, data, or expert opinions AI will cite', 'Critical', 'AI Citation Readiness')
+
+    
+
+    # Structured Q&A format (directly answerable by AI)
+
+    qa_headings = [h for h in soup.find_all(['h2', 'h3', 'h4']) if '?' in h.get_text()]
+
+    faq_schema = 'FAQPage' in html or '"Question"' in html
+
+    add_check(checks, 'Q&A Structure', 'pass' if len(qa_headings) >= 2 or faq_schema else 'warning',
+
+              'Question-answer format for AI', f'{len(qa_headings)} question headings, FAQ schema: {"Yes" if faq_schema else "No"}',
+
+              'Structure content as questions and answers for AI citation', 'High', 'AI Citation Readiness')
+
+    
+
+    # ===== 11-15: Citation Gap Indicators =====
+
+    # Google-strong but AI-weak: good keywords but poor extractability
+
+    google_score = sum([
+
+        title_kw_ratio >= 0.6,
+
+        desc_kw_match >= 1,
+
+        h1_kw_match >= 1,
+
+        1.0 <= kw_density <= 4.0,
+
+        link_worthy_score >= 2
+
+    ])
+
+    ai_score = sum([
+
+        len(short_answer_paras) >= 3,
+
+        len(factual_patterns) >= 2,
+
+        len(definitions) >= 2,
+
+        unique_insights >= 2,
+
+        len(qa_headings) >= 2 or faq_schema
+
+    ])
+
+    
+
+    gap = abs(google_score - ai_score)
+
+    gap_direction = 'Google-heavy' if google_score > ai_score else ('AI-heavy' if ai_score > google_score else 'Balanced')
+
+    add_check(checks, 'Citation Gap Score', 'pass' if gap <= 1 else ('warning' if gap <= 2 else 'fail'),
+
+              'Balance between Google SEO and AI citation', f'Google: {google_score}/5, AI: {ai_score}/5 ({gap_direction})',
+
+              'Balance traditional SEO with AI-friendly content structure', 'Critical', 'Gap Analysis')
+
+    
+
+    # Content freshness signals (AI prefers recent, updated content)
+
+    date_meta = soup.find('meta', property='article:modified_time') or soup.find('meta', property='article:published_time')
+
+    time_elements = soup.find_all('time')
+
+    freshness_words = ['updated', 'latest', '2025', '2026', 'recently', 'new', 'current']
+
+    has_freshness = any(w in text.lower() for w in freshness_words)
+
+    add_check(checks, 'Content Freshness', 'pass' if (date_meta or time_elements) and has_freshness else 'warning',
+
+              'Recency signals for AI preference', f'Date meta: {"Yes" if date_meta else "No"}, Freshness words: {"Yes" if has_freshness else "No"}',
+
+              'Add publish/update dates and current year references', 'High', 'Gap Analysis')
+
+    
+
+    # Source authority signals (AI cites authoritative domains)
+
+    external_links = [a for a in soup.find_all('a', href=True) if a['href'].startswith('http') and parsed.netloc not in a['href']]
+
+    authority_domains = ['wikipedia', 'gov', 'edu', 'nature.com', 'sciencedirect', 'pubmed',
+
+                         'reuters', 'bbc', 'nytimes', 'forbes', 'harvard', 'stanford', 'mit']
+
+    authority_links = [l for l in external_links if any(d in l['href'].lower() for d in authority_domains)]
+
+    add_check(checks, 'Authority Source Links', 'pass' if len(authority_links) >= 1 else 'warning',
+
+              'Links to authoritative sources', f'{len(authority_links)} authority links out of {len(external_links)} external',
+
+              'Link to .gov, .edu, Wikipedia, and research sources for AI trust', 'High', 'Gap Analysis')
+
+    
+
+    # Semantic topic coverage (AI needs comprehensive topic coverage)
+
+    headings = soup.find_all(['h2', 'h3'])
+
+    heading_texts = [h.get_text().lower() for h in headings]
+
+    topic_breadth = len(set(' '.join(heading_texts).split())) if heading_texts else 0
+
+    add_check(checks, 'Topic Coverage Breadth', 'pass' if topic_breadth >= 15 else 'warning',
+
+              'Semantic topic comprehensiveness', f'{topic_breadth} unique terms across {len(headings)} subheadings',
+
+              'Cover subtopics comprehensively so AI sees your page as authoritative', 'High', 'Gap Analysis')
+
+    
+
+    # Competing content format (does page match what AI typically cites?)
+
+    has_summary = any(w in text.lower() for w in ['in summary', 'to summarize', 'key takeaways', 'bottom line', 'conclusion', 'tldr', 'tl;dr'])
+
+    has_intro = any(w in text.lower()[:500] for w in ['this guide', 'this article', 'in this post', 'we will explore', 'you will learn'])
+
+    has_structure = len(headings) >= 3 and len(paragraphs) >= 5
+
+    format_score = sum([has_summary, has_intro, has_structure])
+
+    add_check(checks, 'AI-Preferred Format', 'pass' if format_score >= 2 else 'warning',
+
+              'Content format AI engines prefer to cite', f'{format_score}/3 (intro: {"✓" if has_intro else "✗"}, structure: {"✓" if has_structure else "✗"}, summary: {"✓" if has_summary else "✗"})',
+
+              'Include clear intro, structured body, and summary/takeaways', 'High', 'Gap Analysis')
+
+    
+
+    # ===== 16-20: Bridge Recommendations =====
+
+    # Entity markup for AI knowledge graphs
+
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+
+    entity_types = ['Person', 'Organization', 'Product', 'Article', 'WebPage', 'HowTo', 'FAQPage']
+
+    entities_found = [e for e in entity_types if any(e in str(j) for j in json_ld)]
+
+    add_check(checks, 'Entity Schema Coverage', 'pass' if len(entities_found) >= 2 else 'warning',
+
+              'Schema types for AI knowledge extraction', f'{len(entities_found)} entity types: {", ".join(entities_found) or "None"}',
+
+              'Add Article, FAQPage, HowTo schemas to help AI understand your content', 'High', 'Bridge Strategy')
+
+    
+
+    # Snippet-optimized paragraphs (40-60 words, starts with topic)
+
+    snippet_ready = [p for p in paragraphs if 30 <= len(p.get_text().split()) <= 60
+
+                     and any(kw in p.get_text().lower() for kw in keyword_words)]
+
+    add_check(checks, 'Snippet-Ready Paragraphs', 'pass' if len(snippet_ready) >= 2 else 'warning',
+
+              'Paragraphs optimized for both featured snippets and AI quotes', f'{len(snippet_ready)} snippet-ready paragraphs',
+
+              'Write 40-60 word paragraphs containing your keyword that can serve as both Google snippets and AI citations', 'Critical', 'Bridge Strategy')
+
+    
+
+    # Comparative/superlative claims (AI cites "best", "most", "top" content)
+
+    comparison_words = ['best', 'top', 'most', 'leading', 'fastest', 'cheapest', 'easiest',
+
+                        'compared to', 'versus', 'vs', 'better than', 'unlike', 'difference between']
+
+    comparisons = sum(1 for w in comparison_words if w in text.lower())
+
+    add_check(checks, 'Comparative Content', 'pass' if comparisons >= 3 else 'info',
+
+              'Comparison and ranking language', f'{comparisons} comparative terms',
+
+              'Include comparisons and rankings that both Google and AI favor', 'Medium', 'Bridge Strategy')
+
+    
+
+    # Internal topic clustering (helps both Google and AI understand site authority)
+
+    internal_links = [a for a in soup.find_all('a', href=True) if parsed.netloc in urljoin(url, a['href'])]
+
+    descriptive_anchors = [a for a in internal_links if len(a.get_text().strip().split()) >= 2
+
+                           and a.get_text().strip().lower() not in ['click here', 'read more', 'learn more', 'here']]
+
+    add_check(checks, 'Topic Cluster Links', 'pass' if len(descriptive_anchors) >= 3 else 'warning',
+
+              'Internal links with descriptive anchors', f'{len(descriptive_anchors)} descriptive internal links',
+
+              'Build topic clusters with descriptive internal links for both Google authority and AI context', 'High', 'Bridge Strategy')
+
+    
+
+    # Overall bridge score
+
+    total_google = google_score
+
+    total_ai = ai_score
+
+    bridge_score = min(total_google, total_ai) / max(max(total_google, total_ai), 1) * 100
+
+    bridge_status = 'pass' if bridge_score >= 70 else ('warning' if bridge_score >= 40 else 'fail')
+
+    add_check(checks, 'Overall Bridge Score', bridge_status,
+
+              'How well content bridges Google SEO and AI citation', f'Bridge: {bridge_score:.0f}% (Google {total_google}/5, AI {total_ai}/5)',
+
+              'Optimize for both Google ranking factors AND AI citation patterns simultaneously', 'Critical', 'Bridge Strategy')
+
+    
+
+    passed = sum(1 for c in checks if c['status'] == 'pass')
+
+    return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed,
+
+            'keyword': keyword, 'googleScore': google_score, 'aiScore': ai_score, 'gapDirection': gap_direction}
+
+
+
+
+
+# ============== API ROUTES ==============
+
 
 # === Lambda handler (Mangum) ===
 if IS_LAMBDA:
