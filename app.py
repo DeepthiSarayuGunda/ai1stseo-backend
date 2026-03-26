@@ -2696,6 +2696,11 @@ def serve_geo_test():
 def serve_dev1_dashboard():
     return send_from_directory('.', 'dev1-dashboard.html')
 
+@app.route('/dashboard')
+def serve_dashboard_redirect():
+    """Short alias — /dashboard redirects to /dev1-dashboard"""
+    return send_from_directory('.', 'dev1-dashboard.html')
+
 
 @app.route('/<path:path>')
 def catch_all(path):
