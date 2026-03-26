@@ -6,6 +6,29 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-03-26 18:30 — Per-Dev Lambda Routing via API Gateway (Troy)
+
+**Problem:** Everyone deploying to the same Lambda kept breaking each other's code.
+
+**Solution:** Set up path-based routing on API Gateway. Each dev's routes go to their own Lambda. No more merge conflicts or broken deploys.
+
+**Route mapping:**
+| Path Prefix | Lambda | Dev | Notes |
+|-------------|--------|-----|-------|
+| `$default` (everything else) | `ai1stseo-backend` | Troy | Auth, admin, data API, webhooks, API keys, SEO analyzer, health. Also handles Samarveer's content-brief/score/briefs until he has his own Lambda. |
+| `/api/geo-probe/*`, `/api/aeo/*`, `/api/ai/*`, `/api/chatbot/*`, `/api/brand/*` | `ai1stseo-geo-engine` | Deepthi | GEO probes, AEO analyzer, AI chatbot, brand resolver |
+| `/api/social-posts/*` | `automation-hub` | Tabasum | Social post scheduler CRUD |
+
+**How to deploy your own Lambda now:**
+- Deepthi: deploy to `ai1stseo-geo-engine` — your routes are isolated
+- Tabasum: deploy to `automation-hub` — your routes are isolated
+- Samarveer: for now your routes still go through Troy's Lambda. When you're ready for your own, create a Lambda and Troy will add the route.
+- Troy: deploy to `ai1stseo-backend` — only your routes are affected
+
+**Each dev can deploy independently without breaking anyone else.**
+
+---
+
 ## 2026-03-26 18:17 — Content Briefs & Scoring Routes Added (Troy)
 
 **Issue:** GET `/api/content-briefs` was returning index.html instead of JSON. The route was never in the deployed `app.py` — it was in Samarveer's later commits but missed all previous merges.
