@@ -259,7 +259,7 @@ button:disabled{opacity:.5;cursor:wait}
 <div class="card full">
   <span class="tag tag-data">DATA</span>
   <h2>Probe History (Stored Results)</h2>
-  <p class="desc">All past GEO probe results stored in SQLite</p>
+  <p class="desc">All past GEO probe results stored in RDS PostgreSQL</p>
   <div class="row2">
     <div><label>Filter by Brand</label><input id="h-brand" class="sync-brand" placeholder="Auto-filled (optional)"></div>
     <div><label>Filter by Provider</label>
@@ -411,7 +411,13 @@ function friendlyHistoryResult(d) {
     });
     if (d.stored_results.length > 20) html += `<div class="fr-detail">… and ${d.stored_results.length - 20} more</div>`;
   }
-  if (!html) html = '<div class="fr-detail">No history found. Run some probes first.</div>';
+  if (!html) {
+    if (d.db_status === 'empty_or_unreachable') {
+      html = '<div class="fr-detail">No history found. Run some GEO probes first to build history, or the database may be temporarily unreachable.</div>';
+    } else {
+      html = '<div class="fr-detail">No history found. Run some probes first.</div>';
+    }
+  }
   return html;
 }
 
