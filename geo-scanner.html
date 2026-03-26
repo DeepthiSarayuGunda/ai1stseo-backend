@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO Scanner Agent — AI Visibility Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;padding:24px}
+h1{font-size:1.4rem;margin-bottom:4px}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:20px}
+.nav{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.nav a{color:#58a6ff;font-size:.82rem;text-decoration:none;padding:6px 12px;border:1px solid #30363d;border-radius:6px;transition:all .15s}
+.nav a:hover{background:#161b22;border-color:#58a6ff}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:16px;max-width:900px}
+label{display:block;font-size:.78rem;color:#8b949e;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.9rem}
+textarea{min-height:80px;resize:vertical;font-family:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{margin-top:12px;padding:12px 20px;border:none;border-radius:6px;color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;width:100%}
+button:disabled{opacity:.5;cursor:wait}
+.btn-scan{background:#238636;font-size:1rem}
+.btn-scan:hover{background:#2ea043}
+.tip{color:#58a6ff;cursor:help;font-size:.7rem;vertical-align:super}
+
+/* Results */
+.report{display:none;max-width:900px}
+.score-hero{text-align:center;padding:28px;background:#161b22;border:1px solid #30363d;border-radius:12px;margin-bottom:16px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;font-size:2rem;font-weight:700;border:5px solid}
+.score-high{border-color:#3fb950;color:#3fb950}
+.score-mid{border-color:#d29922;color:#d29922}
+.score-low{border-color:#f85149;color:#f85149}
+.score-label{font-size:.85rem;color:#8b949e;margin-top:8px}
+.summary-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-bottom:16px;line-height:1.6;font-size:.88rem}
+.summary-box p{margin-bottom:10px}
+.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;margin-bottom:10px}
+.scanner-card h3{font-size:.92rem;color:#58a6ff;margin-bottom:6px}
+.scanner-card .verdict{font-size:.85rem;line-height:1.5}
+.scanner-card .verdict.ok{color:#3fb950}
+.scanner-card .verdict.warn{color:#d29922}
+.scanner-card .verdict.bad{color:#f85149}
+.rec-list{list-style:none;padding:0}
+.rec-item{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:8px}
+.rec-item .rec-title{font-weight:600;font-size:.88rem;margin-bottom:4px}
+.rec-item .rec-desc{font-size:.8rem;color:#8b949e;line-height:1.5}
+.rec-item .rec-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin-right:6px}
+.badge-high{background:#f8514933;color:#f85149}
+.badge-medium{background:#d2992233;color:#d29922}
+.rds-status{font-size:.75rem;color:#8b949e;margin-top:12px;padding:8px;background:#0d1117;border-radius:6px}
+.elapsed{font-size:.75rem;color:#484f58;margin-top:8px}
+
+/* Agents list */
+.agents-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.agent-chip{background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:10px}
+.agent-chip .name{color:#58a6ff;font-weight:600;font-size:.82rem}
+.agent-chip .desc{color:#8b949e;font-size:.75rem;margin-top:2px}
+
+/* Parameter reference */
+.param-ref{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-top:16px;max-width:900px}
+.param-ref h3{font-size:.95rem;color:#58a6ff;margin-bottom:10px}
+.param-ref table{width:100%;border-collapse:collapse;font-size:.78rem}
+.param-ref th{text-align:left;color:#8b949e;padding:6px 8px;border-bottom:1px solid #30363d}
+.param-ref td{padding:6px 8px;border-bottom:1px solid #21262d;color:#c9d1d9}
+.param-ref td:first-child{color:#58a6ff;font-weight:600;white-space:nowrap}
+</style>
+</head>
+<body>
+<h1>🔬 GEO Scanner Agent</h1>
+<p class="sub">AI Visibility Scanner — Full automated scan with plain-English results</p>
+
+<nav class="nav" aria-label="Dashboard navigation">
+  <a href="/dev1-dashboard">← Dev 1 Dashboard</a>
+  <a href="/geo-test">GEO Probe (Simple)</a>
+  <a href="/">Home</a>
+</nav>
+
+<!-- Scanner Input -->
+<div class="card">
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:12px">Run a Full AI Visibility Scan</h2>
+  <p style="font-size:.82rem;color:#8b949e;margin-bottom:12px">Enter your brand details and we'll check how visible you are across AI search engines like ChatGPT, Perplexity, and Claude.</p>
+
+  <div class="row2">
+    <div>
+      <label for="s-brand">Brand Name <span class="tip" title="Your company or product name. We'll check if AI models mention this when users search for your industry.">ⓘ</span></label>
+      <input id="s-brand" placeholder="e.g. Notion, Shopify, Ahrefs">
+    </div>
+    <div>
+      <label for="s-url">Website URL (optional) <span class="tip" title="Your main website. Used to check if AI models link directly to your site and to analyze your page for AI-readiness.">ⓘ</span></label>
+      <input id="s-url" placeholder="e.g. https://notion.so">
+    </div>
+  </div>
+
+  <label for="s-kw">Keywords — one per line <span class="tip" title="Search queries your customers might type into ChatGPT or Perplexity. Example: 'best project management tools for startups'. More keywords = more thorough scan.">ⓘ</span></label>
+  <textarea id="s-kw" placeholder="best project management tools&#10;top productivity apps for teams&#10;project management software comparison"></textarea>
+
+  <div class="row2">
+    <div>
+      <label for="s-prov">AI Provider <span class="tip" title="Which AI model to query. Nova Lite is fast (AWS Bedrock). Ollama is a free fallback but slower.">ⓘ</span></label>
+      <select id="s-prov">
+        <option value="nova" selected>Nova Lite (Bedrock) — fast</option>
+        <option value="ollama">Ollama (qwen3:30b) — slower</option>
+      </select>
+    </div>
+    <div>
+      <label>Scanners</label>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:6px" id="agent-list">Loading agents…</div>
+    </div>
+  </div>
+
+  <button class="btn-scan" onclick="runScan()" id="scan-btn">🔍 Run Full AI Visibility Scan</button>
+  <div id="scan-error" style="color:#f85149;font-size:.82rem;margin-top:8px;display:none"></div>
+</div>
+
+<!-- Results Report -->
+<div class="report" id="report">
+  <div class="score-hero">
+    <div id="score-ring" class="score-ring score-mid">—</div>
+    <div class="score-label">Overall AI Visibility Score</div>
+  </div>
+
+  <div class="summary-box" id="exec-summary"></div>
+
+  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">Scanner Results</h2>
+  <div id="scanner-results"></div>
+
+  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">Recommendations</h2>
+  <ul class="rec-list" id="recommendations"></ul>
+
+  <div class="rds-status" id="rds-status"></div>
+  <div class="elapsed" id="elapsed"></div>
+</div>
+</body>
+</html>
+
+<!-- Comprehensive Parameter Reference -->
+<div class="param-ref">
+  <h3>AI Visibility Scanning — Complete Parameter Reference</h3>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Every parameter used across the GEO Scanner Agent system. Understanding these helps you interpret results and fine-tune scans.</p>
+  <table>
+    <tr><th>Parameter</th><th>Type</th><th>Used In</th><th>Description</th><th>Example</th></tr>
+    <tr><td>brand_name</td><td>string</td><td>All scanners</td><td>The company or product name to track across AI search engines</td><td>Notion, Ahrefs</td></tr>
+    <tr><td>url</td><td>string</td><td>Content Readiness, Site Mention</td><td>Your website URL — used for page analysis and link detection</td><td>https://notion.so</td></tr>
+    <tr><td>keywords</td><td>string[]</td><td>Brand Visibility, Batch Probe</td><td>Search queries users might ask AI. One per line. More = better coverage.</td><td>["best SEO tools", "top marketing platforms"]</td></tr>
+    <tr><td>provider</td><td>string</td><td>All probes</td><td>AI model to query. "nova" = AWS Bedrock Nova Lite (fast). "ollama" = free fallback (slower).</td><td>nova, ollama</td></tr>
+    <tr><td>scanners</td><td>string[]</td><td>Orchestrator</td><td>Which scanner agents to run. Omit to run all. Options: brand_visibility, content_readiness, competitor_gap, site_mention</td><td>["brand_visibility", "content_readiness"]</td></tr>
+    <tr><td>overall_score</td><td>0–100</td><td>Scan report</td><td>Weighted average across all scanners. 70+ = strong, 40-69 = moderate, &lt;40 = needs work.</td><td>62</td></tr>
+    <tr><td>geo_score</td><td>0.0–1.0</td><td>Brand Visibility</td><td>Fraction of keywords where your brand was cited by AI. 0.75 = 75% of queries mention you.</td><td>0.75</td></tr>
+    <tr><td>aeo_score</td><td>0–100</td><td>Content Readiness</td><td>How well your page is structured for AI engines. Checks schema, headings, FAQ, content depth.</td><td>72</td></tr>
+    <tr><td>visibility_score</td><td>0–100</td><td>Competitor Gap</td><td>% of AI models that cite your brand for a keyword. 67 = 2 of 3 models mention you.</td><td>67</td></tr>
+    <tr><td>confidence</td><td>0.0–1.0</td><td>Individual probes</td><td>How confident the citation detection is. 1.0 = strong recommendation, 0.5 = comparison mention, 0.0 = conditional/weak.</td><td>0.85</td></tr>
+    <tr><td>cited / brand_present</td><td>boolean</td><td>Individual probes</td><td>Whether the AI model mentioned your brand in its response to the keyword query.</td><td>true / false</td></tr>
+    <tr><td>citation_context</td><td>string</td><td>Individual probes</td><td>The exact sentence(s) where the AI mentioned your brand. Helps understand how you're being described.</td><td>"Notion is a top pick for…"</td></tr>
+    <tr><td>site_mentioned</td><td>boolean</td><td>Site Mention</td><td>Whether the AI model included a direct link to your website domain.</td><td>true / false</td></tr>
+    <tr><td>sentiment</td><td>string</td><td>Individual probes</td><td>Tone of the AI's mention: positive, neutral, or negative.</td><td>positive</td></tr>
+    <tr><td>severity</td><td>string</td><td>Content Readiness</td><td>Issue severity: high (fix first), medium (important), low (nice to have).</td><td>high</td></tr>
+    <tr><td>impact</td><td>string</td><td>Recommendations</td><td>Expected impact of following a recommendation: high or medium.</td><td>high</td></tr>
+    <tr><td>batch_results</td><td>JSON</td><td>RDS storage</td><td>Full probe results stored as JSONB in ai_visibility_history for historical analysis.</td><td>[{keyword, cited, …}]</td></tr>
+    <tr><td>project_id</td><td>UUID</td><td>All RDS tables</td><td>Multi-tenancy key. Default: 00000000-…-000001. Each project gets isolated data.</td><td>UUID</td></tr>
+  </table>
+</div>
+
+<script>
+const BASE = window.location.origin;
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Load available agents on page load
+(async function() {
+  try {
+    const r = await fetch(BASE + '/api/geo-scanner/agents');
+    const d = await r.json();
+    const el = document.getElementById('agent-list');
+    if (d.agents && d.agents.length) {
+      el.innerHTML = d.agents.map(a =>
+        `<span style="display:inline-block;padding:2px 8px;background:#21262d;border-radius:4px;margin:2px;font-size:.72rem">${esc(a.name)}</span>`
+      ).join(' ');
+    }
+  } catch(e) {
+    document.getElementById('agent-list').textContent = '4 agents available';
+  }
+})();
+
+async function runScan() {
+  const brand = document.getElementById('s-brand').value.trim();
+  const url = document.getElementById('s-url').value.trim();
+  const kw = document.getElementById('s-kw').value.split('\n').map(k => k.trim()).filter(Boolean);
+  const provider = document.getElementById('s-prov').value;
+  const errEl = document.getElementById('scan-error');
+  const btn = document.getElementById('scan-btn');
+
+  if (!brand) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Please enter a brand name.';
+    return;
+  }
+  if (!kw.length) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Please enter at least one keyword.';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '🔄 Scanning… this may take 30-60 seconds';
+  document.getElementById('report').style.display = 'none';
+
+  try {
+    const resp = await fetch(BASE + '/api/geo-scanner/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ brand_name: brand, url: url || undefined, keywords: kw, provider })
+    });
+    const d = await resp.json();
+    if (d.error) { errEl.style.display = 'block'; errEl.textContent = d.error; return; }
+    renderReport(d);
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Network error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Run Full AI Visibility Scan';
+  }
+}
+
+function renderReport(d) {
+  const report = document.getElementById('report');
+  report.style.display = 'block';
+
+  // Score ring
+  const ring = document.getElementById('score-ring');
+  const score = d.overall_score || 0;
+  ring.textContent = score;
+  ring.className = 'score-ring ' + (score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low');
+
+  // Executive summary
+  const summary = document.getElementById('exec-summary');
+  const paragraphs = (d.executive_summary || '').split('\n\n').filter(Boolean);
+  summary.innerHTML = paragraphs.map(p => `<p>${esc(p)}</p>`).join('');
+
+  // Scanner results
+  const container = document.getElementById('scanner-results');
+  const labels = {
+    brand_visibility: '🎯 Brand Visibility',
+    content_readiness: '📄 Content Readiness',
+    competitor_gap: '⚔️ Cross-Model Coverage',
+    site_mention: '🔗 Site Link Detection'
+  };
+  let html = '';
+  for (const [name, result] of Object.entries(d.scanner_results || {})) {
+    const label = labels[name] || name;
+    const s = result.friendly_summary || 'No summary available.';
+    const scoreVal = extractScore(name, result);
+    const cls = result.status === 'error' ? 'bad' : scoreVal >= 60 ? 'ok' : scoreVal >= 30 ? 'warn' : 'bad';
+    html += `<div class="scanner-card"><h3>${label}</h3><div class="verdict ${cls}">${esc(s)}</div></div>`;
+  }
+  container.innerHTML = html;
+
+  // Recommendations
+  const recList = document.getElementById('recommendations');
+  recList.innerHTML = (d.recommendations || []).map(r => {
+    const badge = r.impact === 'high' ? 'badge-high' : 'badge-medium';
+    return `<li class="rec-item"><div class="rec-title"><span class="rec-badge ${badge}">${r.impact}</span>${esc(r.title)}</div><div class="rec-desc">${esc(r.description)}</div></li>`;
+  }).join('');
+
+  // RDS status
+  const rds = d.rds_status || {};
+  document.getElementById('rds-status').textContent =
+    `Data saved: probes=${rds.geo_probes || '—'}, visibility=${rds.ai_visibility || '—'}`;
+
+  // Elapsed
+  document.getElementById('elapsed').textContent =
+    `Scan completed in ${d.elapsed_seconds || '—'}s · ${(d.scanners_run || []).length} scanners · ${d.timestamp || ''}`;
+
+  report.scrollIntoView({behavior: 'smooth'});
+}
+
+function extractScore(name, result) {
+  if (name === 'brand_visibility') return Math.round((result.geo_score || 0) * 100);
+  if (name === 'content_readiness') return result.aeo_score || 0;
+  if (name === 'competitor_gap') return result.visibility_score || 0;
+  if (name === 'site_mention') return result.site_mentioned ? 100 : 0;
+  return 50;
+}
+</script>
+</body>
+</html>
