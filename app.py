@@ -34,6 +34,14 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# ── RDS initialization ────────────────────────────────────────────────────────
+try:
+    from db import init_db
+    init_db()
+    print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+except Exception as e:
+    print(f"⚠ RDS init failed (will retry on first request): {e}")
+
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
 COGNITO_CLIENT_ID = '7scsae79o2g9idc92eputcrvrg'
@@ -2270,7 +2278,7 @@ def geo_probe_batch():
 
 @app.route('/api/geo-probe/history', methods=['GET'])
 def geo_probe_history():
-    """Return probe history — batch (in-memory) + stored (SQLite)."""
+    """Return probe history — batch summaries + individual probes from RDS."""
     from geo_probe_service import get_history, get_stored_history
     brand = request.args.get('brand')
     ai_model = request.args.get('ai_model')
