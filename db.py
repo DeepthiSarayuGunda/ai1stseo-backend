@@ -142,11 +142,15 @@ def init_db():
 def insert_probe(keyword: str, brand: str, ai_model: str, cited: bool,
                  citation_context: str = None, confidence: float = 0.0,
                  site_url: str = None) -> int:
-    """Insert a single probe result. Returns the new row id."""
+    """Insert a single probe result. Handles both 'brand' and 'brand_name' columns."""
     with get_conn() as conn:
         cur = conn.cursor()
+        # Detect column name
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'geo_probes' AND column_name IN ('brand', 'brand_name')")
+        brand_col = cur.fetchone()
+        brand_col = brand_col[0] if brand_col else "brand"
         cur.execute(
-            """INSERT INTO geo_probes (keyword, brand, ai_model, cited, citation_context, confidence, site_url)
+            f"""INSERT INTO geo_probes (keyword, {brand_col}, ai_model, cited, citation_context, confidence, site_url)
                VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
             (keyword, brand, ai_model, cited, citation_context, confidence, site_url),
         )
@@ -154,12 +158,18 @@ def insert_probe(keyword: str, brand: str, ai_model: str, cited: bool,
 
 
 def get_probes(limit: int = 50, brand: str = None, ai_model: str = None) -> list[dict]:
-    """Fetch probe results with optional filters."""
+    """Fetch probe results with optional filters. Handles both 'brand' and 'brand_name' columns."""
     with get_conn() as conn:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Detect which column name the table uses
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'geo_probes' AND column_name IN ('brand', 'brand_name')")
+        brand_col = cur.fetchone()
+        brand_col = brand_col["column_name"] if brand_col else "brand"
+
         clauses, params = [], []
         if brand:
-            clauses.append("brand = %s")
+            clauses.append(f"{brand_col} = %s")
             params.append(brand)
         if ai_model:
             clauses.append("ai_model = %s")
@@ -168,10 +178,12 @@ def get_probes(limit: int = 50, brand: str = None, ai_model: str = None) -> list
         params.append(limit)
         cur.execute(f"SELECT * FROM geo_probes {where} ORDER BY id DESC LIMIT %s", params)
         rows = cur.fetchall()
-        # Convert datetime to ISO string for JSON serialization
         for r in rows:
             if r.get("created_at"):
                 r["created_at"] = r["created_at"].isoformat()
+            # Normalize column name
+            if "brand_name" in r and "brand" not in r:
+                r["brand"] = r.pop("brand_name")
         return rows
 
 
@@ -179,14 +191,18 @@ def get_probe_trend(brand: str, limit: int = 30) -> list[dict]:
     """Daily aggregated visibility trend for a brand."""
     with get_conn() as conn:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
+        # Detect column name
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'geo_probes' AND column_name IN ('brand', 'brand_name')")
+        brand_col = cur.fetchone()
+        brand_col = brand_col["column_name"] if brand_col else "brand"
+        cur.execute(f"""
             SELECT DATE(created_at) AS date,
                    COUNT(*) AS total,
                    SUM(CASE WHEN cited THEN 1 ELSE 0 END) AS cited,
                    ROUND(SUM(CASE WHEN cited THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100) AS visibility_score,
                    ARRAY_AGG(DISTINCT ai_model) AS providers
             FROM geo_probes
-            WHERE brand = %s
+            WHERE {brand_col} = %s
             GROUP BY DATE(created_at)
             ORDER BY DATE(created_at) DESC
             LIMIT %s
