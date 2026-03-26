@@ -83,21 +83,99 @@ def require_auth(f):
         try:
             client = _get_cognito_client()
             user_info = client.get_user(AccessToken=token)
+            attrs = {
+                attr['Name']: attr['Value']
+                for attr in user_info.get('UserAttributes', [])
+            }
             # Attach user info to request context
             request.cognito_user = {
                 'username': user_info['Username'],
-                'attributes': {
-                    attr['Name']: attr['Value']
-                    for attr in user_info.get('UserAttributes', [])
-                }
+                'attributes': attrs,
+                'email': attrs.get('email', user_info['Username']),
+                'sub': attrs.get('sub', ''),
+                'name': attrs.get('name', ''),
+            }
+            # Look up role from DB
+            request.cognito_user['role'] = _get_user_role(attrs.get('email', ''))
+            return f(*args, **kwargs)
+        except client.exceptions.NotAuthorizedException:
+            return jsonify({'error': 'Token expired or invalid'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed: {}'.format(str(e))}), 401
+
+    return decorated
+
+
+def require_admin(f):
+    """Decorator — requires valid Cognito token AND admin role."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Missing or invalid Authorization header'}), 401
+
+        token = auth_header.split(' ', 1)[1]
+        try:
+            client = _get_cognito_client()
+            user_info = client.get_user(AccessToken=token)
+            attrs = {
+                attr['Name']: attr['Value']
+                for attr in user_info.get('UserAttributes', [])
+            }
+            email = attrs.get('email', user_info['Username'])
+            role = _get_user_role(email)
+            if role != 'admin':
+                return jsonify({'error': 'Admin access required'}), 403
+            request.cognito_user = {
+                'username': user_info['Username'],
+                'attributes': attrs,
+                'email': email,
+                'sub': attrs.get('sub', ''),
+                'name': attrs.get('name', ''),
+                'role': role,
             }
             return f(*args, **kwargs)
         except client.exceptions.NotAuthorizedException:
             return jsonify({'error': 'Token expired or invalid'}), 401
         except Exception as e:
-            return jsonify({'error': f'Authentication failed: {str(e)}'}), 401
+            return jsonify({'error': 'Authentication failed: {}'.format(str(e))}), 401
 
     return decorated
+
+
+def _get_user_role(email):
+    """Look up user role from RDS. Returns 'member' if not found."""
+    try:
+        from database import query_one
+        row = query_one("SELECT role FROM users WHERE email = %s", (email,))
+        return row['role'] if row else 'member'
+    except Exception:
+        return 'member'
+
+
+def _sync_user_to_db(email, cognito_sub, name=''):
+    """Upsert user to RDS on login — syncs Cognito data to local users table."""
+    try:
+        from database import execute, query_one
+        existing = query_one("SELECT id, role FROM users WHERE email = %s", (email,))
+        if existing:
+            execute(
+                "UPDATE users SET last_login = NOW(), cognito_sub = %s, name = %s WHERE email = %s",
+                (cognito_sub, name, email),
+            )
+            return existing['role']
+        else:
+            # Default project
+            project_id = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
+            execute(
+                "INSERT INTO users (cognito_sub, email, name, role, project_id, last_login) "
+                "VALUES (%s, %s, %s, 'member', %s, NOW())",
+                (cognito_sub, email, name, project_id),
+            )
+            return 'member'
+    except Exception as e:
+        print("User sync failed: {}".format(e))
+        return 'member'
 
 
 # ============== AUTH ROUTES ==============
@@ -235,6 +313,12 @@ def login():
         # Decode the ID token to get user info
         id_payload = _decode_jwt_payload(auth_result['IdToken'])
 
+        # Sync user to RDS and get role
+        user_email = id_payload.get('email', email)
+        user_sub = id_payload.get('sub', '')
+        user_name = id_payload.get('name', '')
+        role = _sync_user_to_db(user_email, user_sub, user_name)
+
         return jsonify({
             'status': 'success',
             'accessToken': auth_result['AccessToken'],
@@ -242,10 +326,11 @@ def login():
             'refreshToken': auth_result['RefreshToken'],
             'expiresIn': auth_result['ExpiresIn'],
             'user': {
-                'email': id_payload.get('email', email),
-                'name': id_payload.get('name', ''),
+                'email': user_email,
+                'name': user_name,
                 'emailVerified': id_payload.get('email_verified', False),
-                'sub': id_payload.get('sub', '')
+                'sub': user_sub,
+                'role': role,
             }
         })
 
