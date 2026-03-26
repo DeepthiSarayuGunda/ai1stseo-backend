@@ -97,29 +97,11 @@ def call_ollama(prompt: str) -> str:
 # ── Unified interface ─────────────────────────────────────────────────────────
 
 def generate(prompt: str, provider: str = "nova") -> str:
-    """Call the specified AI provider with automatic fallback.
-
-    If the primary provider fails, falls back to the other provider.
-    Nova → Ollama fallback, Ollama → Nova fallback.
-    """
+    """Call the specified AI provider. Returns response text."""
     if provider == "ollama":
-        primary, fallback, fallback_name = call_ollama, call_nova, "nova"
+        return call_ollama(prompt)
     else:
-        primary, fallback, fallback_name = call_nova, call_ollama, "ollama"
-
-    try:
-        return primary(prompt)
-    except Exception as e:
-        logger.warning("Primary provider '%s' failed: %s — falling back to '%s'",
-                       provider, str(e)[:200], fallback_name)
-        try:
-            return fallback(prompt)
-        except Exception as e2:
-            logger.error("Fallback provider '%s' also failed: %s", fallback_name, str(e2)[:200])
-            raise RuntimeError(
-                f"All AI providers failed. {provider}: {str(e)[:150]}; "
-                f"{fallback_name}: {str(e2)[:150]}"
-            )
+        return call_nova(prompt)
 
 
 def get_available_providers() -> list[dict]:
