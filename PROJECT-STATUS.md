@@ -11,7 +11,7 @@
 | Component | URL / Location | Tech |
 |-----------|---------------|------|
 | Frontend (Production) | `https://www.ai1stseo.com` via CloudFront `E16GYTIVXY9IOU` | React + Vite (dashboard) + static HTML on S3 (`ai1stseo-website`) |
-| Auth API (Production) | `https://api.ai1stseo.com/api/auth/*` | Troy's EC2 (`54.226.251.216`) |
+| Auth API (Production) | `https://api.ai1stseo.com/api/auth/*` | Lambda + API Gateway (migrated from EC2, EC2 shut down Mar 26) |
 | App Runner (Dev/Test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` | Flask Python backend |
 | SEO Analyzer Backend | App Runner | Flask — 236 checks across 10 categories |
 | Cognito User Pool | `us-east-1_DVvth47zH` | Client ID: `7scsae79o2g9idc92eputcrvrg` |
@@ -132,30 +132,26 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 ---
 
-## Current Sprint — Dev 5 Tasks (Due Thursday Mar 26)
+## Current Sprint — Dev 5 Tasks (Due Tuesday Mar 31)
 
-### 🔧 Cleanup (Immediate)
-- Resend Tailscale team emails to Gurbachan
-- Send AI companion meeting notes to team by email
+### 🔧 From Mar 26 Meeting
+- Clean up main website (`index.html`) — move non-essential resources, diagrams, and buttons to admin dashboard. Only essential info visible to public.
+- Add standard company pages to main website: About Us, Privacy Policy, Contact. Consider adding developer info under About Us. Make it professional and advertising-friendly.
+- Make free SEO analysis + PDF report feature prominent on homepage (helps Tabasum with marketing)
+- Deploy project to Linux server by Tuesday using OpenShell/NVIDIA open shell layer. Share deployment instructions with team.
+- Coordinate with Troy on updating main website (shared task)
 
-### ✅ Dashboard Separation (Done — Mar 24)
-- Per Gurbachan's demo feedback: split into two distinct pages
-- **User Dashboard** (`dashboard.html`) — tools-first layout. AEO/GEO tools (GEO Visibility Scanner, AEO Optimizer, Citation Gap Analysis) prioritized at top. SEO & Content tools (Full Audit, Content Brief, Quick Scan) below. Stats widgets, category breakdown, recent audits preserved.
-- **Admin Dashboard** (`admin.html`) — internal management page. Key metrics (Total Users, Active This Week, Total Audits, Briefs Generated, MRR), traffic/sign-up chart placeholders, recent sign-ups table (needs backend endpoint), platform health checks (App Runner, Auth API, CloudFront, SES live status). Auth-gated, links back to user dashboard.
-- Both uploaded to S3, CloudFront invalidated
-
-### ✅ React + Vite Migration (Done — Mar 24)
-- `dashboard.html` now served from React + Vite build (TypeScript + Tailwind CSS)
-- Live API call: AnalyzeBar calls App Runner `/api/analyze` directly, updates dashboard state in-place (no page navigation)
-- Site Status widget: pings last audited site's favicon, shows ✅ Online or ❌ Down
-- Audit results saved to localStorage and dashboard updates immediately after analysis
-- Loading state on ANALYZE button during API call
-- All components: Navbar, ToolCard, AnalyzeBar, ScoreRing, StatWidget, CategoryGrid, RecentAudits
-- Source: `frontend/src/` — builds to `frontend/dist/`, deployed to S3 as `dashboard.html`
-- Tech stack: React 19 + TypeScript + Vite 6 + Tailwind CSS 3
-
-### ⚠️ Coordination Required
-- Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
+### ✅ Previous Sprint (Done — Mar 24-26)
+- Dashboard separation (user + admin) per Gurbachan's feedback ✅
+- React + Vite migration of user dashboard ✅
+- Light/dark mode fix across all components ✅
+- Admin dashboard deployed (Troy's version with live API endpoints) ✅
+- Admin role-based access via `/api/admin/me` ✅
+- Website Monitoring tool card added (Troy's `monitor.ai1stseo.com`) ✅
+- SEO Audit Dashboard tool card added (`main.dyvwpl8fa8swd.amplifyapp.com`) ✅
+- AEO Platform tool card added (Deepthi's `main.d3ouus8qzvb5ml.amplifyapp.com`) ✅
+- Cross-subdomain SSO auth.js deployed ✅
+- Admin dashboard restyled to match user dashboard theme ✅
 
 ### 📋 Upcoming
 1. Expand Local SEO category — per Gurbachan's feedback (Mar 26 email). Current: 0/15 checks. Article reference shows 20+ distinct Local SEO audit areas: GBP category/attribute audits, review velocity analysis, review response templates, GBP posting strategy, services section optimization, description optimization, photo audits, citation consistency (NAP), competitor GBP comparison, entity optimization, local search intent mapping. Goal: make Local SEO the deepest category in the platform.
@@ -173,9 +169,9 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
-| Mar 26, 2026 | Added `BACKEND-ARCHITECTURE.md` — full backend architecture reference with module map, all API endpoints, DB schema, AI provider config, recent changes, and contributor rules. Covers shared Lambda deployment path and confirms all GEO/AEO/content endpoints are live. | `BACKEND-ARCHITECTURE.md` |
 | Mar 25, 2026 | Added SEO Audit Dashboard tool card (`seoaudit.ai1stseo.com`) to dashboard "SEO & Content Tools" section — red-to-orange gradient, "Report" tag, opens in new tab. Also added to Tools dropdown in navbar. Generates PDF audit reports. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Doc Intelligence (`docsummarizer.ai1stseo.com`) and Automation Hub (`automationhub.ai1stseo.com`) tool cards to dashboard SEO & Content Tools section. Removed duplicate SEO Audit Dashboard from Tools dropdown. All tools now in both card grid and dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
+| Mar 26, 2026 | Sprint updated per Mar 26 team meeting — new tasks: clean up homepage for professional/advertising look, add About Us/Privacy Policy/Contact pages, move non-essential items to admin dashboard, deploy to Linux server by Tuesday. Architecture updated: EC2 shut down, auth API now on Lambda + API Gateway. | `PROJECT-STATUS.md` |
 | Mar 26, 2026 | Updated SEO Audit Dashboard link to Amplify URL (`main.dyvwpl8fa8swd.amplifyapp.com`) and AEO Platform link to Amplify URL (`main.d3ouus8qzvb5ml.amplifyapp.com`) — both in tool cards and Tools dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Deepthi's AEO Platform tool card (`seoanalysis.ai1stseo.com`) to dashboard "AI Search Optimization" section — purple gradient, opens in new tab. Also added to Tools dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Deployed Troy's updated `auth.js` with cross-subdomain SSO — shared cookie on `.ai1stseo.com` so users stay logged in across `www`, `monitor`, and `seoaudit` subdomains. Uploaded to S3, CloudFront invalidated. | `assets/auth.js` (S3) |
