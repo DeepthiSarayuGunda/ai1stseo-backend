@@ -23,14 +23,10 @@ import boto3
 import hmac
 import base64
 
-# Detect Lambda environment
-IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
-
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
-    'https://automationhub.ai1stseo.com',
     'https://d6ugqfyp4h9y3.cloudfront.net',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
@@ -105,7 +101,7 @@ def send_welcome_email(email, name):
         print(f"SES not available - skipping welcome email for {email}")
         return False
     try:
-        subject = "Welcome to AI1stSEO — Your AI-First SEO Platform"
+        subject = "Welcome to AI1stSEO ΓÇö Your AI-First SEO Platform"
         html_body = f"""
         <html>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #ffffff; padding: 40px;">
@@ -113,23 +109,23 @@ def send_welcome_email(email, name):
                 <h1 style="background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; font-size: 2rem;">AISEO Master</h1>
                 <h2 style="color: #00d4ff; text-align: center;">Welcome, {name}!</h2>
                 <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
-                    Thank you for joining <strong>AI1stSEO</strong> — the AI-First SEO Platform. We're excited to have you on board!
+                    Thank you for joining <strong>AI1stSEO</strong> ΓÇö the AI-First SEO Platform. We're excited to have you on board!
                 </p>
                 <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
                     Here's what you can do with your account:
                 </p>
                 <ul style="color: rgba(255,255,255,0.8); line-height: 2; font-size: 1rem;">
-                    <li><strong>SEO Analyzer</strong> — Run comprehensive 180-point SEO audits on any website</li>
-                    <li><strong>9 Audit Categories</strong> — Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
-                    <li><strong>AI Optimization</strong> — Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
-                    <li><strong>Detailed Reports</strong> — Actionable recommendations with impact ratings</li>
+                    <li><strong>SEO Analyzer</strong> ΓÇö Run comprehensive 180-point SEO audits on any website</li>
+                    <li><strong>9 Audit Categories</strong> ΓÇö Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
+                    <li><strong>AI Optimization</strong> ΓÇö Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
+                    <li><strong>Detailed Reports</strong> ΓÇö Actionable recommendations with impact ratings</li>
                 </ul>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing →</a>
+                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing ΓåÆ</a>
                 </div>
                 <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                     <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
-                        AI1stSEO — Optimize for AI Discovery<br>
+                        AI1stSEO ΓÇö Optimize for AI Discovery<br>
                         <a href="https://ai1stseo.com" style="color: #00d4ff; text-decoration: none;">ai1stseo.com</a>
                     </p>
                 </div>
@@ -1227,7 +1223,7 @@ def extract_primary_keyword(soup):
                   'than', 'too', 'very', 'just', 'about', 'up', 'out', 'if', 'then',
                   'that', 'this', 'these', 'those', 'it', 'its', 'how', 'what', 'which',
                   'who', 'whom', 'when', 'where', 'why', 'your', 'our', 'my', 'we', 'you',
-                  'i', 'me', 'he', 'she', 'they', 'them', 'his', 'her', 'their', 'us', '|', '-', '–'}
+                  'i', 'me', 'he', 'she', 'they', 'them', 'his', 'her', 'their', 'us', '|', '-', 'ΓÇô'}
     words = re.findall(r'\b[a-z]{3,}\b', all_text)
     meaningful = [w for w in words if w not in stop_words]
     
@@ -1394,7 +1390,7 @@ def analyze_citation_gap(url, soup, response, load_time):
     has_structure = len(headings) >= 3 and len(paragraphs) >= 5
     format_score = sum([has_summary, has_intro, has_structure])
     add_check(checks, 'AI-Preferred Format', 'pass' if format_score >= 2 else 'warning',
-              'Content format AI engines prefer to cite', f'{format_score}/3 (intro: {"✓" if has_intro else "✗"}, structure: {"✓" if has_structure else "✗"}, summary: {"✓" if has_summary else "✗"})',
+              'Content format AI engines prefer to cite', f'{format_score}/3 (intro: {"Γ£ô" if has_intro else "Γ£ù"}, structure: {"Γ£ô" if has_structure else "Γ£ù"}, summary: {"Γ£ô" if has_summary else "Γ£ù"})',
               'Include clear intro, structured body, and summary/takeaways', 'High', 'Gap Analysis')
     
     # ===== 16-20: Bridge Recommendations =====
@@ -1676,7 +1672,7 @@ def verify_token():
 # ============== ADDITIONAL AUTH FEATURES ==============
 
 def require_auth(f):
-    """Decorator to protect routes — expects JSON body with 'token' field"""
+    """Decorator to protect routes ΓÇö expects JSON body with 'token' field"""
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -1733,7 +1729,7 @@ def refresh_token():
 
 @app.route('/api/send-welcome', methods=['POST'])
 def send_welcome():
-    """Send welcome email — called by frontend after signup confirmation"""
+    """Send welcome email ΓÇö called by frontend after signup confirmation"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     name = data.get('name', '') or email.split('@')[0]
@@ -1750,7 +1746,7 @@ def send_welcome():
 
 @app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
-    """Initiate password reset — sends code to email (direct HTTP)"""
+    """Initiate password reset ΓÇö sends code to email (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
 
@@ -1882,13 +1878,11 @@ def health_check():
             'local': 15,
             'geo': 30,
             'citationgap': 20
-        },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health']
+        }
     })
 
 # Ollama LLM Configuration
-OLLAMA_URL = 'https://ollama.sageaios.com/api'  # Primary: free Ollama on homelab GPU
-OLLAMA_FALLBACK_URL = 'https://api.databi.io/api'  # Fallback
+OLLAMA_URL = 'https://api.databi.io/api'  # Reverse proxy to local Ollama server
 
 @app.route('/api/ai-recommendations', methods=['POST'])
 def get_ai_recommendations():
@@ -1934,20 +1928,40 @@ Provide a response with:
 Be specific and actionable. Include actual code examples where helpful."""
 
     try:
-        llm_response = call_llm(prompt, timeout=120)
+        llm_response = requests.post(
+            f"{OLLAMA_URL}/generate",
+            headers={'Content-Type': 'application/json'},
+            json={
+                'model': 'llama3.1:latest',
+                'stream': False,
+                'prompt': prompt
+            },
+            timeout=120  # LLM can take time
+        )
         
-        if llm_response:
+        if llm_response.status_code == 200:
+            result = llm_response.json()
             return jsonify({
                 'status': 'success',
-                'recommendations': llm_response,
+                'recommendations': result.get('response', 'No recommendations generated'),
                 'model': 'llama3.1'
             })
         else:
             return jsonify({
                 'status': 'error',
-                'error': 'Could not connect to any AI server.'
-            }), 503
+                'error': f'LLM service returned status {llm_response.status_code}'
+            }), 500
             
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'status': 'error',
+            'error': 'LLM request timed out. The AI server may be busy.'
+        }), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            'status': 'error', 
+            'error': 'Could not connect to AI server. Please check if the Ollama service is running.'
+        }), 503
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -2443,7 +2457,7 @@ def content_score():
 
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    """GEO Monitoring Engine — multi-provider, direct AI calls."""
+    """GEO Monitoring Engine ΓÇö multi-provider, routes to EC2 AI engine."""
     from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
@@ -2472,7 +2486,7 @@ def geo_probe_models():
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO/AEO batch analysis — multi-provider, direct AI calls."""
+    """GEO/AEO batch analysis ΓÇö multi-provider, routes to EC2."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
@@ -2495,7 +2509,7 @@ def geo_probe_batch():
 
 @app.route('/api/geo-probe/history', methods=['GET'])
 def geo_probe_history():
-    """Return probe history — batch summaries + individual probes from RDS."""
+    """Return probe history ΓÇö batch (in-memory) + stored (SQLite)."""
     from geo_probe_service import get_history, get_stored_history
     brand = request.args.get('brand')
     ai_model = request.args.get('ai_model')
@@ -2570,25 +2584,10 @@ def geo_probe_trend():
     return jsonify(get_visibility_trend(brand, limit=limit))
 
 
-@app.route('/api/brand/resolve', methods=['POST'])
-def brand_resolve():
-    """Resolve brand name <-> domain, suggest keywords."""
-    from brand_resolver import resolve_brand
-    data = request.get_json() or {}
-    brand = (data.get('brand') or data.get('brand_name') or '').strip() or None
-    url = (data.get('url') or data.get('site_url') or '').strip() or None
-    if not brand and not url:
-        return jsonify({'error': 'Provide brand or url'}), 400
-    try:
-        return jsonify(resolve_brand(brand=brand, url=url))
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
-    AI Citation Probe — calls Bedrock/Ollama directly.
+    AI Citation Probe ΓÇö routes to EC2 geo_engine for Bedrock access.
 
     Request:
         { "keyword": "best project management tools 2025",
@@ -2621,13 +2620,13 @@ def ai_citation_probe():
 @app.route('/api/ai/geo-monitor', methods=['POST'])
 def ai_geo_monitor():
     """
-    GEO Monitor — query all available AI models in parallel for a keyword.
+    GEO Monitor ΓÇö query all available AI models in parallel for a keyword.
 
     Request:
         {
           "keyword":   "best CRM software 2025",  (required)
-          "brand":     "HubSpot",                 (optional — tracked in scoring)
-          "providers": ["claude", "openai"]        (optional — defaults to all)
+          "brand":     "HubSpot",                 (optional ΓÇö tracked in scoring)
+          "providers": ["claude", "openai"]        (optional ΓÇö defaults to all)
         }
 
     Response:
@@ -2675,7 +2674,7 @@ def serve_uml_diagrams():
 
 @app.route('/api/aeo/analyze', methods=['POST'])
 def aeo_analyze():
-    """AEO analysis — scan a URL for AI engine optimization issues."""
+    """AEO analysis ΓÇö scan a URL for AI engine optimization issues."""
     from aeo_optimizer import analyze_aeo
 
     data = request.get_json() or {}
@@ -2863,6 +2862,142 @@ def llm_citation_probe():
     except Exception as e:
         return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
+# ============== SOCIAL MEDIA SCHEDULER ==============
+
+import sqlite3
+
+SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png'}
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def _init_social_db():
+    """Create the scheduled_posts table if it doesn't exist, and migrate if needed."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS scheduled_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            platforms TEXT NOT NULL,
+            scheduled_datetime TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            image_path TEXT
+        )
+    ''')
+    # Migration: add image_path column to existing databases that lack it
+    cols = [row[1] for row in conn.execute('PRAGMA table_info(scheduled_posts)').fetchall()]
+    if 'image_path' not in cols:
+        conn.execute('ALTER TABLE scheduled_posts ADD COLUMN image_path TEXT')
+    conn.commit()
+    conn.close()
+
+_init_social_db()
+
+def _allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXT
+
+
+@app.route('/social')
+def serve_social():
+    return send_from_directory('.', 'social.html')
+
+
+@app.route('/static/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
+
+@app.route('/api/social/posts', methods=['GET'])
+def social_get_posts():
+    """Return all scheduled posts ordered by scheduled_datetime ascending."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        'SELECT * FROM scheduled_posts ORDER BY scheduled_datetime ASC'
+    ).fetchall()
+    conn.close()
+    return jsonify({'posts': [dict(r) for r in rows]})
+
+
+@app.route('/api/social/posts', methods=['POST'])
+def social_create_post():
+    """Create a new scheduled post with optional image upload."""
+    # Support both JSON and multipart/form-data
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        content = (request.form.get('content') or '').strip()
+        platforms = request.form.getlist('platforms')
+        # If platforms came as a single comma-separated string, split it
+        if len(platforms) == 1 and ',' in platforms[0]:
+            platforms = [p.strip() for p in platforms[0].split(',')]
+        sched_date = (request.form.get('scheduled_date') or '').strip()
+        sched_time = (request.form.get('scheduled_time') or '').strip()
+        image_file = request.files.get('image')
+    else:
+        data = request.get_json() or {}
+        content = (data.get('content') or '').strip()
+        platforms = data.get('platforms') or []
+        sched_date = (data.get('scheduled_date') or '').strip()
+        sched_time = (data.get('scheduled_time') or '').strip()
+        image_file = None
+
+    if not content:
+        return jsonify({'error': 'Post content is required'}), 400
+    if not platforms:
+        return jsonify({'error': 'Select at least one platform'}), 400
+    if not sched_date or not sched_time:
+        return jsonify({'error': 'Date and time are required'}), 400
+
+    # Handle image upload
+    image_path = None
+    if image_file and image_file.filename:
+        if not _allowed_image(image_file.filename):
+            return jsonify({'error': 'Only JPG, JPEG, and PNG images are allowed'}), 400
+        ext = image_file.filename.rsplit('.', 1)[1].lower()
+        safe_name = f"{int(datetime.utcnow().timestamp() * 1000)}_{secrets.token_hex(4)}.{ext}"
+        save_path = os.path.join(UPLOAD_DIR, safe_name)
+        image_file.save(save_path)
+        image_path = f"/static/uploads/{safe_name}"
+
+    scheduled_datetime = f"{sched_date} {sched_time}"
+    platforms_str = ', '.join(platforms)
+    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect(SOCIAL_DB)
+    cur = conn.execute(
+        'INSERT INTO scheduled_posts (content, platforms, scheduled_datetime, created_at, image_path) VALUES (?, ?, ?, ?, ?)',
+        (content, platforms_str, scheduled_datetime, created_at, image_path)
+    )
+    conn.commit()
+    post_id = cur.lastrowid
+    conn.close()
+
+    return jsonify({'status': 'success', 'id': post_id}), 201
+
+
+@app.route('/api/social/posts/<int:post_id>', methods=['DELETE'])
+def social_delete_post(post_id):
+    """Delete a scheduled post by ID and remove its uploaded image if present."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute('SELECT image_path FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'Post not found'}), 404
+    # Delete the image file from disk
+    img = row['image_path']
+    if img:
+        full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), img.lstrip('/'))
+        try:
+            if os.path.isfile(full_path):
+                os.remove(full_path)
+        except OSError:
+            pass
+    conn.execute('DELETE FROM scheduled_posts WHERE id = ?', (post_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
@@ -2876,11 +3011,6 @@ def serve_geo_test():
 def serve_dev1_dashboard():
     return send_from_directory('.', 'dev1-dashboard.html')
 
-@app.route('/dashboard')
-def serve_dashboard_redirect():
-    """Short alias — /dashboard redirects to /dev1-dashboard"""
-    return send_from_directory('.', 'dev1-dashboard.html')
-
 
 @app.route('/<path:path>')
 def catch_all(path):
@@ -2891,105 +3021,3 @@ def catch_all(path):
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
     app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
-
-# === Lambda handler (Mangum) ===
-if IS_LAMBDA:
-    try:
-        from mangum import Mangum
-        from mangum.adapter import Mangum as _M
-        import asyncio
-        import io as _io
-
-        class _FlaskAsgi:
-            """Minimal WSGI-to-ASGI adapter for Flask on Lambda."""
-            def __init__(self, wsgi_app):
-                self.wsgi_app = wsgi_app
-
-            async def __call__(self, scope, receive, send):
-                if scope["type"] == "lifespan":
-                    while True:
-                        message = await receive()
-                        if message["type"] == "lifespan.startup":
-                            await send({"type": "lifespan.startup.complete"})
-                        elif message["type"] == "lifespan.shutdown":
-                            await send({"type": "lifespan.shutdown.complete"})
-                            return
-                        else:
-                            return
-                elif scope["type"] == "http":
-                    await self._handle_http(scope, receive, send)
-
-            async def _handle_http(self, scope, receive, send):
-                body_parts = []
-                while True:
-                    message = await receive()
-                    body_parts.append(message.get("body", b""))
-                    if not message.get("more_body", False):
-                        break
-                body = b"".join(body_parts)
-
-                headers = dict(scope.get("headers", []))
-                environ = {
-                    "REQUEST_METHOD": scope["method"],
-                    "SCRIPT_NAME": "",
-                    "PATH_INFO": scope["path"],
-                    "QUERY_STRING": scope.get("query_string", b"").decode("utf-8"),
-                    "SERVER_NAME": headers.get(b"host", b"localhost").decode("utf-8").split(":")[0],
-                    "SERVER_PORT": str(scope.get("server", ("", 80))[1]) if scope.get("server") else "80",
-                    "SERVER_PROTOCOL": "HTTP/{}".format(scope.get("http_version", "1.1")),
-                    "wsgi.version": (1, 0),
-                    "wsgi.url_scheme": scope.get("scheme", "https"),
-                    "wsgi.input": _io.BytesIO(body),
-                    "wsgi.errors": _io.BytesIO(),
-                    "wsgi.multithread": False,
-                    "wsgi.multiprocess": False,
-                    "wsgi.run_once": False,
-                    "CONTENT_LENGTH": str(len(body)),
-                }
-                for hdr_name, hdr_val in scope.get("headers", []):
-                    name = hdr_name.decode("utf-8").lower()
-                    val = hdr_val.decode("utf-8")
-                    if name == "content-type":
-                        environ["CONTENT_TYPE"] = val
-                    else:
-                        key = "HTTP_{}".format(name.upper().replace("-", "_"))
-                        environ[key] = val
-
-                response_headers = []
-                status_code = [500]
-
-                def start_response(status, headers, exc_info=None):
-                    status_code[0] = int(status.split(" ", 1)[0])
-                    response_headers.clear()
-                    response_headers.extend(headers)
-
-                output = self.wsgi_app(environ, start_response)
-                body_out = b"".join(output)
-                if hasattr(output, "close"):
-                    output.close()
-
-                await send({
-                    "type": "http.response.start",
-                    "status": status_code[0],
-                    "headers": [(k.lower().encode(), v.encode()) for k, v in response_headers],
-                })
-                await send({
-                    "type": "http.response.body",
-                    "body": body_out,
-                })
-
-        _mangum_handler = Mangum(_FlaskAsgi(app), lifespan="off")
-
-        def handler(event, context):
-            """Route EventBridge scheduled events to aggregation, everything else to Mangum."""
-            if event.get("source") == "aws.events" or event.get("detail-type") == "Scheduled Event":
-                try:
-                    from admin_aggregation import aggregate_daily_metrics
-                    result = aggregate_daily_metrics()
-                    print("Admin metrics aggregated: {}".format(result))
-                    return {"statusCode": 200, "body": str(result)}
-                except Exception as e:
-                    return {"statusCode": 500, "body": str(e)}
-            return _mangum_handler(event, context)
-    except ImportError:
-        pass

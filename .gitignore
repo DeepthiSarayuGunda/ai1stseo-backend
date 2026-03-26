@@ -14,3 +14,7 @@ build/
 .DS_Store
 *.log
 /OneDrive/Documents/NetBeansProjects/usermanager/target/
+
+# Social scheduler runtime files
+social_scheduler.db
+static/uploads/
