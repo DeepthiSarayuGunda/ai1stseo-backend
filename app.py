@@ -1858,7 +1858,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/ai-recommendations', '/api/health']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/ai-recommendations', '/api/health']
     })
 
 # Ollama LLM Configuration
@@ -2221,10 +2221,44 @@ def generate_content_brief():
             response_data['ai_generated'] = False
             response_data['note'] = 'LLM unavailable — brief generated from SERP data analysis'
         
+        # Save brief to database
+        try:
+            from db import save_content_brief
+            brief_id = save_content_brief(
+                keyword=keyword,
+                content_type=content_type,
+                brief_json=response_data.get('brief', {}),
+                serp_competitors=response_data.get('serp_analysis', {}).get('competitors', []),
+                keywords=response_data.get('brief', {}).get('keywords', []),
+                ai_generated=response_data.get('ai_generated', False)
+            )
+            response_data['brief_id'] = brief_id
+        except Exception as db_err:
+            import logging
+            logging.getLogger(__name__).warning(f"Failed to save brief to DB: {db_err}")
+        
         return jsonify(response_data)
     
     except Exception as e:
         return jsonify({'error': f'Brief generation failed: {str(e)}'}), 500
+
+
+@app.route('/api/content-briefs', methods=['GET'])
+def list_content_briefs():
+    """Retrieve past content briefs."""
+    try:
+        from db import get_content_briefs, get_content_brief_by_id
+        brief_id = request.args.get('id')
+        if brief_id:
+            brief = get_content_brief_by_id(brief_id)
+            if not brief:
+                return jsonify({'error': 'Brief not found'}), 404
+            return jsonify({'status': 'success', 'brief': brief})
+        limit = min(int(request.args.get('limit', 20)), 100)
+        briefs = get_content_briefs(limit=limit)
+        return jsonify({'status': 'success', 'briefs': briefs, 'count': len(briefs)})
+    except Exception as e:
+        return jsonify({'error': f'Failed to retrieve briefs: {str(e)}'}), 500
 
 
 @app.route('/api/geo-probe', methods=['POST'])

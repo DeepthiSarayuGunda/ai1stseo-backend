@@ -316,3 +316,120 @@ def get_visibility_history(limit: int = 20, brand: str = None,
             r["created_at"] = r.get("measured_at", "")
             r["brand"] = r.get("brand_name", "")
         return rows
+
+
+# ── content_briefs CRUD ───────────────────────────────────────────────────────
+
+def save_content_brief(keyword: str, content_type: str, brief_json: dict,
+                       serp_competitors: list = None, keywords: list = None,
+                       target_word_count: int = None, ai_generated: bool = True,
+                       project_id: str = None) -> str:
+    """Save a content brief and its related competitors/keywords. Returns brief ID."""
+    pid = project_id or DEFAULT_PROJECT_ID
+    brief_id = str(uuid.uuid4())
+
+    with get_conn() as conn:
+        cur = conn.cursor()
+
+        # Insert main brief
+        cur.execute("""
+            INSERT INTO content_briefs (id, project_id, keyword, content_type,
+                target_word_count, brief_json, status, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+        """, (
+            brief_id, pid, keyword, content_type,
+            target_word_count or brief_json.get('target_word_count'),
+            json.dumps(brief_json),
+            'generated' if ai_generated else 'draft'
+        ))
+
+        # Insert competitors
+        if serp_competitors:
+            for comp in serp_competitors:
+                cur.execute("""
+                    INSERT INTO brief_competitors (id, brief_id, url, domain, title,
+                        word_count, heading_structure)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    str(uuid.uuid4()), brief_id,
+                    comp.get('url', ''),
+                    comp.get('url', '').split('/')[2] if '/' in comp.get('url', '') else '',
+                    comp.get('title', ''),
+                    comp.get('word_count', 0),
+                    json.dumps({'headings_count': comp.get('headings_count', 0)})
+                ))
+
+        # Insert keywords
+        if keywords:
+            for kw in keywords:
+                cur.execute("""
+                    INSERT INTO brief_keywords (id, brief_id, keyword, placement)
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    str(uuid.uuid4()), brief_id,
+                    kw.get('term', ''),
+                    kw.get('placement', '')
+                ))
+
+    logger.info("Saved content brief %s for keyword '%s'", brief_id, keyword)
+    return brief_id
+
+
+def get_content_briefs(limit: int = 20, project_id: str = None) -> list:
+    """Retrieve past content briefs."""
+    pid = project_id or DEFAULT_PROJECT_ID
+    with get_conn() as conn:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            SELECT id, keyword, content_type, target_word_count, brief_json,
+                   status, created_at
+            FROM content_briefs
+            WHERE project_id = %s
+            ORDER BY created_at DESC
+            LIMIT %s
+        """, (pid, limit))
+        rows = cur.fetchall()
+        for r in rows:
+            r['id'] = str(r['id'])
+            if r.get('created_at'):
+                r['created_at'] = r['created_at'].isoformat()
+            if r.get('brief_json') and isinstance(r['brief_json'], str):
+                r['brief_json'] = json.loads(r['brief_json'])
+        return rows
+
+
+def get_content_brief_by_id(brief_id: str, project_id: str = None) -> dict:
+    """Retrieve a single brief with its competitors and keywords."""
+    pid = project_id or DEFAULT_PROJECT_ID
+    with get_conn() as conn:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        cur.execute("""
+            SELECT * FROM content_briefs WHERE id = %s AND project_id = %s
+        """, (brief_id, pid))
+        brief = cur.fetchone()
+        if not brief:
+            return None
+
+        brief['id'] = str(brief['id'])
+        brief['project_id'] = str(brief['project_id'])
+        if brief.get('created_at'):
+            brief['created_at'] = brief['created_at'].isoformat()
+        if brief.get('updated_at'):
+            brief['updated_at'] = brief['updated_at'].isoformat()
+
+        # Get competitors
+        cur.execute("SELECT * FROM brief_competitors WHERE brief_id = %s", (brief_id,))
+        brief['competitors'] = [
+            {**r, 'id': str(r['id']), 'brief_id': str(r['brief_id'])}
+            for r in cur.fetchall()
+        ]
+
+        # Get keywords
+        cur.execute("SELECT * FROM brief_keywords WHERE brief_id = %s", (brief_id,))
+        brief['keywords'] = [
+            {**r, 'id': str(r['id']), 'brief_id': str(r['brief_id'])}
+            for r in cur.fetchall()
+        ]
+
+        return brief
