@@ -6,6 +6,28 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-03-26 18:07 — Full Team Merge + Deepthi's GEO Routes Fixed (Troy)
+
+**What happened:** Rebuilt the Lambda with everyone's code merged. Used Samarveer's 73MB zip as the base (has all dependencies + Deepthi's GEO modules), injected Troy's blueprints (auth, admin, data API, webhooks, API keys), added Mangum Lambda handler, request logging, and CORS for all subdomains.
+
+**What's now live (45+ routes):**
+- Troy's infrastructure: auth, admin dashboard (9 endpoints), data API (22 endpoints), webhooks, API keys, request logging
+- Samarveer's features: `/api/content-brief`, `/api/content-score`, `/api/content-briefs`, `call_llm`, citation gap analysis (10th category)
+- Deepthi's GEO engine: `/api/geo-probe/*` (models, history, batch, compare, trend, schedule, site), `/api/aeo/analyze`, `/api/ai/*` (citation-probe, geo-monitor, ranking-recommendations), `/api/chatbot/*` (session, chat, history, sessions), `/api/brand/resolve`
+- Shared: `/api/analyze` (251 checks across 10 categories), `/api/health`, `/api/ai-recommendations`
+
+**Verified working:**
+- All Samarveer routes: content-brief (400), content-score (400), content-briefs (500 — db connection, route exists)
+- All Deepthi routes: geo-probe/models (200), geo-probe/history (200), chatbot/session (200), aeo/analyze (400)
+- All Troy routes: auth (400), admin (401), data API (401), webhooks (200), API keys (401)
+- CORS: automationhub + monitor both returning correct headers
+
+**EC2 shutdown:** Stopped `i-0d59b5c1a433f0255` (54.226.251.216). All services migrated to Lambda/App Runner/Amplify. Saving ~$30/mo.
+
+**DNS updates:** `seoaudit.ai1stseo.com` and `seoanalysis.ai1stseo.com` CNAMEs updated (Samarveer fixed to point to API Gateway).
+
+---
+
 ## 2026-03-26 12:21 — Lambda Merge Fix (Troy)
 
 **What happened:** Someone deployed a 73MB zip (`lambda_deploy.zip`) directly to the `ai1stseo-backend` Lambda, overwriting the existing 26MB package. The new deploy didn't include the auth module (`auth.py`), breaking login for all users (`/api/auth/login` returned 405).
