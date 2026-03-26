@@ -85,6 +85,8 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
             cited=cited,
             citation_context=context,
             confidence=confidence,
+            response_snippet=data.get("ai_summary", data.get("text", ""))[:2000] if data.get("ai_summary") or data.get("text") else None,
+            query_text=keyword,
         )
     except Exception as e:
         logger.error("Failed to persist probe to RDS: %s", e)
@@ -315,6 +317,8 @@ def geo_probe_site(site_url: str, keyword: str, ai_model: str = "nova") -> dict:
             citation_context=context,
             confidence=1.0 if mentioned else 0.0,
             site_url=site_url,
+            response_snippet=text[:2000] if text else None,
+            query_text=prompt,
         )
     except Exception as e:
         logger.error("Failed to persist site probe to RDS: %s", e)
