@@ -76,37 +76,52 @@
       // Inject GEO Scanner Agent card into the React dashboard
       (function() {
         var injected = false;
-        var observer = new MutationObserver(function() {
+        function tryInject() {
           if (injected) return;
-          // Only inject on dashboard pages
-          if (!location.pathname.includes('dashboard')) return;
-          // Find the card grid — look for the section with "AI SEARCH OPTIMIZATION" or similar card containers
-          var cards = document.querySelectorAll('[class*="MuiCard"], [class*="card"], [class*="Card"]');
-          if (cards.length < 2) return;
-          // Find the parent grid container
-          var grid = cards[0].parentElement;
-          if (!grid) return;
-          // Check if we already injected
-          if (document.getElementById('geo-scanner-card')) return;
-          injected = true;
+          if (document.getElementById('geo-scanner-card')) { injected = true; return; }
+          // Find "GEO Visibility Scanner" text on the page to locate the card grid
+          var allEls = document.querySelectorAll('*');
+          var geoCard = null;
+          for (var i = 0; i < allEls.length; i++) {
+            var el = allEls[i];
+            if (el.children.length === 0 && el.textContent.trim() === 'GEO Visibility Scanner') {
+              geoCard = el;
+              break;
+            }
+          }
+          if (!geoCard) return;
+          // Walk up to find the card container (the clickable card wrapper)
+          var cardEl = geoCard;
+          for (var j = 0; j < 8; j++) {
+            if (!cardEl.parentElement) break;
+            cardEl = cardEl.parentElement;
+            // The grid parent has multiple card children
+            if (cardEl.children.length >= 3) {
+              // This is likely the grid
+              var grid = cardEl;
+              injected = true;
 
-          var card = document.createElement('div');
-          card.id = 'geo-scanner-card';
-          card.style.cssText = 'background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border:2px solid #238636;border-radius:16px;padding:24px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;';
-          card.onmouseover = function(){ card.style.borderColor='#3fb950'; card.style.transform='translateY(-2px)'; card.style.boxShadow='0 4px 20px rgba(35,134,54,0.3)'; };
-          card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
-          card.onclick = function(){ window.location.href='/geo-scanner'; };
-          card.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
-            + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">GEO Scanner Agent</div>'
-            + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Get a plain-English report with scores, recommendations, and RDS tracking.</div>'
-            + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW — Scanner Agent</span>';
+              var card = document.createElement('div');
+              card.id = 'geo-scanner-card';
+              card.style.cssText = 'background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border:2px solid #238636;border-radius:16px;padding:24px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-height:160px;';
+              card.onmouseover = function(){ card.style.borderColor='#3fb950'; card.style.transform='translateY(-2px)'; card.style.boxShadow='0 4px 20px rgba(35,134,54,0.3)'; };
+              card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
+              card.onclick = function(){ window.location.href='/geo-scanner'; };
+              card.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
+                + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">GEO Scanner Agent</div>'
+                + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
+                + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>';
 
-          // Insert as the first card in the grid
-          grid.insertBefore(card, grid.firstChild);
-        });
+              grid.insertBefore(card, grid.firstChild);
+              return;
+            }
+          }
+        }
+        var observer = new MutationObserver(tryInject);
         observer.observe(document.body, { childList: true, subtree: true });
-        // Stop observing after 30s to avoid memory leaks
-        setTimeout(function(){ observer.disconnect(); }, 30000);
+        // Also try on interval in case MutationObserver misses it
+        var interval = setInterval(function() { tryInject(); if (injected) clearInterval(interval); }, 500);
+        setTimeout(function(){ observer.disconnect(); clearInterval(interval); }, 30000);
       })();
     </script>
   </body>
