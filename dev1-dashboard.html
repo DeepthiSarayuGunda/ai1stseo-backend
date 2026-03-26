@@ -115,8 +115,8 @@ button:disabled{opacity:.5;cursor:wait}
   <label>Keyword <span class="tip" title="A search query a real user might type into ChatGPT, Perplexity, or Google AI. Example: 'best project management tools for remote teams'">ⓘ</span></label><input id="g-kw" placeholder="e.g. best project management tools">
   <label>Provider <span class="tip" title="Which AI model to query. Nova Lite uses AWS Bedrock. Ollama is a free local fallback.">ⓘ</span></label>
   <select id="g-prov">
-    <option value="nova" selected>Nova Lite (Bedrock)</option>
-    <option value="ollama">Ollama (Free Fallback)</option>
+    <option value="nova" selected>Nova Lite (Bedrock) — fast</option>
+    <option value="ollama">Ollama (qwen3:30b) — slower, 20-40s</option>
   </select>
   <button class="btn1" onclick="runGeo()">Run GEO Probe</button>
   <div id="g-out" class="out"></div>
@@ -214,7 +214,7 @@ button:disabled{opacity:.5;cursor:wait}
   <label>Provider</label>
   <select id="site-prov">
     <option value="nova" selected>Nova Lite</option>
-    <option value="ollama">Ollama</option>
+    <option value="ollama">Ollama (slower)</option>
   </select>
   <button class="btn2" onclick="runSite()">Check Site Mention</button>
   <div id="site-out" class="out"></div>
@@ -240,7 +240,7 @@ button:disabled{opacity:.5;cursor:wait}
     <div><label>Provider <span class="tip" title="Which AI model to query for all keywords in this batch.">ⓘ</span></label>
       <select id="b-prov">
         <option value="nova" selected>Nova Lite (Bedrock)</option>
-        <option value="ollama">Ollama (Free Fallback)</option>
+        <option value="ollama">Ollama (qwen3:30b) — slower, 20-40s</option>
       </select>
     </div>
   </div>
@@ -266,7 +266,7 @@ button:disabled{opacity:.5;cursor:wait}
       <select id="h-model">
         <option value="">All Providers</option>
         <option value="nova">Nova Lite</option>
-        <option value="ollama">Ollama</option>
+        <option value="ollama">Ollama (slower)</option>
       </select>
     </div>
   </div>
@@ -294,7 +294,7 @@ button:disabled{opacity:.5;cursor:wait}
   <label>Provider</label>
   <select id="s-prov">
     <option value="nova">Nova Lite</option>
-    <option value="ollama">Ollama</option>
+    <option value="ollama">Ollama (slower)</option>
   </select>
   <label>Interval (minutes)</label><input id="s-int" type="number" value="60">
   <button class="btn7" onclick="createSchedule()">Register Schedule</button>
@@ -554,15 +554,27 @@ document.getElementById('gb-url').addEventListener('keydown', e => { if (e.key =
 // ── Core Features ────────────────────────────────────────────────────────────
 
 async function runGeo() {
-  show('g-out', 'Probing…');
+  const prov = document.getElementById('g-prov').value;
+  const msg = prov === 'ollama' ? 'Probing via Ollama (this takes 20-40 seconds)…' : 'Probing…';
+  show('g-out', msg);
   try {
     const d = await api('POST', '/api/geo-probe', {
       brand_name: document.getElementById('g-brand').value,
       keyword: document.getElementById('g-kw').value,
-      provider: document.getElementById('g-prov').value
+      provider: prov
     });
-    showHtml('g-out', friendlyGeoResult(d));
-  } catch (e) { show('g-out', 'Error: ' + e.message); }
+    if (d.error && d.error.includes('timed out')) {
+      showHtml('g-out', '<div class="friendly-result"><div class="fr-verdict error">⏱ Request timed out — Ollama model is large (30B params) and can take 20-40s. Try again or use Nova Lite for faster results.</div></div>');
+    } else {
+      showHtml('g-out', friendlyGeoResult(d));
+    }
+  } catch (e) {
+    if (prov === 'ollama') {
+      showHtml('g-out', '<div class="friendly-result"><div class="fr-verdict error">⏱ Ollama timed out — the model is large and takes 20-40s. The API gateway has a 30s limit. Try Nova Lite instead.</div></div>');
+    } else {
+      show('g-out', 'Error: ' + e.message);
+    }
+  }
 }
 
 async function runAeo() {
