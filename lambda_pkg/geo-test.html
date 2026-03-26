@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO/AEO Probe</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px}
+  .wrap{width:560px;max-width:100%}
+  h1{font-size:1.3rem;margin-bottom:2px}
+  .sub{color:#8b949e;font-size:.85rem;margin-bottom:20px}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:16px}
+  label{display:block;font-size:.8rem;color:#8b949e;margin:12px 0 4px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.95rem;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#58a6ff}
+  textarea{min-height:72px;font-family:inherit}
+  .hint{font-size:.75rem;color:#484f58;margin-top:2px}
+  .btns{display:flex;gap:8px;margin-top:16px}
+  button{flex:1;padding:12px;border:none;border-radius:6px;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer}
+  .btn-single{background:#238636}
+  .btn-single:hover{background:#2ea043}
+  .btn-batch{background:#1f6feb}
+  .btn-batch:hover{background:#388bfd}
+  button:disabled{opacity:.5;cursor:wait}
+  .err{padding:12px;background:#3d1214;border:1px solid #f85149;border-radius:6px;color:#f85149;font-size:.85rem;margin-bottom:12px;display:none}
+  .score-bar{margin:12px 0;padding:16px;background:#0d1117;border-radius:8px;text-align:center;display:none}
+  .score-val{font-size:2rem;font-weight:700}
+  .score-lbl{font-size:.8rem;color:#8b949e}
+  .result{border:1px solid #21262d;border-radius:8px;padding:12px;margin-top:8px;background:#0d1117}
+  .row{display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem;border-bottom:1px solid #161b22}
+  .row:last-child{border:none}
+  .lbl{color:#8b949e}
+  .val{font-weight:600;text-align:right;max-width:65%;word-break:break-word}
+  .cited-true{color:#3fb950}
+  .cited-false{color:#f85149}
+  .cited-null{color:#8b949e}
+  .sources{font-size:.8rem;color:#58a6ff;word-break:break-all}
+  .hist-link{text-align:right;margin-top:8px}
+  .hist-link a{color:#58a6ff;font-size:.85rem;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GEO / AEO Probe</h1>
+  <p class="sub">AI brand visibility analysis engine</p>
+
+  <div class="card">
+    <label for="brand">Brand Name <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="The company or product you want to track. We'll check if AI models mention this brand when answering the keyword query.">ⓘ</span></label>
+    <input id="brand" placeholder="e.g. Notion" value="Notion">
+
+    <label for="keywords">Keywords / Prompts <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="Search queries a real user might type into ChatGPT, Perplexity, or Google AI. One per line. Example: 'best project management tools for remote teams'">ⓘ</span></label>
+    <textarea id="keywords" placeholder="One per line&#10;e.g. best project management tools&#10;tools similar to Notion"></textarea>
+    <div class="hint">One keyword per line. Single line = single probe, multiple = batch with GEO score (% of queries where your brand was mentioned).</div>
+
+    <label for="model">AI Provider <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="Which AI model to query. Nova Lite uses AWS Bedrock (fast, reliable). Ollama is a free local fallback.">ⓘ</span></label>
+    <select id="model">
+      <option value="nova" selected>Nova Lite (Bedrock)</option>
+      <option value="ollama">Ollama (qwen3:30b) — slower, 20-40s</option>
+    </select>
+
+    <div class="btns">
+      <button class="btn-single" onclick="run('single')">Single Probe</button>
+      <button class="btn-batch" onclick="run('batch')">Batch Analyze</button>
+    </div>
+  </div>
+
+  <div id="error" class="err"></div>
+  <div id="score" class="score-bar"></div>
+  <div id="results"></div>
+  <div class="hist-link"><a href="/api/geo-probe/history" target="_blank">View probe history →</a></div>
+</div>
+
+<script>
+function getKeywords() {
+  return document.getElementById('keywords').value.split('\n').map(k => k.trim()).filter(Boolean);
+}
+
+function renderResult(r) {
+  const cited = r.brand_present;
+  const cls = cited === true ? 'cited-true' : cited === false ? 'cited-false' : 'cited-null';
+  const tag = cited === true ? '✓ Yes' : cited === false ? '✗ No' : '⚠ Error';
+  let html = '<div class="result">';
+  html += `<div class="row"><span class="lbl">Keyword</span><span class="val">${esc(r.keyword)}</span></div>`;
+  html += `<div class="row"><span class="lbl">Brand Present</span><span class="val ${cls}">${tag}</span></div>`;
+  html += `<div class="row"><span class="lbl">Context</span><span class="val">${esc(r.citation_context || '—')}</span></div>`;
+  if (r.cited_sources && r.cited_sources.length) {
+    html += `<div class="row"><span class="lbl">Sources</span><span class="val sources">${r.cited_sources.map(esc).join('<br>')}</span></div>`;
+  }
+  html += `<div class="row"><span class="lbl">Model</span><span class="val">${esc(r.ai_model)}</span></div>`;
+  html += `<div class="row"><span class="lbl">Time</span><span class="val">${esc(r.timestamp)}</span></div>`;
+  if (r.error) html += `<div class="row"><span class="lbl">Error</span><span class="val cited-false">${esc(r.error)}</span></div>`;
+  html += '</div>';
+  return html;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function run(mode) {
+  const errEl = document.getElementById('error');
+  const scoreEl = document.getElementById('score');
+  const resEl = document.getElementById('results');
+  errEl.style.display = 'none';
+  scoreEl.style.display = 'none';
+  resEl.innerHTML = '';
+
+  const brand = document.getElementById('brand').value.trim();
+  const kws = getKeywords();
+  const model = document.getElementById('model').value;
+
+  if (!brand) { errEl.textContent = 'Brand name is required'; errEl.style.display = 'block'; return; }
+  if (!kws.length) { errEl.textContent = 'Enter at least one keyword'; errEl.style.display = 'block'; return; }
+
+  document.querySelectorAll('button').forEach(b => { b.disabled = true; b.dataset.orig = b.textContent; b.textContent = 'Probing…'; });
+
+  try {
+    if (mode === 'single') {
+      const resp = await fetch('/api/geo-probe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ brand_name: brand, keyword: kws[0], provider: model })
+      });
+      const data = await resp.json();
+      if (!resp.ok) { errEl.textContent = data.error || `HTTP ${resp.status}`; errEl.style.display = 'block'; return; }
+      resEl.innerHTML = renderResult(data);
+    } else {
+      const resp = await fetch('/api/geo-probe/batch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ brand_name: brand, keywords: kws, provider: model })
+      });
+      const data = await resp.json();
+      if (!resp.ok) { errEl.textContent = data.error || `HTTP ${resp.status}`; errEl.style.display = 'block'; return; }
+      const pct = Math.round(data.geo_score * 100);
+      const color = pct >= 60 ? '#3fb950' : pct >= 30 ? '#d29922' : '#f85149';
+      scoreEl.innerHTML = `<div class="score-val" style="color:${color}">${pct}%</div><div class="score-lbl">GEO Score — brand cited in ${data.cited_count} of ${data.total_prompts} prompts</div>`;
+      scoreEl.style.display = 'block';
+      resEl.innerHTML = data.results.map(renderResult).join('');
+    }
+  } catch (e) {
+    errEl.textContent = 'Network error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    document.querySelectorAll('button').forEach(b => { b.disabled = false; b.textContent = b.dataset.orig; });
+  }
+}
+</script>
+</body>
+</html>
