@@ -47,17 +47,17 @@
   <p class="sub">AI brand visibility analysis engine</p>
 
   <div class="card">
-    <label for="brand">Brand Name</label>
+    <label for="brand">Brand Name <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="The company or product you want to track. We'll check if AI models mention this brand when answering the keyword query.">ⓘ</span></label>
     <input id="brand" placeholder="e.g. Notion" value="Notion">
 
-    <label for="keywords">Keywords / Prompts</label>
+    <label for="keywords">Keywords / Prompts <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="Search queries a real user might type into ChatGPT, Perplexity, or Google AI. One per line. Example: 'best project management tools for remote teams'">ⓘ</span></label>
     <textarea id="keywords" placeholder="One per line&#10;e.g. best project management tools&#10;tools similar to Notion"></textarea>
-    <div class="hint">One keyword per line. Single line = single probe, multiple = batch with geo_score.</div>
+    <div class="hint">One keyword per line. Single line = single probe, multiple = batch with GEO score (% of queries where your brand was mentioned).</div>
 
-    <label for="model">AI Provider</label>
+    <label for="model">AI Provider <span style="color:#58a6ff;cursor:help;font-size:.7rem" title="Which AI model to query. Nova Lite uses AWS Bedrock (fast, reliable). Ollama is a free local fallback.">ⓘ</span></label>
     <select id="model">
       <option value="nova" selected>Nova Lite (Bedrock)</option>
-      <option value="ollama">Ollama (Free Fallback)</option>
+      <option value="ollama">Ollama (qwen3:30b) — slower, 20-40s</option>
     </select>
 
     <div class="btns">

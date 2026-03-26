@@ -3,25 +3,19 @@ ai_chatbot.py
 AI SEO Chatbot — conversational interface for SEO insights.
 
 Maintains per-session conversation history and routes queries
-through EC2 Bedrock (Claude) with SEO-specific system prompts.
+through Bedrock Nova / Ollama directly. No EC2 dependency.
 """
 
-import collections
 import logging
 import os
 import uuid
 from datetime import datetime, timezone
 
-import requests
-
 logger = logging.getLogger(__name__)
-
-EC2_GEO_ENGINE_URL = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
-EC2_TIMEOUT = int(os.environ.get("GEO_ENGINE_TIMEOUT", "45"))
 
 # In-memory session store (session_id → message history)
 _sessions: dict[str, list[dict]] = {}
-MAX_HISTORY = 20  # messages per session
+MAX_HISTORY = 20
 MAX_SESSIONS = 100
 
 SYSTEM_PROMPT = (
@@ -40,16 +34,10 @@ SYSTEM_PROMPT = (
 )
 
 
-def _call_ec2_generate(prompt: str) -> str:
-    """Call EC2 /generate endpoint for chat responses via Bedrock."""
-    url = f"{EC2_GEO_ENGINE_URL}/generate"
-    try:
-        resp = requests.post(url, json={"prompt": prompt}, timeout=EC2_TIMEOUT)
-        if resp.status_code == 200:
-            return resp.json().get("text", "")
-    except Exception as e:
-        logger.warning("EC2 generate failed: %s", e)
-    raise RuntimeError("AI engine unavailable — could not reach EC2 Bedrock service")
+def _call_generate(prompt: str) -> str:
+    """Call AI provider directly for chat responses."""
+    from ai_provider import generate
+    return generate(prompt, provider="nova")
 
 
 def _now():
@@ -95,7 +83,7 @@ def chat(session_id: str, message: str) -> dict:
     prompt = _build_chat_prompt(history, message)
 
     # Get AI response
-    response_text = _call_ec2_generate(prompt)
+    response_text = _call_generate(prompt)
 
     # Store in history
     history.append({"role": "user", "content": message, "timestamp": _now()})

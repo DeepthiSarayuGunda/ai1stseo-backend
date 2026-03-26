@@ -435,7 +435,7 @@
     </div>
 
     <script>
-        const API_BASE = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+        const API_BASE = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
 
         const categoryMeta = {
             'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 30 },
@@ -573,19 +573,34 @@
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-                        <select id="briefContentType" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;">
-                            <option value="blog">Blog Post</option>
-                            <option value="faq">FAQ Page</option>
-                            <option value="landing_page">Landing Page</option>
-                            <option value="how_to">How-To Guide</option>
-                            <option value="comparison">Comparison Article</option>
-                            <option value="listicle">Listicle</option>
+                        <select id="briefContentType" style="background:#1a1a2e;border:1px solid rgba(0,212,255,0.3);color:#fff;padding:10px 16px;border-radius:8px;font-size:0.9rem;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg fill=\"white\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>');background-repeat:no-repeat;background-position:right 10px center;background-size:18px;padding-right:36px;min-width:200px;">
+                            <option value="blog" style="background:#1a1a2e;color:#fff;">📝 Blog Post</option>
+                            <option value="faq" style="background:#1a1a2e;color:#fff;">❓ FAQ Page</option>
+                            <option value="landing_page" style="background:#1a1a2e;color:#fff;">🎯 Landing Page</option>
+                            <option value="how_to" style="background:#1a1a2e;color:#fff;">📖 How-To Guide</option>
+                            <option value="comparison" style="background:#1a1a2e;color:#fff;">⚖️ Comparison Article</option>
+                            <option value="listicle" style="background:#1a1a2e;color:#fff;">📋 Listicle</option>
                         </select>
                     </div>
                     <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
                         <span>📋</span> Generate Content Brief
                     </button>
                     <div id="briefContent"></div>
+                </div>
+
+                <!-- Past Briefs Section -->
+                <div class="ai-section" id="pastBriefsSection">
+                    <div class="ai-header">
+                        <span class="ai-icon">📚</span>
+                        <div>
+                            <div class="ai-title">Saved Content Briefs</div>
+                            <div class="ai-subtitle">Previously generated briefs stored in the database — click any to expand</div>
+                        </div>
+                    </div>
+                    <button class="ai-btn" id="loadBriefsBtn" onclick="loadPastBriefs()" style="background:linear-gradient(90deg,#00d4ff,#7b2cbf);">
+                        <span>🔄</span> Load Past Briefs
+                    </button>
+                    <div id="pastBriefsList"></div>
                 </div>
 
                 <div style="text-align: center; padding: 30px;">
@@ -780,6 +795,18 @@
             if (dd && tab && !tab.contains(e.target)) dd.classList.remove('open');
         });
 
+        // Reset brief button when content type changes
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === 'briefContentType') {
+                var btn = document.getElementById('briefBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>📋</span> Generate Content Brief';
+                    btn.style.background = 'linear-gradient(90deg, #7b2cbf, #00d4ff)';
+                }
+            }
+        });
+
         async function generateContentBrief() {
             const btn = document.getElementById('briefBtn');
             const contentDiv = document.getElementById('briefContent');
@@ -860,6 +887,67 @@
             } catch (error) {
                 contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
                 btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+            }
+        }
+
+        async function loadPastBriefs() {
+            const btn = document.getElementById('loadBriefsBtn');
+            const listDiv = document.getElementById('pastBriefsList');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Loading...';
+            try {
+                const resp = await fetch(API_BASE + '/api/content-briefs?limit=10');
+                const data = await resp.json();
+                if (data.status === 'success' && data.briefs && data.briefs.length > 0) {
+                    let html = '<div style="margin-top:20px;">';
+                    data.briefs.forEach(function(b) {
+                        var brief = b.brief_json || {};
+                        var date = b.created_at ? new Date(b.created_at).toLocaleDateString() : '';
+                        var typeLabel = (b.content_type || 'blog').replace('_', ' ');
+                        html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:12px;padding:16px;margin-bottom:12px;cursor:pointer;" onclick="this.querySelector(\'.brief-expand\').style.display=this.querySelector(\'.brief-expand\').style.display===\'none\'?\'block\':\'none\'">';
+                        html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+                        html += '<div><span style="color:#00d4ff;font-weight:600;">' + (b.keyword || '') + '</span>';
+                        html += ' <span style="background:rgba(123,44,191,0.2);padding:3px 10px;border-radius:12px;font-size:0.75rem;margin-left:8px;">' + typeLabel + '</span></div>';
+                        html += '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">' + date + ' <span style="margin-left:6px;">▼</span></div>';
+                        html += '</div>';
+                        html += '<div class="brief-expand" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">';
+                        if (brief.recommended_title) html += '<div style="font-size:1.1rem;font-weight:600;margin-bottom:8px;">📋 ' + brief.recommended_title + '</div>';
+                        if (brief.target_word_count) html += '<div style="color:rgba(255,255,255,0.6);margin-bottom:12px;">Target: <span style="color:#00d4ff;">' + brief.target_word_count + ' words</span></div>';
+                        if (brief.headings && brief.headings.length > 0) {
+                            html += '<div style="margin-bottom:12px;"><strong style="color:#00d4ff;">Headings:</strong>';
+                            brief.headings.forEach(function(h) {
+                                var indent = h.level === 'h3' ? '24px' : '0';
+                                html += '<div style="padding:4px 8px;margin-left:' + indent + ';border-left:2px solid rgba(0,212,255,0.3);margin-top:4px;font-size:0.85rem;"><span style="background:rgba(0,212,255,0.15);padding:1px 6px;border-radius:3px;font-size:0.7rem;margin-right:6px;">' + (h.level || '').toUpperCase() + '</span>' + (h.text || '') + '</div>';
+                            });
+                            html += '</div>';
+                        }
+                        if (brief.questions_to_answer && brief.questions_to_answer.length > 0) {
+                            html += '<div style="margin-bottom:12px;"><strong style="color:#00d4ff;">Questions:</strong>';
+                            brief.questions_to_answer.forEach(function(q) {
+                                html += '<div style="padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:6px;margin-top:4px;font-size:0.85rem;">❓ ' + (q.question || q) + '</div>';
+                            });
+                            html += '</div>';
+                        }
+                        if (brief.keywords && brief.keywords.length > 0) {
+                            html += '<div><strong style="color:#00d4ff;">Keywords:</strong> <span style="font-size:0.85rem;">';
+                            brief.keywords.forEach(function(k) { html += '<span style="background:rgba(0,212,255,0.1);padding:3px 8px;border-radius:10px;margin:2px;display:inline-block;font-size:0.8rem;">' + (k.term || '') + '</span> '; });
+                            html += '</span></div>';
+                        }
+                        html += '</div></div>';
+                    });
+                    html += '</div>';
+                    listDiv.innerHTML = html;
+                    btn.innerHTML = '✅ ' + data.count + ' Briefs Loaded';
+                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                } else {
+                    listDiv.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.5);margin-top:15px;">No saved briefs yet. Generate one above first.</div>';
+                    btn.innerHTML = '🔄 Load Past Briefs';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                listDiv.innerHTML = '<div style="padding:15px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;">⚠️ ' + err.message + '</div>';
+                btn.innerHTML = '🔄 Retry';
+                btn.disabled = false;
             }
         }
 

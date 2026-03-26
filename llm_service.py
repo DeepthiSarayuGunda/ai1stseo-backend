@@ -102,19 +102,14 @@ def _query_groq(keyword, model="llama-3.3-70b-versatile"):
     return resp.choices[0].message.content
 
 def _query_claude(keyword, model="claude-3-haiku-20240307"):
-    """Route Claude queries through EC2 Bedrock - no API key needed."""
-    import requests as _req
-    ec2_url = os.environ.get("GEO_ENGINE_URL", "http://54.226.251.216:5005")
+    """Route Claude queries through Bedrock Nova directly, fallback to Anthropic API."""
+    # Try Bedrock Nova first (no API key needed, uses IAM role)
     try:
-        resp = _req.post(
-            f"{ec2_url}/generate",
-            json={"prompt": f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources."},
-            timeout=45,
-        )
-        if resp.status_code == 200:
-            return resp.json().get("text", "")
+        from ai_provider import call_nova
+        return call_nova(f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources.")
     except Exception:
         pass
+    # Fallback to Anthropic API if key is set
     key = os.environ.get("ANTHROPIC_API_KEY")
     if key:
         client = _anthropic_client()
@@ -123,7 +118,7 @@ def _query_claude(keyword, model="claude-3-haiku-20240307"):
             messages=[{"role": "user", "content": f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources."}]
         )
         return msg.content[0].text
-    raise RuntimeError("Claude unavailable - EC2 Bedrock down and no ANTHROPIC_API_KEY set")
+    raise RuntimeError("Claude unavailable — no Bedrock access and no ANTHROPIC_API_KEY set")
 
 def _query_openai(keyword, model="gpt-4o-mini"):
     client = _openai_client()
