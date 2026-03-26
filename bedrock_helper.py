@@ -63,7 +63,7 @@ def invoke_llm(
     if model_id.startswith("amazon.nova"):
         body = json.dumps({
             "messages": [{"role": "user", "content": [{"text": prompt}]}],
-            "inferenceConfig": {"maxNewTokens": max_tokens}
+            "inferenceConfig": {"max_new_tokens": max_tokens}
         })
     else:
         body = json.dumps({
