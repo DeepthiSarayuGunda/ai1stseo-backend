@@ -375,19 +375,29 @@ def save_content_brief(keyword: str, content_type: str, brief_json: dict,
     return brief_id
 
 
-def get_content_briefs(limit: int = 20, project_id: str = None) -> list:
-    """Retrieve past content briefs."""
+def get_content_briefs(limit: int = 20, project_id: str = None, keyword_filter: str = '') -> list:
+    """Retrieve past content briefs, optionally filtered by keyword."""
     pid = project_id or DEFAULT_PROJECT_ID
     with get_conn() as conn:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
-            SELECT id, keyword, content_type, target_word_count, brief_json,
-                   status, created_at
-            FROM content_briefs
-            WHERE project_id = %s
-            ORDER BY created_at DESC
-            LIMIT %s
-        """, (pid, limit))
+        if keyword_filter:
+            cur.execute("""
+                SELECT id, keyword, content_type, target_word_count, brief_json,
+                       status, created_at
+                FROM content_briefs
+                WHERE project_id = %s AND keyword ILIKE %s
+                ORDER BY created_at DESC
+                LIMIT %s
+            """, (pid, f'%{keyword_filter}%', limit))
+        else:
+            cur.execute("""
+                SELECT id, keyword, content_type, target_word_count, brief_json,
+                       status, created_at
+                FROM content_briefs
+                WHERE project_id = %s
+                ORDER BY created_at DESC
+                LIMIT %s
+            """, (pid, limit))
         rows = cur.fetchall()
         for r in rows:
             r['id'] = str(r['id'])
