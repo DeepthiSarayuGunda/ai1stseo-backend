@@ -65,24 +65,53 @@ def get_conn():
 # ── Schema initialization ─────────────────────────────────────────────────────
 
 def init_db():
-    """Create tables if they don't exist. Safe to call on every startup."""
+    """Create tables if they don't exist. Add missing columns to existing tables."""
     with get_conn() as conn:
         cur = conn.cursor()
 
+        # Check if geo_probes exists and what columns it has
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS geo_probes (
-                id          SERIAL PRIMARY KEY,
-                keyword     TEXT NOT NULL,
-                brand       TEXT NOT NULL,
-                ai_model    TEXT NOT NULL,
-                cited       BOOLEAN NOT NULL DEFAULT FALSE,
-                citation_context TEXT,
-                confidence  REAL DEFAULT 0.0,
-                site_url    TEXT,
-                created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            )
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name = 'geo_probes'
         """)
+        existing_cols = {row[0] for row in cur.fetchall()}
 
+        if not existing_cols:
+            # Table doesn't exist — create it fresh
+            cur.execute("""
+                CREATE TABLE geo_probes (
+                    id          SERIAL PRIMARY KEY,
+                    keyword     TEXT NOT NULL,
+                    brand       TEXT NOT NULL,
+                    ai_model    TEXT NOT NULL,
+                    cited       BOOLEAN NOT NULL DEFAULT FALSE,
+                    citation_context TEXT,
+                    confidence  REAL DEFAULT 0.0,
+                    site_url    TEXT,
+                    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+        else:
+            # Table exists — add any missing columns using savepoints
+            needed = {
+                "brand": "TEXT NOT NULL DEFAULT ''",
+                "cited": "BOOLEAN NOT NULL DEFAULT FALSE",
+                "citation_context": "TEXT",
+                "confidence": "REAL DEFAULT 0.0",
+                "site_url": "TEXT",
+                "created_at": "TIMESTAMPTZ DEFAULT NOW()",
+            }
+            for col, coldef in needed.items():
+                if col not in existing_cols:
+                    try:
+                        cur.execute(f"SAVEPOINT sp_{col}")
+                        cur.execute(f"ALTER TABLE geo_probes ADD COLUMN {col} {coldef}")
+                        cur.execute(f"RELEASE SAVEPOINT sp_{col}")
+                    except Exception as e:
+                        cur.execute(f"ROLLBACK TO SAVEPOINT sp_{col}")
+                        logger.warning("Could not add column %s: %s", col, e)
+
+        # ai_visibility_history table
         cur.execute("""
             CREATE TABLE IF NOT EXISTS ai_visibility_history (
                 id          SERIAL PRIMARY KEY,
