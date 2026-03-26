@@ -1913,7 +1913,7 @@ Be specific and actionable. Include actual code examples where helpful."""
             'error': f'AI recommendation failed: {str(e)}'
         }), 500
 
-def call_llm(prompt, model='llama3.1:latest', timeout=120):
+def call_llm(prompt, model='qwen3:30b-a3b', timeout=120):
     """Call LLM with fallback: Nova Lite (Bedrock) → Ollama homelab → Ollama fallback"""
     # 1. Try Nova Lite via Bedrock (fast, cheap, always up)
     try:
