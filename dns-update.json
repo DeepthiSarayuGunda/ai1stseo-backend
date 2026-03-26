@@ -1,0 +1,26 @@
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "seoaudit.ai1stseo.com",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "d-gb39s1cajf.execute-api.us-east-1.amazonaws.com" }
+        ]
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "seoanalysis.ai1stseo.com",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          { "Value": "d-2jl900y7pd.execute-api.us-east-1.amazonaws.com" }
+        ]
+      }
+    }
+  ]
+}
