@@ -582,24 +582,15 @@
                             <option value="listicle" style="background:#1a1a2e;color:#fff;">📋 Listicle</option>
                         </select>
                     </div>
-                    <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
-                        <span>📋</span> Generate Content Brief
-                    </button>
-                    <div id="briefContent"></div>
-                </div>
-
-                <!-- Past Briefs Section -->
-                <div class="ai-section" id="pastBriefsSection">
-                    <div class="ai-header">
-                        <span class="ai-icon">📚</span>
-                        <div>
-                            <div class="ai-title">Saved Content Briefs</div>
-                            <div class="ai-subtitle">Previously generated briefs stored in the database — click any to expand</div>
-                        </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
+                            <span>📋</span> Generate Content Brief
+                        </button>
+                        <button class="ai-btn" id="loadBriefsBtn" onclick="loadPastBriefs()" style="background:linear-gradient(90deg,#00d4ff,#0f3460);">
+                            <span>📚</span> View Saved Briefs
+                        </button>
                     </div>
-                    <button class="ai-btn" id="loadBriefsBtn" onclick="loadPastBriefs()" style="background:linear-gradient(90deg,#00d4ff,#7b2cbf);">
-                        <span>🔄</span> Load Past Briefs
-                    </button>
+                    <div id="briefContent"></div>
                     <div id="pastBriefsList"></div>
                 </div>
 
@@ -891,13 +882,41 @@
         }
 
         async function loadPastBriefs() {
-            const btn = document.getElementById('loadBriefsBtn');
-            const listDiv = document.getElementById('pastBriefsList');
+            var btn = document.getElementById('loadBriefsBtn');
+            var listDiv = document.getElementById('pastBriefsList');
+            // Toggle: if already showing, hide
+            if (listDiv.innerHTML && listDiv.style.display !== 'none') {
+                listDiv.style.display = 'none';
+                btn.innerHTML = '<span>📚</span> View Saved Briefs';
+                btn.style.background = 'linear-gradient(90deg,#00d4ff,#0f3460)';
+                btn.disabled = false;
+                return;
+            }
+            listDiv.style.display = 'block';
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Loading...';
+            // Extract current keyword to filter briefs
+            var filterKeyword = '';
+            var cats = window.auditData?.categories || {};
+            for (var cat of Object.values(cats)) {
+                for (var check of (cat.checks || [])) {
+                    if (check.name && check.name.toLowerCase().includes('primary keyword') && check.value) { filterKeyword = check.value; break; }
+                }
+                if (filterKeyword) break;
+            }
+            if (!filterKeyword) {
+                for (var cat2 of Object.values(cats)) {
+                    for (var check2 of (cat2.checks || [])) {
+                        if (check2.name && check2.name.toLowerCase().includes('title tag') && check2.value) { filterKeyword = check2.value.replace(/\|.*$/, '').replace(/-.*$/, '').trim().substring(0, 60); break; }
+                    }
+                    if (filterKeyword) break;
+                }
+            }
+            if (!filterKeyword) filterKeyword = (window.auditData?.url || '').replace(/https?:\/\//, '').replace(/\/$/, '');
             try {
-                const resp = await fetch(API_BASE + '/api/content-briefs?limit=10');
-                const data = await resp.json();
+                var qp = filterKeyword ? '?limit=20&keyword=' + encodeURIComponent(filterKeyword) : '?limit=10';
+                var resp = await fetch(API_BASE + '/api/content-briefs' + qp);
+                var data = await resp.json();
                 if (data.status === 'success' && data.briefs && data.briefs.length > 0) {
                     let html = '<div style="margin-top:20px;">';
                     data.briefs.forEach(function(b) {
@@ -937,8 +956,9 @@
                     });
                     html += '</div>';
                     listDiv.innerHTML = html;
-                    btn.innerHTML = '✅ ' + data.count + ' Briefs Loaded';
+                    btn.innerHTML = '📚 ' + data.count + ' Briefs — Click to Hide';
                     btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                    btn.disabled = false;
                 } else {
                     listDiv.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.5);margin-top:15px;">No saved briefs yet. Generate one above first.</div>';
                     btn.innerHTML = '🔄 Load Past Briefs';
