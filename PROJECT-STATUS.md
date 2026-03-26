@@ -158,7 +158,9 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Coordinate with Samarveer (Dev 2) before deploying to S3 — both touching `audit.html`
 
 ### 📋 Upcoming
-1. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
+1. Expand Local SEO category — per Gurbachan's feedback (Mar 26 email). Current: 0/15 checks. Article reference shows 20+ distinct Local SEO audit areas: GBP category/attribute audits, review velocity analysis, review response templates, GBP posting strategy, services section optimization, description optimization, photo audits, citation consistency (NAP), competitor GBP comparison, entity optimization, local search intent mapping. Goal: make Local SEO the deepest category in the platform.
+2. Workflow/pipeline mode — per Gurbachan's feedback. Instead of standalone tools, chain them: audit → gap analysis → content brief → content generation → score → publish. Reference: n8n-style automated SEO pipeline with multi-agent content generation (research → planning → writing → review → publish). Could be a "Run Full Pipeline" button on dashboard.
+3. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
 2. White-label reporting (branded PDF + live reports)
 3. Custom dashboard builder (drag-and-drop widgets)
 4. Onboarding flow / first-run experience
