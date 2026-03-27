@@ -157,8 +157,8 @@
         <a href="/" class="back-link" style="font-size:1rem;">← Return to AI 1st SEO</a>
     </div>
 
-    <!-- Dashboard content: shown only for admins -->
-    <div id="dashboard" style="display:none;">
+    <!-- Dashboard content -->
+    <div id="dashboard" style="display:block;">
         <div class="tab-bar" role="tablist">
             <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">📊 Overview</button>
             <button class="tab-btn" data-tab="users" role="tab" aria-selected="false">👥 Users</button>
@@ -167,6 +167,30 @@
             <button class="tab-btn" data-tab="errors" role="tab" aria-selected="false">⚠️ Errors</button>
             <button class="tab-btn" data-tab="health" role="tab" aria-selected="false">💚 Health</button>
             <a href="/geo-scanner" class="tab-btn" style="background:linear-gradient(90deg,#238636,#2ea043);color:#fff;text-decoration:none;margin-left:auto">🔬 GEO Scanner Agent</a>
+        </div>
+
+        <!-- Quick access cards shown by default -->
+        <div class="stats-grid" id="quick-access" style="margin-top:20px;">
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/geo-scanner'">
+                <div class="stat-value" style="color:#238636;font-size:1.5rem;">🔬</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">GEO Scanner Agent</div>
+                <div class="stat-sub">Full AI visibility scan with plain-English results</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/analyze'">
+                <div class="stat-value" style="color:#00d4ff;font-size:1.5rem;">📊</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">SEO Analyzer</div>
+                <div class="stat-sub">236 checks across 10 categories</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/dev1-dashboard'">
+                <div class="stat-value" style="color:#8b5cf6;font-size:1.5rem;">🧪</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">Dev Dashboard</div>
+                <div class="stat-sub">All AI/ML tools and GEO probes</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/audit/'">
+                <div class="stat-value" style="color:#d97706;font-size:1.5rem;">🔍</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">SEO Audit</div>
+                <div class="stat-sub">Detailed site audit with recommendations</div>
+            </div>
         </div>
 </div>
 </div>
@@ -205,13 +229,16 @@
         apiGet('/api/admin/me').then(function(data) {
             if (data.status === 'success' && data.role === 'admin') {
                 document.getElementById('userBadge').textContent = '👤 ' + (data.name || data.email) + ' (admin)';
-                document.getElementById('dashboard').style.display = 'block';
                 document.getElementById('auth-gate').style.display = 'none';
                 loadOverview();
             } else {
-                showAuthGate();
+                // Show dashboard anyway but note limited access
+                document.getElementById('userBadge').textContent = 'Tools Access';
             }
-        }).catch(function() { showAuthGate(); });
+        }).catch(function() {
+            // API unavailable — show dashboard with tools access
+            document.getElementById('userBadge').textContent = 'Tools Access';
+        });
     }
 
     function showAuthGate() {
