@@ -2925,7 +2925,7 @@ def data_geo_probes():
             brand=brand,
             ai_model=ai_model,
             cited=data.get('cited', False),
-            context_snippet=data.get('citation_context', ''),
+            citation_context=data.get('citation_context', ''),
             confidence=data.get('confidence', 0.0),
             response_snippet=data.get('response_snippet', ''),
             sentiment=data.get('sentiment', 'neutral'),
@@ -2986,6 +2986,11 @@ def serve_dev1_dashboard():
 def serve_dashboard_redirect():
     """Short alias — /dashboard redirects to /dev1-dashboard"""
     return send_from_directory('.', 'dev1-dashboard.html')
+
+@app.route('/admin')
+def serve_admin():
+    """Admin dashboard — overview, users, usage, AI costs, errors, health."""
+    return send_from_directory('.', 'admin.html')
 
 
 @app.route('/<path:path>')

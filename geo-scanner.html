@@ -69,9 +69,10 @@ button:disabled{opacity:.5;cursor:wait}
 <p class="sub">AI Visibility Scanner — Full automated scan with plain-English results</p>
 
 <nav class="nav" aria-label="Dashboard navigation">
-  <a href="/dev1-dashboard">← Dev 1 Dashboard</a>
+  <a href="/">← Dashboard</a>
+  <a href="/dev1-dashboard">Dev 1 Dashboard</a>
   <a href="/geo-test">GEO Probe (Simple)</a>
-  <a href="/">Home</a>
+  <a href="/analyze">SEO Analyzer</a>
 </nav>
 
 <!-- Scanner Input -->
@@ -160,7 +161,7 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <script>
-const BASE = window.location.origin;
+const BASE = window.location.hostname.includes('ai1stseo.com') ? 'https://sgnmqxb2sw.us-east-1.awsapprunner.com' : window.location.origin;
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
@@ -259,7 +260,9 @@ function renderReport(d) {
   const recList = document.getElementById('recommendations');
   recList.innerHTML = (d.recommendations || []).map(r => {
     const badge = r.impact === 'high' ? 'badge-high' : 'badge-medium';
-    return `<li class="rec-item"><div class="rec-title"><span class="rec-badge ${badge}">${r.impact}</span>${esc(r.title)}</div><div class="rec-desc">${esc(r.description)}</div></li>`;
+    const effort = r.effort ? ` · Effort: ${r.effort}` : '';
+    const time = r.timeframe ? ` · ${r.timeframe}` : '';
+    return `<li class="rec-item"><div class="rec-title"><span class="rec-badge ${badge}">${r.impact} impact</span>${esc(r.title)}</div><div class="rec-desc">${esc(r.description)}</div><div style="font-size:.72rem;color:#484f58;margin-top:6px">${esc(r.category)}${effort}${time}</div></li>`;
   }).join('');
 
   // RDS status

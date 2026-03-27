@@ -389,66 +389,136 @@ class GEOScannerOrchestrator:
                 summaries.append(r["friendly_summary"])
 
         if overall_score >= 70:
-            headline = f"{brand} has strong AI search visibility ({overall_score}/100)."
+            headline = (
+                f"{brand} has strong AI search visibility ({overall_score}/100). "
+                f"When people ask AI assistants like ChatGPT or Perplexity about your industry, "
+                f"your brand is being recommended. Keep up the good work."
+            )
         elif overall_score >= 40:
-            headline = f"{brand} has moderate AI search visibility ({overall_score}/100) with room to improve."
+            headline = (
+                f"{brand} has moderate AI search visibility ({overall_score}/100). "
+                f"AI assistants sometimes mention your brand, but not consistently. "
+                f"With targeted improvements to your content and website structure, "
+                f"you can significantly increase how often AI recommends you."
+            )
         else:
-            headline = f"{brand} has low AI search visibility ({overall_score}/100) and needs attention."
+            headline = (
+                f"{brand} has low AI search visibility ({overall_score}/100). "
+                f"Right now, when potential customers ask AI assistants about your industry, "
+                f"your brand is rarely mentioned. This is a growth opportunity — "
+                f"the recommendations below will help you get noticed by AI search engines."
+            )
 
-        parts = [headline, ""] + summaries
+        # Add a "what this means" section for non-technical readers
+        what_it_means = (
+            "What does this score mean? AI search engines like ChatGPT, Perplexity, and Google AI "
+            "are increasingly how people discover products and services. Your AI visibility score "
+            "measures how often these AI tools mention and recommend your brand when users ask "
+            "questions related to your industry."
+        )
+
+        parts = [headline, what_it_means] + summaries
         return "\n\n".join(parts)
 
     def _build_recommendations(self, scanner_results: dict) -> list[dict]:
-        """Generate prioritized recommendations from all scanner results."""
+        """Generate prioritized, plain-English recommendations from all scanner results."""
         recs = []
         priority = 1
 
         # From brand visibility
         bv = scanner_results.get("brand_visibility", {})
-        if bv.get("geo_score", 1) < 0.4:
+        bv_score = bv.get("geo_score", 1)
+        if bv_score < 0.4:
             recs.append({
                 "priority": priority,
                 "category": "AI Visibility",
                 "title": "Improve brand presence in AI search",
                 "description": (
-                    "AI models rarely mention your brand. Create authoritative content "
-                    "that directly answers common questions in your industry. "
-                    "Focus on FAQ pages, comparison guides, and detailed product descriptions."
+                    "AI models rarely mention your brand when users search for your industry. "
+                    "To fix this, create content that directly answers common customer questions — "
+                    "think FAQ pages, 'best of' comparison guides, and detailed product descriptions. "
+                    "The more authoritative and helpful your content, the more likely AI will cite you."
                 ),
                 "impact": "high",
+                "effort": "medium",
+                "timeframe": "2-4 weeks to see initial results",
+            })
+            priority += 1
+        elif bv_score < 0.7:
+            recs.append({
+                "priority": priority,
+                "category": "AI Visibility",
+                "title": "Strengthen brand mentions in AI responses",
+                "description": (
+                    "Your brand appears in some AI searches but not consistently. "
+                    "Focus on creating comparison content and industry roundup articles "
+                    "that position your brand alongside well-known competitors. "
+                    "AI models learn from these patterns."
+                ),
+                "impact": "medium",
+                "effort": "low",
+                "timeframe": "1-2 weeks",
             })
             priority += 1
 
         # From content readiness
         cr = scanner_results.get("content_readiness", {})
-        if cr.get("aeo_score", 100) < 60:
+        cr_score = cr.get("aeo_score", 100)
+        if cr_score < 60:
             high_issues = cr.get("severity_breakdown", {}).get("high", 0)
             recs.append({
                 "priority": priority,
                 "category": "Content Structure",
-                "title": f"Fix {high_issues} critical content issues",
+                "title": f"Fix {high_issues} critical content issues on your website",
                 "description": (
-                    "Your page has structural issues that prevent AI engines from "
-                    "understanding your content. Add structured data (JSON-LD), "
-                    "improve heading hierarchy, and include FAQ sections."
+                    "Your website has structural issues that make it hard for AI engines "
+                    "to understand your content. Key fixes: add structured data (JSON-LD schema), "
+                    "organize content with clear headings (H1, H2, H3), and include FAQ sections. "
+                    "These changes help AI 'read' your page and cite it in responses."
                 ),
                 "impact": "high",
+                "effort": "medium",
+                "timeframe": "1-2 weeks for technical implementation",
+            })
+            priority += 1
+        elif cr_score < 80:
+            recs.append({
+                "priority": priority,
+                "category": "Content Structure",
+                "title": "Fine-tune your page for AI readability",
+                "description": (
+                    "Your page is reasonably well-structured but could be improved. "
+                    "Add FAQ schema markup, ensure every section has a clear heading, "
+                    "and include concise summary paragraphs that AI can easily extract."
+                ),
+                "impact": "medium",
+                "effort": "low",
+                "timeframe": "A few days",
             })
             priority += 1
 
         # From competitor gap
         cg = scanner_results.get("competitor_gap", {})
-        if cg.get("visibility_score", 100) < 50:
+        cg_score = cg.get("visibility_score", 100)
+        if cg_score < 50:
+            missing_models = []
+            for prov, r in cg.get("results", {}).items():
+                if isinstance(r, dict) and not r.get("brand_present"):
+                    missing_models.append(prov)
+            missing_str = ", ".join(missing_models[:3]) if missing_models else "several AI models"
             recs.append({
                 "priority": priority,
                 "category": "Cross-Model Coverage",
-                "title": "Expand presence across AI models",
+                "title": f"Expand presence to {missing_str}",
                 "description": (
-                    "Your brand is missing from several AI search engines. "
-                    "Different AI models pull from different sources — ensure your "
-                    "content is indexed broadly and referenced by authoritative sites."
+                    f"Your brand is missing from {missing_str}. Different AI models "
+                    f"pull from different data sources — to get cited everywhere, ensure your "
+                    f"content is indexed broadly. Get mentioned on industry blogs, review sites, "
+                    f"and authoritative publications that these AI models train on."
                 ),
                 "impact": "medium",
+                "effort": "medium",
+                "timeframe": "Ongoing — 2-6 weeks for initial coverage",
             })
             priority += 1
 
@@ -458,13 +528,16 @@ class GEOScannerOrchestrator:
             recs.append({
                 "priority": priority,
                 "category": "Direct Links",
-                "title": "Get AI models to link to your website",
+                "title": "Get AI models to link directly to your website",
                 "description": (
-                    "AI models mention topics in your space but don't link to your site. "
-                    "Build backlinks from authoritative sources, ensure your site is "
-                    "well-indexed, and create content that AI models want to reference."
+                    "AI models discuss topics in your space but don't link to your site. "
+                    "To earn direct links: build high-quality backlinks from authoritative sources, "
+                    "ensure your site is well-indexed by search engines, and create content "
+                    "that AI models want to reference as a primary source."
                 ),
                 "impact": "medium",
+                "effort": "high",
+                "timeframe": "4-8 weeks",
             })
             priority += 1
 
@@ -472,12 +545,15 @@ class GEOScannerOrchestrator:
         recs.append({
             "priority": priority,
             "category": "Best Practice",
-            "title": "Add Schema.org structured data",
+            "title": "Add Schema.org structured data to key pages",
             "description": (
-                "Structured data (FAQPage, HowTo, Product, Organization) helps "
-                "AI engines understand and cite your content more accurately."
+                "Structured data (FAQPage, HowTo, Product, Organization schemas) helps "
+                "AI engines understand exactly what your page is about and cite it more accurately. "
+                "This is one of the highest-impact, lowest-effort changes you can make."
             ),
             "impact": "medium",
+            "effort": "low",
+            "timeframe": "A few hours with a developer",
         })
 
         return recs
@@ -499,7 +575,7 @@ class GEOScannerOrchestrator:
                         brand=brand,
                         ai_model=r.get("ai_model", context.get("provider", "nova")),
                         cited=r.get("brand_present", False),
-                        context_snippet=r.get("citation_context", ""),
+                        citation_context=r.get("citation_context", ""),
                         confidence=r.get("confidence", 0.0),
                         response_snippet=r.get("response_snippet", ""),
                         sentiment=r.get("sentiment", "neutral"),

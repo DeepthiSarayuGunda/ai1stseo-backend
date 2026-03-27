@@ -194,6 +194,17 @@ Extended routing: `llm_service.py` → `citation_probe()` / `geo_monitor()` — 
 
 ## Recent Changes (March 2026)
 
+### Mar 26 — GEO Scanner Agent Enhancements & Workflow Documentation
+- Fixed parameter mismatch in `_persist_to_rds()` — `context_snippet` → `citation_context` to match `db.insert_probe()` signature
+- Fixed same mismatch in `POST /api/data/geo-probes` endpoint in `app.py`
+- Enhanced executive summary with "what this means" explainer for non-technical users
+- Improved recommendations with `effort`, `timeframe` fields and more actionable descriptions
+- Added intermediate score thresholds (40-70%) for more nuanced recommendations
+- Competitor gap recommendations now list specific missing AI models
+- Updated `geo-scanner.html` to display effort/timeframe in recommendation cards
+- Created `SEO-CONTENT-WORKFLOWS.md` — full process documentation with ASCII diagrams for all 9 workflows
+- Created `DEPLOYMENT-LINUX.md` — Docker + direct deployment instructions for Linux server
+
 ### Mar 26 — Shared Lambda Fix & Endpoint Audit
 - Confirmed all GEO/AEO/content endpoints are live and functional in the shared backend
 - No `/api/data/*` endpoints exist — dashboard pages should use the endpoints listed above
