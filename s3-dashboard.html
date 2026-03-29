@@ -10,43 +10,57 @@
   <body class="bg-[#0a0a0a] text-white min-h-screen">
     <div id="root"></div>
 
-    <!-- GEO Scanner Agent — inject card into React dashboard grid -->
+    <!-- AI Visibility Report — inject as separate section below AI Search Optimization -->
     <script>
       (function() {
         var injected = false;
         function tryInject() {
           if (injected) return;
-          if (document.getElementById('geo-scanner-card')) { injected = true; return; }
-          // Find "GEO Visibility Scanner" text to locate the card grid
+          if (document.getElementById('geo-scanner-section')) { injected = true; return; }
+          // Find "AI SEARCH OPTIMIZATION" section heading to place our section after it
           var allEls = document.querySelectorAll('*');
-          var geoCard = null;
+          var seoSection = null;
           for (var i = 0; i < allEls.length; i++) {
             var el = allEls[i];
-            if (el.children.length === 0 && el.textContent.trim() === 'GEO Visibility Scanner') {
-              geoCard = el; break;
+            if (el.children.length === 0 && el.textContent.trim().indexOf('SEO & CONTENT TOOLS') !== -1) {
+              seoSection = el; break;
             }
           }
-          if (!geoCard) return;
-          var cardEl = geoCard;
-          for (var j = 0; j < 8; j++) {
-            if (!cardEl.parentElement) break;
-            cardEl = cardEl.parentElement;
-            if (cardEl.children.length >= 3) {
-              var grid = cardEl;
-              injected = true;
-              var card = document.createElement('div');
-              card.id = 'geo-scanner-card';
-              card.style.cssText = 'background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border:2px solid #238636;border-radius:16px;padding:24px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-height:160px;';
-              card.onmouseover = function(){ card.style.borderColor='#3fb950'; card.style.transform='translateY(-2px)'; card.style.boxShadow='0 4px 20px rgba(35,134,54,0.3)'; };
-              card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
-              card.onclick = function(){ window.location.href='/geo-scanner'; };
-              card.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
-                + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">AI Visibility Report</div>'
-                + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
-                + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>';
-              grid.insertBefore(card, grid.firstChild);
-              return;
-            }
+          if (!seoSection) return;
+          // Walk up to find the section container
+          var sectionEl = seoSection;
+          for (var j = 0; j < 5; j++) {
+            if (!sectionEl.parentElement) break;
+            sectionEl = sectionEl.parentElement;
+          }
+          injected = true;
+
+          // Create the AI Visibility Report section
+          var section = document.createElement('div');
+          section.id = 'geo-scanner-section';
+          section.style.cssText = 'max-width:1200px;margin:0 auto 32px;padding:0 24px;';
+          section.innerHTML = ''
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-top:8px">'
+            + '  <span style="font-size:1.1rem">🔬</span>'
+            + '  <span style="font-size:0.75rem;font-weight:600;color:#8b949e;letter-spacing:0.05em;text-transform:uppercase">AI Visibility Report</span>'
+            + '</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
+            + '  <div id="geo-scanner-card" style="background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border:2px solid #238636;border-radius:16px;padding:24px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-height:160px;" onclick="window.location.href=\'/geo-scanner\'">'
+            + '    <div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
+            + '    <div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">AI Visibility Report</div>'
+            + '    <div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
+            + '    <span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>'
+            + '  </div>'
+            + '</div>';
+
+          // Insert before the SEO & CONTENT TOOLS section
+          sectionEl.parentElement.insertBefore(section, sectionEl);
+
+          // Add hover effect
+          var card = document.getElementById('geo-scanner-card');
+          if (card) {
+            card.onmouseover = function(){ card.style.borderColor='#3fb950'; card.style.transform='translateY(-2px)'; card.style.boxShadow='0 4px 20px rgba(35,134,54,0.3)'; };
+            card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
           }
         }
         var observer = new MutationObserver(tryInject);
@@ -56,24 +70,8 @@
       })();
     </script>
 
-    <!-- Fallback banner if card injection doesn't find the grid -->
-    <div id="geo-agent-banner" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d1117,#161b22);border-top:2px solid #238636;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
-      <span style="background:#f0883e;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700">NEW</span>
-      <span style="color:#8b949e;font-size:.82rem">🔬 AI Visibility Report — Full AI visibility scan</span>
-      <a href="/geo-scanner" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:#238636;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">Open GEO Scanner</a>
-      <span onclick="this.parentElement.style.display='none'" style="color:#484f58;cursor:pointer;font-size:1.2rem;padding:4px 8px">&times;</span>
-    </div>
+    <!-- No floating banner — AI Visibility Report is shown as its own section -->
     <script>
-      // Hide banner if card was injected successfully
-      var hideBanner = setInterval(function() {
-        if (document.getElementById('geo-scanner-card')) {
-          var banner = document.getElementById('geo-agent-banner');
-          if (banner) banner.style.display = 'none';
-          clearInterval(hideBanner);
-        }
-      }, 600);
-      setTimeout(function(){ clearInterval(hideBanner); }, 35000);
-
       // Remove personalized greeting for public site
       var hideGreeting = setInterval(function() {
         var allH1 = document.querySelectorAll('h1, h2, [class*="text-3xl"], [class*="text-4xl"]');
@@ -87,6 +85,40 @@
         }
       }, 300);
       setTimeout(function(){ clearInterval(hideGreeting); }, 15000);
+
+      // Inject "AI Visibility Scanner" nav tab into the top navigation
+      var navInjected = false;
+      var navInterval = setInterval(function() {
+        if (navInjected) { clearInterval(navInterval); return; }
+        // Find the nav bar — look for the AI1stSEO logo or nav element
+        var navs = document.querySelectorAll('nav, header, [class*="navbar"], [class*="nav-"]');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          if (nav.querySelector('a') && nav.textContent.indexOf('AI1stSEO') !== -1) {
+            // Found the nav bar — check if tab already exists
+            if (nav.querySelector('#ai-visibility-tab')) { navInjected = true; return; }
+            // Find the right spot — look for existing nav links
+            var links = nav.querySelectorAll('a');
+            var lastLink = null;
+            for (var j = 0; j < links.length; j++) {
+              if (links[j].textContent.trim() && links[j].href) lastLink = links[j];
+            }
+            if (lastLink) {
+              var tab = document.createElement('a');
+              tab.id = 'ai-visibility-tab';
+              tab.href = '/geo-scanner';
+              tab.textContent = '🔬 AI Visibility Scanner';
+              tab.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#238636;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.82rem;margin-left:8px;transition:background 0.15s;white-space:nowrap;';
+              tab.onmouseover = function(){ tab.style.background='#2ea043'; };
+              tab.onmouseout = function(){ tab.style.background='#238636'; };
+              lastLink.parentElement.insertBefore(tab, lastLink.nextSibling);
+              navInjected = true;
+              return;
+            }
+          }
+        }
+      }, 400);
+      setTimeout(function(){ clearInterval(navInterval); }, 20000);
     </script>
   </body>
 </html>
