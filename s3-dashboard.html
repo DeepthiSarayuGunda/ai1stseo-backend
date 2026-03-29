@@ -41,7 +41,7 @@
               card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
               card.onclick = function(){ window.location.href='/geo-scanner'; };
               card.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
-                + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">GEO Scanner Agent</div>'
+                + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">AI Visibility Report</div>'
                 + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
                 + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>';
               grid.insertBefore(card, grid.firstChild);
@@ -59,7 +59,7 @@
     <!-- Fallback banner if card injection doesn't find the grid -->
     <div id="geo-agent-banner" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#0d1117,#161b22);border-top:2px solid #238636;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
       <span style="background:#f0883e;color:#fff;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700">NEW</span>
-      <span style="color:#8b949e;font-size:.82rem">🔬 GEO Scanner Agent — Full AI visibility scan</span>
+      <span style="color:#8b949e;font-size:.82rem">🔬 AI Visibility Report — Full AI visibility scan</span>
       <a href="/geo-scanner" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:#238636;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">Open GEO Scanner</a>
       <span onclick="this.parentElement.style.display='none'" style="color:#484f58;cursor:pointer;font-size:1.2rem;padding:4px 8px">&times;</span>
     </div>
