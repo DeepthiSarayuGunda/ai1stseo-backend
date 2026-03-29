@@ -40,6 +40,42 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 
 /* Results */
 .report{display:none;max-width:1200px}
+
+/* Stat boxes row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:768px){.stat-row{grid-template-columns:1fr 1fr}}
+.stat-box{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.stat-box.stat-green::before{background:linear-gradient(90deg,#238636,#3fb950)}
+.stat-box.stat-amber::before{background:linear-gradient(90deg,#d29922,#e3b341)}
+.stat-box.stat-red::before{background:linear-gradient(90deg,#da3633,#f85149)}
+.stat-box.stat-blue::before{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
+.stat-box .stat-label{font-size:.7rem;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600}
+.stat-box .stat-value{font-size:1.8rem;font-weight:700;line-height:1.1}
+.stat-box .stat-sub{font-size:.72rem;color:#484f58;margin-top:4px}
+
+/* Scanner result cards (keyword-opportunity style) */
+.scanner-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+@media(max-width:768px){.scanner-grid{grid-template-columns:1fr}}
+.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:12px;padding:20px;transition:all .2s;position:relative;overflow:hidden}
+.scanner-card:hover{border-color:#30363d;transform:translateY(-1px)}
+.scanner-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.scanner-card.sc-green::before{background:linear-gradient(90deg,#238636,#3fb950)}
+.scanner-card.sc-amber::before{background:linear-gradient(90deg,#d29922,#e3b341)}
+.scanner-card.sc-red::before{background:linear-gradient(90deg,#da3633,#f85149)}
+.scanner-card .sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;margin-top:4px}
+.scanner-card h3{font-size:.9rem;color:#e1e4e8;margin-bottom:0;font-weight:600}
+.scanner-card .sc-score-pill{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700}
+.sc-pill-high{background:#3fb95018;color:#3fb950;border:1px solid #3fb95033}
+.sc-pill-mid{background:#d2992218;color:#d29922;border:1px solid #d2992233}
+.sc-pill-low{background:#f8514918;color:#f85149;border:1px solid #f8514933}
+.scanner-card .sc-what{font-size:.72rem;color:#484f58;margin-bottom:10px;font-style:italic}
+.scanner-card .sc-metrics{display:flex;gap:16px;margin-bottom:10px}
+.scanner-card .sc-metric{text-align:center}
+.scanner-card .sc-metric-val{font-size:1.1rem;font-weight:700;color:#e1e4e8}
+.scanner-card .sc-metric-label{font-size:.65rem;color:#484f58;text-transform:uppercase;letter-spacing:.04em}
+.scanner-card .verdict{font-size:.8rem;line-height:1.6;color:#8b949e}
+
 .score-hero{text-align:center;padding:36px;background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid #30363d;border-radius:16px;margin-bottom:20px}
 .score-ring{display:inline-flex;align-items:center;justify-content:center;width:110px;height:110px;border-radius:50%;font-size:2.2rem;font-weight:700;border:5px solid}
 .score-high{border-color:#3fb950;color:#3fb950}
@@ -165,6 +201,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 
 <!-- Results Report -->
 <div class="report" id="report">
+  <!-- Stat boxes row -->
+  <div class="stat-row" id="stat-row"></div>
+
   <div class="score-hero">
     <div id="score-ring" class="score-ring score-mid">—</div>
     <div class="score-label">Overall AI Visibility Score</div>
@@ -184,10 +223,10 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 
   <div class="summary-box" id="exec-summary"></div>
 
-  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">Scanner Results</h2>
-  <div id="scanner-results"></div>
+  <h2 style="color:#e1e4e8;font-size:1rem;margin:24px 0 14px;display:flex;align-items:center;gap:8px"><span>📊</span> Scanner Results</h2>
+  <div id="scanner-results" class="scanner-grid"></div>
 
-  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">What You Should Do Next</h2>
+  <h2 style="color:#e1e4e8;font-size:1rem;margin:24px 0 14px;display:flex;align-items:center;gap:8px"><span>🎯</span> What You Should Do Next</h2>
   <ul class="rec-list" id="recommendations"></ul>
 
   <div class="rds-status" id="rds-status"></div>
@@ -534,9 +573,44 @@ function renderReport(d) {
   const report = document.getElementById('report');
   report.style.display = 'block';
 
+  // Stat boxes at the top
+  const score = d.overall_score || 0;
+  const bv = d.scanner_results?.brand_visibility || {};
+  const cr = d.scanner_results?.content_readiness || {};
+  const cg = d.scanner_results?.competitor_gap || {};
+  const sm = d.scanner_results?.site_mention || {};
+  const geoScore = Math.round((bv.geo_score || 0) * 100);
+  const aeoScore = cr.aeo_score || 0;
+  const visScore = cg.visibility_score || 0;
+  const scanners = d.scanners_run?.length || 0;
+
+  const statCls = v => v >= 60 ? 'stat-green' : v >= 30 ? 'stat-amber' : 'stat-red';
+  const valCls = v => v >= 60 ? '#3fb950' : v >= 30 ? '#d29922' : '#f85149';
+
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-box ${statCls(score)}">
+      <div class="stat-label">Overall Score</div>
+      <div class="stat-value" style="color:${valCls(score)}">${score}</div>
+      <div class="stat-sub">out of 100</div>
+    </div>
+    <div class="stat-box ${statCls(geoScore)}">
+      <div class="stat-label">Brand Visibility</div>
+      <div class="stat-value" style="color:${valCls(geoScore)}">${geoScore}%</div>
+      <div class="stat-sub">${bv.cited_count || 0}/${bv.total_prompts || 0} keywords cited</div>
+    </div>
+    <div class="stat-box ${statCls(aeoScore)}">
+      <div class="stat-label">Content Readiness</div>
+      <div class="stat-value" style="color:${valCls(aeoScore)}">${aeoScore}</div>
+      <div class="stat-sub">AEO score</div>
+    </div>
+    <div class="stat-box stat-blue">
+      <div class="stat-label">Scanners Run</div>
+      <div class="stat-value" style="color:#58a6ff">${scanners}</div>
+      <div class="stat-sub">in ${d.elapsed_seconds || '—'}s</div>
+    </div>`;
+
   // Score ring with explanation
   const ring = document.getElementById('score-ring');
-  const score = d.overall_score || 0;
   ring.textContent = score;
   ring.className = 'score-ring ' + (score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low');
 
@@ -554,7 +628,7 @@ function renderReport(d) {
   const paragraphs = (d.executive_summary || '').split('\n\n').filter(Boolean);
   summary.innerHTML = paragraphs.map(p => `<p>${esc(p)}</p>`).join('');
 
-  // Scanner results with score pills and context
+  // Scanner results — keyword-opportunity style cards
   const container = document.getElementById('scanner-results');
   const scannerMeta = {
     brand_visibility: { icon: '🎯', label: 'Brand Visibility', what: 'Are AI models mentioning your brand when users search for your keywords?' },
@@ -567,16 +641,16 @@ function renderReport(d) {
     const meta = scannerMeta[name] || { icon: '📋', label: name, what: '' };
     const s = result.friendly_summary || (result.status === 'skipped' ? ('Skipped — ' + (result.reason || 'not enough data')) : 'No summary available.');
     const scoreVal = extractScore(name, result);
-    const cls = result.status === 'error' ? 'bad' : result.status === 'skipped' ? 'warn' : scoreVal >= 60 ? 'ok' : scoreVal >= 30 ? 'warn' : 'bad';
+    const cardCls = result.status === 'skipped' ? 'sc-amber' : scoreVal >= 60 ? 'sc-green' : scoreVal >= 30 ? 'sc-amber' : 'sc-red';
     const pillCls = result.status === 'skipped' ? 'sc-pill-mid' : scoreVal >= 60 ? 'sc-pill-high' : scoreVal >= 30 ? 'sc-pill-mid' : 'sc-pill-low';
     const pillText = result.status === 'error' ? 'Error' : result.status === 'skipped' ? 'Skipped' : scoreVal + '%';
-    html += `<div class="scanner-card">
+    html += `<div class="scanner-card ${cardCls}">
       <div class="sc-header">
         <h3>${meta.icon} ${meta.label}</h3>
         <span class="sc-score-pill ${pillCls}">${pillText}</span>
       </div>
       <div class="sc-what">${meta.what}</div>
-      <div class="verdict ${cls}">${esc(s)}</div>
+      <div class="verdict">${esc(s)}</div>
     </div>`;
   }
   container.innerHTML = html;
