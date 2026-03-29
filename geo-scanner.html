@@ -31,23 +31,59 @@ button:disabled{opacity:.5;cursor:wait}
 .score-mid{border-color:#d29922;color:#d29922}
 .score-low{border-color:#f85149;color:#f85149}
 .score-label{font-size:.85rem;color:#8b949e;margin-top:8px}
+.score-explain{font-size:.78rem;color:#8b949e;margin-top:10px;max-width:400px;display:inline-block;line-height:1.5}
+.score-explain .grade{font-weight:600;font-size:.85rem}
+.score-explain .grade-high{color:#3fb950}
+.score-explain .grade-mid{color:#d29922}
+.score-explain .grade-low{color:#f85149}
 .summary-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-bottom:16px;line-height:1.6;font-size:.88rem}
 .summary-box p{margin-bottom:10px}
-.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;margin-bottom:10px}
-.scanner-card h3{font-size:.92rem;color:#58a6ff;margin-bottom:6px}
-.scanner-card .verdict{font-size:.85rem;line-height:1.5}
+.how-to-read{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;margin-bottom:16px;max-width:900px}
+.how-to-read summary{cursor:pointer;font-size:.88rem;color:#58a6ff;font-weight:600;user-select:none}
+.how-to-read .guide-content{margin-top:12px;font-size:.8rem;color:#8b949e;line-height:1.7}
+.how-to-read .guide-content .guide-item{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.how-to-read .guide-content .guide-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.how-to-read .guide-content .guide-text strong{color:#c9d1d9}
+.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:16px;margin-bottom:10px}
+.scanner-card .sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.scanner-card h3{font-size:.92rem;color:#58a6ff;margin-bottom:0}
+.scanner-card .sc-score-pill{padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.sc-pill-high{background:#3fb95022;color:#3fb950}
+.sc-pill-mid{background:#d2992222;color:#d29922}
+.sc-pill-low{background:#f8514922;color:#f85149}
+.scanner-card .sc-what{font-size:.75rem;color:#484f58;margin-bottom:8px;font-style:italic}
+.scanner-card .verdict{font-size:.85rem;line-height:1.6}
 .scanner-card .verdict.ok{color:#3fb950}
 .scanner-card .verdict.warn{color:#d29922}
 .scanner-card .verdict.bad{color:#f85149}
 .rec-list{list-style:none;padding:0}
-.rec-item{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px;margin-bottom:8px}
-.rec-item .rec-title{font-weight:600;font-size:.88rem;margin-bottom:4px}
+.rec-item{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;margin-bottom:8px;border-left:3px solid transparent}
+.rec-item.rec-high{border-left-color:#f85149}
+.rec-item.rec-medium{border-left-color:#d29922}
+.rec-item .rec-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rec-item .rec-icon{font-size:1rem}
+.rec-item .rec-title{font-weight:600;font-size:.88rem}
 .rec-item .rec-desc{font-size:.8rem;color:#8b949e;line-height:1.5}
-.rec-item .rec-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin-right:6px}
+.rec-item .rec-meta{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.rec-item .rec-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
 .badge-high{background:#f8514933;color:#f85149}
 .badge-medium{background:#d2992233;color:#d29922}
+.badge-effort{background:#58a6ff22;color:#58a6ff}
+.badge-time{background:#8b949e22;color:#8b949e}
 .rds-status{font-size:.75rem;color:#8b949e;margin-top:12px;padding:8px;background:#0d1117;border-radius:6px}
 .elapsed{font-size:.75rem;color:#484f58;margin-top:8px}
+/* Friendly tool results */
+.friendly-result{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;margin-top:8px}
+.fr-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.fr-verdict{font-size:1rem;font-weight:700}
+.fr-verdict.cited{color:#3fb950}
+.fr-verdict.not-cited{color:#f85149}
+.fr-detail{font-size:.8rem;color:#8b949e;line-height:1.5}
+.fr-context{font-size:.82rem;color:#c9d1d9;background:#161b22;border-radius:6px;padding:10px;margin-top:6px;font-style:italic}
+.fr-score-ring{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:.95rem;font-weight:700;border:3px solid}
+.fr-score-high{border-color:#3fb950;color:#3fb950}
+.fr-score-mid{border-color:#d29922;color:#d29922}
+.fr-score-low{border-color:#f85149;color:#f85149}
 
 /* Agents list */
 .agents-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
@@ -115,14 +151,26 @@ button:disabled{opacity:.5;cursor:wait}
   <div class="score-hero">
     <div id="score-ring" class="score-ring score-mid">—</div>
     <div class="score-label">Overall AI Visibility Score</div>
+    <div class="score-explain" id="score-explain"></div>
   </div>
+
+  <details class="how-to-read" open>
+    <summary>📖 How to read this report</summary>
+    <div class="guide-content">
+      <div class="guide-item"><span class="guide-icon">🎯</span><div class="guide-text"><strong>Brand Visibility</strong> — Did AI models mention your brand when users searched for your industry keywords? Higher % = more AI engines recommend you.</div></div>
+      <div class="guide-item"><span class="guide-icon">📄</span><div class="guide-text"><strong>Content Readiness</strong> — Is your website structured so AI engines can easily read and cite it? Checks for FAQ schema, headings, and structured data.</div></div>
+      <div class="guide-item"><span class="guide-icon">⚔️</span><div class="guide-text"><strong>Cross-Model Coverage</strong> — How many different AI engines (ChatGPT, Perplexity, Claude, etc.) mention your brand? Gaps mean missed audiences.</div></div>
+      <div class="guide-item"><span class="guide-icon">🔗</span><div class="guide-text"><strong>Site Link Detection</strong> — Does the AI actually link to your website, or just mention your name? Direct links drive real traffic.</div></div>
+      <div class="guide-item"><span class="guide-icon">📊</span><div class="guide-text"><strong>Score scale:</strong> 70–100 = strong visibility, 40–69 = room to grow, below 40 = AI engines aren't finding you yet.</div></div>
+    </div>
+  </details>
 
   <div class="summary-box" id="exec-summary"></div>
 
   <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">Scanner Results</h2>
   <div id="scanner-results"></div>
 
-  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">Recommendations</h2>
+  <h2 style="color:#58a6ff;font-size:1rem;margin:20px 0 10px">What You Should Do Next</h2>
   <ul class="rec-list" id="recommendations"></ul>
 
   <div class="rds-status" id="rds-status"></div>
@@ -340,48 +388,78 @@ function renderReport(d) {
   const report = document.getElementById('report');
   report.style.display = 'block';
 
-  // Score ring
+  // Score ring with explanation
   const ring = document.getElementById('score-ring');
   const score = d.overall_score || 0;
   ring.textContent = score;
   ring.className = 'score-ring ' + (score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low');
+
+  const explainEl = document.getElementById('score-explain');
+  if (score >= 70) {
+    explainEl.innerHTML = '<span class="grade grade-high">Strong visibility.</span> AI search engines are actively recommending your brand. Keep optimizing to maintain your lead.';
+  } else if (score >= 40) {
+    explainEl.innerHTML = '<span class="grade grade-mid">Moderate visibility.</span> Some AI engines mention you, but there are gaps. The recommendations below will help you improve.';
+  } else {
+    explainEl.innerHTML = '<span class="grade grade-low">Low visibility.</span> AI search engines aren\'t recommending your brand yet. Follow the high-priority recommendations below to get started.';
+  }
 
   // Executive summary
   const summary = document.getElementById('exec-summary');
   const paragraphs = (d.executive_summary || '').split('\n\n').filter(Boolean);
   summary.innerHTML = paragraphs.map(p => `<p>${esc(p)}</p>`).join('');
 
-  // Scanner results
+  // Scanner results with score pills and context
   const container = document.getElementById('scanner-results');
-  const labels = {
-    brand_visibility: '🎯 Brand Visibility',
-    content_readiness: '📄 Content Readiness',
-    competitor_gap: '⚔️ Cross-Model Coverage',
-    site_mention: '🔗 Site Link Detection'
+  const scannerMeta = {
+    brand_visibility: { icon: '🎯', label: 'Brand Visibility', what: 'Are AI models mentioning your brand when users search for your keywords?' },
+    content_readiness: { icon: '📄', label: 'Content Readiness', what: 'Is your website structured so AI engines can easily read and cite your content?' },
+    competitor_gap: { icon: '⚔️', label: 'Cross-Model Coverage', what: 'How many different AI engines mention your brand for the same query?' },
+    site_mention: { icon: '🔗', label: 'Site Link Detection', what: 'Does the AI link directly to your website, or just mention your name?' }
   };
   let html = '';
   for (const [name, result] of Object.entries(d.scanner_results || {})) {
-    const label = labels[name] || name;
+    const meta = scannerMeta[name] || { icon: '📋', label: name, what: '' };
     const s = result.friendly_summary || 'No summary available.';
     const scoreVal = extractScore(name, result);
     const cls = result.status === 'error' ? 'bad' : scoreVal >= 60 ? 'ok' : scoreVal >= 30 ? 'warn' : 'bad';
-    html += `<div class="scanner-card"><h3>${label}</h3><div class="verdict ${cls}">${esc(s)}</div></div>`;
+    const pillCls = scoreVal >= 60 ? 'sc-pill-high' : scoreVal >= 30 ? 'sc-pill-mid' : 'sc-pill-low';
+    const pillText = result.status === 'error' ? 'Error' : scoreVal + '%';
+    html += `<div class="scanner-card">
+      <div class="sc-header">
+        <h3>${meta.icon} ${meta.label}</h3>
+        <span class="sc-score-pill ${pillCls}">${pillText}</span>
+      </div>
+      <div class="sc-what">${meta.what}</div>
+      <div class="verdict ${cls}">${esc(s)}</div>
+    </div>`;
   }
   container.innerHTML = html;
 
-  // Recommendations
+  // Recommendations with icons, colored borders, and metadata badges
+  const catIcons = { content: '📝', technical: '🔧', strategy: '📈', schema: '🏷️', authority: '🏆', visibility: '🎯' };
   const recList = document.getElementById('recommendations');
   recList.innerHTML = (d.recommendations || []).map(r => {
-    const badge = r.impact === 'high' ? 'badge-high' : 'badge-medium';
-    const effort = r.effort ? ` · Effort: ${r.effort}` : '';
-    const time = r.timeframe ? ` · ${r.timeframe}` : '';
-    return `<li class="rec-item"><div class="rec-title"><span class="rec-badge ${badge}">${r.impact} impact</span>${esc(r.title)}</div><div class="rec-desc">${esc(r.description)}</div><div style="font-size:.72rem;color:#484f58;margin-top:6px">${esc(r.category)}${effort}${time}</div></li>`;
+    const icon = catIcons[r.category] || '💡';
+    const borderCls = r.impact === 'high' ? 'rec-high' : 'rec-medium';
+    const badgeCls = r.impact === 'high' ? 'badge-high' : 'badge-medium';
+    return `<li class="rec-item ${borderCls}">
+      <div class="rec-header">
+        <span class="rec-icon">${icon}</span>
+        <span class="rec-title">${esc(r.title)}</span>
+      </div>
+      <div class="rec-desc">${esc(r.description)}</div>
+      <div class="rec-meta">
+        <span class="rec-badge ${badgeCls}">${r.impact} impact</span>
+        ${r.effort ? `<span class="rec-badge badge-effort">${r.effort} effort</span>` : ''}
+        ${r.timeframe ? `<span class="rec-badge badge-time">${r.timeframe}</span>` : ''}
+      </div>
+    </li>`;
   }).join('');
 
   // RDS status
   const rds = d.rds_status || {};
-  document.getElementById('rds-status').textContent =
-    `Data saved: probes=${rds.geo_probes || '—'}, visibility=${rds.ai_visibility || '—'}`;
+  document.getElementById('rds-status').innerHTML =
+    `💾 Data saved to database: probes = ${esc(rds.geo_probes || '—')}, visibility = ${esc(rds.ai_visibility || '—')}`;
 
   // Elapsed
   document.getElementById('elapsed').textContent =
@@ -405,6 +483,18 @@ function show(id, data) {
   el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 }
 
+function showFriendly(id, html) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+
+function confidenceLabel(c) {
+  if (c >= 0.8) return { text: 'Strong recommendation', cls: 'cited' };
+  if (c >= 0.4) return { text: 'Comparison mention', cls: 'cited' };
+  return { text: 'Weak/conditional', cls: 'not-cited' };
+}
+
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
@@ -414,62 +504,155 @@ async function api(method, path, body) {
 
 // ── Core Tools ───────────────────────────────────────────────────────────────
 async function runGeo() {
-  show('g-out', 'Probing…');
+  showFriendly('g-out', '<div style="color:#8b949e">🔄 Probing AI model… this may take 10-30 seconds</div>');
   try {
     const d = await api('POST', '/api/geo-probe', {
       brand_name: document.getElementById('g-brand').value,
       keyword: document.getElementById('g-kw').value,
       provider: document.getElementById('g-prov').value
     });
-    show('g-out', d);
-  } catch (e) { show('g-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('g-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const cited = d.brand_present || d.cited;
+    const conf = d.confidence || 0;
+    const confInfo = confidenceLabel(conf);
+    let html = `<div class="friendly-result">
+      <div class="fr-header">
+        <span class="fr-verdict ${cited ? 'cited' : 'not-cited'}">${cited ? '✅ Brand Found' : '❌ Brand Not Found'}</span>
+        <span class="fr-score-ring ${conf >= 0.7 ? 'fr-score-high' : conf >= 0.3 ? 'fr-score-mid' : 'fr-score-low'}">${Math.round(conf * 100)}%</span>
+      </div>
+      <div class="fr-detail">
+        <strong>Keyword:</strong> ${esc(d.keyword)}<br>
+        <strong>AI Model:</strong> ${esc(d.ai_model || d.provider || 'nova')}<br>
+        <strong>Confidence:</strong> ${confInfo.text} (${Math.round(conf * 100)}%)
+      </div>`;
+    if (d.citation_context) {
+      html += `<div class="fr-context">"${esc(d.citation_context)}"</div>`;
+    }
+    if (!cited) {
+      html += `<div style="margin-top:10px;font-size:.8rem;color:#d29922">💡 The AI didn't mention your brand for this keyword. Consider creating content that directly answers this query.</div>`;
+    }
+    html += `</div>`;
+    showFriendly('g-out', html);
+  } catch (e) { showFriendly('g-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function runAeo() {
-  show('a-out', 'Analyzing…');
+  showFriendly('a-out', '<div style="color:#8b949e">🔄 Analyzing page for AI-readiness…</div>');
   try {
     const d = await api('POST', '/api/aeo/analyze', { url: document.getElementById('a-url').value });
-    show('a-out', d);
-  } catch (e) { show('a-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('a-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const score = d.aeo_score || d.score || 0;
+    const cls = score >= 70 ? 'fr-score-high' : score >= 40 ? 'fr-score-mid' : 'fr-score-low';
+    let html = `<div class="friendly-result">
+      <div class="fr-header">
+        <span style="font-size:.92rem;font-weight:600;color:#58a6ff">AI-Readiness Score</span>
+        <span class="fr-score-ring ${cls}">${score}</span>
+      </div>`;
+    const issues = d.issues || [];
+    if (issues.length) {
+      const high = issues.filter(i => i.severity === 'high').length;
+      const med = issues.filter(i => i.severity === 'medium').length;
+      html += `<div class="fr-detail" style="margin-top:8px">
+        Found <strong style="color:#f85149">${high} high</strong> and <strong style="color:#d29922">${med} medium</strong> priority issues.
+      </div>`;
+      html += `<div style="margin-top:10px">`;
+      issues.slice(0, 5).forEach(i => {
+        const sev = i.severity === 'high' ? '🔴' : i.severity === 'medium' ? '🟡' : '🟢';
+        html += `<div style="font-size:.8rem;margin-bottom:6px;color:#c9d1d9">${sev} <strong>${esc(i.name || i.check || '')}</strong> — ${esc(i.recommendation || i.description || '')}</div>`;
+      });
+      if (issues.length > 5) html += `<div style="font-size:.75rem;color:#484f58">+ ${issues.length - 5} more issues</div>`;
+      html += `</div>`;
+    } else {
+      html += `<div class="fr-detail" style="margin-top:8px;color:#3fb950">No major issues found. Your page is well-structured for AI engines.</div>`;
+    }
+    html += `</div>`;
+    showFriendly('a-out', html);
+  } catch (e) { showFriendly('a-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function runRank() {
-  show('r-out', 'Analyzing…');
+  showFriendly('r-out', '<div style="color:#8b949e">🔄 Analyzing E-E-A-T signals…</div>');
   try {
     const d = await api('POST', '/api/ai/ranking-recommendations', {
       url: document.getElementById('r-url').value,
       brand_name: document.getElementById('r-brand').value
     });
-    show('r-out', d);
-  } catch (e) { show('r-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('r-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const recs = d.recommendations || [];
+    let html = `<div class="friendly-result">
+      <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">AI Ranking Recommendations</div>`;
+    if (recs.length) {
+      html += `<div class="fr-detail">Found <strong>${recs.length}</strong> recommendations to improve your AI search ranking:</div>`;
+      html += `<div style="margin-top:10px">`;
+      recs.forEach(r => {
+        const badge = r.impact === 'high' ? '🔴' : '🟡';
+        html += `<div style="font-size:.8rem;margin-bottom:8px;color:#c9d1d9;padding:8px;background:#161b22;border-radius:6px">
+          ${badge} <strong>${esc(r.title || r.name || '')}</strong><br>
+          <span style="color:#8b949e">${esc(r.description || '')}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div class="fr-detail" style="color:#3fb950">Looking good — no major ranking issues found.</div>`;
+    }
+    html += `</div>`;
+    showFriendly('r-out', html);
+  } catch (e) { showFriendly('r-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function runContent() {
-  show('c-out', 'Generating…');
+  showFriendly('c-out', '<div style="color:#8b949e">🔄 Generating content…</div>');
   try {
     const d = await api('POST', '/api/content/generate', {
       brand_name: document.getElementById('c-brand').value,
       topic: document.getElementById('c-topic').value,
       content_type: document.getElementById('c-type').value
     });
-    show('c-out', d);
-  } catch (e) { show('c-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('c-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    let html = `<div class="friendly-result">
+      <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Generated ${esc(d.content_type || '')} Content</div>
+      <div style="font-size:.85rem;color:#c9d1d9;line-height:1.6;white-space:pre-wrap;background:#161b22;padding:12px;border-radius:6px">${esc(d.content || d.generated_content || JSON.stringify(d, null, 2))}</div>
+    </div>`;
+    showFriendly('c-out', html);
+  } catch (e) { showFriendly('c-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 // ── AI Visibility Scanner ────────────────────────────────────────────────────
 async function runCompare() {
-  show('cmp-out', 'Comparing across all models…');
+  showFriendly('cmp-out', '<div style="color:#8b949e">🔄 Comparing across all AI models… this may take 30-60 seconds</div>');
   try {
     const d = await api('POST', '/api/geo-probe/compare', {
       brand_name: document.getElementById('cmp-brand').value,
       keyword: document.getElementById('cmp-kw').value
     });
-    show('cmp-out', d);
-  } catch (e) { show('cmp-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('cmp-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const vs = d.visibility_score || 0;
+    const cls = vs >= 60 ? 'fr-score-high' : vs >= 30 ? 'fr-score-mid' : 'fr-score-low';
+    let html = `<div class="friendly-result">
+      <div class="fr-header">
+        <span style="font-size:.92rem;font-weight:600;color:#58a6ff">Cross-Model Visibility</span>
+        <span class="fr-score-ring ${cls}">${vs}%</span>
+      </div>
+      <div class="fr-detail" style="margin-top:8px">
+        Your brand was cited by <strong>${d.cited_count || 0}</strong> out of <strong>${d.total_providers || 0}</strong> AI models for "<em>${esc(d.keyword || '')}</em>"
+      </div>`;
+    const results = d.results || {};
+    if (Object.keys(results).length) {
+      html += `<div style="margin-top:10px">`;
+      for (const [provider, r] of Object.entries(results)) {
+        const cited = r.brand_present || r.cited;
+        const icon = cited ? '✅' : '❌';
+        html += `<div style="font-size:.8rem;margin-bottom:4px;color:#c9d1d9">${icon} <strong>${esc(provider)}</strong> — ${cited ? 'Mentioned your brand' : 'Did not mention your brand'}</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+    showFriendly('cmp-out', html);
+  } catch (e) { showFriendly('cmp-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function runBatch() {
-  show('b-out', 'Running batch probe…');
+  showFriendly('b-out', '<div style="color:#8b949e">🔄 Running batch probe… this may take 30-60 seconds</div>');
   try {
     const kw = document.getElementById('b-kw').value.split('\n').map(k => k.trim()).filter(Boolean);
     const d = await api('POST', '/api/geo-probe/batch', {
@@ -477,28 +660,99 @@ async function runBatch() {
       keywords: kw,
       provider: document.getElementById('b-prov').value
     });
-    show('b-out', d);
-  } catch (e) { show('b-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('b-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const geoScore = Math.round((d.geo_score || 0) * 100);
+    const cls = geoScore >= 60 ? 'fr-score-high' : geoScore >= 30 ? 'fr-score-mid' : 'fr-score-low';
+    let html = `<div class="friendly-result">
+      <div class="fr-header">
+        <span style="font-size:.92rem;font-weight:600;color:#58a6ff">GEO Visibility Score</span>
+        <span class="fr-score-ring ${cls}">${geoScore}%</span>
+      </div>
+      <div class="fr-detail" style="margin-top:8px">
+        Your brand was mentioned in <strong>${d.cited_count || 0}</strong> out of <strong>${d.total_prompts || 0}</strong> keyword searches (${geoScore}% visibility).
+      </div>`;
+    const results = d.results || [];
+    if (results.length) {
+      html += `<div style="margin-top:10px">`;
+      results.forEach(r => {
+        const cited = r.brand_present || r.cited;
+        const icon = cited ? '✅' : '❌';
+        html += `<div style="font-size:.8rem;margin-bottom:4px;color:#c9d1d9;padding:6px;background:#161b22;border-radius:4px">
+          ${icon} <strong>${esc(r.keyword || '')}</strong>
+          ${r.citation_context ? ` — <em style="color:#8b949e">${esc(r.citation_context.substring(0, 100))}${r.citation_context.length > 100 ? '…' : ''}</em>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    showFriendly('b-out', html);
+  } catch (e) { showFriendly('b-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function runTrend() {
-  show('trend-out', 'Loading trend…');
+  showFriendly('trend-out', '<div style="color:#8b949e">🔄 Loading trend data…</div>');
   try {
     const brand = document.getElementById('trend-brand').value.trim();
     const d = await api('GET', '/api/geo-probe/trend?brand=' + encodeURIComponent(brand));
-    show('trend-out', d);
-  } catch (e) { show('trend-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('trend-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const trend = d.trend || [];
+    if (!trend.length) {
+      showFriendly('trend-out', '<div style="color:#8b949e">No trend data yet. Run some scans first to build history.</div>');
+      return;
+    }
+    let html = `<div class="friendly-result">
+      <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Visibility Trend — ${esc(brand)}</div>
+      <div class="fr-detail">${trend.length} data points · ${d.total_probes || 0} total probes</div>
+      <div style="margin-top:10px">`;
+    trend.slice(0, 15).forEach(t => {
+      const score = Math.round((t.geo_score || 0) * 100);
+      const barWidth = Math.max(score, 2);
+      const color = score >= 60 ? '#3fb950' : score >= 30 ? '#d29922' : '#f85149';
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.78rem">
+        <span style="width:80px;color:#8b949e;flex-shrink:0">${esc(t.date || t.measured_at || '')}</span>
+        <div style="flex:1;background:#21262d;border-radius:3px;height:16px;overflow:hidden">
+          <div style="width:${barWidth}%;background:${color};height:100%;border-radius:3px;transition:width .3s"></div>
+        </div>
+        <span style="width:36px;text-align:right;color:${color};font-weight:600">${score}%</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+    showFriendly('trend-out', html);
+  } catch (e) { showFriendly('trend-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 async function loadHistory() {
-  show('h-out', 'Loading…');
+  showFriendly('h-out', '<div style="color:#8b949e">🔄 Loading probe history…</div>');
   try {
     let path = '/api/geo-probe/history?limit=50';
     const brand = document.getElementById('h-brand').value.trim();
     if (brand) path += '&brand=' + encodeURIComponent(brand);
     const d = await api('GET', path);
-    show('h-out', d);
-  } catch (e) { show('h-out', 'Error: ' + e.message); }
+    if (d.error) { showFriendly('h-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const stored = d.stored_results || [];
+    const batch = d.batch_history || [];
+    if (!stored.length && !batch.length) {
+      showFriendly('h-out', `<div style="color:#8b949e">No probe history yet. Run some scans to build your history. DB status: ${esc(d.db_status || 'unknown')}</div>`);
+      return;
+    }
+    let html = `<div class="friendly-result">
+      <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Probe History</div>
+      <div class="fr-detail">${stored.length} stored probes · ${batch.length} batch results · DB: ${esc(d.db_status || 'ok')}</div>`;
+    if (stored.length) {
+      html += `<div style="margin-top:10px">`;
+      stored.slice(0, 20).forEach(s => {
+        const cited = s.cited || s.brand_present;
+        const icon = cited ? '✅' : '❌';
+        html += `<div style="font-size:.78rem;margin-bottom:4px;color:#c9d1d9;padding:4px 6px;background:#161b22;border-radius:4px">
+          ${icon} <strong>${esc(s.keyword || '')}</strong> · ${esc(s.ai_model || '')} · ${esc(s.probe_timestamp || s.timestamp || '')}
+        </div>`;
+      });
+      if (stored.length > 20) html += `<div style="font-size:.75rem;color:#484f58">+ ${stored.length - 20} more</div>`;
+      html += `</div>`;
+    }
+    html += `</div>`;
+    showFriendly('h-out', html);
+  } catch (e) { showFriendly('h-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 </script>
 </body>
