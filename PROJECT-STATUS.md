@@ -1,6 +1,6 @@
 # AI1STSEO Project Status
 
-> **Last Updated:** March 25, 2026
+> **Last Updated:** March 29, 2026
 > **Updated By:** Dev 5 (Frontend & UX) — Amira
 > **Purpose:** This file is the single source of truth for project context. Read this FIRST before making any changes.
 
@@ -34,15 +34,21 @@
 | `index.html` | Professional landing page — hero with ANALYZE bar, 6 feature cards, PDF reports section, About Us, Privacy Policy, Contact, footer. Redirects logged-in users to dashboard. Source: `index-new.html` |
 | `logout.html` | Professional sign-out page with 5-second auto-redirect to homepage |
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
-| `assets/index-DHXIsnai.js` | React dashboard JS bundle (Vite build output) |
+| `assets/index-DW5KlJL7.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
-| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health), wired to live API endpoints, role-based auth via `GET /api/admin/me` |
+| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints, role-based auth via `GET /api/admin/me` + 7th Resources tab (Platform Tools, 15 Mermaid diagrams, Lambda routing table) |
 | `analyze.html` | SEO analyzer input page |
-| `audit.html` | SEO audit results page — saves results to localStorage for dashboard |
+| `audit.html` | SEO audit results page — saves results to localStorage for dashboard, PDF report download (jsPDF), AI recommendations, content brief generator |
 | `login.html` | Standalone login page (points to `api.ai1stseo.com`) |
 | `signup.html` | Standalone signup page (points to `api.ai1stseo.com`) |
 | `account.html` | Account management page |
 | `assets/auth.js` | Troy's auth module — handles all auth UI + welcome email trigger |
+| `backend/AI1STSEO-UML-DIAGRAMS.md` | 15 Mermaid diagrams file — fetched by admin dashboard Resources tab |
+
+## Homepage Migration Notes (Mar 26)
+- Old homepage: React app loaded from `assets/index-Bfah4_p8.js` — had resource tabs, diagrams, tool cards, analyze bar. Bundle still on S3, just not loaded.
+- New homepage: `index.html` is now a standalone HTML landing page (source: `index-new.html` in repo). Professional marketing page with About Us, Privacy Policy, Contact, feature descriptions, PDF reports section.
+- If old resource tabs/diagrams need to be accessible, they can be added as a tab in admin dashboard or linked separately.
 
 ## S3 Upload Command Template
 ```bash
@@ -132,14 +138,61 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 ---
 
-## Current Sprint — Dev 5 Tasks (Due Tuesday Mar 31)
+## Current Sprint — Week of Mar 26 (Due Tuesday Apr 1)
 
-### 🔧 From Mar 26 Meeting
-- Clean up main website (`index.html`) — move non-essential resources, diagrams, and buttons to admin dashboard. Only essential info visible to public.
-- Add standard company pages to main website: About Us, Privacy Policy, Contact. Consider adding developer info under About Us. Make it professional and advertising-friendly.
-- Make free SEO analysis + PDF report feature prominent on homepage (helps Tabasum with marketing)
-- Deploy project to Linux server by Tuesday using OpenShell/NVIDIA open shell layer. Share deployment instructions with team.
-- Coordinate with Troy on updating main website (shared task)
+### Dev 5 — Amira (Frontend & UX)
+
+#### New Task (from guide/WBS — Phase 3)
+- ✅ Build the admin dashboard UI using Troy's API endpoints — backend complete with 9 admin endpoints, reference UI at `admin.html`, handoff doc at `AMIRA_ADMIN_HANDOFF.md`. Troy's original admin.html restored Mar 29.
+
+#### Cleanup (from last week)
+- ✅ Separate user dashboard from admin dashboard — `dashboard.html` (user, React+Vite) and `admin.html` (admin, Troy's API-wired version). Done Mar 24.
+- ✅ Continue React + Vite migration — dashboard fully migrated. Done Mar 24.
+- 🔄 Coordinate with Samarveer on S3 deploys to avoid overwriting each other — ongoing. Teammate repo auto-deploy overwrote homepage Mar 29, re-uploaded.
+
+#### From Gurbachan / Zoom
+- ✅ Move non-essential resources/diagrams/buttons from main website to admin dashboard — added 7th "Resources" tab to Troy's admin.html with Platform Tools cards (GEO Scanner, SEO Audit Dashboard, Monitoring, Automation Hub, Doc Intelligence, SEO Analysis), Architecture & Documentation links (UML Diagrams, AWS Deployment Status, Backend Diagrams), and Per-Dev Lambda Routing table. Troy's original 6 tabs untouched. Done Mar 29.
+- ✅ Update main website to be professional and advertising-friendly (About Us, Privacy Policy, Contact, developer info) — new `index.html` deployed with all sections. Done Mar 26.
+- ✅ Add free analysis section with PDF report feature (for marketing) — homepage ANALYZE bar + PDF Reports section deployed. PDF download implemented in `audit.html` using jsPDF — generates branded PDF with overall score, category breakdown with progress bars, and all failed/warning checks with recommendations. Done Mar 29.
+- ✅ Deploy microproject to Linux server using OpenShell/NVIDIA open shell layer — deployed seo-audit-tool to seo-dev server. Done Mar 29.
+- ✅ Share deployment instructions with team — documented in PROJECT-STATUS.md below. Done Mar 29.
+
+### All Other Devs — Summary
+
+#### Dev 1 — Deepthi (AI/ML)
+- New: Build GEO Scanner Agent orchestrator skeleton (Phase 1)
+- Cleanup: Wire GEO probe results to RDS (`POST /api/data/geo-probes`, `POST /api/data/ai-visibility`), improve scanner output for non-technical users, build AI visibility parameter reference list
+- Zoom: Add GEO page URL/link to admin dashboard for Gurbachan review, document SEO/content analysis workflows, deploy to Linux server
+- ⚠️ Her repo auto-deploys to S3 — overwrote homepage Mar 29. Needs to remove or update `index.html` in her repo.
+
+#### Dev 2 — Samarveer (Content & NLP)
+- New: Build content scoring engine — expand `compute_readability_score`, `compute_seo_score`, `compute_aeo_score` (13 SEO + 13 AEO checks per DEV2-CHANGES.md)
+- Cleanup: Add `get_content_briefs()` and `get_content_brief_by_id()` to `db.py` (route returns 500), fix merge conflicts, ensure Ollama fallback chain works end-to-end
+- Zoom: Fix content brief generation and AI recommendations, deploy to Linux server
+
+#### Dev 3 — Troy (Data & Infrastructure)
+- New: Build `api_request_log` middleware for API usage tracking (feeds admin dashboard + future billing)
+- Cleanup: Fully terminate EC2 and delete all associated resources (IPs, security groups, snapshots), coordinate with Amira on admin dashboard API changes
+- Zoom: Verify all EC2 resources fully deleted, compile AI notes for team via WhatsApp, deploy to Linux server
+
+#### Dev 4 — Tabasum (Integrations)
+- New: Build social media content generation pipeline using SEO info document + LLM fallback chain
+- Cleanup: Complete social post scheduler CRUD (`/api/data/social-posts`), follow up on Facebook/LinkedIn account linking, test auth with direct Gmail
+- Zoom: Implement Facebook/LinkedIn scheduling, collect SEO info document, test PostIZ integration, email Paul/Gurbachan re DynamoDB permissions, troubleshoot forgot password, deploy to Linux server
+
+#### Paul
+- Review AWS backend for unexpected charges after EC2 shutdown
+- Assist with graceful shutdown of remaining services
+
+### Architecture Change: Per-Dev Lambda Routing
+| Routes | Lambda | Deployed By |
+|--------|--------|-------------|
+| Everything else (auth, admin, data API, SEO analyzer) | `ai1stseo-backend` | Troy only |
+| `/api/geo-probe/*`, `/api/aeo/*`, `/api/ai/*`, `/api/chatbot/*`, `/api/brand/*` | `ai1stseo-geo-engine` | Deepthi only |
+| `/api/social-posts/*` | `automation-hub` | Tabasum only |
+| Samarveer's content routes | Still on Troy's Lambda | Coordinate with Troy |
+
+⚠️ Deploy ONLY to your own Lambda. Don't touch `ai1stseo-backend`. If you need a new route, ask Troy to add it to API Gateway. Always read `DEPLOYMENT_LOG.md` before starting work. Push code to GitHub before deploying.
 
 ### ✅ Previous Sprint (Done — Mar 24-26)
 - Dashboard separation (user + admin) per Gurbachan's feedback ✅
@@ -153,15 +206,57 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 - Cross-subdomain SSO auth.js deployed ✅
 - Admin dashboard restyled to match user dashboard theme ✅
 
-### 📋 Upcoming
+### 📋 Upcoming (After This Sprint)
 1. Expand Local SEO category — per Gurbachan's feedback (Mar 26 email). Current: 0/15 checks. Article reference shows 20+ distinct Local SEO audit areas: GBP category/attribute audits, review velocity analysis, review response templates, GBP posting strategy, services section optimization, description optimization, photo audits, citation consistency (NAP), competitor GBP comparison, entity optimization, local search intent mapping. Goal: make Local SEO the deepest category in the platform.
 2. Workflow/pipeline mode — per Gurbachan's feedback. Instead of standalone tools, chain them: audit → gap analysis → content brief → content generation → score → publish. Reference: n8n-style automated SEO pipeline with multi-agent content generation (research → planning → writing → review → publish). Could be a "Run Full Pipeline" button on dashboard.
 3. Content editor with live SEO/AEO scoring (TipTap) — spec says SEO score and AEO score must display separately, never blended
-2. White-label reporting (branded PDF + live reports)
-3. Custom dashboard builder (drag-and-drop widgets)
-4. Onboarding flow / first-run experience
-5. Education hub with in-app tutorials
-6. Content brief UI (settings left panel, generated brief right panel — per Section 4.4 of product spec)
+4. White-label reporting (branded PDF + live reports)
+5. Custom dashboard builder (drag-and-drop widgets)
+6. Onboarding flow / first-run experience
+7. Education hub with in-app tutorials
+8. Content brief UI (settings left panel, generated brief right panel — per Section 4.4 of product spec)
+
+---
+
+## Linux Server Deployment — Dev 5 (Amira)
+
+| Detail | Value |
+|--------|-------|
+| App | seo-audit-tool |
+| Server | seo-dev |
+| Location | `/opt/seo-audit-tool` |
+| Port | 8080 |
+| Process Manager | PM2 (name: `seo-audit-tool`) |
+| Access via Tailscale | `http://100.108.196.117:8080` |
+
+### Useful Commands
+```bash
+# Check status
+ssh root@100.108.196.117 "pm2 status"
+
+# Restart
+ssh root@100.108.196.117 "pm2 restart seo-audit-tool"
+
+# View logs
+ssh root@100.108.196.117 "pm2 logs seo-audit-tool"
+```
+
+---
+
+## Dev 5 — Session Summary (Mar 29, 2026)
+
+All Dev 5 tasks for the week of Mar 26 are now complete:
+
+1. Restored Troy's original admin.html (6 tabs wired to live API endpoints) + added 7th Resources tab with Platform Tools, 15 interactive Mermaid diagrams, and Per-Dev Lambda Routing table
+2. Built PDF report download in audit.html — jsPDF generates branded A4 PDF with scores, category breakdown, and recommendations
+3. Re-uploaded homepage to S3 after teammate repo auto-deploy overwrote it with old React bundle
+4. Restored GEO Scanner Agent tool card (Deepthi's Dev 1 task) that was missing from dashboard
+5. Reverted AEO Platform link to Amplify URL, SEO Audit Dashboard to seoaudit.ai1stseo.com subdomain
+6. Updated backend/AI1STSEO-UML-DIAGRAMS.md with 15 comprehensive Mermaid diagrams
+7. Deployed seo-audit-tool to Linux server via PM2 on seo-dev (Tailscale: 100.108.196.117:8080)
+8. Multiple React dashboard rebuilds and S3 deploys with CloudFront invalidation
+
+Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`, `audit.html`, `backend/AI1STSEO-UML-DIAGRAMS.md`, `assets/index-DW5KlJL7.js`
 
 ---
 
@@ -169,6 +264,14 @@ aws cloudfront create-invalidation --distribution-id E16GYTIVXY9IOU --paths "/*"
 
 | Date | Change | Files |
 |------|--------|-------|
+| Mar 29, 2026 | Deployed seo-audit-tool to Linux server (seo-dev) — PM2 process manager, port 8080, Tailscale access at 100.108.196.117:8080. Deployment instructions added to PROJECT-STATUS.md. | Linux server, `PROJECT-STATUS.md` |
+| Mar 29, 2026 | Restored GEO Scanner Agent tool card to dashboard (was missing after rebuild) — Deepthi's Dev 1 task. 🔬 icon, green "NEW" tag, links to /geo-scanner.html. Found original card details by downloading old S3 bundle (index-DHXIsnai.js). AEO Platform reverted to Amplify URL. Rebuilt and deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `dashboard.html` (S3) |
+| Mar 29, 2026 | Reverted AEO Platform link back to Amplify URL (`main.d3ouus8qzvb5ml.amplifyapp.com`) — subdomain not configured. SEO Audit Dashboard kept at `seoaudit.ai1stseo.com`. Rebuilt React dashboard, deployed new bundle to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx`, `admin.html`, `dashboard.html` (S3) |
+| Mar 29, 2026 | Reverted SEO Audit Dashboard and AEO Platform links back to subdomain URLs (`seoaudit.ai1stseo.com` and `seoanalysis.ai1stseo.com`) from Amplify URLs — fixes cross-subdomain SSO so users stay logged in via Troy's shared cookie on `.ai1stseo.com`. Updated in tool cards, Tools dropdown, and admin Resources tab. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx`, `admin.html` |
+| Mar 29, 2026 | Added 7th "Resources" tab to Troy's admin.html — Platform Tools cards (GEO Scanner, SEO Audit Dashboard, Website Monitoring, Automation Hub, Doc Intelligence, SEO Analysis), Architecture & Diagrams section with 15 interactive Mermaid diagrams rendered as visual SVGs (Use Cases, System Architecture, Class Diagram, SEO Analysis Flow, GenAI SEO Flow, AI Content Gen, User Flow, Deployment, Content Lifecycle, Database ERD, Package Diagram, Roadmap Gantt, SEO Categories Mindmap, Metrics, Summary). Loads Mermaid v11 from CDN, fetches backend/AI1STSEO-UML-DIAGRAMS.md. Per-Dev Lambda Routing table. Troy's original 6 tabs untouched. | `admin.html`, `backend/AI1STSEO-UML-DIAGRAMS.md` |
+| Mar 29, 2026 | Added PDF report download to `audit.html` — "Download PDF Report" button using jsPDF CDN. Generates branded A4 PDF with: header (AI1stSEO branding, URL, date), overall score with color coding, category breakdown with progress bars and pass/total counts, all failed/warning checks grouped by category with descriptions and recommendations, footer. Filename auto-generated from URL. | `audit.html` |
+| Mar 29, 2026 | Restored Troy's original admin.html with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints at api.ai1stseo.com. Auth gate uses server-side role check via GET /api/admin/me instead of frontend email allowlist. Source: teammate-repo/OneDrive/Desktop/seo deployment/admin.html. Previous localStorage-based version replaced. | `admin.html` |
+| Mar 29, 2026 | Re-uploaded index-new.html to S3 as index.html after teammate repo auto-deploy overwrote homepage with old React bundle ("AISEO Master" / 170 SEO Factors). CloudFront invalidated. Coordination needed with Deepthi to prevent future overwrites. | `index.html` (S3) |
 | Mar 25, 2026 | Added SEO Audit Dashboard tool card (`seoaudit.ai1stseo.com`) to dashboard "SEO & Content Tools" section — red-to-orange gradient, "Report" tag, opens in new tab. Also added to Tools dropdown in navbar. Generates PDF audit reports. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 25, 2026 | Added Doc Intelligence (`docsummarizer.ai1stseo.com`) and Automation Hub (`automationhub.ai1stseo.com`) tool cards to dashboard SEO & Content Tools section. Removed duplicate SEO Audit Dashboard from Tools dropdown. All tools now in both card grid and dropdown. Deployed to S3, CloudFront invalidated. | `frontend/src/App.tsx`, `frontend/src/components/Navbar.tsx` |
 | Mar 26, 2026 | Rebuilt `index.html` as professional landing page — replaced old React bundle homepage with clean standalone HTML. New sections: hero with ANALYZE bar, stats bar (236 checks/10 categories/PDF/24-7), 6 feature cards, PDF reports section, About Us (mission + team), footer with Platform/Company/Contact links, Privacy Policy modal. Free analysis + PDF report prominent per Gurbachan's request. Deployed to S3, CloudFront invalidated. | `index-new.html` → `index.html` (S3) |
