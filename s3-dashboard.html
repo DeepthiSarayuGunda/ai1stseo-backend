@@ -73,6 +73,20 @@
         }
       }, 600);
       setTimeout(function(){ clearInterval(hideBanner); }, 35000);
+
+      // Remove personalized greeting for public site
+      var hideGreeting = setInterval(function() {
+        var allH1 = document.querySelectorAll('h1, h2, [class*="text-3xl"], [class*="text-4xl"]');
+        for (var i = 0; i < allH1.length; i++) {
+          var txt = allH1[i].textContent.trim();
+          if (txt.match(/^Good (morning|afternoon|evening)/i)) {
+            allH1[i].textContent = 'AI-First SEO Dashboard';
+            clearInterval(hideGreeting);
+            return;
+          }
+        }
+      }, 300);
+      setTimeout(function(){ clearInterval(hideGreeting); }, 15000);
     </script>
   </body>
 </html>
