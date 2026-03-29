@@ -78,6 +78,13 @@ button:disabled{opacity:.5;cursor:wait}
 <h1>Developer 1 — AI/ML & Core Engine Dashboard</h1>
 <p class="sub">AI Search Visibility Scanner — Phase 1 (Lambda + RDS)</p>
 
+<!-- ═══ QUICK NAV — GEO Scanner Agent Link ═══ -->
+<nav style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap" aria-label="Quick navigation">
+  <a href="/geo-scanner" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#238636;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:.88rem;transition:background .15s" onmouseover="this.style.background='#2ea043'" onmouseout="this.style.background='#238636'">🔬 GEO Scanner Agent — Full AI Visibility Scan</a>
+  <a href="/geo-test" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#161b22;color:#58a6ff;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-size:.85rem;transition:border-color .15s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">🧪 GEO Probe (Simple)</a>
+  <a href="/analyze" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#161b22;color:#58a6ff;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-size:.85rem;transition:border-color .15s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">📊 SEO Analyzer</a>
+</nav>
+
 <!-- ═══ GLOBAL BRAND / URL BAR ═══ -->
 <div class="brand-bar">
   <h2>🔍 Brand & Website Setup</h2>
@@ -304,22 +311,34 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <!-- ═══ AI VISIBILITY SCANNING PARAMETERS ═══ -->
-<div class="section-title">AI Visibility Scanning — Parameter Reference</div>
+<div class="section-title">AI Visibility Scanning — Comprehensive Parameter Reference</div>
 <div class="param-ref">
-  <h3>Structured Parameter List</h3>
-  <p class="desc" style="margin-bottom:12px">These are the key parameters used across all AI visibility scanning tools. Understanding them helps you get better results.</p>
+  <h3>Complete Parameter List for AI Visibility Scanning</h3>
+  <p class="desc" style="margin-bottom:12px">Every parameter used across GEO probes, AEO analysis, AI ranking, and the Scanner Agent orchestrator. Use this as a reference when interpreting results or building integrations.</p>
   <table>
-    <tr><th>Parameter</th><th>Used In</th><th>Description</th><th>Example</th></tr>
-    <tr><td>brand_name</td><td>All probes</td><td>The company/product name to track in AI responses</td><td>Notion, Ahrefs, Shopify</td></tr>
-    <tr><td>keyword</td><td>Single probe, Compare, Site</td><td>A natural-language search query a user might ask an AI</td><td>best project management tools for startups</td></tr>
-    <tr><td>keywords</td><td>Batch probe</td><td>Multiple search queries (one per line). Each is probed separately.</td><td>best SEO tools\ntop marketing platforms</td></tr>
-    <tr><td>provider / ai_model</td><td>All probes</td><td>Which AI model to query. Nova Lite = AWS Bedrock, Ollama = free local fallback.</td><td>nova, ollama</td></tr>
-    <tr><td>site_url</td><td>Site detection</td><td>A specific URL to check for in AI output (domain-level matching)</td><td>https://notion.so</td></tr>
-    <tr><td>url</td><td>AEO, Ranking</td><td>The webpage to analyze for AI-readiness (schema, content, E-E-A-T)</td><td>https://notion.so/product</td></tr>
-    <tr><td>content_type</td><td>Content gen</td><td>Type of content to generate: faq, comparison, meta_description, feature_snippet</td><td>faq</td></tr>
-    <tr><td>geo_score</td><td>Batch results</td><td>% of keywords where the brand was cited (0.0–1.0). Higher = better AI visibility.</td><td>0.75 = 75%</td></tr>
-    <tr><td>confidence</td><td>Probe results</td><td>How confident the detection is (0.0–1.0). Based on context match strength.</td><td>0.85</td></tr>
-    <tr><td>visibility_score</td><td>Compare results</td><td>% of AI models that cited the brand for a given keyword (0–100)</td><td>67 = 2 of 3 models</td></tr>
+    <tr><th>Parameter</th><th>Type</th><th>Used In</th><th>Description</th><th>Example</th></tr>
+    <tr><td>brand_name</td><td>string</td><td>All probes, Scanner Agent</td><td>The company/product name to track in AI responses</td><td>Notion, Ahrefs, Shopify</td></tr>
+    <tr><td>keyword</td><td>string</td><td>Single probe, Compare, Site</td><td>A natural-language search query a user might ask an AI</td><td>best project management tools for startups</td></tr>
+    <tr><td>keywords</td><td>string[]</td><td>Batch probe, Scanner Agent</td><td>Multiple search queries (one per line). Each is probed separately.</td><td>best SEO tools\ntop marketing platforms</td></tr>
+    <tr><td>provider / ai_model</td><td>string</td><td>All probes</td><td>Which AI model to query. nova = AWS Bedrock Nova Lite (fast), ollama = free local fallback (slower).</td><td>nova, ollama</td></tr>
+    <tr><td>url</td><td>string</td><td>AEO, Ranking, Scanner Agent</td><td>The webpage to analyze for AI-readiness (schema, content, E-E-A-T)</td><td>https://notion.so/product</td></tr>
+    <tr><td>site_url</td><td>string</td><td>Site detection</td><td>A specific URL to check for in AI output (domain-level matching)</td><td>https://notion.so</td></tr>
+    <tr><td>scanners</td><td>string[]</td><td>Scanner Agent</td><td>Which scanner agents to run. Options: brand_visibility, content_readiness, competitor_gap, site_mention. Omit to run all.</td><td>["brand_visibility"]</td></tr>
+    <tr><td>content_type</td><td>string</td><td>Content gen</td><td>Type of content to generate: faq, comparison, meta_description, feature_snippet</td><td>faq</td></tr>
+    <tr><td>overall_score</td><td>0–100</td><td>Scanner Agent report</td><td>Weighted average across all scanners. 70+ = strong, 40-69 = moderate, &lt;40 = needs work.</td><td>62</td></tr>
+    <tr><td>geo_score</td><td>0.0–1.0</td><td>Batch results</td><td>% of keywords where the brand was cited (0.0–1.0). Higher = better AI visibility.</td><td>0.75 = 75%</td></tr>
+    <tr><td>aeo_score</td><td>0–100</td><td>Content Readiness</td><td>How well your page is structured for AI engines. Checks schema, headings, FAQ, content depth.</td><td>72</td></tr>
+    <tr><td>confidence</td><td>0.0–1.0</td><td>Probe results</td><td>How confident the detection is. 1.0 = strong recommendation, 0.5 = comparison, 0.0 = conditional.</td><td>0.85</td></tr>
+    <tr><td>visibility_score</td><td>0–100</td><td>Compare results</td><td>% of AI models that cited the brand for a given keyword (0–100)</td><td>67 = 2 of 3 models</td></tr>
+    <tr><td>cited / brand_present</td><td>boolean</td><td>Individual probes</td><td>Whether the AI model mentioned your brand in its response</td><td>true / false</td></tr>
+    <tr><td>citation_context</td><td>string</td><td>Individual probes</td><td>The exact sentence(s) where the AI mentioned your brand</td><td>"Notion is a top pick for…"</td></tr>
+    <tr><td>site_mentioned</td><td>boolean</td><td>Site detection</td><td>Whether the AI model included a direct link to your website domain</td><td>true / false</td></tr>
+    <tr><td>sentiment</td><td>string</td><td>Individual probes</td><td>Tone of the AI's mention: positive, neutral, or negative</td><td>positive</td></tr>
+    <tr><td>severity</td><td>string</td><td>AEO issues</td><td>Issue severity: high (fix first), medium (important), low (nice to have)</td><td>high</td></tr>
+    <tr><td>impact</td><td>string</td><td>Recommendations</td><td>Expected impact of following a recommendation: high or medium</td><td>high</td></tr>
+    <tr><td>batch_results</td><td>JSONB</td><td>RDS storage</td><td>Full probe results stored in ai_visibility_history for historical analysis</td><td>[{keyword, cited, …}]</td></tr>
+    <tr><td>project_id</td><td>UUID</td><td>All RDS tables</td><td>Multi-tenancy key. Default: 00000000-…-000001. Each project gets isolated data.</td><td>UUID</td></tr>
+    <tr><td>probe_timestamp</td><td>ISO 8601</td><td>All probes</td><td>When the probe was executed (UTC)</td><td>2026-03-26T14:30:00Z</td></tr>
   </table>
 </div>
 

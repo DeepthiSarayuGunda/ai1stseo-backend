@@ -2874,6 +2874,101 @@ def llm_citation_probe():
     except Exception as e:
         return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
+# ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
+
+@app.route('/api/geo-scanner/scan', methods=['POST'])
+def geo_scanner_scan():
+    """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
+    from geo_scanner_agent import run_full_scan
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    if not brand:
+        return jsonify({'error': 'brand_name is required'}), 400
+
+    try:
+        result = run_full_scan(
+            brand_name=brand,
+            url=data.get('url'),
+            keywords=data.get('keywords', []),
+            provider=data.get('provider', 'nova'),
+            scanners=data.get('scanners'),
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'GEO scan failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo-scanner/agents', methods=['GET'])
+def geo_scanner_agents():
+    """List available scanner agents."""
+    from geo_scanner_agent import get_available_scanners
+    return jsonify({'agents': get_available_scanners()})
+
+
+# ── RDS Data Persistence Endpoints ────────────────────────────────────────────
+
+@app.route('/api/data/geo-probes', methods=['POST'])
+def data_geo_probes():
+    """POST /api/data/geo-probes — persist GEO probe results to RDS."""
+    from db import insert_probe
+    data = request.get_json() or {}
+    keyword = (data.get('keyword') or '').strip()
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    ai_model = (data.get('ai_model') or data.get('provider') or 'nova').strip()
+
+    if not keyword or not brand:
+        return jsonify({'error': 'keyword and brand are required'}), 400
+
+    try:
+        probe_id = insert_probe(
+            keyword=keyword,
+            brand=brand,
+            ai_model=ai_model,
+            cited=data.get('cited', False),
+            citation_context=data.get('citation_context', ''),
+            confidence=data.get('confidence', 0.0),
+            response_snippet=data.get('response_snippet', ''),
+            sentiment=data.get('sentiment', 'neutral'),
+        )
+        return jsonify({'status': 'saved', 'probe_id': probe_id})
+    except Exception as e:
+        return jsonify({'error': f'Failed to save probe: {str(e)}'}), 500
+
+
+@app.route('/api/data/ai-visibility', methods=['POST'])
+def data_ai_visibility():
+    """POST /api/data/ai-visibility — persist batch visibility results to RDS."""
+    from db import insert_visibility_batch
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    ai_model = (data.get('ai_model') or data.get('provider') or 'nova').strip()
+
+    if not brand:
+        return jsonify({'error': 'brand is required'}), 400
+
+    try:
+        batch_id = insert_visibility_batch(
+            brand=brand,
+            ai_model=ai_model,
+            keyword=data.get('keyword', ''),
+            geo_score=data.get('geo_score', 0),
+            cited_count=data.get('cited_count', 0),
+            total_prompts=data.get('total_prompts', 0),
+            batch_results=json.dumps(data.get('batch_results', [])),
+        )
+        return jsonify({'status': 'saved', 'batch_id': batch_id})
+    except Exception as e:
+        return jsonify({'error': f'Failed to save visibility batch: {str(e)}'}), 500
+
+
+# ── GEO Scanner Dashboard Page ───────────────────────────────────────────────
+
+@app.route('/geo-scanner')
+def serve_geo_scanner():
+    """Serve the GEO Scanner Agent dashboard."""
+    return send_from_directory('.', 'geo-scanner.html')
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
@@ -2891,6 +2986,11 @@ def serve_dev1_dashboard():
 def serve_dashboard_redirect():
     """Short alias — /dashboard redirects to /dev1-dashboard"""
     return send_from_directory('.', 'dev1-dashboard.html')
+
+@app.route('/admin')
+def serve_admin():
+    """Admin dashboard — overview, users, usage, AI costs, errors, health."""
+    return send_from_directory('.', 'admin.html')
 
 
 @app.route('/<path:path>')

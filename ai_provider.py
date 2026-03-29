@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://ollama.sageaios.com")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3:30b-a3b")
-OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "120"))
+OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "15"))
 
 NOVA_MODEL = os.environ.get("NOVA_MODEL", "us.amazon.nova-lite-v1:0")
 BEDROCK_REGION = os.environ.get("AWS_REGION_NAME", os.environ.get("AWS_REGION", "us-east-1"))
@@ -67,6 +67,12 @@ def call_ollama(prompt: str) -> str:
     """Call Ollama API directly. Returns response text."""
     base = OLLAMA_URL.rstrip("/")
     model = OLLAMA_MODEL
+
+    # Quick connectivity check — fail fast if server is unreachable
+    try:
+        requests.get(f"{base}/api/tags", timeout=5)
+    except Exception:
+        raise RuntimeError(f"Ollama server unreachable at {base}")
 
     if not model:
         try:

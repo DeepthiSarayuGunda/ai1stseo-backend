@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AI 1st SEO</title>
+    <style>
+        :root, [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-nav: rgba(10,10,10,0.95);
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.07);
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(0,212,255,0.3);
+            --text: #fff;
+            --text-muted: rgba(255,255,255,0.5);
+            --text-faint: rgba(255,255,255,0.3);
+            --table-hover: rgba(255,255,255,0.03);
+        }
+        [data-theme="light"] {
+            --bg: #f4f6f9;
+            --bg-nav: rgba(255,255,255,0.95);
+            --bg-card: #fff;
+            --bg-card-hover: #f0f4f8;
+            --border: #e2e8f0;
+            --border-hover: #00d4ff;
+            --text: #1a202c;
+            --text-muted: #64748b;
+            --text-faint: #94a3b8;
+            --table-hover: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 32px; background: var(--bg-nav);
+            border-bottom: 1px solid var(--border); backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo {
+            font-size: 1.3rem; font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            text-decoration: none;
+        }
+        .logo-sub { color: var(--text-faint); font-size: 0.75rem; margin-top: 2px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .user-badge {
+            padding: 4px 12px; background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 20px; font-size: 0.8rem; color: #00d4ff;
+        }
+        .back-link {
+            color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+            padding: 6px 14px; border-radius: 8px; transition: all 0.2s;
+        }
+        .back-link:hover { background: var(--bg-card); color: var(--text); }
+        .theme-toggle {
+            display: flex; align-items: center; gap: 6px; background: none;
+            border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px;
+            cursor: pointer; font-size: 0.8rem; color: var(--text-muted); font-family: inherit;
+        }
+        .theme-toggle:hover { border-color: var(--border-hover); }
+
+        /* Auth gate */
+        #auth-gate { text-align: center; padding: 80px 20px; }
+        #auth-gate h2 { margin-bottom: 12px; }
+        #auth-gate p { color: var(--text-muted); margin-bottom: 24px; }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex; gap: 4px; margin: 24px 0; flex-wrap: wrap;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 4px;
+        }
+        .tab-btn {
+            padding: 10px 18px; background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--text); background: var(--bg-card-hover); }
+        .tab-btn.active { color: #fff; background: linear-gradient(90deg, #00ff88, #00d4ff); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Cards */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px; margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-card); border-radius: 16px; padding: 20px;
+            border: 1px solid var(--border); text-align: center; transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+        .stat-value { font-size: 2rem; font-weight: bold; margin-bottom: 4px; }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; }
+        .stat-sub { color: var(--text-faint); font-size: 0.75rem; margin-top: 4px; }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-card); border-radius: 16px; padding: 24px;
+            margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        .panel-title {
+            font-size: 1.1rem; font-weight: 600; margin-bottom: 16px;
+            padding-bottom: 12px; border-bottom: 1px solid var(--border);
+        }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            text-align: left; padding: 10px 12px; color: var(--text-faint);
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 10px 12px; border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .data-table tr:hover td { background: var(--table-hover); }
+        @media (max-width: 768px) {
+            header { padding: 12px 16px; }
+            .container { padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .back-link { display: none; }
+        }
+        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div style="display:flex;align-items:center;gap:14px">
+            <a href="/" class="logo">🔍 AI1stSEO</a>
+            <span class="user-badge">Admin</span>
+        </div>
+        <div class="header-right">
+            <a href="/dashboard.html" class="back-link">← User Dashboard</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <span id="themeIcon">🌙</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <span class="user-badge" id="userBadge" style="background:rgba(0,200,83,0.15);border-color:rgba(0,200,83,0.3);color:#00c853;">Loading...</span>
+        </div>
+    </header>
+
+    <!-- Auth gate: shown if not admin -->
+    <div id="auth-gate" style="display:none;">
+        <h2>🔒 Admin Access Required</h2>
+        <p>You must be logged in with an admin account to view this page.</p>
+        <a href="/" class="back-link" style="font-size:1rem;">← Return to AI 1st SEO</a>
+    </div>
+
+    <!-- Dashboard content -->
+    <div id="dashboard" style="display:block;">
+        <div class="tab-bar" role="tablist">
+            <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">📊 Overview</button>
+            <button class="tab-btn" data-tab="users" role="tab" aria-selected="false">👥 Users</button>
+            <button class="tab-btn" data-tab="usage" role="tab" aria-selected="false">📈 Usage</button>
+            <button class="tab-btn" data-tab="ai-costs" role="tab" aria-selected="false">🤖 AI Costs</button>
+            <button class="tab-btn" data-tab="errors" role="tab" aria-selected="false">⚠️ Errors</button>
+            <button class="tab-btn" data-tab="health" role="tab" aria-selected="false">💚 Health</button>
+            <a href="/geo-scanner" class="tab-btn" style="background:linear-gradient(90deg,#238636,#2ea043);color:#fff;text-decoration:none;margin-left:auto">🔬 GEO Scanner Agent</a>
+        </div>
+
+        <!-- Quick access cards shown by default -->
+        <div class="stats-grid" id="quick-access" style="margin-top:20px;">
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/geo-scanner'">
+                <div class="stat-value" style="color:#238636;font-size:1.5rem;">🔬</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">GEO Scanner Agent</div>
+                <div class="stat-sub">Full AI visibility scan with plain-English results</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/analyze'">
+                <div class="stat-value" style="color:#00d4ff;font-size:1.5rem;">📊</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">SEO Analyzer</div>
+                <div class="stat-sub">236 checks across 10 categories</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/dev1-dashboard'">
+                <div class="stat-value" style="color:#8b5cf6;font-size:1.5rem;">🧪</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">Dev Dashboard</div>
+                <div class="stat-sub">All AI/ML tools and GEO probes</div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='/audit/'">
+                <div class="stat-value" style="color:#d97706;font-size:1.5rem;">🔍</div>
+                <div class="stat-label" style="font-weight:600;color:var(--text);">SEO Audit</div>
+                <div class="stat-sub">Detailed site audit with recommendations</div>
+            </div>
+        </div>
+</div>
+</div>
+<script src="/assets/auth.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:5000' : 'https://api.ai1stseo.com';
+
+    // Theme
+    var savedTheme = localStorage.getItem('ai1stseo_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+    document.getElementById('themeLabel').textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    document.getElementById('themeToggle').onclick = function() {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('ai1stseo_theme', next);
+        document.getElementById('themeIcon').textContent = next === 'dark' ? '🌙' : '☀️';
+        document.getElementById('themeLabel').textContent = next === 'dark' ? 'Dark' : 'Light';
+    };
+
+    function authHeaders() {
+        var token = window.AI1STSEO_AUTH ? window.AI1STSEO_AUTH.getAccessToken() : localStorage.getItem('ai1stseo_access_token');
+        return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token || '') };
+    }
+
+    function apiGet(endpoint) {
+        return fetch(API + endpoint, { headers: authHeaders() }).then(function(r) { return r.json(); });
+    }
+
+    // ---- Auth check ----
+    function checkAdmin() {
+        apiGet('/api/admin/me').then(function(data) {
+            if (data.status === 'success' && data.role === 'admin') {
+                document.getElementById('userBadge').textContent = '👤 ' + (data.name || data.email) + ' (admin)';
+                document.getElementById('auth-gate').style.display = 'none';
+                loadOverview();
+            } else {
+                // Show dashboard anyway but note limited access
+                document.getElementById('userBadge').textContent = 'Tools Access';
+            }
+        }).catch(function() {
+            // API unavailable — show dashboard with tools access
+            document.getElementById('userBadge').textContent = 'Tools Access';
+        });
+    }
+
+    function showAuthGate() {
+        document.getElementById('auth-gate').style.display = 'block';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('userBadge').textContent = 'Not authorized';
+    }
+
+    // ---- Tab switching ----
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+            document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+            var tab = btn.dataset.tab;
+            var panel = document.getElementById('panel-' + tab);
+            if (panel) { panel.classList.add('active'); }
+            // Load data on tab switch
+            var loaders = {
+                'overview': loadOverview, 'users': loadUsers, 'usage': loadUsage,
+                'ai-costs': loadAICosts, 'errors': loadErrors, 'health': loadHealth
+            };
+            if (loaders[tab]) loaders[tab]();
+        });
+    });
+
+    // ---- Overview Tab ----
+    function loadOverview() {
+        var dash = document.getElementById('dashboard');
+        var existing = document.getElementById('panel-overview');
+        if (!existing) {
+            existing = document.createElement('div');
+            existing.id = 'panel-overview';
+            existing.className = 'tab-panel active';
+            existing.innerHTML = '<div class="stats-grid" id="overview-stats"></div><div class="panel" id="overview-metrics"><div class="panel-title">📅 Daily Metrics (Last 30 Days)</div><div id="metrics-table">Loading...</div></div>';
+            dash.appendChild(existing);
+        } else { existing.classList.add('active'); }
+
+        apiGet('/api/admin/overview').then(function(d) {
+            if (d.status !== 'success') return;
+            document.getElementById('overview-stats').innerHTML =
+                statCard(d.users.total, 'Total Users', '#00d4ff', '+' + d.users.new_7d + ' this week') +
+                statCard(d.users.active_24h, 'Active (24h)', '#8bc34a') +
+                statCard(d.scans.total, 'Total Scans', '#00d4ff', d.scans.last_7d + ' this week') +
+                statCard(d.scans.avg_score + '%', 'Avg Score', scoreColor(d.scans.avg_score)) +
+                statCard(d.errors.unresolved, 'Unresolved Errors', d.errors.unresolved > 0 ? '#f44336' : '#00c853') +
+                statCard(d.monitoring.active_sites, 'Monitored Sites', '#7b2cbf');
+        });
+
+        apiGet('/api/admin/metrics?days=30').then(function(d) {
+            if (d.status !== 'success' || !d.metrics || d.metrics.length === 0) {
+                document.getElementById('metrics-table').innerHTML = '<p style="color:rgba(255,255,255,0.4);">No aggregated metrics yet. The daily job runs at 02:00 UTC.</p>';
+                return;
+            }
+            var html = '<table class="data-table"><thead><tr><th>Date</th><th>Users</th><th>New</th><th>Scans</th><th>Avg Score</th><th>Bedrock</th><th>Ollama</th><th>AI Cost</th><th>Errors</th></tr></thead><tbody>';
+            d.metrics.forEach(function(m) {
+                html += '<tr><td>' + m.metric_date + '</td><td>' + m.total_users + '</td><td>' + m.new_signups + '</td><td>' + m.total_scans + '</td><td>' + (m.avg_seo_score || '-') + '</td><td>' + m.bedrock_calls + '</td><td>' + m.ollama_fallback_calls + '</td><td>$' + (m.estimated_ai_cost_usd || 0) + '</td><td>' + m.scan_errors_count + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('metrics-table').innerHTML = html;
+        });
+    }
+
+    // ---- Users Tab ----
+    function loadUsers() {
+        ensurePanel('users', '<div class="panel"><div class="panel-title">👥 Registered Users</div><div id="users-table">Loading...</div><div id="users-pager" style="margin-top:12px;display:flex;gap:8px;"></div></div>');
+        fetchUsers(0);
+    }
+
+    function fetchUsers(offset) {
+        apiGet('/api/admin/users?limit=25&offset=' + offset).then(function(d) {
+            if (d.status !== 'success') return;
+            var html = '<table class="data-table"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Scans</th><th>Last Login</th><th>Joined</th><th>Action</th></tr></thead><tbody>';
+            d.users.forEach(function(u) {
+                html += '<tr><td>' + esc(u.email) + '</td><td>' + esc(u.name || '-') + '</td><td>' + roleBadge(u.role) + '</td><td>' + (u.scan_count || 0) + '</td><td>' + shortDate(u.last_login) + '</td><td>' + shortDate(u.created_at) + '</td><td>' + roleToggle(u.id, u.role) + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('users-table').innerHTML = html;
+            // Pager
+            var pager = document.getElementById('users-pager');
+            pager.innerHTML = '';
+            if (offset > 0) { var pb = document.createElement('button'); pb.className = 'tab-btn'; pb.textContent = '← Prev'; pb.onclick = function() { fetchUsers(offset - 25); }; pager.appendChild(pb); }
+            if (d.users.length === 25) { var nb = document.createElement('button'); nb.className = 'tab-btn'; nb.textContent = 'Next →'; nb.onclick = function() { fetchUsers(offset + 25); }; pager.appendChild(nb); }
+            pager.innerHTML += '<span style="color:rgba(255,255,255,0.4);font-size:0.8rem;margin-left:auto;">' + d.total + ' total users</span>';
+        });
+    }
+
+    window.setUserRole = function(userId, newRole) {
+        fetch(API + '/api/admin/users/' + userId + '/role', {
+            method: 'PUT', headers: authHeaders(), body: JSON.stringify({ role: newRole })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.status === 'success') loadUsers();
+        });
+    };
+
+    // ---- Usage Tab ----
+    function loadUsage() {
+        ensurePanel('usage', '<div class="panel"><div class="panel-title">📈 Scan Volume (Last 30 Days)</div><div id="usage-daily">Loading...</div></div><div class="panel"><div class="panel-title">🔗 Top Scanned URLs</div><div id="usage-urls">Loading...</div></div>');
+        apiGet('/api/admin/usage?days=30').then(function(d) {
+            if (d.status !== 'success') return;
+            // Daily scans table
+            if (d.daily_scans.length === 0) {
+                document.getElementById('usage-daily').innerHTML = '<p style="color:rgba(255,255,255,0.4);">No scan data yet.</p>';
+            } else {
+                var html = '<table class="data-table"><thead><tr><th>Date</th><th>Scans</th><th>Avg Score</th></tr></thead><tbody>';
+                d.daily_scans.forEach(function(r) { html += '<tr><td>' + r.date + '</td><td>' + r.scans + '</td><td>' + (r.avg_score || '-') + '</td></tr>'; });
+                html += '</tbody></table>';
+                document.getElementById('usage-daily').innerHTML = html;
+            }
+            // Top URLs
+            if (d.top_urls.length === 0) {
+                document.getElementById('usage-urls').innerHTML = '<p style="color:rgba(255,255,255,0.4);">No URLs scanned yet.</p>';
+            } else {
+                var html2 = '<table class="data-table"><thead><tr><th>URL</th><th>Scans</th><th>Avg Score</th></tr></thead><tbody>';
+                d.top_urls.forEach(function(r) { html2 += '<tr><td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(r.url) + '</td><td>' + r.scan_count + '</td><td>' + (r.avg_score || '-') + '</td></tr>'; });
+                html2 += '</tbody></table>';
+                document.getElementById('usage-urls').innerHTML = html2;
+            }
+        });
+    }
+
+    // ---- AI Costs Tab ----
+    function loadAICosts() {
+        ensurePanel('ai-costs', '<div class="stats-grid" id="ai-summary"></div><div class="panel"><div class="panel-title">🤖 AI Provider Breakdown</div><div id="ai-providers">Loading...</div></div><div class="panel"><div class="panel-title">📊 Usage by Trigger</div><div id="ai-triggers">Loading...</div></div><div class="panel"><div class="panel-title">📅 Daily AI Usage</div><div id="ai-daily">Loading...</div></div>');
+        apiGet('/api/admin/ai-costs?days=30').then(function(d) {
+            if (d.status !== 'success') return;
+            // Summary cards
+            var totalCalls = 0, totalCost = 0, totalFails = 0;
+            d.by_provider.forEach(function(p) { totalCalls += p.calls; totalCost += parseFloat(p.total_cost || 0); totalFails += p.failures; });
+            document.getElementById('ai-summary').innerHTML =
+                statCard(totalCalls, 'Total AI Calls', '#00d4ff', d.days + ' days') +
+                statCard('$' + totalCost.toFixed(4), 'Estimated Cost', '#ff9800') +
+                statCard(totalFails, 'Failed Calls', totalFails > 0 ? '#f44336' : '#00c853') +
+                statCard((totalCalls > 0 ? ((1 - totalFails / totalCalls) * 100).toFixed(1) : 100) + '%', 'Success Rate', '#8bc34a');
+
+            // Provider table
+            var html = '<table class="data-table"><thead><tr><th>Provider</th><th>Model</th><th>Calls</th><th>Input Tokens</th><th>Output Tokens</th><th>Cost</th><th>Avg Latency</th><th>Success</th><th>Failures</th></tr></thead><tbody>';
+            d.by_provider.forEach(function(p) {
+                html += '<tr><td>' + providerBadge(p.provider) + '</td><td style="font-size:0.75rem;">' + esc(p.model) + '</td><td>' + p.calls + '</td><td>' + fmtNum(p.input_tokens) + '</td><td>' + fmtNum(p.output_tokens) + '</td><td>$' + p.total_cost + '</td><td>' + (p.avg_latency_ms || 0) + 'ms</td><td style="color:#00c853;">' + p.successes + '</td><td style="color:' + (p.failures > 0 ? '#f44336' : 'rgba(255,255,255,0.3)') + ';">' + p.failures + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('ai-providers').innerHTML = html;
+
+            // By trigger
+            var html2 = '<table class="data-table"><thead><tr><th>Trigger</th><th>Calls</th><th>Cost</th></tr></thead><tbody>';
+            d.by_trigger.forEach(function(t) { html2 += '<tr><td>' + esc(t.triggered_by || 'unknown') + '</td><td>' + t.calls + '</td><td>$' + t.cost + '</td></tr>'; });
+            html2 += '</tbody></table>';
+            document.getElementById('ai-triggers').innerHTML = html2;
+
+            // Daily
+            if (d.daily.length === 0) {
+                document.getElementById('ai-daily').innerHTML = '<p style="color:rgba(255,255,255,0.4);">No daily data yet.</p>';
+            } else {
+                var html3 = '<table class="data-table"><thead><tr><th>Date</th><th>Provider</th><th>Calls</th><th>Cost</th></tr></thead><tbody>';
+                d.daily.forEach(function(r) { html3 += '<tr><td>' + r.date + '</td><td>' + providerBadge(r.provider) + '</td><td>' + r.calls + '</td><td>$' + r.cost + '</td></tr>'; });
+                html3 += '</tbody></table>';
+                document.getElementById('ai-daily').innerHTML = html3;
+            }
+        });
+    }
+
+    // ---- Errors Tab ----
+    function loadErrors() {
+        ensurePanel('errors', '<div class="panel"><div class="panel-title">⚠️ Scan Errors (Last 48h)</div><div id="errors-table">Loading...</div></div>');
+        apiGet('/api/admin/errors?hours=48').then(function(d) {
+            if (d.status !== 'success') return;
+            if (d.errors.length === 0) {
+                document.getElementById('errors-table').innerHTML = '<p style="color:#00c853;">No errors in the last 48 hours. 🎉</p>';
+                return;
+            }
+            var html = '<table class="data-table"><thead><tr><th>Time</th><th>URL</th><th>Type</th><th>Error</th><th>Source</th><th>Status</th></tr></thead><tbody>';
+            d.errors.forEach(function(e) {
+                html += '<tr><td style="white-space:nowrap;">' + shortDate(e.created_at) + '</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(e.url || '-') + '</td><td>' + esc(e.scan_type) + '</td><td style="color:#f44336;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(e.error_message) + '</td><td>' + esc(e.source) + '</td><td>' + (e.resolved ? '<span style="color:#00c853;">Resolved</span>' : '<span style="color:#ff9800;">Open</span>') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('errors-table').innerHTML = html;
+        });
+    }
+
+    // ---- Health Tab ----
+    function loadHealth() {
+        ensurePanel('health', '<div class="stats-grid" id="health-stats"></div>');
+        apiGet('/api/admin/health').then(function(d) {
+            if (d.status !== 'success') return;
+            document.getElementById('health-stats').innerHTML =
+                statCard(d.uptime_pct + '%', 'Uptime (24h)', d.uptime_pct >= 99 ? '#00c853' : '#ff9800') +
+                statCard(d.avg_response_ms + 'ms', 'Avg Response', d.avg_response_ms < 2000 ? '#00c853' : '#ff9800') +
+                statCard(d.total_checks_24h, 'Checks (24h)', '#00d4ff') +
+                statCard(d.errors_24h, 'Errors (24h)', d.errors_24h > 0 ? '#f44336' : '#00c853');
+        });
+    }
+
+    // ---- Helpers ----
+    function ensurePanel(id, html) {
+        var dash = document.getElementById('dashboard');
+        var el = document.getElementById('panel-' + id);
+        if (!el) { el = document.createElement('div'); el.id = 'panel-' + id; el.className = 'tab-panel active'; el.innerHTML = html; dash.appendChild(el); }
+        else { el.classList.add('active'); }
+    }
+
+    function statCard(value, label, color, sub) {
+        return '<div class="stat-card"><div class="stat-value" style="color:' + color + '">' + value + '</div><div class="stat-label">' + label + '</div>' + (sub ? '<div class="stat-sub">' + sub + '</div>' : '') + '</div>';
+    }
+
+    function scoreColor(s) { return s >= 80 ? '#00c853' : s >= 60 ? '#8bc34a' : s >= 40 ? '#ff9800' : '#f44336'; }
+
+    function roleBadge(role) {
+        return role === 'admin'
+            ? '<span style="color:#ff9800;font-weight:600;">admin</span>'
+            : '<span style="color:rgba(255,255,255,0.5);">member</span>';
+    }
+
+    function roleToggle(userId, currentRole) {
+        var newRole = currentRole === 'admin' ? 'member' : 'admin';
+        return '<button onclick="setUserRole(\'' + userId + '\',\'' + newRole + '\')" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;">Make ' + newRole + '</button>';
+    }
+
+    function providerBadge(p) {
+        if (p === 'nova_lite') return '<span style="color:#ff9800;">⚡ Nova Lite</span>';
+        if (p && p.indexOf('ollama') === 0) return '<span style="color:#8bc34a;">🦙 Ollama</span>';
+        return esc(p);
+    }
+
+    function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function fmtNum(n) { return n ? Number(n).toLocaleString() : '0'; }
+    function shortDate(d) { if (!d) return '-'; return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+
+    // ---- Init ----
+    checkAdmin();
+})();
+</script>
+</body>
+</html>
