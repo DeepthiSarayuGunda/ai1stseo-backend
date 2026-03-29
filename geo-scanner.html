@@ -204,6 +204,7 @@ button:disabled{opacity:.5;cursor:wait}
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Scan URL for AI visibility issues + FAQ schema gaps</p>
   <label>URL to analyze <span class="tip" title="The webpage to scan for structured data, FAQ schema, content quality, and other AI-readiness signals.">ⓘ</span></label><input id="a-url" class="sync-url" placeholder="Auto-filled from above">
   <button style="background:#1f6feb" onclick="runAeo()">Analyze AEO</button>
+  <button style="background:#238636;margin-top:6px" onclick="runAeoFix()">Generate FAQ Schema + Fixes</button>
   <div id="a-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
 
@@ -694,6 +695,47 @@ async function runAeo() {
       html += `</div>`;
     } else {
       html += `<div class="fr-detail" style="margin-top:8px;color:#3fb950">No major issues found. Your page is well-structured for AI engines.</div>`;
+    }
+    html += `</div>`;
+    showFriendly('a-out', html);
+  } catch (e) { showFriendly('a-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+async function runAeoFix() {
+  showFriendly('a-out', '<div style="color:#8b949e">🔄 Generating FAQ schema and optimisation fixes… this may take 20-30 seconds</div>');
+  try {
+    const url = document.getElementById('a-url').value.trim();
+    const brand = document.getElementById('s-brand').value.trim() || 'your brand';
+    // First analyze, then generate FAQ fix
+    const analysis = await api('POST', '/api/aeo/analyze', { url: url, brand_name: brand });
+    const faq = await api('POST', '/api/content/generate', { brand_name: brand, content_type: 'faq', topic: url, count: 5 });
+    if (faq.error) { showFriendly('a-out', `<div style="color:#f85149">Error: ${esc(faq.error)}</div>`); return; }
+
+    const score = analysis.aeo_score || 0;
+    const cls = score >= 70 ? 'fr-score-high' : score >= 40 ? 'fr-score-mid' : 'fr-score-low';
+    let html = `<div class="friendly-result">
+      <div class="fr-header">
+        <span style="font-size:.92rem;font-weight:600;color:#58a6ff">AEO Score: ${score}/100</span>
+        <span class="fr-score-ring ${cls}">${score}</span>
+      </div>
+      <div style="font-size:.88rem;font-weight:600;color:#3fb950;margin:12px 0 8px">✅ Generated FAQ Schema (copy and paste into your page)</div>
+      <div style="background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:12px;font-family:monospace;font-size:.75rem;white-space:pre-wrap;max-height:200px;overflow-y:auto;color:#c9d1d9">${esc(faq.schema_json_ld || 'No schema generated')}</div>`;
+    if (faq.faqs && faq.faqs.length) {
+      html += `<div style="font-size:.88rem;font-weight:600;color:#58a6ff;margin:16px 0 8px">Generated FAQ Content (${faq.faqs.length} Q&As)</div>`;
+      faq.faqs.forEach(f => {
+        html += `<div style="margin-bottom:8px;padding:8px;background:#161b22;border-radius:6px">
+          <div style="font-size:.82rem;font-weight:600;color:#e1e4e8">Q: ${esc(f.question)}</div>
+          <div style="font-size:.8rem;color:#8b949e;margin-top:4px">A: ${esc(f.answer)}</div>
+        </div>`;
+      });
+    }
+    const issues = analysis.issues || [];
+    if (issues.length) {
+      html += `<div style="font-size:.88rem;font-weight:600;color:#d29922;margin:16px 0 8px">Issues Found (${issues.length})</div>`;
+      issues.slice(0, 5).forEach(i => {
+        const sev = i.severity === 'high' ? '🔴' : i.severity === 'medium' ? '🟡' : '🟢';
+        html += `<div style="font-size:.78rem;margin-bottom:4px;color:#c9d1d9">${sev} ${esc(i.message || '')} — <em>${esc(i.fix || '')}</em></div>`;
+      });
     }
     html += `</div>`;
     showFriendly('a-out', html);
