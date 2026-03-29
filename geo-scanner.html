@@ -154,18 +154,25 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </head>
 <body>
 <div class="page-wrap">
-<h1>🔬 AI Visibility Report</h1>
-<p class="sub">Full automated scan — 4 AI agents, plain-English scores and recommendations</p>
 
-<nav class="nav" aria-label="Dashboard navigation">
+<!-- Hero Header -->
+<div style="text-align:center;padding:40px 0 32px">
+  <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:2rem">🔬</span>
+    <h1 style="font-size:1.8rem;background:linear-gradient(135deg,#58a6ff,#3fb950);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.03em">AI Visibility Report</h1>
+  </div>
+  <p class="sub" style="margin-bottom:0;max-width:500px;margin-left:auto;margin-right:auto">See how AI understands your brand and get clear steps to show up when people ask for recommendations</p>
+</div>
+
+<nav class="nav" style="justify-content:center" aria-label="Dashboard navigation">
   <a href="/dashboard.html">← Dashboard</a>
   <a href="/">Home</a>
 </nav>
 
-<!-- Scanner Input -->
-<div class="card">
-  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:12px">Run a Full AI Visibility Scan</h2>
-  <p style="font-size:.82rem;color:#8b949e;margin-bottom:12px">Enter your brand details and we'll check how visible you are across AI search engines like ChatGPT, Perplexity, and Claude.</p>
+<!-- Scanner Input Card -->
+<div style="background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid #30363d;border-radius:16px;padding:32px;margin-bottom:24px">
+  <h2 style="color:#e1e4e8;font-size:1.1rem;margin-bottom:6px;font-weight:700">Run a Full AI Visibility Scan</h2>
+  <p style="font-size:.82rem;color:#8b949e;margin-bottom:20px;line-height:1.5">Enter your brand details and we'll check how visible you are across AI search engines like ChatGPT, Perplexity, and Claude.</p>
 
   <div class="row2">
     <div>
@@ -196,7 +203,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   </div>
 
   <button class="btn-scan" onclick="runScan()" id="scan-btn">🔍 Run Full AI Visibility Scan</button>
-  <div id="scan-error" style="color:#f85149;font-size:.82rem;margin-top:8px;display:none"></div>
+  <div id="scan-error" style="color:#f85149;font-size:.82rem;margin-top:10px;display:none;text-align:center"></div>
 </div>
 
 <!-- Results Report -->
@@ -238,8 +245,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 <div class="grid">
 
 <!-- GEO Monitoring Engine -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#238636,#3fb950)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">1. GEO Monitoring Engine</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Detect brand mentions across Nova Lite (Bedrock) + Ollama fallback</p>
   <label>Brand <span class="tip" title="The brand you want to check. The AI model will be asked about this topic and we'll check if your brand appears in the response.">ⓘ</span></label><input id="g-brand" class="sync-brand" placeholder="Auto-filled from above">
@@ -254,8 +262,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- AEO Optimizer -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#1f6feb,#58a6ff)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">2. AEO Question-Answer Optimizer</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Scan URL for AI visibility issues + FAQ schema gaps</p>
   <label>URL to analyze <span class="tip" title="The webpage to scan for structured data, FAQ schema, content quality, and other AI-readiness signals.">ⓘ</span></label><input id="a-url" class="sync-url" placeholder="Auto-filled from above">
@@ -265,8 +274,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- AI Ranking Recommendations -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">3. AI Ranking Recommendations</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">E-E-A-T signal analysis + actionable recommendations</p>
   <label>URL</label><input id="r-url" class="sync-url" placeholder="Auto-filled from above">
@@ -276,8 +286,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- Content Generation Pipeline -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#d97706,#f59e0b)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">4. AI Content Generation Pipeline</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">One-click FAQ, comparison, meta description, feature snippets</p>
   <label>Brand</label><input id="c-brand" class="sync-brand" placeholder="Auto-filled from above">
@@ -295,8 +306,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- AI SEO Chatbot -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#e11d48,#f43f5e)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">5. AI SEO Assistant Chatbot</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Conversational diagnostics for SEO/AEO/GEO</p>
   <label>Message</label>
@@ -306,8 +318,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- LLM API Integrations -->
-<div class="card">
-  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>
+  <span class="tag tag-live">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">6. LLM API Integrations</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Multi-provider: Claude, Bedrock, Groq, OpenAI, Gemini, Perplexity</p>
   <button style="background:#0891b2" onclick="runProviders()">Check Providers</button>
