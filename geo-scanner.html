@@ -128,8 +128,123 @@ button:disabled{opacity:.5;cursor:wait}
   <div class="rds-status" id="rds-status"></div>
   <div class="elapsed" id="elapsed"></div>
 </div>
-</body>
-</html>
+
+<!-- ═══ CORE TOOLS ═══ -->
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:900px">Core Tools</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+<!-- GEO Monitoring Engine -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">1. GEO Monitoring Engine</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Detect brand mentions across Nova Lite (Bedrock) + Ollama fallback</p>
+  <label>Brand</label><input id="g-brand" placeholder="e.g. Notion, Shopify">
+  <label>Keyword</label><input id="g-kw" placeholder="e.g. best project management tools">
+  <label>Provider</label>
+  <select id="g-prov">
+    <option value="nova" selected>Nova Lite (Bedrock) — fast</option>
+    <option value="ollama">Ollama (qwen3:30b) — slower</option>
+  </select>
+  <button style="background:#238636" onclick="runGeo()">Run GEO Probe</button>
+  <div id="g-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- AEO Optimizer -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">2. AEO Question-Answer Optimizer</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Scan URL for AI visibility issues + FAQ schema gaps</p>
+  <label>URL to analyze</label><input id="a-url" placeholder="e.g. https://notion.so">
+  <button style="background:#1f6feb" onclick="runAeo()">Analyze AEO</button>
+  <div id="a-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- AI Ranking Recommendations -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">3. AI Ranking Recommendations</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">E-E-A-T signal analysis + actionable recommendations</p>
+  <label>URL</label><input id="r-url" placeholder="e.g. https://notion.so">
+  <label>Brand</label><input id="r-brand" placeholder="e.g. Notion">
+  <button style="background:#8b5cf6" onclick="runRank()">Get Recommendations</button>
+  <div id="r-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Content Generation Pipeline -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">4. AI Content Generation Pipeline</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">One-click FAQ, comparison, meta description, feature snippets</p>
+  <label>Brand</label><input id="c-brand" placeholder="e.g. Notion">
+  <label>Topic</label><input id="c-topic" placeholder="e.g. project management tools">
+  <label>Type</label>
+  <select id="c-type">
+    <option value="faq">FAQ (with JSON-LD schema)</option>
+    <option value="comparison">Comparison</option>
+    <option value="meta_description">Meta Description</option>
+    <option value="feature_snippet">Feature Snippet</option>
+  </select>
+  <button style="background:#d97706" onclick="runContent()">Generate Content</button>
+  <div id="c-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+</div>
+
+<!-- ═══ AI VISIBILITY SCANNER ═══ -->
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:900px">AI Visibility Scanner</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+<!-- Cross-Model Compare -->
+<div class="card" style="grid-column:1/-1">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Cross-Model Visibility Compare</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Probe the SAME keyword across ALL AI providers simultaneously</p>
+  <div class="row2">
+    <div><label>Brand</label><input id="cmp-brand" placeholder="e.g. Notion"></div>
+    <div><label>Keyword</label><input id="cmp-kw" placeholder="e.g. best running shoes"></div>
+  </div>
+  <button style="background:#238636" onclick="runCompare()">Compare Across All Models</button>
+  <div id="cmp-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Batch Probe -->
+<div class="card" style="grid-column:1/-1">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Batch GEO Probe</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Probe multiple keywords at once — get a GEO score showing what % of queries mention your brand</p>
+  <div class="row2">
+    <div><label>Brand</label><input id="b-brand" placeholder="e.g. Notion"></div>
+    <div><label>Provider</label>
+      <select id="b-prov"><option value="nova" selected>Nova Lite (Bedrock)</option><option value="ollama">Ollama — slower</option></select>
+    </div>
+  </div>
+  <label>Keywords (one per line)</label>
+  <textarea id="b-kw" style="min-height:80px" placeholder="best project management tools&#10;top productivity apps"></textarea>
+  <button style="background:#238636" onclick="runBatch()">Run Batch Probe</button>
+  <div id="b-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Visibility Trend -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#6366f1;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">DATA</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Visibility Trend</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Track how your brand visibility changes over time</p>
+  <label>Brand</label><input id="trend-brand" placeholder="e.g. Notion">
+  <button style="background:#6366f1" onclick="runTrend()">Load Trend</button>
+  <div id="trend-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Probe History -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#6366f1;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">DATA</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Probe History</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">All past GEO probe results stored in RDS</p>
+  <label>Filter by Brand</label><input id="h-brand" placeholder="(optional)">
+  <button style="background:#6366f1" onclick="loadHistory()">Load History</button>
+  <div id="h-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+</div>
 
 <!-- Comprehensive Parameter Reference -->
 <div class="param-ref">
@@ -281,6 +396,109 @@ function extractScore(name, result) {
   if (name === 'competitor_gap') return result.visibility_score || 0;
   if (name === 'site_mention') return result.site_mentioned ? 100 : 0;
   return 50;
+}
+
+// ── Helper for tool outputs ──────────────────────────────────────────────────
+function show(id, data) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(BASE + path, opts);
+  return r.json();
+}
+
+// ── Core Tools ───────────────────────────────────────────────────────────────
+async function runGeo() {
+  show('g-out', 'Probing…');
+  try {
+    const d = await api('POST', '/api/geo-probe', {
+      brand_name: document.getElementById('g-brand').value,
+      keyword: document.getElementById('g-kw').value,
+      provider: document.getElementById('g-prov').value
+    });
+    show('g-out', d);
+  } catch (e) { show('g-out', 'Error: ' + e.message); }
+}
+
+async function runAeo() {
+  show('a-out', 'Analyzing…');
+  try {
+    const d = await api('POST', '/api/aeo/analyze', { url: document.getElementById('a-url').value });
+    show('a-out', d);
+  } catch (e) { show('a-out', 'Error: ' + e.message); }
+}
+
+async function runRank() {
+  show('r-out', 'Analyzing…');
+  try {
+    const d = await api('POST', '/api/ai/ranking-recommendations', {
+      url: document.getElementById('r-url').value,
+      brand_name: document.getElementById('r-brand').value
+    });
+    show('r-out', d);
+  } catch (e) { show('r-out', 'Error: ' + e.message); }
+}
+
+async function runContent() {
+  show('c-out', 'Generating…');
+  try {
+    const d = await api('POST', '/api/content/generate', {
+      brand_name: document.getElementById('c-brand').value,
+      topic: document.getElementById('c-topic').value,
+      content_type: document.getElementById('c-type').value
+    });
+    show('c-out', d);
+  } catch (e) { show('c-out', 'Error: ' + e.message); }
+}
+
+// ── AI Visibility Scanner ────────────────────────────────────────────────────
+async function runCompare() {
+  show('cmp-out', 'Comparing across all models…');
+  try {
+    const d = await api('POST', '/api/geo-probe/compare', {
+      brand_name: document.getElementById('cmp-brand').value,
+      keyword: document.getElementById('cmp-kw').value
+    });
+    show('cmp-out', d);
+  } catch (e) { show('cmp-out', 'Error: ' + e.message); }
+}
+
+async function runBatch() {
+  show('b-out', 'Running batch probe…');
+  try {
+    const kw = document.getElementById('b-kw').value.split('\n').map(k => k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/geo-probe/batch', {
+      brand_name: document.getElementById('b-brand').value,
+      keywords: kw,
+      provider: document.getElementById('b-prov').value
+    });
+    show('b-out', d);
+  } catch (e) { show('b-out', 'Error: ' + e.message); }
+}
+
+async function runTrend() {
+  show('trend-out', 'Loading trend…');
+  try {
+    const brand = document.getElementById('trend-brand').value.trim();
+    const d = await api('GET', '/api/geo-probe/trend?brand=' + encodeURIComponent(brand));
+    show('trend-out', d);
+  } catch (e) { show('trend-out', 'Error: ' + e.message); }
+}
+
+async function loadHistory() {
+  show('h-out', 'Loading…');
+  try {
+    let path = '/api/geo-probe/history?limit=50';
+    const brand = document.getElementById('h-brand').value.trim();
+    if (brand) path += '&brand=' + encodeURIComponent(brand);
+    const d = await api('GET', path);
+    show('h-out', d);
+  } catch (e) { show('h-out', 'Error: ' + e.message); }
 }
 </script>
 </body>
