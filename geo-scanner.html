@@ -178,7 +178,7 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <!-- ═══ CORE TOOLS ═══ -->
-<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:900px">Core Tools</h2>
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:900px">Core Features</h2>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
 
 <!-- GEO Monitoring Engine -->
@@ -186,8 +186,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">1. GEO Monitoring Engine</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Detect brand mentions across Nova Lite (Bedrock) + Ollama fallback</p>
-  <label>Brand</label><input id="g-brand" placeholder="e.g. Notion, Shopify">
-  <label>Keyword</label><input id="g-kw" placeholder="e.g. best project management tools">
+  <label>Brand <span class="tip" title="The brand you want to check. The AI model will be asked about this topic and we'll check if your brand appears in the response.">ⓘ</span></label><input id="g-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keyword <span class="tip" title="A search query a real user might type into ChatGPT, Perplexity, or Google AI.">ⓘ</span></label><input id="g-kw" placeholder="e.g. best project management tools">
   <label>Provider</label>
   <select id="g-prov">
     <option value="nova" selected>Nova Lite (Bedrock) — fast</option>
@@ -202,7 +202,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">2. AEO Question-Answer Optimizer</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Scan URL for AI visibility issues + FAQ schema gaps</p>
-  <label>URL to analyze</label><input id="a-url" placeholder="e.g. https://notion.so">
+  <label>URL to analyze <span class="tip" title="The webpage to scan for structured data, FAQ schema, content quality, and other AI-readiness signals.">ⓘ</span></label><input id="a-url" class="sync-url" placeholder="Auto-filled from above">
   <button style="background:#1f6feb" onclick="runAeo()">Analyze AEO</button>
   <div id="a-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
@@ -212,8 +212,8 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">3. AI Ranking Recommendations</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">E-E-A-T signal analysis + actionable recommendations</p>
-  <label>URL</label><input id="r-url" placeholder="e.g. https://notion.so">
-  <label>Brand</label><input id="r-brand" placeholder="e.g. Notion">
+  <label>URL</label><input id="r-url" class="sync-url" placeholder="Auto-filled from above">
+  <label>Brand</label><input id="r-brand" class="sync-brand" placeholder="Auto-filled from above">
   <button style="background:#8b5cf6" onclick="runRank()">Get Recommendations</button>
   <div id="r-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
@@ -223,7 +223,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">4. AI Content Generation Pipeline</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">One-click FAQ, comparison, meta description, feature snippets</p>
-  <label>Brand</label><input id="c-brand" placeholder="e.g. Notion">
+  <label>Brand</label><input id="c-brand" class="sync-brand" placeholder="Auto-filled from above">
   <label>Topic</label><input id="c-topic" placeholder="e.g. project management tools">
   <label>Type</label>
   <select id="c-type">
@@ -234,6 +234,30 @@ button:disabled{opacity:.5;cursor:wait}
   </select>
   <button style="background:#d97706" onclick="runContent()">Generate Content</button>
   <div id="c-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- AI SEO Chatbot -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">5. AI SEO Assistant Chatbot</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Conversational diagnostics for SEO/AEO/GEO</p>
+  <label>Message</label>
+  <textarea id="ch-msg" style="min-height:50px">How do I optimize my website for ChatGPT and Perplexity?</textarea>
+  <button style="background:#e11d48" onclick="runChat()">Send Message</button>
+  <div id="ch-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- LLM API Integrations -->
+<div class="card">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">6. LLM API Integrations</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Multi-provider: Claude, Bedrock, Groq, OpenAI, Gemini, Perplexity</p>
+  <button style="background:#0891b2" onclick="runProviders()">Check Providers</button>
+  <label>Keyword</label><input id="l-kw" placeholder="e.g. best SEO tools 2025">
+  <label>Provider</label>
+  <select id="l-prov"><option value="claude">Claude (Bedrock)</option></select>
+  <button style="background:#0891b2;margin-top:6px" onclick="runLlmProbe()">Run Citation Probe</button>
+  <div id="l-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
 
 </div>
@@ -248,7 +272,7 @@ button:disabled{opacity:.5;cursor:wait}
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Cross-Model Visibility Compare</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Probe the SAME keyword across ALL AI providers simultaneously</p>
   <div class="row2">
-    <div><label>Brand</label><input id="cmp-brand" placeholder="e.g. Notion"></div>
+    <div><label>Brand</label><input id="cmp-brand" class="sync-brand" placeholder="Auto-filled from above"></div>
     <div><label>Keyword</label><input id="cmp-kw" placeholder="e.g. best running shoes"></div>
   </div>
   <button style="background:#238636" onclick="runCompare()">Compare Across All Models</button>
@@ -261,7 +285,7 @@ button:disabled{opacity:.5;cursor:wait}
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Batch GEO Probe</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Probe multiple keywords at once — get a GEO score showing what % of queries mention your brand</p>
   <div class="row2">
-    <div><label>Brand</label><input id="b-brand" placeholder="e.g. Notion"></div>
+    <div><label>Brand</label><input id="b-brand" class="sync-brand" placeholder="Auto-filled from above"></div>
     <div><label>Provider</label>
       <select id="b-prov"><option value="nova" selected>Nova Lite (Bedrock)</option><option value="ollama">Ollama — slower</option></select>
     </div>
@@ -277,7 +301,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#6366f1;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">DATA</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Visibility Trend</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Track how your brand visibility changes over time</p>
-  <label>Brand</label><input id="trend-brand" placeholder="e.g. Notion">
+  <label>Brand</label><input id="trend-brand" class="sync-brand" placeholder="Auto-filled from above">
   <button style="background:#6366f1" onclick="runTrend()">Load Trend</button>
   <div id="trend-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
@@ -287,7 +311,7 @@ button:disabled{opacity:.5;cursor:wait}
   <span style="display:inline-block;padding:2px 8px;background:#6366f1;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">DATA</span>
   <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Probe History</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">All past GEO probe results stored in RDS</p>
-  <label>Filter by Brand</label><input id="h-brand" placeholder="(optional)">
+  <label>Filter by Brand</label><input id="h-brand" class="sync-brand" placeholder="Auto-filled (optional)">
   <button style="background:#6366f1" onclick="loadHistory()">Load History</button>
   <div id="h-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
@@ -325,6 +349,32 @@ button:disabled{opacity:.5;cursor:wait}
 const BASE = window.location.hostname.includes('ai1stseo.com') ? 'https://sgnmqxb2sw.us-east-1.awsapprunner.com' : window.location.origin;
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ── Auto-sync brand/URL from top scan form to all tool inputs ────────────────
+function syncAllFields() {
+  const brand = document.getElementById('s-brand').value.trim();
+  const url = document.getElementById('s-url').value.trim();
+  document.querySelectorAll('.sync-brand').forEach(el => {
+    if (!el.dataset.userEdited) el.value = brand;
+  });
+  document.querySelectorAll('.sync-url').forEach(el => {
+    if (!el.dataset.userEdited) el.value = url;
+  });
+}
+
+// Sync on every change to the top form
+document.getElementById('s-brand').addEventListener('input', syncAllFields);
+document.getElementById('s-url').addEventListener('input', syncAllFields);
+
+// Track user edits on downstream fields so we don't overwrite manual changes
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('sync-brand') || e.target.classList.contains('sync-url')) {
+    e.target.dataset.userEdited = 'true';
+  }
+  if (e.target.value === '') delete e.target.dataset.userEdited;
+});
+
+let chatSession = null;
 
 // Load available agents on page load
 (async function() {
@@ -438,11 +488,11 @@ function renderReport(d) {
   let html = '';
   for (const [name, result] of Object.entries(d.scanner_results || {})) {
     const meta = scannerMeta[name] || { icon: '📋', label: name, what: '' };
-    const s = result.friendly_summary || 'No summary available.';
+    const s = result.friendly_summary || (result.status === 'skipped' ? ('Skipped — ' + (result.reason || 'not enough data')) : 'No summary available.');
     const scoreVal = extractScore(name, result);
-    const cls = result.status === 'error' ? 'bad' : scoreVal >= 60 ? 'ok' : scoreVal >= 30 ? 'warn' : 'bad';
-    const pillCls = scoreVal >= 60 ? 'sc-pill-high' : scoreVal >= 30 ? 'sc-pill-mid' : 'sc-pill-low';
-    const pillText = result.status === 'error' ? 'Error' : scoreVal + '%';
+    const cls = result.status === 'error' ? 'bad' : result.status === 'skipped' ? 'warn' : scoreVal >= 60 ? 'ok' : scoreVal >= 30 ? 'warn' : 'bad';
+    const pillCls = result.status === 'skipped' ? 'sc-pill-mid' : scoreVal >= 60 ? 'sc-pill-high' : scoreVal >= 30 ? 'sc-pill-mid' : 'sc-pill-low';
+    const pillText = result.status === 'error' ? 'Error' : result.status === 'skipped' ? 'Skipped' : scoreVal + '%';
     html += `<div class="scanner-card">
       <div class="sc-header">
         <h3>${meta.icon} ${meta.label}</h3>
@@ -455,7 +505,7 @@ function renderReport(d) {
   container.innerHTML = html;
 
   // Recommendations with icons, colored borders, and metadata badges
-  const catIcons = { content: '📝', technical: '🔧', strategy: '📈', schema: '🏷️', authority: '🏆', visibility: '🎯' };
+  const catIcons = { 'AI Visibility': '🎯', 'Content Structure': '📄', 'Cross-Model Coverage': '⚔️', 'Direct Links': '🔗', 'Best Practice': '🏷️', content: '📝', technical: '🔧', strategy: '📈', schema: '🏷️', authority: '🏆', visibility: '🎯' };
   const recList = document.getElementById('recommendations');
   recList.innerHTML = (d.recommendations || []).map(r => {
     const icon = catIcons[r.category] || '💡';
@@ -774,6 +824,46 @@ async function loadHistory() {
     html += `</div>`;
     showFriendly('h-out', html);
   } catch (e) { showFriendly('h-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── AI SEO Chatbot ───────────────────────────────────────────────────────────
+async function runChat() {
+  showFriendly('ch-out', '<div style="color:#8b949e">🔄 Thinking…</div>');
+  try {
+    if (!chatSession) {
+      const s = await api('POST', '/api/chatbot/session', {});
+      chatSession = s.session_id;
+    }
+    const d = await api('POST', '/api/chatbot/chat', {
+      session_id: chatSession,
+      message: document.getElementById('ch-msg').value
+    });
+    if (d.error) { showFriendly('ch-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const reply = d.response || d.message || JSON.stringify(d, null, 2);
+    showFriendly('ch-out', `<div class="friendly-result"><div style="font-size:.85rem;color:#c9d1d9;line-height:1.6;white-space:pre-wrap">${esc(reply)}</div></div>`);
+  } catch (e) { showFriendly('ch-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── LLM API Integrations ─────────────────────────────────────────────────────
+async function runProviders() {
+  showFriendly('l-out', '<div style="color:#8b949e">🔄 Loading providers…</div>');
+  try {
+    const d = await api('GET', '/api/llm/providers');
+    if (d.error) { showFriendly('l-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    show('l-out', d);
+  } catch (e) { showFriendly('l-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+async function runLlmProbe() {
+  showFriendly('l-out', '<div style="color:#8b949e">🔄 Probing…</div>');
+  try {
+    const d = await api('POST', '/api/llm/citation-probe', {
+      keyword: document.getElementById('l-kw').value,
+      provider: document.getElementById('l-prov').value
+    });
+    if (d.error) { showFriendly('l-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    show('l-out', d);
+  } catch (e) { showFriendly('l-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 </script>
 </body>
