@@ -6,27 +6,42 @@
 <title>AI Visibility Report — Full Automated Scan</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;padding:24px}
-h1{font-size:1.4rem;margin-bottom:4px}
-.sub{color:#8b949e;font-size:.85rem;margin-bottom:20px}
-.nav{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.nav a{color:#58a6ff;font-size:.82rem;text-decoration:none;padding:6px 12px;border:1px solid #30363d;border-radius:6px;transition:all .15s}
-.nav a:hover{background:#161b22;border-color:#58a6ff}
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:16px;max-width:1100px}
-label{display:block;font-size:.78rem;color:#8b949e;margin:10px 0 4px}
-input,select,textarea{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.9rem}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e1e4e8;padding:0}
+.page-wrap{max-width:1200px;margin:0 auto;padding:32px 24px}
+h1{font-size:1.6rem;margin-bottom:6px;letter-spacing:-0.02em}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:24px;line-height:1.5}
+.nav{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.nav a{color:#58a6ff;font-size:.82rem;text-decoration:none;padding:8px 16px;border:1px solid #30363d;border-radius:8px;transition:all .2s;background:#161b22}
+.nav a:hover{background:#1c2333;border-color:#58a6ff}
+.section-title{font-size:1.05rem;color:#58a6ff;margin:36px 0 16px;padding-bottom:8px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px;letter-spacing:0.01em}
+.section-title span{font-size:1.1rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:768px){.grid{grid-template-columns:1fr}}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:22px;margin-bottom:0;transition:border-color .2s}
+.card:hover{border-color:#30363d}
+.card h2{font-size:.95rem;color:#58a6ff;margin-bottom:3px}
+.card .desc{font-size:.78rem;color:#8b949e;margin-bottom:14px;line-height:1.5}
+.tag{display:inline-block;padding:3px 10px;border-radius:5px;font-size:.7rem;font-weight:600;margin-bottom:10px}
+.tag-live{background:#238636;color:#fff}
+.tag-data{background:#6366f1;color:#fff}
+.tag-info{background:#0891b2;color:#fff}
+label{display:block;font-size:.78rem;color:#8b949e;margin:10px 0 4px;font-weight:500}
+input,select,textarea{width:100%;padding:10px 14px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e1e4e8;font-size:.88rem;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#58a6ff}
 textarea{min-height:80px;resize:vertical;font-family:inherit}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button{margin-top:12px;padding:12px 20px;border:none;border-radius:6px;color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;width:100%}
-button:disabled{opacity:.5;cursor:wait}
-.btn-scan{background:#238636;font-size:1rem}
-.btn-scan:hover{background:#2ea043}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+button{margin-top:12px;padding:12px 20px;border:none;border-radius:8px;color:#fff;font-size:.88rem;font-weight:600;cursor:pointer;width:100%;transition:all .2s;letter-spacing:0.01em}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
+.btn-scan{background:linear-gradient(135deg,#238636,#2ea043);font-size:1rem;padding:14px 24px}
+.btn-scan:hover{background:linear-gradient(135deg,#2ea043,#3fb950)}
 .tip{color:#58a6ff;cursor:help;font-size:.7rem;vertical-align:super}
+.out{margin-top:10px;padding:12px;background:#0d1117;border:1px solid #21262d;border-radius:8px;font-size:.78rem;max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;display:none}
 
 /* Results */
-.report{display:none;max-width:1100px}
-.score-hero{text-align:center;padding:28px;background:#161b22;border:1px solid #30363d;border-radius:12px;margin-bottom:16px}
-.score-ring{display:inline-flex;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;font-size:2rem;font-weight:700;border:5px solid}
+.report{display:none;max-width:1200px}
+.score-hero{text-align:center;padding:36px;background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid #30363d;border-radius:16px;margin-bottom:20px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;width:110px;height:110px;border-radius:50%;font-size:2.2rem;font-weight:700;border:5px solid}
 .score-high{border-color:#3fb950;color:#3fb950}
 .score-mid{border-color:#d29922;color:#d29922}
 .score-low{border-color:#f85149;color:#f85149}
@@ -36,15 +51,16 @@ button:disabled{opacity:.5;cursor:wait}
 .score-explain .grade-high{color:#3fb950}
 .score-explain .grade-mid{color:#d29922}
 .score-explain .grade-low{color:#f85149}
-.summary-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-bottom:16px;line-height:1.6;font-size:.88rem}
-.summary-box p{margin-bottom:10px}
-.how-to-read{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;margin-bottom:16px;max-width:1100px}
+.summary-box{background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid #30363d;border-radius:12px;padding:22px;margin-bottom:20px;line-height:1.7;font-size:.88rem}
+.summary-box p{margin-bottom:12px;color:#c9d1d9}
+.how-to-read{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:18px;margin-bottom:20px;max-width:1200px}
 .how-to-read summary{cursor:pointer;font-size:.88rem;color:#58a6ff;font-weight:600;user-select:none}
 .how-to-read .guide-content{margin-top:12px;font-size:.8rem;color:#8b949e;line-height:1.7}
 .how-to-read .guide-content .guide-item{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
 .how-to-read .guide-content .guide-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .how-to-read .guide-content .guide-text strong{color:#c9d1d9}
-.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:16px;margin-bottom:10px}
+.scanner-card{background:#0d1117;border:1px solid #21262d;border-radius:10px;padding:18px;margin-bottom:12px;transition:border-color .2s}
+.scanner-card:hover{border-color:#30363d}
 .scanner-card .sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .scanner-card h3{font-size:.92rem;color:#58a6ff;margin-bottom:0}
 .scanner-card .sc-score-pill{padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
@@ -57,7 +73,7 @@ button:disabled{opacity:.5;cursor:wait}
 .scanner-card .verdict.warn{color:#d29922}
 .scanner-card .verdict.bad{color:#f85149}
 .rec-list{list-style:none;padding:0}
-.rec-item{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;margin-bottom:8px;border-left:3px solid transparent}
+.rec-item{background:#0d1117;border:1px solid #21262d;border-radius:10px;padding:16px;margin-bottom:10px;border-left:3px solid transparent;transition:border-color .2s}
 .rec-item.rec-high{border-left-color:#f85149}
 .rec-item.rec-medium{border-left-color:#d29922}
 .rec-item .rec-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -92,7 +108,7 @@ button:disabled{opacity:.5;cursor:wait}
 .agent-chip .desc{color:#8b949e;font-size:.75rem;margin-top:2px}
 
 /* Parameter reference */
-.param-ref{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-top:16px;max-width:1100px}
+.param-ref{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:22px;margin-top:20px}
 .param-ref h3{font-size:.95rem;color:#58a6ff;margin-bottom:10px}
 .param-ref table{width:100%;border-collapse:collapse;font-size:.78rem}
 .param-ref th{text-align:left;color:#8b949e;padding:6px 8px;border-bottom:1px solid #30363d}
@@ -101,6 +117,7 @@ button:disabled{opacity:.5;cursor:wait}
 </style>
 </head>
 <body>
+<div class="page-wrap">
 <h1>🔬 AI Visibility Report</h1>
 <p class="sub">Full automated scan — 4 AI agents, plain-English scores and recommendations</p>
 
@@ -178,8 +195,8 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <!-- ═══ CORE TOOLS ═══ -->
-<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:1100px">Core Features</h2>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px">
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>⚡</span> Core Features</h2>
+<div class="grid">
 
 <!-- GEO Monitoring Engine -->
 <div class="card">
@@ -265,8 +282,8 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <!-- ═══ AI VISIBILITY SCANNER ═══ -->
-<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:1100px">AI Visibility Scanner</h2>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px">
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>🔍</span> AI Visibility Scanner</h2>
+<div class="grid">
 
 <!-- Cross-Model Compare -->
 <div class="card" style="grid-column:1/-1">
@@ -327,8 +344,8 @@ button:disabled{opacity:.5;cursor:wait}
 </div>
 
 <!-- ═══ MONITORING & DATA ═══ -->
-<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d;max-width:1100px">Monitoring & Data</h2>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px">
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>📊</span> Monitoring & Data</h2>
+<div class="grid">
 
 <!-- Probe History -->
 <div class="card" style="grid-column:1/-1">
@@ -1022,5 +1039,6 @@ async function createSchedule() {
   } catch (e) { showFriendly('sj-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 </script>
+</div><!-- /page-wrap -->
 </body>
 </html>
