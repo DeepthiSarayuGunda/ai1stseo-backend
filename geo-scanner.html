@@ -586,14 +586,34 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 // ── Auto-sync brand/URL from top scan form to all tool inputs ────────────────
 function syncAllFields() {
   const brand = document.getElementById('s-brand').value.trim();
-  const url = document.getElementById('s-url').value.trim();
+  const urlField = document.getElementById('s-url');
+  const url = urlField.value.trim();
+
+  // Auto-fill URL from brand name if URL is empty or was auto-filled
+  if (brand && (!url || urlField.dataset.autoFilled)) {
+    const slug = brand.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (slug) {
+      urlField.value = 'https://www.' + slug + '.com';
+      urlField.dataset.autoFilled = 'true';
+    }
+  }
+  if (!brand) {
+    if (urlField.dataset.autoFilled) { urlField.value = ''; delete urlField.dataset.autoFilled; }
+  }
+
+  const finalUrl = urlField.value.trim();
   document.querySelectorAll('.sync-brand').forEach(el => {
     if (!el.dataset.userEdited) el.value = brand;
   });
   document.querySelectorAll('.sync-url').forEach(el => {
-    if (!el.dataset.userEdited) el.value = url;
+    if (!el.dataset.userEdited) el.value = finalUrl;
   });
 }
+
+// Clear auto-fill flag if user manually edits the URL
+document.getElementById('s-url').addEventListener('input', function() {
+  delete this.dataset.autoFilled;
+});
 
 // Sync on every change to the top form
 document.getElementById('s-brand').addEventListener('input', syncAllFields);
