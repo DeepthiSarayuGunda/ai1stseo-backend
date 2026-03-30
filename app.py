@@ -4,7 +4,7 @@ SEO Analyzer Backend - Flask API
 Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, redirect
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -62,6 +62,25 @@ try:
     from db import init_db
     init_db()
     print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+    # Initialize new feature tables
+    try:
+        from answer_fingerprint import init_fingerprint_tables
+        init_fingerprint_tables()
+        print("✓ answer_fingerprints table initialized")
+    except Exception as e2:
+        print(f"⚠ answer_fingerprints init: {e2}")
+    try:
+        from model_comparison import init_comparison_tables
+        init_comparison_tables()
+        print("✓ model_comparisons table initialized")
+    except Exception as e2:
+        print(f"⚠ model_comparisons init: {e2}")
+    try:
+        from multilang_probe import init_multilang_columns
+        init_multilang_columns()
+        print("✓ multilang columns initialized")
+    except Exception as e2:
+        print(f"⚠ multilang init: {e2}")
 except Exception as e:
     print(f"⚠ RDS init failed (will retry on first request): {e}")
 
@@ -1446,7 +1465,9 @@ def analyze_citation_gap(url, soup, response, load_time):
 # ============== API ROUTES ==============
 @app.route('/')
 def serve_index():
-    return send_from_directory('.', 'index.html')
+    """Redirect to the production frontend — this backend is API-only infrastructure.
+    The real homepage lives on S3/CloudFront at www.ai1stseo.com."""
+    return redirect('https://www.ai1stseo.com')
 
 @app.route('/analyze')
 def serve_analyze():
@@ -1883,7 +1904,24 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health', '/api/status']
+    })
+
+@app.route('/api/status')
+def status_check():
+    """Status endpoint for AEO Platform and other frontends to check backend availability."""
+    return jsonify({
+        'status': 'online',
+        'service': 'ai1stseo-backend',
+        'version': '1.0.0',
+        'endpoints': {
+            'aeo_analyze': '/api/aeo/analyze',
+            'geo_probe': '/api/geo-probe',
+            'ai_recommendations': '/api/ai-recommendations',
+            'content_brief': '/api/content-brief',
+            'analyze': '/api/analyze',
+            'health': '/api/health'
+        }
     })
 
 # Ollama LLM Configuration
@@ -2905,6 +2943,95 @@ def geo_scanner_agents():
     return jsonify({'agents': get_available_scanners()})
 
 
+# ── Feature 1: AI Answer Fingerprinting ───────────────────────────────────────
+
+@app.route('/api/geo/fingerprint', methods=['POST'])
+def geo_fingerprint_save():
+    """Save a response fingerprint and detect changes."""
+    from answer_fingerprint import save_fingerprint
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    ai_model = (data.get('ai_model') or 'nova').strip()
+    response_text = (data.get('response_text') or '').strip()
+    if not brand or not keyword or not response_text:
+        return jsonify({'error': 'brand_name, keyword, and response_text are required'}), 400
+    try:
+        result = save_fingerprint(brand, keyword, ai_model, response_text,
+                                   probe_id=data.get('probe_id'))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Fingerprint save failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/fingerprint/<brand_name>/history', methods=['GET'])
+def geo_fingerprint_history(brand_name):
+    """Get the last N fingerprints for a brand with diff summaries."""
+    from answer_fingerprint import get_fingerprint_history
+    keyword = request.args.get('keyword')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 10))
+    try:
+        history = get_fingerprint_history(brand_name, keyword=keyword,
+                                           ai_model=ai_model, limit=limit)
+        return jsonify({'brand_name': brand_name, 'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
+
+
+# ── Feature 2: AI Model Disagreement Detector ─────────────────────────────────
+
+@app.route('/api/geo/model-comparison', methods=['POST'])
+def geo_model_comparison():
+    """Compare how different AI models respond to the same brand/keyword query."""
+    from model_comparison import probe_all_models
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    try:
+        result = probe_all_models(brand, keyword)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Model comparison failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/model-comparison/history', methods=['GET'])
+def geo_model_comparison_history():
+    """Get past model comparison results."""
+    from model_comparison import get_comparison_history
+    brand = request.args.get('brand_name')
+    limit = int(request.args.get('limit', 10))
+    try:
+        history = get_comparison_history(brand_name=brand, limit=limit)
+        return jsonify({'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
+
+
+# ── Feature 3: Multi-Language GEO Probing ─────────────────────────────────────
+
+@app.route('/api/geo/scan/languages', methods=['POST'])
+def geo_multilang_scan():
+    """Run GEO probes across multiple languages."""
+    from multilang_probe import probe_multilang
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    languages = data.get('languages', ['en'])
+    provider = data.get('provider', 'nova')
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    if len(languages) > 10:
+        return jsonify({'error': 'Maximum 10 languages per scan'}), 400
+    try:
+        result = probe_multilang(brand, keyword, languages=languages, provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Multi-language scan failed: {str(e)}'}), 500
+
+
 # ── RDS Data Persistence Endpoints ────────────────────────────────────────────
 
 @app.route('/api/data/geo-probes', methods=['POST'])
@@ -2997,7 +3124,8 @@ def serve_admin():
 def catch_all(path):
     if path.startswith('assets/'):
         return send_from_directory('.', path)
-    return send_from_directory('.', 'index.html')
+    # Don't serve index.html for unknown paths — the real frontend is on S3/CloudFront
+    return jsonify({'error': 'Not found', 'message': 'This is the API backend. Visit https://www.ai1stseo.com for the website.'}), 404
 
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
