@@ -1199,6 +1199,9 @@ async function runModelComparison() {
     let html = `<div class="friendly-result">
       <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Model Comparison — ${esc(brand)}</div>
       <div class="fr-detail">${d.models_responding?.length || 0} models responded · ${d.elapsed_seconds || '—'}s</div>`;
+    if (d.models_failed?.length) {
+      html += `<div style="margin-top:6px;font-size:.78rem;color:#d29922">⚠ Failed models: ${d.models_failed.map(m => esc(typeof m === 'string' ? m : m.model + ' (' + m.reason?.substring(0,60) + ')')).join(', ')}</div>`;
+    }
     if (comp.brand_mentioned_by?.length) {
       html += `<div style="margin-top:10px;color:#3fb950;font-weight:600">✅ Brand mentioned by: ${comp.brand_mentioned_by.map(m => esc(m)).join(', ')}</div>`;
     }

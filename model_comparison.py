@@ -125,8 +125,10 @@ def probe_all_models(brand_name, keyword, project_id=None):
         for future in as_completed(futures):
             responses.append(future.result())
 
-    # Analyze comparison
-    comparison = _analyze_comparison(brand_name, keyword, responses)
+    # Analyze comparison (only with successful responses)
+    successful = [r for r in responses if r["status"] == "ok"]
+    failed = [r for r in responses if r["status"] == "error"]
+    comparison = _analyze_comparison(brand_name, keyword, successful) if successful else {"error": "All models failed"}
 
     elapsed = round(time.time() - t0, 2)
 
@@ -143,7 +145,7 @@ def probe_all_models(brand_name, keyword, project_id=None):
         """, (
             pid, brand_name, keyword,
             json.dumps(models),
-            json.dumps({r["model"]: r["response"][:2000] for r in responses}),
+            json.dumps({r["model"]: r["response"][:2000] if r["status"] == "ok" else r.get("error", "failed") for r in responses}),
             json.dumps(comparison),
             json.dumps(comparison.get("brand_mentioned_by", [])),
             json.dumps(comparison.get("disagreements", [])),
@@ -156,8 +158,8 @@ def probe_all_models(brand_name, keyword, project_id=None):
         "brand_name": brand_name,
         "keyword": keyword,
         "models_queried": models,
-        "models_responding": [r["model"] for r in responses if r["status"] == "ok"],
-        "models_failed": [r["model"] for r in responses if r["status"] == "error"],
+        "models_responding": [r["model"] for r in successful],
+        "models_failed": [{"model": r["model"], "reason": r.get("error", "unknown")} for r in failed],
         "comparison": comparison,
         "elapsed_seconds": elapsed,
         "timestamp": datetime.now(timezone.utc).isoformat(),

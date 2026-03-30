@@ -70,18 +70,30 @@ def _probe_single_language(brand_name, keyword, language, provider):
     prompt = _translate_prompt(keyword, brand_name, language)
     try:
         response = generate(prompt, provider=provider)
-        detection = _detect_citation(response, brand_name)
+        cited, context, confidence = _detect_citation(response, brand_name)
+        # Determine sentiment from context
+        sentiment = "neutral"
+        if context:
+            pos_words = ["best", "top", "great", "excellent", "leading", "popular", "recommended"]
+            neg_words = ["worst", "avoid", "poor", "bad", "disappointing"]
+            ctx_lower = context.lower()
+            if any(w in ctx_lower for w in pos_words):
+                sentiment = "positive"
+            elif any(w in ctx_lower for w in neg_words):
+                sentiment = "negative"
+        logger.info("Multilang probe [%s]: cited=%s conf=%.2f snippet=%s", language, cited, confidence, response[:100])
         return {
             "language": language,
             "language_name": LANGUAGE_NAMES.get(language, language),
-            "cited": detection["brand_present"],
-            "confidence": detection["confidence"],
-            "citation_context": detection.get("citation_context", ""),
-            "sentiment": detection.get("sentiment", "neutral"),
+            "cited": cited,
+            "confidence": confidence,
+            "citation_context": context or "",
+            "sentiment": sentiment,
             "response_snippet": response[:500],
             "status": "ok",
         }
     except Exception as e:
+        logger.warning("Multilang probe [%s] failed: %s", language, e)
         return {
             "language": language,
             "language_name": LANGUAGE_NAMES.get(language, language),
