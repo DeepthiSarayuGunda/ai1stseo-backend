@@ -395,6 +395,65 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 
 </div>
 
+<!-- ═══ ADVANCED AI INTELLIGENCE ═══ -->
+<h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>🧠</span> Advanced AI Intelligence</h2>
+<div class="grid">
+
+<!-- AI Answer Fingerprinting -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">AI Answer Fingerprinting</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Track how AI responses change over time — the AI equivalent of rank change alerts</p>
+  <label>Brand</label><input id="fp-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keyword</label><input id="fp-kw" placeholder="e.g. best project management tools">
+  <button style="background:#f59e0b;color:#000" onclick="runFingerprint()">Check Answer History</button>
+  <div id="fp-out" class="out"></div>
+</div>
+
+<!-- Model Disagreement Detector -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ec4899,#f472b6)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Model Disagreement Detector</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Compare how ChatGPT, Claude, Gemini respond to the same query — find where they disagree about your brand</p>
+  <label>Brand</label><input id="mc-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keyword</label><input id="mc-kw" placeholder="e.g. best SEO tools">
+  <button style="background:#ec4899" onclick="runModelComparison()">Compare All Models</button>
+  <div id="mc-out" class="out"></div>
+</div>
+
+<!-- Multi-Language GEO Probe -->
+<div class="card" style="grid-column:1/-1;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Multi-Language GEO Probe</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Check your brand visibility across languages — see if AI mentions you in Spanish, French, German, and more</p>
+  <div class="row2">
+    <div>
+      <label>Brand</label><input id="ml-brand" class="sync-brand" placeholder="Auto-filled from above">
+    </div>
+    <div>
+      <label>Keyword</label><input id="ml-kw" placeholder="e.g. best project management tools">
+    </div>
+  </div>
+  <label>Languages (select multiple)</label>
+  <div id="lang-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="en" checked style="width:auto;margin:0"> English</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="es" style="width:auto;margin:0"> Spanish</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="fr" style="width:auto;margin:0"> French</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="de" style="width:auto;margin:0"> German</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="pt" style="width:auto;margin:0"> Portuguese</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="ja" style="width:auto;margin:0"> Japanese</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="ko" style="width:auto;margin:0"> Korean</label>
+    <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#21262d;border-radius:6px;cursor:pointer;font-size:.78rem;margin:0"><input type="checkbox" value="zh" style="width:auto;margin:0"> Chinese</label>
+  </div>
+  <button style="background:#06b6d4" onclick="runMultilang()">Scan Across Languages</button>
+  <div id="ml-out" class="out"></div>
+</div>
+
+</div>
+
 <!-- ═══ MONITORING & DATA ═══ -->
 <h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>📊</span> Monitoring & Data</h2>
 <div class="grid">
@@ -1096,6 +1155,110 @@ async function runSite() {
 }
 
 // ── Monitoring & Data ────────────────────────────────────────────────────────
+
+// ── Advanced AI Intelligence ─────────────────────────────────────────────────
+async function runFingerprint() {
+  const brand = document.getElementById('fp-brand').value.trim();
+  if (!brand) { showFriendly('fp-out', '<div style="color:#f85149">Enter a brand name</div>'); return; }
+  showFriendly('fp-out', '<div style="color:#8b949e">🔄 Loading answer history…</div>');
+  try {
+    const kw = document.getElementById('fp-kw').value.trim();
+    let url = '/api/geo/fingerprint/' + encodeURIComponent(brand) + '/history?limit=10';
+    if (kw) url += '&keyword=' + encodeURIComponent(kw);
+    const d = await api('GET', url);
+    if (d.error) { showFriendly('fp-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    if (!d.history || !d.history.length) {
+      showFriendly('fp-out', '<div style="color:#8b949e">No fingerprint history yet. Run some GEO scans first to build history.</div>');
+      return;
+    }
+    let html = `<div class="friendly-result"><div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Answer History — ${esc(brand)} (${d.count} records)</div>`;
+    d.history.forEach(h => {
+      const icon = h.change_detected ? '🔴 Changed' : '🟢 Stable';
+      const cls = h.change_detected ? 'color:#f85149' : 'color:#3fb950';
+      html += `<div style="padding:8px;background:#161b22;border-radius:6px;margin-bottom:6px;font-size:.78rem">
+        <div style="display:flex;justify-content:space-between"><span style="${cls};font-weight:600">${icon}</span><span style="color:#484f58">${esc(h.created_at || '')}</span></div>
+        <div style="color:#8b949e;margin-top:4px">${esc(h.keyword || '')} · ${esc(h.ai_model || '')}</div>`;
+      if (h.diff_summary && h.diff_summary.added_count > 0) html += `<div style="color:#3fb950;margin-top:4px">+ ${h.diff_summary.added_count} new sentences</div>`;
+      if (h.diff_summary && h.diff_summary.removed_count > 0) html += `<div style="color:#f85149">- ${h.diff_summary.removed_count} removed sentences</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+    showFriendly('fp-out', html);
+  } catch (e) { showFriendly('fp-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+async function runModelComparison() {
+  const brand = document.getElementById('mc-brand').value.trim();
+  const kw = document.getElementById('mc-kw').value.trim();
+  if (!brand || !kw) { showFriendly('mc-out', '<div style="color:#f85149">Enter brand and keyword</div>'); return; }
+  showFriendly('mc-out', '<div style="color:#8b949e">🔄 Comparing across all AI models… this may take 30-60 seconds</div>');
+  try {
+    const d = await api('POST', '/api/geo/model-comparison', { brand_name: brand, keyword: kw });
+    if (d.error) { showFriendly('mc-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const comp = d.comparison || {};
+    let html = `<div class="friendly-result">
+      <div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:10px">Model Comparison — ${esc(brand)}</div>
+      <div class="fr-detail">${d.models_responding?.length || 0} models responded · ${d.elapsed_seconds || '—'}s</div>`;
+    if (comp.brand_mentioned_by?.length) {
+      html += `<div style="margin-top:10px;color:#3fb950;font-weight:600">✅ Brand mentioned by: ${comp.brand_mentioned_by.map(m => esc(m)).join(', ')}</div>`;
+    }
+    if (comp.brand_not_mentioned_by?.length) {
+      html += `<div style="margin-top:4px;color:#f85149;font-weight:600">❌ Not mentioned by: ${comp.brand_not_mentioned_by.map(m => esc(m)).join(', ')}</div>`;
+    }
+    if (comp.consensus) {
+      html += `<div style="margin-top:10px;padding:10px;background:#161b22;border-radius:6px;font-size:.82rem;color:#c9d1d9"><strong>Consensus:</strong> ${esc(comp.consensus)}</div>`;
+    }
+    if (comp.disagreements?.length) {
+      html += `<div style="margin-top:10px;font-size:.82rem;font-weight:600;color:#d29922">⚠ Disagreements:</div>`;
+      comp.disagreements.forEach(dis => {
+        html += `<div style="padding:6px;background:#161b22;border-radius:4px;margin-top:4px;font-size:.78rem;color:#8b949e">${esc(dis.topic || dis.details || JSON.stringify(dis))}</div>`;
+      });
+    }
+    if (comp.brand_sentiment) {
+      html += `<div style="margin-top:10px;font-size:.82rem;font-weight:600;color:#58a6ff">Sentiment by model:</div>`;
+      for (const [model, sent] of Object.entries(comp.brand_sentiment)) {
+        const sIcon = sent === 'positive' ? '🟢' : sent === 'negative' ? '🔴' : '🟡';
+        html += `<div style="font-size:.78rem;color:#8b949e;margin-top:2px">${sIcon} ${esc(model)}: ${esc(sent)}</div>`;
+      }
+    }
+    html += `</div>`;
+    showFriendly('mc-out', html);
+  } catch (e) { showFriendly('mc-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+async function runMultilang() {
+  const brand = document.getElementById('ml-brand').value.trim();
+  const kw = document.getElementById('ml-kw').value.trim();
+  if (!brand || !kw) { showFriendly('ml-out', '<div style="color:#f85149">Enter brand and keyword</div>'); return; }
+  const langs = Array.from(document.querySelectorAll('#lang-chips input:checked')).map(c => c.value);
+  if (!langs.length) { showFriendly('ml-out', '<div style="color:#f85149">Select at least one language</div>'); return; }
+  showFriendly('ml-out', `<div style="color:#8b949e">🔄 Scanning ${langs.length} languages… this may take 30-90 seconds</div>`);
+  try {
+    const d = await api('POST', '/api/geo/scan/languages', { brand_name: brand, keyword: kw, languages: langs });
+    if (d.error) { showFriendly('ml-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    let html = `<div class="friendly-result">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:.92rem;font-weight:600;color:#58a6ff">Multi-Language Visibility — ${esc(brand)}</span>
+        <span style="font-size:.82rem;color:#8b949e">${d.languages_cited || 0}/${d.languages_probed || 0} languages cited · avg ${d.average_visibility_score || 0}%</span>
+      </div>`;
+    (d.results || []).forEach(r => {
+      const barColor = r.visibility_score >= 60 ? '#3fb950' : r.visibility_score >= 30 ? '#d29922' : '#f85149';
+      const icon = r.cited ? '✅' : '❌';
+      html += `<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#161b22;border-radius:6px;margin-bottom:6px">
+        <span style="width:24px;text-align:center">${icon}</span>
+        <span style="width:80px;font-size:.82rem;font-weight:600;color:#e1e4e8">${esc(r.language_name || r.language)}</span>
+        <div style="flex:1;background:#21262d;border-radius:4px;height:20px;overflow:hidden">
+          <div style="width:${r.visibility_score}%;background:${barColor};height:100%;border-radius:4px;transition:width .3s"></div>
+        </div>
+        <span style="width:40px;text-align:right;font-size:.82rem;font-weight:700;color:${barColor}">${r.visibility_score}%</span>
+      </div>`;
+    });
+    html += `<div style="font-size:.72rem;color:#484f58;margin-top:8px">Completed in ${d.elapsed_seconds || '—'}s</div></div>`;
+    showFriendly('ml-out', html);
+  } catch (e) { showFriendly('ml-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── Monitoring & Data (original) ─────────────────────────────────────────────
 async function loadModels() {
   showFriendly('m-out', '<div style="color:#8b949e">🔄 Loading…</div>');
   try {
