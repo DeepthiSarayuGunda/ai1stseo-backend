@@ -81,6 +81,18 @@ try:
         print("✓ multilang columns initialized")
     except Exception as e2:
         print(f"⚠ multilang init: {e2}")
+    try:
+        from share_of_voice import init_sov_tables
+        init_sov_tables()
+        print("✓ share_of_voice table initialized")
+    except Exception as e2:
+        print(f"⚠ share_of_voice init: {e2}")
+    try:
+        from prompt_simulator import init_simulator_tables
+        init_simulator_tables()
+        print("✓ prompt_simulations table initialized")
+    except Exception as e2:
+        print(f"⚠ prompt_simulations init: {e2}")
 except Exception as e:
     print(f"⚠ RDS init failed (will retry on first request): {e}")
 
@@ -3030,6 +3042,68 @@ def geo_multilang_scan():
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': f'Multi-language scan failed: {str(e)}'}), 500
+
+
+# ── Feature 5: AI Share of Voice ──────────────────────────────────────────────
+
+@app.route('/api/geo/share-of-voice', methods=['POST'])
+def geo_share_of_voice():
+    """Calculate AI Share of Voice: brand vs competitors across keywords."""
+    from share_of_voice import calculate_sov
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    competitors = [c.strip() for c in (data.get('competitors') or []) if c.strip()]
+    keywords = [k.strip() for k in (data.get('keywords') or []) if k.strip()]
+    provider = data.get('provider', 'nova')
+    if not brand:
+        return jsonify({'error': 'brand is required'}), 400
+    if not keywords:
+        return jsonify({'error': 'At least one keyword is required'}), 400
+    if not competitors:
+        return jsonify({'error': 'At least one competitor is required'}), 400
+    try:
+        result = calculate_sov(brand, competitors[:5], keywords[:10], provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'SOV calculation failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/share-of-voice/<brand_name>/latest', methods=['GET'])
+def geo_sov_latest(brand_name):
+    """Get the latest SOV scan for a brand."""
+    from share_of_voice import get_sov_latest
+    result = get_sov_latest(brand_name)
+    if not result:
+        return jsonify({'error': 'No SOV data found for this brand', 'brand': brand_name}), 404
+    return jsonify(result)
+
+
+# ── Feature 6: Prompt Injection Simulator ─────────────────────────────────────
+
+@app.route('/api/geo/prompt-simulator', methods=['POST'])
+def geo_prompt_simulator():
+    """Run prompt simulation: 15 prompt variations to test brand visibility."""
+    from prompt_simulator import run_simulation
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    provider = data.get('provider', 'nova')
+    if not brand or not keyword:
+        return jsonify({'error': 'brand and keyword are required'}), 400
+    try:
+        result = run_simulation(brand, keyword, provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Prompt simulation failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/prompt-simulator/<brand_name>/history', methods=['GET'])
+def geo_prompt_simulator_history(brand_name):
+    """Get past prompt simulation results."""
+    from prompt_simulator import get_simulation_history
+    limit = int(request.args.get('limit', 5))
+    history = get_simulation_history(brand_name, limit=limit)
+    return jsonify({'brand': brand_name, 'history': history, 'count': len(history)})
 
 
 # ── RDS Data Persistence Endpoints ────────────────────────────────────────────

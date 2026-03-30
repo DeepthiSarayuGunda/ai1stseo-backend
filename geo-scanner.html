@@ -463,6 +463,40 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <div id="ml-out" class="out"></div>
 </div>
 
+<!-- AI Share of Voice -->
+<div class="card" style="grid-column:1/-1;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#e1e4e8;font-size:1rem;margin-bottom:2px">AI Market Share (Share of Voice)</h2>
+  <p style="font-size:.78rem;color:#7d8590;margin-bottom:14px">What % of AI answers mention your brand vs competitors? The metric every CMO will screenshot.</p>
+  <div class="row2">
+    <div>
+      <label>Your Brand</label><input id="sov-brand" class="sync-brand" placeholder="Auto-filled from above">
+    </div>
+    <div>
+      <label>Competitors (comma-separated, up to 5)</label><input id="sov-comp" placeholder="e.g. Adidas, New Balance, Puma">
+    </div>
+  </div>
+  <label>Keywords (one per line, up to 10)</label>
+  <textarea id="sov-kw" style="min-height:60px" placeholder="running shoes&#10;best athletic footwear&#10;sports shoes brands"></textarea>
+  <button style="background:#8b5cf6" onclick="runSOV()">Calculate AI Market Share</button>
+  <div id="sov-out" class="out"></div>
+</div>
+
+<!-- Prompt Injection Simulator -->
+<div class="card" style="grid-column:1/-1;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ef4444,#f87171)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#e1e4e8;font-size:1rem;margin-bottom:2px">Prompt Penetration Test</h2>
+  <p style="font-size:.78rem;color:#7d8590;margin-bottom:14px">15 prompt variations fired at AI — see your hit rate and who gets recommended instead of you.</p>
+  <div class="row2">
+    <div><label>Your Brand</label><input id="sim-brand" class="sync-brand" placeholder="Auto-filled from above"></div>
+    <div><label>Target Keyword</label><input id="sim-kw" placeholder="e.g. running shoes"></div>
+  </div>
+  <button style="background:#ef4444" onclick="runSimulator()">Run Penetration Test (15 prompts)</button>
+  <div id="sim-out" class="out"></div>
+</div>
+
 </div>
 
 <!-- ═══ MONITORING & DATA ═══ -->
@@ -1273,6 +1307,95 @@ async function runMultilang() {
 }
 
 // ── Monitoring & Data (original) ─────────────────────────────────────────────
+
+// ── AI Share of Voice ────────────────────────────────────────────────────────
+async function runSOV() {
+  const brand = document.getElementById('sov-brand').value.trim();
+  const compStr = document.getElementById('sov-comp').value.trim();
+  const kwStr = document.getElementById('sov-kw').value.trim();
+  if (!brand || !compStr || !kwStr) { showFriendly('sov-out', '<div style="color:#f85149">Enter brand, competitors, and keywords</div>'); return; }
+  const competitors = compStr.split(',').map(c => c.trim()).filter(Boolean);
+  const keywords = kwStr.split('\n').map(k => k.trim()).filter(Boolean);
+  showFriendly('sov-out', `<div style="color:#7d8590">🔄 Calculating AI Market Share across ${keywords.length} keywords… this may take 30-90 seconds</div>`);
+  try {
+    const d = await api('POST', '/api/geo/share-of-voice', { brand: brand, competitors: competitors, keywords: keywords });
+    if (d.error) { showFriendly('sov-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const sov = d.sov_summary || {};
+    let html = `<div class="friendly-result">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:700;color:#e1e4e8">AI Market Share</span>
+        <span style="font-size:.78rem;color:#7d8590">${d.total_probes} probes · ${d.elapsed_seconds}s</span>
+      </div>`;
+    if (d.gap_message) html += `<div style="padding:10px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:8px;font-size:.82rem;color:#a78bfa;margin-bottom:14px;font-weight:600">${esc(d.gap_message)}</div>`;
+    // Bar chart
+    const allBrands = Object.entries(sov).sort((a,b) => b[1].sov_percentage - a[1].sov_percentage);
+    allBrands.forEach(([b, data]) => {
+      const color = data.is_user_brand ? '#3fb950' : '#484f58';
+      const labelColor = data.is_user_brand ? '#3fb950' : '#8b949e';
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="width:100px;font-size:.82rem;font-weight:600;color:${labelColor};text-align:right;flex-shrink:0">${esc(b)}</span>
+        <div style="flex:1;background:rgba(255,255,255,.04);border-radius:6px;height:28px;overflow:hidden;position:relative">
+          <div style="width:${Math.max(data.sov_percentage, 1)}%;background:${color};height:100%;border-radius:6px;transition:width .5s"></div>
+        </div>
+        <span style="width:50px;font-size:.88rem;font-weight:800;color:${labelColor};text-align:right">${data.sov_percentage}%</span>
+      </div>`;
+    });
+    html += `</div>`;
+    showFriendly('sov-out', html);
+  } catch (e) { showFriendly('sov-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── Prompt Penetration Test ──────────────────────────────────────────────────
+async function runSimulator() {
+  const brand = document.getElementById('sim-brand').value.trim();
+  const kw = document.getElementById('sim-kw').value.trim();
+  if (!brand || !kw) { showFriendly('sim-out', '<div style="color:#f85149">Enter brand and keyword</div>'); return; }
+  showFriendly('sim-out', '<div style="color:#7d8590">🔄 Running 15 prompt variations… this may take 60-120 seconds</div>');
+  try {
+    const d = await api('POST', '/api/geo/prompt-simulator', { brand: brand, keyword: kw });
+    if (d.error) { showFriendly('sim-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const rateColor = d.hit_rate >= 60 ? '#3fb950' : d.hit_rate >= 30 ? '#d29922' : '#f85149';
+    let html = `<div class="friendly-result">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:700;color:#e1e4e8">Prompt Penetration Test</span>
+        <span style="font-size:1.2rem;font-weight:800;color:${rateColor}">${d.hit_rate}% hit rate</span>
+      </div>
+      <div style="font-size:.82rem;color:#7d8590;margin-bottom:14px">${esc(brand)} appeared in ${d.hits}/${d.total_prompts} prompts · ${d.elapsed_seconds}s</div>`;
+    // Hit/miss grid
+    html += `<div style="display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:16px">`;
+    (d.prompt_results || []).forEach(r => {
+      const icon = r.brand_mentioned ? '<span style="color:#3fb950;font-weight:700">HIT</span>' : '<span style="color:#f85149;font-weight:700">MISS</span>';
+      const bg = r.brand_mentioned ? 'rgba(63,185,80,.06)' : 'rgba(248,81,73,.06)';
+      const border = r.brand_mentioned ? 'rgba(63,185,80,.15)' : 'rgba(248,81,73,.15)';
+      html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${bg};border:1px solid ${border};border-radius:6px;font-size:.78rem">
+        <span style="width:40px;flex-shrink:0">${icon}</span>
+        <span style="color:#c9d1d9;flex:1">${esc(r.prompt)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+    // Top competitors
+    if (d.top_competitors?.length) {
+      html += `<div style="font-size:.88rem;font-weight:700;color:#e1e4e8;margin-bottom:8px">Who appears instead of you:</div>`;
+      d.top_competitors.slice(0, 5).forEach(c => {
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;margin-bottom:4px;font-size:.8rem">
+          <span style="color:#f85149;font-weight:700;width:30px">${c.mentions}x</span>
+          <span style="color:#c9d1d9">${esc(c.brand)}</span>
+        </div>`;
+      });
+    }
+    // Gap analysis
+    if (d.gap_analysis) {
+      html += `<div style="margin-top:16px;padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px">
+        <div style="font-size:.82rem;font-weight:700;color:#f87171;margin-bottom:8px">Gap Analysis & Recommendations</div>
+        <div style="font-size:.8rem;color:#c9d1d9;line-height:1.7;white-space:pre-wrap">${esc(d.gap_analysis)}</div>
+      </div>`;
+    }
+    html += `</div>`;
+    showFriendly('sim-out', html);
+  } catch (e) { showFriendly('sim-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── Monitoring & Data ────────────────────────────────────────────────────────
 async function loadModels() {
   showFriendly('m-out', '<div style="color:#8b949e">🔄 Loading…</div>');
   try {
