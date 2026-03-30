@@ -91,24 +91,50 @@ def _generate_extra_prompts(keyword):
 
 
 def _detect_brands_in_text(text):
-    """Extract likely brand names from AI response (capitalized words/phrases)."""
-    # Find capitalized words that look like brand names (2+ chars, not common words)
-    common = {'the','and','for','are','but','not','you','all','can','had','her','was','one','our','out',
-              'has','its','let','may','who','did','get','how','him','his','she','too','use','best','top',
-              'most','very','good','great','high','well','also','just','more','some','than','them','then',
-              'what','when','with','will','from','have','been','this','that','they','each','make','like',
-              'many','over','such','take','long','only','come','made','find','here','know','want','give',
+    """Use LLM to extract actual brand/company names from AI response."""
+    from ai_provider import generate
+    import json as _json
+    prompt = (
+        f"Extract ONLY real brand names and company names from this text. "
+        f"Return a JSON array of strings. No generic words, no product categories, "
+        f"no adjectives — ONLY proper brand/company names.\n\n"
+        f"Text: {text[:1500]}\n\n"
+        f"Return ONLY a JSON array like: [\"Nike\", \"Adidas\", \"Puma\"]"
+    )
+    try:
+        raw = generate(prompt, provider="nova")
+        # Extract JSON array
+        match = re.search(r'\[[\s\S]*?\]', raw)
+        if match:
+            brands = _json.loads(match.group())
+            # Count occurrences in original text
+            brand_counts = {}
+            for b in brands:
+                if isinstance(b, str) and len(b) >= 2:
+                    pattern = re.compile(r'\b' + re.escape(b) + r'\b', re.IGNORECASE)
+                    count = len(pattern.findall(text))
+                    if count > 0:
+                        brand_counts[b] = count
+            return sorted(brand_counts.items(), key=lambda x: -x[1])
+    except Exception as e:
+        logger.warning("LLM brand extraction failed: %s", e)
+    # Fallback: simple capitalized word extraction with stricter filtering
+    common = {'the','and','for','are','but','not','you','all','can','had','was','one','our','out',
+              'has','its','may','who','did','get','how','she','too','use','best','top','most','very',
+              'good','great','high','well','also','just','more','some','than','them','then','what',
+              'when','with','will','from','have','been','this','that','they','each','make','like',
+              'many','over','such','take','long','only','come','made','find','here','know','want',
               'first','could','these','other','which','their','about','would','there','after','should',
               'right','think','every','where','might','while','still','being','those','never','before',
               'between','through','running','shoes','tools','software','products','brands','options',
-              'recommend','recommended','popular','quality','price','value','features','performance'}
+              'recommend','recommended','popular','quality','price','value','features','performance',
+              'consider','however','overall','another','several','different','available','including',
+              'especially','particularly','whether','although','because','provides','offering','known'}
     words = re.findall(r'\b[A-Z][a-zA-Z]{2,}\b', text)
-    brands = [w for w in words if w.lower() not in common]
-    # Count occurrences
     brand_counts = {}
-    for b in brands:
-        brand_counts[b] = brand_counts.get(b, 0) + 1
-    # Return sorted by frequency
+    for w in words:
+        if w.lower() not in common:
+            brand_counts[w] = brand_counts.get(w, 0) + 1
     return sorted(brand_counts.items(), key=lambda x: -x[1])
 
 

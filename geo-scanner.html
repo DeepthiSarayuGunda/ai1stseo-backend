@@ -551,8 +551,12 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 
 </div>
 
-<!-- Comprehensive Parameter Reference -->
-<div class="param-ref">
+<!-- Collapsible Parameter Reference -->
+<details style="margin-top:24px">
+  <summary style="cursor:pointer;font-size:.82rem;color:#484f58;padding:10px 0;display:flex;align-items:center;gap:6px;user-select:none;transition:color .2s" onmouseover="this.style.color='#7d8590'" onmouseout="this.style.color='#484f58'">
+    <span style="font-size:.7rem;transition:transform .2s;display:inline-block" class="chevron">▾</span> Parameter Reference
+  </summary>
+<div class="param-ref" style="margin-top:0;border-top-left-radius:0;border-top-right-radius:0">
   <h3>AI Visibility Scanning — Complete Parameter Reference</h3>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Every parameter used across the AI Visibility Report system. Understanding these helps you interpret results and fine-tune scans.</p>
   <table>
@@ -577,6 +581,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
     <tr><td>project_id</td><td>UUID</td><td>All RDS tables</td><td>Multi-tenancy key. Default: 00000000-…-000001. Each project gets isolated data.</td><td>UUID</td></tr>
   </table>
 </div>
+</details>
 
 <script>
 const BASE = window.location.hostname.includes('ai1stseo.com') ? 'https://sgnmqxb2sw.us-east-1.awsapprunner.com' : window.location.origin;
@@ -1405,9 +1410,10 @@ async function runSimulator() {
     }
     // Gap analysis
     if (d.gap_analysis) {
+      const cleanGap = d.gap_analysis.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#e1e4e8">$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
       html += `<div style="margin-top:16px;padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px">
         <div style="font-size:.82rem;font-weight:700;color:#f87171;margin-bottom:8px">Gap Analysis & Recommendations</div>
-        <div style="font-size:.8rem;color:#c9d1d9;line-height:1.7;white-space:pre-wrap">${esc(d.gap_analysis)}</div>
+        <div style="font-size:.8rem;color:#c9d1d9;line-height:1.7;white-space:pre-wrap">${cleanGap}</div>
       </div>`;
     }
     html += `</div>`;

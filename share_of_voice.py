@@ -58,12 +58,20 @@ def _detect_brand_in_text(text, brand):
 
 
 def _probe_keyword(keyword, all_brands, provider):
-    """Probe a single keyword with 2 prompt variations and detect all brand mentions."""
+    """Probe a single keyword with 10 prompt variations and detect all brand mentions."""
     from ai_provider import generate
 
     prompts = [
-        f"What are the best {keyword}? Please recommend specific brands and products.",
-        f"Recommend top {keyword} brands. Be specific with brand names.",
+        f"What are the best {keyword}? Please recommend specific brands.",
+        f"Recommend top {keyword} brands. Be specific.",
+        f"What {keyword} should I buy? Name specific brands.",
+        f"Best {keyword} for beginners — which brands?",
+        f"Top rated {keyword} brands in 2025",
+        f"Compare the leading {keyword} brands",
+        f"Which {keyword} brands do experts recommend?",
+        f"Most popular {keyword} right now — name brands",
+        f"Premium vs budget {keyword} — which brands for each?",
+        f"If I want the best {keyword}, which brand should I choose?",
     ]
 
     mentions = {b: 0 for b in all_brands}
@@ -72,7 +80,7 @@ def _probe_keyword(keyword, all_brands, provider):
     for prompt in prompts:
         try:
             response = generate(prompt, provider=provider)
-            responses.append({"prompt": prompt, "response": response[:1000], "status": "ok"})
+            responses.append({"prompt": prompt, "response": response[:800], "status": "ok"})
             for brand in all_brands:
                 if _detect_brand_in_text(response, brand):
                     mentions[brand] += 1
