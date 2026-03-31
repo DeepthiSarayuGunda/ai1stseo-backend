@@ -3194,6 +3194,96 @@ def serve_admin():
     return send_from_directory('.', 'admin.html')
 
 
+# ── Month 1 Research API ──────────────────────────────────────────────────────
+
+@app.route('/api/month1/keyword-universe', methods=['POST'])
+def month1_keyword_universe():
+    """Generate 200 categorised natural-language queries."""
+    from month1_api import api_keyword_universe
+    data = request.get_json() or {}
+    result, status = api_keyword_universe(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/benchmark', methods=['POST'])
+def month1_benchmark():
+    """Run benchmark research across 5 brands."""
+    from month1_api import api_benchmark
+    data = request.get_json() or {}
+    result, status = api_benchmark(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/provider-behaviour', methods=['POST'])
+def month1_provider_behaviour():
+    """Analyze provider behaviour across all AI engines."""
+    from month1_api import api_provider_behaviour
+    data = request.get_json() or {}
+    result, status = api_provider_behaviour(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/answer-taxonomy', methods=['POST'])
+def month1_answer_taxonomy():
+    """Build answer format taxonomy from empirical data."""
+    from month1_api import api_answer_taxonomy
+    data = request.get_json() or {}
+    result, status = api_answer_taxonomy(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/geo-baseline', methods=['POST'])
+def month1_geo_baseline():
+    """Generate Month 1 GEO baseline vs competitors."""
+    from month1_api import api_geo_baseline
+    data = request.get_json() or {}
+    result, status = api_geo_baseline(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/monitoring/activate', methods=['POST'])
+def month1_monitoring_activate():
+    """Activate scheduled monitoring jobs."""
+    from month1_api import api_monitoring_activate
+    data = request.get_json() or {}
+    result, status = api_monitoring_activate(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/eeat-register', methods=['POST'])
+def month1_eeat_register():
+    """Build E-E-A-T gap register from page audits."""
+    from month1_api import api_eeat_register
+    data = request.get_json() or {}
+    result, status = api_eeat_register(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/technical-debt', methods=['POST'])
+def month1_technical_debt():
+    """Run 236-check audit and build technical debt register."""
+    from month1_api import api_technical_debt
+    data = request.get_json() or {}
+    result, status = api_technical_debt(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/run-all', methods=['POST'])
+def month1_run_all():
+    """Run all 8 Month 1 deliverables."""
+    from month1_api import api_run_all
+    data = request.get_json() or {}
+    result, status = api_run_all(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/results', methods=['GET'])
+def month1_results():
+    """Get latest Month 1 results."""
+    from month1_api import api_latest_results
+    deliverable = request.args.get('deliverable')
+    result, status = api_latest_results(deliverable=deliverable)
+    return jsonify(result), status
+
+@app.route('/api/month1/results/<deliverable>', methods=['GET'])
+def month1_results_by_type(deliverable):
+    """Get latest results for a specific deliverable."""
+    from month1_api import api_latest_results
+    result, status = api_latest_results(deliverable=deliverable)
+    return jsonify(result), status
+
+
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
