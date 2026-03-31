@@ -25,6 +25,8 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "month1_research", "output"
 _jobs: dict[str, dict] = {}
 _MAX_JOBS = 50  # keep last N jobs in memory
 
+JOBS_DIR = os.path.join(os.path.dirname(__file__), "month1_research", "jobs")
+
 
 def _ensure_output():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -60,12 +62,34 @@ def _persist_to_rds(table_name, data):
     except Exception as e:
         logger.warning("RDS persist failed for %s: %s", table_name, e)
 
-# ── Async Job Infrastructure ──────────────────────────────────────────────────
+# ── Async Job Infrastructure (file-based for App Runner) ──────────────────────
+
+def _ensure_jobs_dir():
+    os.makedirs(JOBS_DIR, exist_ok=True)
+
+
+def _job_path(job_id):
+    return os.path.join(JOBS_DIR, f"{job_id}.json")
+
+
+def _save_job(job_id, data):
+    _ensure_jobs_dir()
+    with open(_job_path(job_id), "w", encoding="utf-8") as f:
+        json.dump(data, f, default=str)
+
+
+def _load_job(job_id):
+    path = _job_path(job_id)
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 
 def _start_job(job_type, fn, args=()):
     """Start a background job. Returns job_id immediately."""
     job_id = str(uuid.uuid4())[:12]
-    _jobs[job_id] = {
+    job_data = {
         "status": "pending",
         "job_type": job_type,
         "result": None,
@@ -73,23 +97,20 @@ def _start_job(job_type, fn, args=()):
         "started_at": datetime.now(timezone.utc).isoformat(),
         "finished_at": None,
     }
-    # Prune old jobs
-    if len(_jobs) > _MAX_JOBS:
-        oldest = sorted(_jobs.keys(), key=lambda k: _jobs[k]["started_at"])
-        for k in oldest[:len(_jobs) - _MAX_JOBS]:
-            del _jobs[k]
+    _save_job(job_id, job_data)
 
     def _worker():
         try:
             result = fn(*args)
-            _jobs[job_id]["status"] = "complete"
-            _jobs[job_id]["result"] = result
+            job_data["status"] = "complete"
+            job_data["result"] = result
         except Exception as e:
             logger.error("Job %s (%s) failed: %s", job_id, job_type, traceback.format_exc())
-            _jobs[job_id]["status"] = "failed"
-            _jobs[job_id]["error"] = str(e)
+            job_data["status"] = "failed"
+            job_data["error"] = str(e)
         finally:
-            _jobs[job_id]["finished_at"] = datetime.now(timezone.utc).isoformat()
+            job_data["finished_at"] = datetime.now(timezone.utc).isoformat()
+            _save_job(job_id, job_data)
 
     t = threading.Thread(target=_worker, daemon=True)
     t.start()
@@ -98,7 +119,7 @@ def _start_job(job_type, fn, args=()):
 
 def api_job_status(job_id):
     """Check status of an async job."""
-    job = _jobs.get(job_id)
+    job = _load_job(job_id)
     if not job:
         return {"error": "Job not found", "job_id": job_id}, 404
     resp = {
