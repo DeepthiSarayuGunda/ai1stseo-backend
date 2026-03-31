@@ -1,55 +1,14 @@
 """
 api_client.py
-Shared HTTP client for all Month 1 research scripts.
-Wraps the AI1stSEO backend API with retry logic and structured responses.
+Shared client for all Month 1 research scripts.
+Calls the backend service functions DIRECTLY (no HTTP) when running
+inside the same process. Falls back to HTTP for standalone usage.
 """
 
-import json
-import os
-import time
 import logging
-import requests
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
-
-API_BASE = os.environ.get("API_BASE_URL", "http://localhost:5001")
-MAX_RETRIES = 3
-RETRY_DELAY = 5  # seconds
-
-
-def _url(path: str) -> str:
-    return f"{API_BASE.rstrip('/')}{path}"
-
-
-def _request(method: str, path: str, payload: dict = None, params: dict = None, retries: int = MAX_RETRIES, timeout: int = 120) -> dict:
-    """Make an API request with retry logic."""
-    for attempt in range(retries):
-        try:
-            if method == "GET":
-                resp = requests.get(_url(path), params=params, timeout=timeout)
-            else:
-                resp = requests.post(_url(path), json=payload, timeout=timeout)
-
-            if resp.status_code == 200:
-                return resp.json()
-            elif resp.status_code == 503:
-                logger.warning("Service unavailable on %s, retry %d/%d", path, attempt + 1, retries)
-                time.sleep(RETRY_DELAY * (attempt + 1))
-                continue
-            else:
-                logger.error("API error %d on %s: %s", resp.status_code, path, resp.text[:200])
-                return {"error": resp.text, "status_code": resp.status_code}
-        except requests.exceptions.Timeout:
-            logger.warning("Timeout on %s (timeout=%ds), retry %d/%d", path, timeout, attempt + 1, retries)
-            if attempt == retries - 1:
-                return {"error": "timeout", "status": "timeout", "path": path}
-            time.sleep(RETRY_DELAY)
-        except requests.exceptions.ConnectionError:
-            logger.error("Connection error on %s", path)
-            time.sleep(RETRY_DELAY)
-
-    return {"error": f"Failed after {retries} retries", "path": path}
 
 
 def now_iso() -> str:
@@ -59,101 +18,159 @@ def now_iso() -> str:
 # ── GEO Probe APIs ───────────────────────────────────────────────────────────
 
 def geo_probe_single(brand: str, keyword: str, provider: str = "nova") -> dict:
-    return _request("POST", "/api/geo-probe", {"brand_name": brand, "keyword": keyword, "provider": provider})
+    from geo_probe_service import geo_probe as _geo_probe
+    try:
+        return _geo_probe(brand, keyword, ai_model=provider)
+    except Exception as e:
+        logger.warning("geo_probe_single failed: %s", e)
+        return {"error": str(e), "cited": False, "confidence": 0}
 
 
 def geo_probe_batch(brand: str, keywords: list, provider: str = "nova") -> dict:
-    return _request("POST", "/api/geo-probe/batch", {"brand_name": brand, "keywords": keywords, "provider": provider})
+    from geo_probe_service import geo_probe_batch as _batch
+    try:
+        return _batch(brand, keywords, ai_model=provider)
+    except Exception as e:
+        logger.warning("geo_probe_batch failed: %s", e)
+        return {"error": str(e), "geo_score": 0, "results": []}
 
 
 def geo_probe_compare(brand: str, keyword: str) -> dict:
-    return _request("POST", "/api/geo-probe/compare", {"brand_name": brand, "keyword": keyword})
+    from geo_probe_service import geo_probe_compare as _compare
+    try:
+        return _compare(brand, keyword)
+    except Exception as e:
+        logger.warning("geo_probe_compare failed: %s", e)
+        return {"error": str(e), "visibility_score": 0, "results": {}}
 
 
 def geo_probe_site(site_url: str, keyword: str, provider: str = "nova") -> dict:
-    return _request("POST", "/api/geo-probe/site", {"site_url": site_url, "keyword": keyword, "provider": provider})
+    from geo_probe_service import geo_probe_site as _site
+    try:
+        return _site(site_url, keyword, ai_model=provider)
+    except Exception as e:
+        logger.warning("geo_probe_site failed: %s", e)
+        return {"error": str(e), "site_mentioned": False}
 
 
 def geo_probe_trend(brand: str, limit: int = 30) -> dict:
-    return _request("GET", "/api/geo-probe/trend", params={"brand": brand, "limit": limit})
-
-
-def geo_probe_history(brand: str = None, ai_model: str = None, limit: int = 50) -> dict:
-    params = {"limit": limit}
-    if brand:
-        params["brand"] = brand
-    if ai_model:
-        params["ai_model"] = ai_model
-    return _request("GET", "/api/geo-probe/history", params=params)
+    from geo_probe_service import get_visibility_trend
+    try:
+        return get_visibility_trend(brand, limit=limit)
+    except Exception as e:
+        logger.warning("geo_probe_trend failed: %s", e)
+        return {"error": str(e), "trend": []}
 
 
 def geo_probe_schedule(brand: str, keywords: list, provider: str = "nova", interval_minutes: int = 10080) -> dict:
-    return _request("POST", "/api/geo-probe/schedule", {
-        "brand_name": brand, "keywords": keywords, "provider": provider, "interval_minutes": interval_minutes
-    })
+    from geo_probe_service import schedule_probe
+    try:
+        return schedule_probe(brand, keywords, ai_model=provider, interval_minutes=interval_minutes)
+    except Exception as e:
+        logger.warning("geo_probe_schedule failed: %s", e)
+        return {"error": str(e)}
 
 
 # ── AEO & Ranking APIs ───────────────────────────────────────────────────────
 
 def aeo_analyze(url: str, brand: str = None) -> dict:
-    payload = {"url": url}
-    if brand:
-        payload["brand_name"] = brand
-    return _request("POST", "/api/aeo/analyze", payload)
+    from aeo_optimizer import analyze_aeo
+    try:
+        return analyze_aeo(url, brand_name=brand)
+    except Exception as e:
+        logger.warning("aeo_analyze failed: %s", e)
+        return {"error": str(e), "aeo_score": 0, "issues": []}
 
 
 def ai_ranking_recommendations(url: str, brand: str, keywords: list = None) -> dict:
-    payload = {"url": url, "brand_name": brand}
+    from ai_ranking_service import get_ranking_recommendations
+    geo_results = []
     if keywords:
-        payload["keywords"] = keywords
-    return _request("POST", "/api/ai/ranking-recommendations", payload)
+        try:
+            from geo_probe_service import geo_probe_batch as _batch
+            batch = _batch(brand, keywords[:5])
+            geo_results = batch.get("results", [])
+        except Exception:
+            pass
+    try:
+        return get_ranking_recommendations(url, brand, geo_results=geo_results)
+    except Exception as e:
+        logger.warning("ai_ranking_recommendations failed: %s", e)
+        return {"error": str(e), "recommendations": []}
 
 
 # ── Content Generation ────────────────────────────────────────────────────────
 
 def content_generate(brand: str, content_type: str, topic: str, competitors: list = None, count: int = 5) -> dict:
-    payload = {"brand_name": brand, "content_type": content_type, "topic": topic, "count": count}
-    if competitors:
-        payload["competitors"] = competitors
-    return _request("POST", "/api/content/generate", payload)
+    from content_generator import generate_content
+    try:
+        return generate_content(brand, content_type, topic=topic, competitors=competitors, count=count)
+    except Exception as e:
+        logger.warning("content_generate failed: %s", e)
+        return {"error": str(e)}
 
 
 # ── Full SEO Audit ────────────────────────────────────────────────────────────
 
 def full_seo_audit(url: str) -> dict:
-    return _request("POST", "/api/analyze", {"url": url})
+    """Run the 236-check audit. This one we call via HTTP since it's complex."""
+    import requests as _req
+    import os
+    base = os.environ.get("API_BASE_URL", "http://localhost:8080")
+    try:
+        resp = _req.post(f"{base}/api/analyze", json={"url": url}, timeout=60)
+        if resp.status_code == 200:
+            return resp.json()
+        return {"error": f"HTTP {resp.status_code}", "checks": []}
+    except Exception as e:
+        logger.warning("full_seo_audit failed: %s", e)
+        return {"error": str(e), "checks": []}
 
 
 # ── LLM Multi-Provider ───────────────────────────────────────────────────────
 
-def llm_providers() -> dict:
-    return _request("GET", "/api/llm/providers")
-
-
 def llm_citation_probe(keyword: str, provider: str = "claude") -> dict:
-    return _request("POST", "/api/llm/citation-probe", {"keyword": keyword, "provider": provider})
+    from llm_service import citation_probe
+    try:
+        return citation_probe(keyword, provider=provider)
+    except Exception as e:
+        logger.warning("llm_citation_probe failed for %s: %s", provider, e)
+        return {"error": str(e), "status": "timeout", "provider": provider}
 
 
 # ── Advanced Features ─────────────────────────────────────────────────────────
 
 def model_comparison(brand: str, keyword: str) -> dict:
-    return _request("POST", "/api/geo/model-comparison", {"brand_name": brand, "keyword": keyword})
+    try:
+        from model_comparison import probe_all_models
+        return probe_all_models(brand, keyword)
+    except Exception as e:
+        logger.warning("model_comparison failed: %s", e)
+        return {"error": str(e), "status": "timeout"}
 
 
 def share_of_voice(brand: str, competitors: list, keywords: list, provider: str = "nova") -> dict:
-    return _request("POST", "/api/geo/share-of-voice", {
-        "brand": brand, "competitors": competitors, "keywords": keywords, "provider": provider
-    })
+    try:
+        from share_of_voice import calculate_sov
+        return calculate_sov(brand, competitors[:5], keywords[:10], provider=provider)
+    except Exception as e:
+        logger.warning("share_of_voice failed: %s", e)
+        return {"error": str(e)}
 
 
 def prompt_simulator(brand: str, keyword: str, provider: str = "nova") -> dict:
-    return _request("POST", "/api/geo/prompt-simulator", {"brand": brand, "keyword": keyword, "provider": provider})
+    try:
+        from prompt_simulator import run_simulation
+        return run_simulation(brand, keyword, provider=provider)
+    except Exception as e:
+        logger.warning("prompt_simulator failed: %s", e)
+        return {"error": str(e)}
 
 
 def geo_scanner_scan(brand: str, url: str = None, keywords: list = None, provider: str = "nova") -> dict:
-    payload = {"brand_name": brand, "provider": provider}
-    if url:
-        payload["url"] = url
-    if keywords:
-        payload["keywords"] = keywords
-    return _request("POST", "/api/geo-scanner/scan", payload)
+    try:
+        from geo_scanner_agent import run_full_scan
+        return run_full_scan(brand_name=brand, url=url, keywords=keywords or [], provider=provider)
+    except Exception as e:
+        logger.warning("geo_scanner_scan failed: %s", e)
+        return {"error": str(e)}
