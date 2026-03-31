@@ -45,47 +45,63 @@ def analyze_provider_behaviour(brand: str, keywords: list) -> dict:
             print("  ERROR: No keywords provided and no keyword universe found.")
             return {}
 
-    keywords = keywords[:20]  # Cap at 20 for manageable research
+    keywords = keywords[:10]  # Cap at 10 for manageable runtime
     print(f"  Analyzing {len(keywords)} keywords across providers...")
 
     # ── Phase 1: Cross-Model Compare (all providers at once) ──────────────
     print_section("Phase 1: Cross-Model Visibility Compare")
     compare_results = []
-    for kw in keywords:
+    for kw in keywords[:5]:  # Top 5 for cross-model (heavy call)
         print(f"  Comparing: '{kw}'...")
-        result = geo_probe_compare(brand, kw)
-        compare_results.append({"keyword": kw, **result})
-        time.sleep(3)
+        try:
+            result = geo_probe_compare(brand, kw)
+            compare_results.append({"keyword": kw, **result})
+        except Exception as e:
+            print(f"    ⚠ Compare failed: {e}")
+            compare_results.append({"keyword": kw, "error": str(e)})
+        time.sleep(2)
 
     # ── Phase 2: Individual probes on core providers ──────────────────────
     print_section("Phase 2: Core Provider Deep Probes (Nova vs Ollama)")
     core_results = {"nova": [], "ollama": []}
-    for kw in keywords:
+    for kw in keywords[:5]:  # Top 5 for core probes
         for provider in CORE_PROVIDERS:
             print(f"  Probing: '{kw}' on {provider}...")
-            result = geo_probe_single(brand, kw, provider=provider)
-            core_results[provider].append({"keyword": kw, **result})
-            time.sleep(2)
+            try:
+                result = geo_probe_single(brand, kw, provider=provider)
+                core_results[provider].append({"keyword": kw, **result})
+            except Exception as e:
+                print(f"    ⚠ {provider} failed: {e}")
+                core_results[provider].append({"keyword": kw, "status": "timeout", "error": str(e)})
+            time.sleep(1)
 
     # ── Phase 3: LLM Citation Probes (external providers) ─────────────────
     print_section("Phase 3: External Provider Citation Probes")
     external_providers = ["claude", "groq", "openai", "gemini", "perplexity"]
     external_results = {p: [] for p in external_providers}
-    for kw in keywords[:10]:  # Limit external to 10 keywords (API cost)
+    for kw in keywords[:3]:  # Top 3 for external (API cost + timeout)
         for provider in external_providers:
             print(f"  Citation probe: '{kw}' on {provider}...")
-            result = llm_citation_probe(kw, provider=provider)
-            external_results[provider].append({"keyword": kw, **result})
-            time.sleep(2)
+            try:
+                result = llm_citation_probe(kw, provider=provider)
+                external_results[provider].append({"keyword": kw, **result})
+            except Exception as e:
+                print(f"    ⚠ {provider} timed out: {e}")
+                external_results[provider].append({"keyword": kw, "status": "timeout", "error": str(e)})
+            time.sleep(1)
 
     # ── Phase 4: Model Comparison (disagreement detection) ────────────────
     print_section("Phase 4: Model Disagreement Analysis")
     disagreement_results = []
-    for kw in keywords[:10]:
+    for kw in keywords[:3]:  # Top 3 for disagreement (heavy call)
         print(f"  Model comparison: '{kw}'...")
-        result = model_comparison(brand, kw)
-        disagreement_results.append({"keyword": kw, **result})
-        time.sleep(3)
+        try:
+            result = model_comparison(brand, kw)
+            disagreement_results.append({"keyword": kw, **result})
+        except Exception as e:
+            print(f"    ⚠ Comparison failed: {e}")
+            disagreement_results.append({"keyword": kw, "status": "timeout", "error": str(e)})
+        time.sleep(2)
 
     # ── Analysis ──────────────────────────────────────────────────────────
     print_section("Analyzing Provider Behaviour Patterns")

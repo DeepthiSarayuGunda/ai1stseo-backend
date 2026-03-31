@@ -556,7 +556,6 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 <!-- MONTH 1 RESEARCH SECTION                                                   -->
 <!-- ═══════════════════════════════════════════════════════════════════════════ -->
 <div class="section-title" id="month1-research" style="margin-top:48px"><span>📊</span> Month 1 — Research &amp; Platform Mastery</div>
-<p style="font-size:.82rem;color:#7d8590;margin-bottom:20px;line-height:1.6">8 deliverables from the 6-Month Blueprint. Generate keyword universes, benchmark brands, analyze providers, build baselines, and activate monitoring — all from the live platform tools.</p>
 
 <div class="grid">
 
@@ -1590,6 +1589,38 @@ function m1Show(id, data) {
   }
 }
 
+function m1PollJob(jobId, outId, progressEl) {
+  let elapsed = 0;
+  const interval = setInterval(async () => {
+    elapsed += 5;
+    try {
+      const d = await api('GET', `/api/month1/job/${jobId}`);
+      if (d.status === 'complete') {
+        clearInterval(interval);
+        if (progressEl) progressEl.style.display = 'none';
+        m1Show(outId, d.result || d);
+      } else if (d.status === 'failed') {
+        clearInterval(interval);
+        if (progressEl) progressEl.innerHTML = '❌ Job failed';
+        m1Show(outId, {error: d.error || 'Job failed'});
+      } else {
+        // Still pending
+        const el = document.getElementById(outId);
+        el.style.display = 'block';
+        let msg = `⏳ Running… ${elapsed}s elapsed`;
+        if (elapsed >= 180) msg += ' — taking longer than expected. Results will be saved when complete.';
+        el.innerHTML = `<div style="color:#8b949e">${msg}</div>`;
+        if (progressEl) progressEl.innerHTML = msg;
+      }
+    } catch (e) {
+      // Network error on poll — keep trying
+      const el = document.getElementById(outId);
+      el.style.display = 'block';
+      el.innerHTML = `<div style="color:#d29922">⏳ Checking… (${elapsed}s)</div>`;
+    }
+  }, 5000);
+}
+
 async function m1KeywordUniverse() {
   const outId = 'm1-ku-out';
   m1Show(outId, {error: '🔄 Generating 200 keywords…'});
@@ -1605,7 +1636,7 @@ async function m1KeywordUniverse() {
 
 async function m1Benchmark() {
   const outId = 'm1-bm-out';
-  m1Show(outId, {error: '🔄 Running benchmark across brands… this may take several minutes'});
+  m1Show(outId, {error: '🔄 Starting benchmark job…'});
   document.getElementById(outId).querySelector('div').style.color = '#8b949e';
   try {
     const kw = document.getElementById('m1-bm-kw').value.split(',').map(k=>k.trim()).filter(Boolean);
@@ -1615,13 +1646,14 @@ async function m1Benchmark() {
       visibility_brands: document.getElementById('m1-bm-vis').value.split(',').map(k=>k.trim()).filter(Boolean),
       keywords: kw.length ? kw : undefined
     });
-    m1Show(outId, d);
+    if (d.job_id) { m1PollJob(d.job_id, outId); }
+    else { m1Show(outId, d); }
   } catch (e) { m1Show(outId, {error: e.message}); }
 }
 
 async function m1ProviderBehaviour() {
   const outId = 'm1-pb-out';
-  m1Show(outId, {error: '🔄 Analyzing all providers… this may take several minutes'});
+  m1Show(outId, {error: '🔄 Starting provider analysis job…'});
   document.getElementById(outId).querySelector('div').style.color = '#8b949e';
   try {
     const kw = document.getElementById('m1-pb-kw').value.split(',').map(k=>k.trim()).filter(Boolean);
@@ -1629,7 +1661,8 @@ async function m1ProviderBehaviour() {
       brand: document.getElementById('m1-pb-brand').value.trim(),
       keywords: kw.length ? kw : undefined
     });
-    m1Show(outId, d);
+    if (d.job_id) { m1PollJob(d.job_id, outId); }
+    else { m1Show(outId, d); }
   } catch (e) { m1Show(outId, {error: e.message}); }
 }
 
@@ -1652,8 +1685,8 @@ async function m1RunAll() {
   const progId = 'm1-all-progress';
   const prog = document.getElementById(progId);
   prog.style.display = 'block';
-  prog.innerHTML = '🔄 Running all 8 Month 1 deliverables… this will take 10-30 minutes depending on keyword count and provider availability.';
-  m1Show(outId, {error: '⏳ Starting…'});
+  prog.innerHTML = '🔄 Starting Month 1 full run…';
+  m1Show(outId, {error: '⏳ Submitting job…'});
   document.getElementById(outId).querySelector('div').style.color = '#8b949e';
   try {
     const pages = document.getElementById('m1-all-pages').value.split(',').map(k=>k.trim()).filter(Boolean);
@@ -1665,10 +1698,15 @@ async function m1RunAll() {
       visibility_brands: document.getElementById('m1-all-vis').value.split(',').map(k=>k.trim()).filter(Boolean),
       pages: pages
     });
-    prog.style.display = 'none';
-    m1Show(outId, d);
+    if (d.job_id) {
+      prog.innerHTML = '🔄 Job submitted. Polling for results every 5 seconds…';
+      m1PollJob(d.job_id, outId, prog);
+    } else {
+      prog.style.display = 'none';
+      m1Show(outId, d);
+    }
   } catch (e) {
-    prog.innerHTML = '❌ Request failed — see output below';
+    prog.innerHTML = '❌ Request failed';
     m1Show(outId, {error: e.message});
   }
 }

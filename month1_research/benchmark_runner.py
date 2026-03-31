@@ -55,15 +55,19 @@ def run_geo_monitoring(brand: str, keywords: list, providers: list = None) -> di
 def run_cross_model_compare(brand: str, keywords: list) -> list:
     """Run Cross-Model Visibility Compare on keywords."""
     results = []
-    for kw in keywords[:20]:
+    for kw in keywords[:5]:  # Cap at 5 (heavy multi-provider call)
         print(f"  Cross-model compare: '{kw}'...")
-        compare = geo_probe_compare(brand, kw)
-        results.append({
-            "keyword": kw,
-            "visibility_score": compare.get("visibility_score", 0),
-            "provider_results": compare.get("results", {}),
-        })
-        time.sleep(3)  # Rate limiting for multi-provider calls
+        try:
+            compare = geo_probe_compare(brand, kw)
+            results.append({
+                "keyword": kw,
+                "visibility_score": compare.get("visibility_score", 0),
+                "provider_results": compare.get("results", {}),
+            })
+        except Exception as e:
+            print(f"    ⚠ Compare failed: {e}")
+            results.append({"keyword": kw, "visibility_score": 0, "error": str(e)})
+        time.sleep(2)
     return results
 
 
@@ -103,22 +107,28 @@ def run_eeat_audit(pages: list, brand: str, keywords: list = None) -> list:
 def run_site_detection(site_urls: list, keywords: list, providers: list = None) -> list:
     """Run Site/URL Detection across keywords and providers."""
     if providers is None:
-        providers = ["nova", "ollama", "groq"]
+        providers = ["nova"]  # Single provider to reduce time
 
     results = []
-    for url in site_urls[:5]:
+    for url in site_urls[:3]:  # Cap at 3 URLs
         url_results = {"url": url, "detections": []}
-        for kw in keywords[:10]:
+        for kw in keywords[:5]:  # Cap at 5 keywords
             for provider in providers:
                 print(f"  Site detection: {url} | '{kw}' | {provider}...")
-                result = geo_probe_site(url, kw, provider=provider)
-                url_results["detections"].append({
-                    "keyword": kw,
-                    "provider": provider,
-                    "site_mentioned": result.get("site_mentioned", False),
-                    "confidence": result.get("confidence", 0),
-                })
-                time.sleep(2)
+                try:
+                    result = geo_probe_site(url, kw, provider=provider)
+                    url_results["detections"].append({
+                        "keyword": kw,
+                        "provider": provider,
+                        "site_mentioned": result.get("site_mentioned", False),
+                        "confidence": result.get("confidence", 0),
+                    })
+                except Exception as e:
+                    url_results["detections"].append({
+                        "keyword": kw, "provider": provider,
+                        "site_mentioned": False, "error": str(e),
+                    })
+                time.sleep(1)
         results.append(url_results)
     return results
 

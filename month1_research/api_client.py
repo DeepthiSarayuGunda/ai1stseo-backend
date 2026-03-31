@@ -22,14 +22,14 @@ def _url(path: str) -> str:
     return f"{API_BASE.rstrip('/')}{path}"
 
 
-def _request(method: str, path: str, payload: dict = None, params: dict = None, retries: int = MAX_RETRIES) -> dict:
+def _request(method: str, path: str, payload: dict = None, params: dict = None, retries: int = MAX_RETRIES, timeout: int = 120) -> dict:
     """Make an API request with retry logic."""
     for attempt in range(retries):
         try:
             if method == "GET":
-                resp = requests.get(_url(path), params=params, timeout=120)
+                resp = requests.get(_url(path), params=params, timeout=timeout)
             else:
-                resp = requests.post(_url(path), json=payload, timeout=120)
+                resp = requests.post(_url(path), json=payload, timeout=timeout)
 
             if resp.status_code == 200:
                 return resp.json()
@@ -41,7 +41,9 @@ def _request(method: str, path: str, payload: dict = None, params: dict = None, 
                 logger.error("API error %d on %s: %s", resp.status_code, path, resp.text[:200])
                 return {"error": resp.text, "status_code": resp.status_code}
         except requests.exceptions.Timeout:
-            logger.warning("Timeout on %s, retry %d/%d", path, attempt + 1, retries)
+            logger.warning("Timeout on %s (timeout=%ds), retry %d/%d", path, timeout, attempt + 1, retries)
+            if attempt == retries - 1:
+                return {"error": "timeout", "status": "timeout", "path": path}
             time.sleep(RETRY_DELAY)
         except requests.exceptions.ConnectionError:
             logger.error("Connection error on %s", path)

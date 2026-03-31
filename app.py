@@ -3206,7 +3206,7 @@ def month1_keyword_universe():
 
 @app.route('/api/month1/benchmark', methods=['POST'])
 def month1_benchmark():
-    """Run benchmark research across 5 brands."""
+    """Run benchmark research — returns job_id for async polling."""
     from month1_api import api_benchmark
     data = request.get_json() or {}
     result, status = api_benchmark(data)
@@ -3214,7 +3214,7 @@ def month1_benchmark():
 
 @app.route('/api/month1/provider-behaviour', methods=['POST'])
 def month1_provider_behaviour():
-    """Analyze provider behaviour across all AI engines."""
+    """Analyze provider behaviour — returns job_id for async polling."""
     from month1_api import api_provider_behaviour
     data = request.get_json() or {}
     result, status = api_provider_behaviour(data)
@@ -3230,7 +3230,7 @@ def month1_answer_taxonomy():
 
 @app.route('/api/month1/geo-baseline', methods=['POST'])
 def month1_geo_baseline():
-    """Generate Month 1 GEO baseline vs competitors."""
+    """Generate Month 1 GEO baseline — returns job_id for async polling."""
     from month1_api import api_geo_baseline
     data = request.get_json() or {}
     result, status = api_geo_baseline(data)
@@ -3262,10 +3262,17 @@ def month1_technical_debt():
 
 @app.route('/api/month1/run-all', methods=['POST'])
 def month1_run_all():
-    """Run all 8 Month 1 deliverables."""
+    """Run all 8 Month 1 deliverables — returns job_id for async polling."""
     from month1_api import api_run_all
     data = request.get_json() or {}
     result, status = api_run_all(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/job/<job_id>', methods=['GET'])
+def month1_job_status(job_id):
+    """Poll async job status."""
+    from month1_api import api_job_status
+    result, status = api_job_status(job_id)
     return jsonify(result), status
 
 @app.route('/api/month1/results', methods=['GET'])
