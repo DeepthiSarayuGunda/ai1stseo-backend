@@ -4,7 +4,7 @@ SEO Analyzer Backend - Flask API
 Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, redirect
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -62,6 +62,37 @@ try:
     from db import init_db
     init_db()
     print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+    # Initialize new feature tables
+    try:
+        from answer_fingerprint import init_fingerprint_tables
+        init_fingerprint_tables()
+        print("✓ answer_fingerprints table initialized")
+    except Exception as e2:
+        print(f"⚠ answer_fingerprints init: {e2}")
+    try:
+        from model_comparison import init_comparison_tables
+        init_comparison_tables()
+        print("✓ model_comparisons table initialized")
+    except Exception as e2:
+        print(f"⚠ model_comparisons init: {e2}")
+    try:
+        from multilang_probe import init_multilang_columns
+        init_multilang_columns()
+        print("✓ multilang columns initialized")
+    except Exception as e2:
+        print(f"⚠ multilang init: {e2}")
+    try:
+        from share_of_voice import init_sov_tables
+        init_sov_tables()
+        print("✓ share_of_voice table initialized")
+    except Exception as e2:
+        print(f"⚠ share_of_voice init: {e2}")
+    try:
+        from prompt_simulator import init_simulator_tables
+        init_simulator_tables()
+        print("✓ prompt_simulations table initialized")
+    except Exception as e2:
+        print(f"⚠ prompt_simulations init: {e2}")
 except Exception as e:
     print(f"⚠ RDS init failed (will retry on first request): {e}")
 
@@ -1446,7 +1477,9 @@ def analyze_citation_gap(url, soup, response, load_time):
 # ============== API ROUTES ==============
 @app.route('/')
 def serve_index():
-    return send_from_directory('.', 'index.html')
+    """Redirect to the production frontend — this backend is API-only infrastructure.
+    The real homepage lives on S3/CloudFront at www.ai1stseo.com."""
+    return redirect('https://www.ai1stseo.com')
 
 @app.route('/analyze')
 def serve_analyze():
@@ -1883,7 +1916,24 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health', '/api/status']
+    })
+
+@app.route('/api/status')
+def status_check():
+    """Status endpoint for AEO Platform and other frontends to check backend availability."""
+    return jsonify({
+        'status': 'online',
+        'service': 'ai1stseo-backend',
+        'version': '1.0.0',
+        'endpoints': {
+            'aeo_analyze': '/api/aeo/analyze',
+            'geo_probe': '/api/geo-probe',
+            'ai_recommendations': '/api/ai-recommendations',
+            'content_brief': '/api/content-brief',
+            'analyze': '/api/analyze',
+            'health': '/api/health'
+        }
     })
 
 # Ollama LLM Configuration
@@ -2905,6 +2955,157 @@ def geo_scanner_agents():
     return jsonify({'agents': get_available_scanners()})
 
 
+# ── Feature 1: AI Answer Fingerprinting ───────────────────────────────────────
+
+@app.route('/api/geo/fingerprint', methods=['POST'])
+def geo_fingerprint_save():
+    """Save a response fingerprint and detect changes."""
+    from answer_fingerprint import save_fingerprint
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    ai_model = (data.get('ai_model') or 'nova').strip()
+    response_text = (data.get('response_text') or '').strip()
+    if not brand or not keyword or not response_text:
+        return jsonify({'error': 'brand_name, keyword, and response_text are required'}), 400
+    try:
+        result = save_fingerprint(brand, keyword, ai_model, response_text,
+                                   probe_id=data.get('probe_id'))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Fingerprint save failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/fingerprint/<brand_name>/history', methods=['GET'])
+def geo_fingerprint_history(brand_name):
+    """Get the last N fingerprints for a brand with diff summaries."""
+    from answer_fingerprint import get_fingerprint_history
+    keyword = request.args.get('keyword')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 10))
+    try:
+        history = get_fingerprint_history(brand_name, keyword=keyword,
+                                           ai_model=ai_model, limit=limit)
+        return jsonify({'brand_name': brand_name, 'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
+
+
+# ── Feature 2: AI Model Disagreement Detector ─────────────────────────────────
+
+@app.route('/api/geo/model-comparison', methods=['POST'])
+def geo_model_comparison():
+    """Compare how different AI models respond to the same brand/keyword query."""
+    from model_comparison import probe_all_models
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    try:
+        result = probe_all_models(brand, keyword)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Model comparison failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/model-comparison/history', methods=['GET'])
+def geo_model_comparison_history():
+    """Get past model comparison results."""
+    from model_comparison import get_comparison_history
+    brand = request.args.get('brand_name')
+    limit = int(request.args.get('limit', 10))
+    try:
+        history = get_comparison_history(brand_name=brand, limit=limit)
+        return jsonify({'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
+
+
+# ── Feature 3: Multi-Language GEO Probing ─────────────────────────────────────
+
+@app.route('/api/geo/scan/languages', methods=['POST'])
+def geo_multilang_scan():
+    """Run GEO probes across multiple languages."""
+    from multilang_probe import probe_multilang
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    languages = data.get('languages', ['en'])
+    provider = data.get('provider', 'nova')
+    if not brand or not keyword:
+        return jsonify({'error': 'brand_name and keyword are required'}), 400
+    if len(languages) > 10:
+        return jsonify({'error': 'Maximum 10 languages per scan'}), 400
+    try:
+        result = probe_multilang(brand, keyword, languages=languages, provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Multi-language scan failed: {str(e)}'}), 500
+
+
+# ── Feature 5: AI Share of Voice ──────────────────────────────────────────────
+
+@app.route('/api/geo/share-of-voice', methods=['POST'])
+def geo_share_of_voice():
+    """Calculate AI Share of Voice: brand vs competitors across keywords."""
+    from share_of_voice import calculate_sov
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    competitors = [c.strip() for c in (data.get('competitors') or []) if c.strip()]
+    keywords = [k.strip() for k in (data.get('keywords') or []) if k.strip()]
+    provider = data.get('provider', 'nova')
+    if not brand:
+        return jsonify({'error': 'brand is required'}), 400
+    if not keywords:
+        return jsonify({'error': 'At least one keyword is required'}), 400
+    if not competitors:
+        return jsonify({'error': 'At least one competitor is required'}), 400
+    try:
+        result = calculate_sov(brand, competitors[:5], keywords[:10], provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'SOV calculation failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/share-of-voice/<brand_name>/latest', methods=['GET'])
+def geo_sov_latest(brand_name):
+    """Get the latest SOV scan for a brand."""
+    from share_of_voice import get_sov_latest
+    result = get_sov_latest(brand_name)
+    if not result:
+        return jsonify({'error': 'No SOV data found for this brand', 'brand': brand_name}), 404
+    return jsonify(result)
+
+
+# ── Feature 6: Prompt Injection Simulator ─────────────────────────────────────
+
+@app.route('/api/geo/prompt-simulator', methods=['POST'])
+def geo_prompt_simulator():
+    """Run prompt simulation: 15 prompt variations to test brand visibility."""
+    from prompt_simulator import run_simulation
+    data = request.get_json() or {}
+    brand = (data.get('brand') or data.get('brand_name') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    provider = data.get('provider', 'nova')
+    if not brand or not keyword:
+        return jsonify({'error': 'brand and keyword are required'}), 400
+    try:
+        result = run_simulation(brand, keyword, provider=provider)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Prompt simulation failed: {str(e)}'}), 500
+
+
+@app.route('/api/geo/prompt-simulator/<brand_name>/history', methods=['GET'])
+def geo_prompt_simulator_history(brand_name):
+    """Get past prompt simulation results."""
+    from prompt_simulator import get_simulation_history
+    limit = int(request.args.get('limit', 5))
+    history = get_simulation_history(brand_name, limit=limit)
+    return jsonify({'brand': brand_name, 'history': history, 'count': len(history)})
+
+
 # ── RDS Data Persistence Endpoints ────────────────────────────────────────────
 
 @app.route('/api/data/geo-probes', methods=['POST'])
@@ -2993,11 +3194,109 @@ def serve_admin():
     return send_from_directory('.', 'admin.html')
 
 
+# ── Month 1 Research API ──────────────────────────────────────────────────────
+
+@app.route('/api/month1/keyword-universe', methods=['POST'])
+def month1_keyword_universe():
+    """Generate 200 categorised natural-language queries."""
+    from month1_api import api_keyword_universe
+    data = request.get_json() or {}
+    result, status = api_keyword_universe(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/benchmark', methods=['POST'])
+def month1_benchmark():
+    """Run benchmark research — returns job_id for async polling."""
+    from month1_api import api_benchmark
+    data = request.get_json() or {}
+    result, status = api_benchmark(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/provider-behaviour', methods=['POST'])
+def month1_provider_behaviour():
+    """Analyze provider behaviour — returns job_id for async polling."""
+    from month1_api import api_provider_behaviour
+    data = request.get_json() or {}
+    result, status = api_provider_behaviour(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/answer-taxonomy', methods=['POST'])
+def month1_answer_taxonomy():
+    """Build answer format taxonomy from empirical data."""
+    from month1_api import api_answer_taxonomy
+    data = request.get_json() or {}
+    result, status = api_answer_taxonomy(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/geo-baseline', methods=['POST'])
+def month1_geo_baseline():
+    """Generate Month 1 GEO baseline — returns job_id for async polling."""
+    from month1_api import api_geo_baseline
+    data = request.get_json() or {}
+    result, status = api_geo_baseline(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/monitoring/activate', methods=['POST'])
+def month1_monitoring_activate():
+    """Activate scheduled monitoring jobs."""
+    from month1_api import api_monitoring_activate
+    data = request.get_json() or {}
+    result, status = api_monitoring_activate(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/eeat-register', methods=['POST'])
+def month1_eeat_register():
+    """Build E-E-A-T gap register from page audits."""
+    from month1_api import api_eeat_register
+    data = request.get_json() or {}
+    result, status = api_eeat_register(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/technical-debt', methods=['POST'])
+def month1_technical_debt():
+    """Run 236-check audit and build technical debt register."""
+    from month1_api import api_technical_debt
+    data = request.get_json() or {}
+    result, status = api_technical_debt(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/run-all', methods=['POST'])
+def month1_run_all():
+    """Run all 8 Month 1 deliverables — returns job_id for async polling."""
+    from month1_api import api_run_all
+    data = request.get_json() or {}
+    result, status = api_run_all(data)
+    return jsonify(result), status
+
+@app.route('/api/month1/job/<job_id>', methods=['GET'])
+def month1_job_status(job_id):
+    """Poll async job status."""
+    from month1_api import api_job_status
+    result, status = api_job_status(job_id)
+    return jsonify(result), status
+
+@app.route('/api/month1/results', methods=['GET'])
+def month1_results():
+    """Get latest Month 1 results."""
+    from month1_api import api_latest_results
+    deliverable = request.args.get('deliverable')
+    result, status = api_latest_results(deliverable=deliverable)
+    return jsonify(result), status
+
+@app.route('/api/month1/results/<deliverable>', methods=['GET'])
+def month1_results_by_type(deliverable):
+    """Get latest results for a specific deliverable."""
+    from month1_api import api_latest_results
+    result, status = api_latest_results(deliverable=deliverable)
+    return jsonify(result), status
+
+
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
         return send_from_directory('.', path)
-    return send_from_directory('.', 'index.html')
+    # Don't serve index.html for unknown paths — the real frontend is on S3/CloudFront
+    return jsonify({'error': 'Not found', 'message': 'This is the API backend. Visit https://www.ai1stseo.com for the website.'}), 404
 
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')

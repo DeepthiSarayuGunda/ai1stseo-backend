@@ -136,6 +136,13 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
     except Exception as e:
         logger.error("Failed to persist probe to RDS: %s", e)
 
+    # Auto-save fingerprint for answer change tracking
+    try:
+        from answer_fingerprint import save_fingerprint
+        save_fingerprint(brand_name, keyword, model_label, response_text)
+    except Exception as e:
+        logger.warning("Failed to save fingerprint: %s", e)
+
     return {
         "keyword": keyword, "brand_name": brand_name, "ai_model": model_label,
         "brand_present": cited, "citation_context": context,

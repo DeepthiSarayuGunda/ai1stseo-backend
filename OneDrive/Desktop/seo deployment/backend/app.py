@@ -5566,6 +5566,34 @@ def content_score():
         return jsonify({'error': str(e)}), 500
 
 
+
+
+# === Contact Form Endpoint ===
+@app.route('/api/contact', methods=['POST'])
+def contact_form():
+    """Send a contact form email via SES."""
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    message = data.get('message', '').strip()
+    if not name or not email or not message:
+        return jsonify({'status': 'error', 'message': 'name, email, and message required'}), 400
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': ['support@ai1stseo.com']},
+            Message={
+                'Subject': {'Data': 'Contact Form: {} ({})'.format(name, email)},
+                'Body': {'Text': {'Data': 'From: {} <{}>\n\n{}'.format(name, email, message)}}
+            },
+            ReplyToAddresses=[email],
+        )
+        return jsonify({'status': 'success', 'message': 'Message sent'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 # === Lambda handler (Mangum) ===
 import os as _os
 _IS_LAMBDA = bool(_os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))

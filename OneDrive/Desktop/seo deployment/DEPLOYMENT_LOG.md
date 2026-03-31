@@ -6,6 +6,32 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-03-31 01:15 — Contact Form + Deepthi Lambda Deploy + DB Security (Troy)
+
+**Contact form:**
+- `POST /api/contact` endpoint live on `ai1stseo-backend` Lambda
+- Accepts `{name, email, message}`, sends via SES to `support@ai1stseo.com`
+- `contact.html` on the repo — Amira deploys to Amplify at `/contact`
+
+**Deepthi's Lambda updated:**
+- Deployed her latest code (GEO Scanner Agent, answer fingerprint, model comparison, multilang probe, prompt simulator, share of voice) to `ai1stseo-geo-engine` Lambda
+- Her routes verified: geo-probe/models (200), geo-probe/history (200), aeo/analyze (400), chatbot/session (200), brand/resolve (400)
+- Did NOT touch `ai1stseo-backend` — per-dev routing keeps them separate
+
+**Database security hardening:**
+- ✅ Deletion protection enabled
+- ✅ SSL enforcement via custom parameter group (`ai1stseo-pg15-secure`, `rds.force_ssl=1`)
+- ✅ `pgcrypto` extension installed for row-level encryption capability
+- ✅ DB credentials stored in Secrets Manager (`ai1stseo/db-credentials`)
+- ⚠️ Encryption at rest still off (requires new instance from encrypted snapshot — planned separately)
+
+**EC2 fully terminated:**
+- Instance `i-0d59b5c1a433f0255` terminated (not just stopped)
+- AMI + snapshot cleaned up automatically
+- No orphaned EBS volumes or Elastic IPs (EIP on RDS is needed)
+
+---
+
 ## 2026-03-26 18:17 — Content Briefs & Scoring Routes Added (Troy)
 
 **Issue:** GET `/api/content-briefs` was returning index.html instead of JSON. The route was never in the deployed `app.py` — it was in Samarveer's later commits but missed all previous merges.
