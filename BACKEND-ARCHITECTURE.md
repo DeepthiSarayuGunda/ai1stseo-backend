@@ -42,6 +42,7 @@
 | `brand_resolver.py` | Dev 1 | Brand ↔ domain resolution with caching |
 | `llm_service.py` | Dev 1/2 | Multi-provider LLM abstraction (Groq, Claude/Nova, OpenAI, Perplexity, Gemini) |
 | `ai_chatbot.py` | Dev 1 | SEO chatbot session management |
+| `geo_scanner_agent.py` | Dev 1 | **NEW** — GEO Scanner Agent orchestrator — coordinates 4 scanner agents, returns structured reports with plain-English summaries, persists to RDS |
 | `bedrock_helper.py` | Dev 2 | Bedrock helper — Nova Lite default, supports Nova + Anthropic formats |
 | `build_zip.py` | Dev 3 | Lambda deployment ZIP builder |
 | `patch_app.py` | — | App patching utility |
@@ -50,6 +51,20 @@
 ---
 
 ## API Endpoints — Full Reference
+
+### GEO Scanner Agent (`/api/geo-scanner/*`) — **NEW**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/geo-scanner/scan` | Full orchestrated scan — runs all scanner agents, returns structured report with overall score, executive summary, recommendations, and RDS persistence status |
+| GET | `/api/geo-scanner/agents` | List available scanner agents (brand_visibility, content_readiness, competitor_gap, site_mention) |
+
+### RDS Data Persistence (`/api/data/*`) — **NEW**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/data/geo-probes` | Persist individual GEO probe results to RDS `geo_probes` table |
+| POST | `/api/data/ai-visibility` | Persist batch visibility results to RDS `ai_visibility_history` table |
 
 ### Auth (`/api/auth/*`)
 
@@ -136,6 +151,7 @@
 | `/analyze` | `analyze.html` |
 | `/audit/` | `audit.html` |
 | `/geo-test` | `geo-test.html` |
+| `/geo-scanner` | `geo-scanner.html` — **NEW** GEO Scanner Agent dashboard |
 | `/dev1-dashboard` | `dev1-dashboard.html` |
 | `/dashboard` | Redirects to `/dev1-dashboard` |
 
@@ -177,6 +193,17 @@ Extended routing: `llm_service.py` → `citation_probe()` / `geo_monitor()` — 
 ---
 
 ## Recent Changes (March 2026)
+
+### Mar 26 — GEO Scanner Agent Enhancements & Workflow Documentation
+- Fixed parameter mismatch in `_persist_to_rds()` — `context_snippet` → `citation_context` to match `db.insert_probe()` signature
+- Fixed same mismatch in `POST /api/data/geo-probes` endpoint in `app.py`
+- Enhanced executive summary with "what this means" explainer for non-technical users
+- Improved recommendations with `effort`, `timeframe` fields and more actionable descriptions
+- Added intermediate score thresholds (40-70%) for more nuanced recommendations
+- Competitor gap recommendations now list specific missing AI models
+- Updated `geo-scanner.html` to display effort/timeframe in recommendation cards
+- Created `SEO-CONTENT-WORKFLOWS.md` — full process documentation with ASCII diagrams for all 9 workflows
+- Created `DEPLOYMENT-LINUX.md` — Docker + direct deployment instructions for Linux server
 
 ### Mar 26 — Shared Lambda Fix & Endpoint Audit
 - Confirmed all GEO/AEO/content endpoints are live and functional in the shared backend
