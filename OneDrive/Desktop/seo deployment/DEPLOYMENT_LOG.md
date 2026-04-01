@@ -6,6 +6,34 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-01 22:55 — Local Ollama Accelerator Integration (Troy)
+
+**Connected site monitor to Gurbachan's local Ollama accelerator on LAN (192.168.2.200:11434).**
+
+**What was done:**
+- Updated `start.sh` on seo-dev server: `OLLAMA_URL` changed from `https://ollama.sageaios.com` to `http://192.168.2.200:11434` (direct LAN, no internet hop)
+- Added tiered model environment variables: `OLLAMA_FAST_MODEL`, `OLLAMA_HEAVY_MODEL`, `OLLAMA_EMBED_MODEL`
+- Enhanced `ai_inference.py` with 3 model tiers + embedding support:
+  - `generate_fast()` → llama3.1:8b (5GB, <2s) — quick summaries, classifications
+  - `generate()` → qwen3:30b-a3b (18.5GB, ~5s) — standard analysis (default)
+  - `generate_deep()` → qwen3:235b-a22b (142GB, ~30s) — deep competitor intel, detailed reports
+  - `get_embeddings()` → nomic-embed-text (274MB) — semantic similarity for content comparison
+- Updated `ai_analyzer.py` to use tiered models:
+  - Fast (8B): score change explanations, scan summaries, chat answers, next action suggestions
+  - Standard (30B): scan analysis, fix code generation
+  - Heavy (235B): competitor gap analysis, competitor strength identification
+- Restarted `troy-monitor.service` — confirmed running
+
+**Available models on accelerator:**
+| Model | Size | Tier | Use Case |
+|-------|------|------|----------|
+| llama3.1:8b | 5 GB | Fast | Quick summaries, chat |
+| qwen3:30b-a3b | 18.5 GB | Standard | SEO analysis, fix generation |
+| qwen3:235b-a22b | 142 GB | Heavy | Deep competitor intel |
+| nomic-embed-text | 274 MB | Embed | Semantic similarity |
+
+---
+
 ## 2026-04-01 11:00 — Email Lead Collection Endpoint + DynamoDB Table (Troy)
 
 **Per Amira's request:** PDF download email gate needs backend storage.
