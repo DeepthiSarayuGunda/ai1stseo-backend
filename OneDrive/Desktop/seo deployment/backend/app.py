@@ -5568,6 +5568,32 @@ def content_score():
 
 
 
+# === Email Lead Collection (PDF downloads) ===
+@app.route('/api/collect-email', methods=['POST'])
+def collect_email():
+    """Store email from PDF download gate. No auth required — public lead capture."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email or '@' not in email:
+        return jsonify({'status': 'error', 'message': 'Valid email required'}), 400
+    try:
+        import boto3, uuid
+        from datetime import datetime
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-email-leads')
+        table.put_item(Item={
+            'id': str(uuid.uuid4()),
+            'email': email,
+            'source': data.get('source', 'pdf_download'),
+            'page_url': data.get('page_url', ''),
+            'report_type': data.get('report_type', ''),
+            'created_at': datetime.utcnow().isoformat(),
+        })
+        return jsonify({'status': 'success', 'message': 'Email collected'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 # === Contact Form Endpoint ===
 @app.route('/api/contact', methods=['POST'])
 def contact_form():
