@@ -3291,6 +3291,169 @@ def month1_results_by_type(deliverable):
     return jsonify(result), status
 
 
+# ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
+import sqlite3
+
+SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png'}
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def _init_social_db():
+    """Create the scheduled_posts table if it doesn't exist, and migrate if needed."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS scheduled_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            platforms TEXT NOT NULL,
+            scheduled_datetime TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            image_path TEXT
+        )
+    ''')
+    cols = [row[1] for row in conn.execute('PRAGMA table_info(scheduled_posts)').fetchall()]
+    if 'image_path' not in cols:
+        conn.execute('ALTER TABLE scheduled_posts ADD COLUMN image_path TEXT')
+    conn.commit()
+    conn.close()
+
+_init_social_db()
+
+def _allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXT
+
+
+@app.route('/social')
+def serve_social():
+    return send_from_directory('.', 'social.html')
+
+
+@app.route('/static/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
+
+@app.route('/api/social/posts', methods=['GET'])
+def social_get_posts():
+    """Return all scheduled posts ordered by scheduled_datetime ascending."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        'SELECT * FROM scheduled_posts ORDER BY scheduled_datetime ASC'
+    ).fetchall()
+    conn.close()
+    return jsonify({'posts': [dict(r) for r in rows]})
+
+
+@app.route('/api/social/posts', methods=['POST'])
+def social_create_post():
+    """Create a new scheduled post with optional image upload."""
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        content = (request.form.get('content') or '').strip()
+        platforms = request.form.getlist('platforms')
+        if len(platforms) == 1 and ',' in platforms[0]:
+            platforms = [p.strip() for p in platforms[0].split(',')]
+        sched_date = (request.form.get('scheduled_date') or '').strip()
+        sched_time = (request.form.get('scheduled_time') or '').strip()
+        image_file = request.files.get('image')
+    else:
+        data = request.get_json() or {}
+        content = (data.get('content') or '').strip()
+        platforms = data.get('platforms') or []
+        sched_date = (data.get('scheduled_date') or '').strip()
+        sched_time = (data.get('scheduled_time') or '').strip()
+        image_file = None
+
+    if not content:
+        return jsonify({'error': 'Post content is required'}), 400
+    if not platforms:
+        return jsonify({'error': 'Select at least one platform'}), 400
+    if not sched_date or not sched_time:
+        return jsonify({'error': 'Date and time are required'}), 400
+
+    image_path = None
+    if image_file and image_file.filename:
+        if not _allowed_image(image_file.filename):
+            return jsonify({'error': 'Only JPG, JPEG, and PNG images are allowed'}), 400
+        ext = image_file.filename.rsplit('.', 1)[1].lower()
+        safe_name = f"{int(datetime.utcnow().timestamp() * 1000)}_{secrets.token_hex(4)}.{ext}"
+        save_path = os.path.join(UPLOAD_DIR, safe_name)
+        image_file.save(save_path)
+        image_path = f"/static/uploads/{safe_name}"
+
+    scheduled_datetime = f"{sched_date} {sched_time}"
+    platforms_str = ', '.join(platforms)
+    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect(SOCIAL_DB)
+    cur = conn.execute(
+        'INSERT INTO scheduled_posts (content, platforms, scheduled_datetime, created_at, image_path) VALUES (?, ?, ?, ?, ?)',
+        (content, platforms_str, scheduled_datetime, created_at, image_path)
+    )
+    conn.commit()
+    post_id = cur.lastrowid
+    conn.close()
+
+    return jsonify({'status': 'success', 'id': post_id}), 201
+
+
+@app.route('/api/social/posts/<int:post_id>', methods=['PUT'])
+def social_update_post(post_id):
+    """Update an existing scheduled post by ID."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute('SELECT * FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'Post not found'}), 404
+
+    data = request.get_json() or {}
+    content_val = data.get('content', row['content'])
+    platforms = data.get('platforms', row['platforms'])
+    if isinstance(platforms, list):
+        platforms = ', '.join(platforms)
+    scheduled_datetime = row['scheduled_datetime']
+    if data.get('scheduled_date') and data.get('scheduled_time'):
+        scheduled_datetime = f"{data['scheduled_date']} {data['scheduled_time']}"
+    elif data.get('scheduled_datetime'):
+        scheduled_datetime = data['scheduled_datetime']
+    cols = [r[1] for r in conn.execute('PRAGMA table_info(scheduled_posts)').fetchall()]
+    status = data.get('status', row['status'] if 'status' in cols else 'draft')
+
+    conn.execute(
+        'UPDATE scheduled_posts SET content = ?, platforms = ?, scheduled_datetime = ?, status = ? WHERE id = ?',
+        (content_val, platforms, scheduled_datetime, status, post_id)
+    )
+    conn.commit()
+    updated = dict(conn.execute('SELECT * FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone())
+    conn.close()
+    return jsonify({'status': 'success', 'post': updated})
+
+
+@app.route('/api/social/posts/<int:post_id>', methods=['DELETE'])
+def social_delete_post(post_id):
+    """Delete a scheduled post by ID and remove its uploaded image if present."""
+    conn = sqlite3.connect(SOCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute('SELECT image_path FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'Post not found'}), 404
+    img = row['image_path']
+    if img:
+        full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), img.lstrip('/'))
+        try:
+            if os.path.isfile(full_path):
+                os.remove(full_path)
+        except OSError:
+            pass
+    conn.execute('DELETE FROM scheduled_posts WHERE id = ?', (post_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
@@ -3403,171 +3566,3 @@ if IS_LAMBDA:
             return _mangum_handler(event, context)
     except ImportError:
         pass
-
-# ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
-import sqlite3
-
-SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
-ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png'}
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-def _init_social_db():
-    """Create the scheduled_posts table if it doesn't exist, and migrate if needed."""
-    conn = sqlite3.connect(SOCIAL_DB)
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS scheduled_posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content TEXT NOT NULL,
-            platforms TEXT NOT NULL,
-            scheduled_datetime TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            image_path TEXT
-        )
-    ''')
-    # Migration: add image_path column to existing databases that lack it
-    cols = [row[1] for row in conn.execute('PRAGMA table_info(scheduled_posts)').fetchall()]
-    if 'image_path' not in cols:
-        conn.execute('ALTER TABLE scheduled_posts ADD COLUMN image_path TEXT')
-    conn.commit()
-    conn.close()
-
-_init_social_db()
-
-def _allowed_image(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXT
-
-
-@app.route('/social')
-def serve_social():
-    return send_from_directory('.', 'social.html')
-
-
-@app.route('/static/uploads/<path:filename>')
-def serve_upload(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
-
-
-@app.route('/api/social/posts', methods=['GET'])
-def social_get_posts():
-    """Return all scheduled posts ordered by scheduled_datetime ascending."""
-    conn = sqlite3.connect(SOCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    rows = conn.execute(
-        'SELECT * FROM scheduled_posts ORDER BY scheduled_datetime ASC'
-    ).fetchall()
-    conn.close()
-    return jsonify({'posts': [dict(r) for r in rows]})
-
-
-@app.route('/api/social/posts', methods=['POST'])
-def social_create_post():
-    """Create a new scheduled post with optional image upload."""
-    # Support both JSON and multipart/form-data
-    if request.content_type and 'multipart/form-data' in request.content_type:
-        content = (request.form.get('content') or '').strip()
-        platforms = request.form.getlist('platforms')
-        # If platforms came as a single comma-separated string, split it
-        if len(platforms) == 1 and ',' in platforms[0]:
-            platforms = [p.strip() for p in platforms[0].split(',')]
-        sched_date = (request.form.get('scheduled_date') or '').strip()
-        sched_time = (request.form.get('scheduled_time') or '').strip()
-        image_file = request.files.get('image')
-    else:
-        data = request.get_json() or {}
-        content = (data.get('content') or '').strip()
-        platforms = data.get('platforms') or []
-        sched_date = (data.get('scheduled_date') or '').strip()
-        sched_time = (data.get('scheduled_time') or '').strip()
-        image_file = None
-
-    if not content:
-        return jsonify({'error': 'Post content is required'}), 400
-    if not platforms:
-        return jsonify({'error': 'Select at least one platform'}), 400
-    if not sched_date or not sched_time:
-        return jsonify({'error': 'Date and time are required'}), 400
-
-    # Handle image upload
-    image_path = None
-    if image_file and image_file.filename:
-        if not _allowed_image(image_file.filename):
-            return jsonify({'error': 'Only JPG, JPEG, and PNG images are allowed'}), 400
-        ext = image_file.filename.rsplit('.', 1)[1].lower()
-        safe_name = f"{int(datetime.utcnow().timestamp() * 1000)}_{secrets.token_hex(4)}.{ext}"
-        save_path = os.path.join(UPLOAD_DIR, safe_name)
-        image_file.save(save_path)
-        image_path = f"/static/uploads/{safe_name}"
-
-    scheduled_datetime = f"{sched_date} {sched_time}"
-    platforms_str = ', '.join(platforms)
-    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    conn = sqlite3.connect(SOCIAL_DB)
-    cur = conn.execute(
-        'INSERT INTO scheduled_posts (content, platforms, scheduled_datetime, created_at, image_path) VALUES (?, ?, ?, ?, ?)',
-        (content, platforms_str, scheduled_datetime, created_at, image_path)
-    )
-    conn.commit()
-    post_id = cur.lastrowid
-    conn.close()
-
-    return jsonify({'status': 'success', 'id': post_id}), 201
-
-
-
-@app.route('/api/social/posts/<int:post_id>', methods=['PUT'])
-def social_update_post(post_id):
-    """Update an existing scheduled post by ID."""
-    conn = sqlite3.connect(SOCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    row = conn.execute('SELECT * FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone()
-    if not row:
-        conn.close()
-        return jsonify({'error': 'Post not found'}), 404
-
-    data = request.get_json() or {}
-    content_val = data.get('content', row['content'])
-    platforms = data.get('platforms', row['platforms'])
-    if isinstance(platforms, list):
-        platforms = ', '.join(platforms)
-    scheduled_datetime = row['scheduled_datetime']
-    if data.get('scheduled_date') and data.get('scheduled_time'):
-        scheduled_datetime = f"{data['scheduled_date']} {data['scheduled_time']}"
-    elif data.get('scheduled_datetime'):
-        scheduled_datetime = data['scheduled_datetime']
-    cols = [r[1] for r in conn.execute('PRAGMA table_info(scheduled_posts)').fetchall()]
-    status = data.get('status', row['status'] if 'status' in cols else 'draft')
-
-    conn.execute(
-        'UPDATE scheduled_posts SET content = ?, platforms = ?, scheduled_datetime = ?, status = ? WHERE id = ?',
-        (content_val, platforms, scheduled_datetime, status, post_id)
-    )
-    conn.commit()
-    updated = dict(conn.execute('SELECT * FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone())
-    conn.close()
-    return jsonify({'status': 'success', 'post': updated})
-
-
-@app.route('/api/social/posts/<int:post_id>', methods=['DELETE'])
-def social_delete_post(post_id):
-    """Delete a scheduled post by ID and remove its uploaded image if present."""
-    conn = sqlite3.connect(SOCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    row = conn.execute('SELECT image_path FROM scheduled_posts WHERE id = ?', (post_id,)).fetchone()
-    if not row:
-        conn.close()
-        return jsonify({'error': 'Post not found'}), 404
-    # Delete the image file from disk
-    img = row['image_path']
-    if img:
-        full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), img.lstrip('/'))
-        try:
-            if os.path.isfile(full_path):
-                os.remove(full_path)
-        except OSError:
-            pass
-    conn.execute('DELETE FROM scheduled_posts WHERE id = ?', (post_id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'status': 'success'})
