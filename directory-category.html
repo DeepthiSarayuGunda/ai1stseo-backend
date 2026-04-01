@@ -59,7 +59,7 @@
     <nav>
         <a href="/" class="nav-logo">AI1stSEO Directory</a>
         <div style="display:flex;gap:16px;align-items:center;">
-            <a href="directory-category.html" style="color:var(--muted);font-size:0.9rem;">Browse</a>
+            <a href="directory-listing.html" style="color:var(--muted);font-size:0.9rem;">Browse</a>
             <a href="directory-category.html" style="color:var(--muted);font-size:0.9rem;">Top 10</a>
             <a href="directory-compare.html" style="color:var(--muted);font-size:0.9rem;">Compare</a>
         </div>
@@ -83,7 +83,7 @@
             <button class="filter-btn">Orthodontics</button>
         </div>
 
-        <div class="rank-card" onclick="window.location='directory-listing.html'">
+        <div class="rank-card" data-tags="general,cosmetic,emergency" onclick="window.location='directory-listing.html'">
             <div class="rank-num gold">#1</div>
             <div class="rank-info">
                 <h3>Capital Dental Care</h3>
@@ -98,7 +98,7 @@
             <div class="rank-score"><div class="score-val" style="color:#00ff88;">94</div><div class="score-label">AI Score</div></div>
         </div>
 
-        <div class="rank-card" onclick="window.location='directory-listing.html'">
+        <div class="rank-card" data-tags="general,pediatric" onclick="window.location='directory-listing.html'">
             <div class="rank-num silver">#2</div>
             <div class="rank-info">
                 <h3>Ottawa Family Dentistry</h3>
@@ -112,7 +112,7 @@
             <div class="rank-score"><div class="score-val" style="color:#00ff88;">89</div><div class="score-label">AI Score</div></div>
         </div>
 
-        <div class="rank-card" onclick="window.location='directory-listing.html'">
+        <div class="rank-card" data-tags="general,cosmetic" onclick="window.location='directory-listing.html'">
             <div class="rank-num bronze">#3</div>
             <div class="rank-info">
                 <h3>Sample Dental Clinic</h3>
@@ -125,7 +125,7 @@
             <div class="rank-score"><div class="score-val" style="color:#00d4ff;">72</div><div class="score-label">AI Score</div></div>
         </div>
 
-        <div class="rank-card">
+        <div class="rank-card" data-tags="general">
             <div class="rank-num">#4</div>
             <div class="rank-info">
                 <h3>Rideau Dental Centre</h3>
@@ -137,7 +137,7 @@
             <div class="rank-score"><div class="score-val" style="color:#00d4ff;">68</div><div class="score-label">AI Score</div></div>
         </div>
 
-        <div class="rank-card">
+        <div class="rank-card" data-tags="general,pediatric,emergency">
             <div class="rank-num">#5</div>
             <div class="rank-info">
                 <h3>Kanata Dental Wellness</h3>
@@ -152,5 +152,19 @@
         </div>
     </div>
     <footer>&copy; 2026 AI1stSEO Directory. AI-optimized business listings for ChatGPT, Gemini, Perplexity, and Claude.</footer>
+    <script>
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var filter = btn.textContent.trim().toLowerCase();
+            document.querySelectorAll('.rank-card').forEach(function(card) {
+                if (filter === 'all') { card.style.display = 'flex'; return; }
+                var tags = (card.getAttribute('data-tags') || '').toLowerCase();
+                card.style.display = tags.indexOf(filter) !== -1 ? 'flex' : 'none';
+            });
+        });
+    });
+    </script>
 </body>
 </html>
