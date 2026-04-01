@@ -1,0 +1,1814 @@
+[
+  {
+    "table_name": "admin_metrics",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "metric_date",
+    "data_type": "date",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "total_users",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "new_signups",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "active_users_24h",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "active_users_7d",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "total_scans",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "total_deep_scans",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "total_content_briefs",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "total_geo_probes",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "avg_seo_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "bedrock_calls",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "ollama_fallback_calls",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "scan_errors_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "estimated_ai_cost_usd",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "admin_metrics",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "referral_source",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "session_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "conversion_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "avg_time_on_site_seconds",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_referral_traffic",
+    "column_name": "measured_date",
+    "data_type": "date",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "provider",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "model",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "input_tokens_est",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "output_tokens_est",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "estimated_cost_usd",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "success",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "latency_ms",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "triggered_by",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_usage_log",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "visibility_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "citation_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "extractable_answers",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "factual_density_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "schema_coverage_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "measured_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "share_of_voice",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "competitor_citations",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "ai_referral_sessions",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "citation_sentiment_positive",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "citation_sentiment_neutral",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "citation_sentiment_negative",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "brand_name",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "ai_model",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "geo_score",
+    "data_type": "real",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "cited_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "total_prompts",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "ai_visibility_history",
+    "column_name": "batch_results",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "brand_name",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "ai_model",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "full_response",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "response_hash",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "diff_summary",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "change_detected",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "probe_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "answer_fingerprints",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "key_hash",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "key_prefix",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "label",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "scopes",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "rate_limit_per_hour",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "requests_this_hour",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "hour_window",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "last_used_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_keys",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "endpoint",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "method",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "status_code",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "response_time_ms",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "api_request_log",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "audit_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "category",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "value",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "recommendation",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audit_checks",
+    "column_name": "impact",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "overall_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "technical_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "onpage_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "content_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "mobile_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "performance_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "security_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "social_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "local_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "geo_aeo_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "total_checks",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "passed_checks",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "failed_checks",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "warning_checks",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "load_time_ms",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "audits",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "competitor_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "seo_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "ai_visibility_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "keyword_overlap",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "domain_authority",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmarks",
+    "column_name": "measured_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "brief_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "domain",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "word_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "heading_structure",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_competitors",
+    "column_name": "content_json",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "brief_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "volume",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "difficulty",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "intent",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "brief_keywords",
+    "column_name": "placement",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "domain",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "label",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "added_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "content_type",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "target_word_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "brief_json",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "seo_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "aeo_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_briefs",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "site_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "change_type",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "old_value",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "new_value",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_changes",
+    "column_name": "detected_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "audit_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "answer_first_structure",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "citation_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "statistics_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "expert_quotes_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "faq_section_present",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "schema_types_found",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "author_bio_present",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "eeat_score",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "paragraph_avg_words",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "content_freshness_days",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "overall_citation_readiness",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "content_citation_scores",
+    "column_name": "scored_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "brand_name",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "ai_model",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "cited",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "citation_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "response_snippet",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "probe_timestamp",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "citation_rank",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "sentiment",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "ai_platform",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "confidence",
+    "data_type": "real",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "geo_probes",
+    "column_name": "language",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "brand_name",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "models_queried",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "raw_responses",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "comparison_result",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "models_mentioning",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "disagreements",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "model_comparisons",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "check_interval_minutes",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "last_checked",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "last_status",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "monitored_sites",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "owner_email",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "plan",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "brand",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "keyword",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "hit_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "miss_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "hit_rate",
+    "data_type": "real",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "prompt_results",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "competitors_cited",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "gap_analysis",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "prompt_simulations",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "report_type",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "title",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "data",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "format",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "reports",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "scan_type",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "error_message",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "source",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "resolved",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "scan_errors",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "brand",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "competitors",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "keywords",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "results",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "sov_summary",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "total_probes",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "share_of_voice",
+    "column_name": "scanned_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "content",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "platforms",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "scheduled_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "published_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "social_posts",
+    "column_name": "image_path",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "channels",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "frequency",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "sites",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "site_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "is_up",
+    "data_type": "boolean",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "status_code",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "response_time_ms",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "error_message",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "uptime_checks",
+    "column_name": "checked_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "users",
+    "column_name": "cognito_sub",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "users",
+    "column_name": "email",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "users",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "users",
+    "column_name": "role",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "users",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "users",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "users",
+    "column_name": "last_login",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "webhook_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "event_type",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "payload",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "status_code",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "response_body",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "success",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhook_deliveries",
+    "column_name": "delivered_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "project_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "url",
+    "data_type": "character varying",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "events",
+    "data_type": "ARRAY",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "secret",
+    "data_type": "character varying",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "webhooks",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  }
+]

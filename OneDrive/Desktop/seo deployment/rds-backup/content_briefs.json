@@ -1,0 +1,1081 @@
+[
+  {
+    "id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "Google",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Introduction to Google",
+          "level": "h2",
+          "purpose": "Provide a brief overview of Google and its significance in the tech industry.",
+          "word_budget": 200
+        },
+        {
+          "text": "The History of Google",
+          "level": "h2",
+          "purpose": "Dive into the origins and evolution of Google from a simple search engine to a global tech powerhouse.",
+          "word_budget": 300
+        },
+        {
+          "text": "Google's Products and Services",
+          "level": "h2",
+          "purpose": "Detail the various products and services offered by Google, highlighting their impact on technology and society.",
+          "word_budget": 300
+        },
+        {
+          "text": "Google's Impact on the Tech Industry",
+          "level": "h2",
+          "purpose": "Analyze how Google has influenced the tech industry and its competitors.",
+          "word_budget": 200
+        },
+        {
+          "text": "Google's Future Prospects",
+          "level": "h2",
+          "purpose": "Speculate on the future directions and potential innovations Google might pursue.",
+          "word_budget": 200
+        },
+        {
+          "text": "The Role of AI in Google's Future",
+          "level": "h3",
+          "purpose": "Discuss the importance of artificial intelligence in shaping Google's future strategies.",
+          "word_budget": 150
+        }
+      ],
+      "keywords": [
+        {
+          "term": "Google",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "history of Google",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "Google products",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "impact of Google",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "future of Google",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "AI in Google",
+          "type": "lsi",
+          "placement": "h3"
+        }
+      ],
+      "recommended_title": "Understanding Google: A Comprehensive Guide to the Tech Giant",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Provide a comprehensive and nuanced view of Google's journey, current status, and future prospects, with a focus on its technological advancements and market strategies.",
+        "target_audience": "Tech enthusiasts, students, professionals interested in the tech industry, and general readers curious about Google's impact.",
+        "ai_citation_tips": "Use clear, concise language and structure the content with well-defined headings and subheadings. Incorporate relevant keywords naturally throughout the text and ensure the content is factual and up-to-date."
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What are the key milestones in Google's history?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "How has Google diversified its product offerings over the years?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "high",
+          "question": "What challenges does Google face in the current tech landscape?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "medium",
+          "question": "What is Google's strategy for maintaining its market dominance?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T07:56:01.013679",
+    "updated_at": "2026-03-26T07:56:01.013679",
+    "created_by": null
+  },
+  {
+    "id": "89dfce6c-230b-4e0d-aef6-85bd04022425",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "Google",
+    "content_type": "comparison",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Introduction to Google",
+          "level": "h2",
+          "purpose": "Provide an overview of Google and its significance in the digital world",
+          "word_budget": 200
+        },
+        {
+          "text": "Google's Search Engine",
+          "level": "h2",
+          "purpose": "Discuss the features and advantages of Google's search engine",
+          "word_budget": 300
+        },
+        {
+          "text": "Google's Ecosystem",
+          "level": "h2",
+          "purpose": "Explore the various services and products offered by Google",
+          "word_budget": 300
+        },
+        {
+          "text": "Comparing Google with Other Search Engines",
+          "level": "h2",
+          "purpose": "Analyze how Google stands out against competitors like Bing and Yahoo",
+          "word_budget": 300
+        },
+        {
+          "text": "User Interface and Experience",
+          "level": "h3",
+          "purpose": "Discuss the user-friendliness of Google compared to other platforms",
+          "word_budget": 150
+        },
+        {
+          "text": "Search Algorithms",
+          "level": "h3",
+          "purpose": "Examine the differences in search algorithms and their impacts",
+          "word_budget": 150
+        }
+      ],
+      "keywords": [
+        {
+          "term": "Google",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "search engine",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "ecosystem",
+          "type": "secondary",
+          "placement": "h2"
+        }
+      ],
+      "recommended_title": "A Comprehensive Comparison: Understanding Google",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Focus on providing a detailed analysis of Google's features and how it compares to other platforms, with a fresh perspective on user experience and technology",
+        "target_audience": "People interested in search engines and digital technology",
+        "ai_citation_tips": "Use clear, concise language and structure the content with well-defined sections and headings to improve chances of being cited by AI chatbots"
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What makes Google's search engine unique?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "medium",
+          "question": "How does Google's ecosystem compare to that of its competitors?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T07:56:20.898687",
+    "updated_at": "2026-03-26T07:56:20.898687",
+    "created_by": null
+  },
+  {
+    "id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "F1 Companion",
+    "content_type": "comparison",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Introduction to F1 Companion Apps",
+          "level": "h2",
+          "purpose": "Brief overview of what F1 Companion apps are and their importance for F1 fans",
+          "word_budget": 200
+        },
+        {
+          "text": "Features to Compare",
+          "level": "h2",
+          "purpose": "Detailed comparison of key features of different F1 Companion apps",
+          "word_budget": 250
+        },
+        {
+          "text": "Real-Time Updates",
+          "level": "h3",
+          "purpose": "Comparison of real-time update capabilities",
+          "word_budget": 150
+        },
+        {
+          "text": "User Interface and Experience",
+          "level": "h3",
+          "purpose": "Evaluation of user interface and experience",
+          "word_budget": 150
+        },
+        {
+          "text": "Additional Features",
+          "level": "h3",
+          "purpose": "Comparison of additional features like statistics, news, and notifications",
+          "word_budget": 150
+        },
+        {
+          "text": "Pros and Cons of Each App",
+          "level": "h2",
+          "purpose": "Detailed pros and cons for each app",
+          "word_budget": 250
+        },
+        {
+          "text": "User Reviews and Ratings",
+          "level": "h2",
+          "purpose": "Summary of user reviews and ratings",
+          "word_budget": 200
+        },
+        {
+          "text": "Conclusion and Recommendations",
+          "level": "h2",
+          "purpose": "Final thoughts and recommendations",
+          "word_budget": 200
+        }
+      ],
+      "keywords": [
+        {
+          "term": "F1 Companion",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "real-time updates",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "user interface",
+          "type": "secondary",
+          "placement": "h3"
+        },
+        {
+          "term": "additional features",
+          "type": "secondary",
+          "placement": "h3"
+        },
+        {
+          "term": "user reviews",
+          "type": "secondary",
+          "placement": "h2"
+        }
+      ],
+      "recommended_title": "Best F1 Companion Apps: A Comprehensive Comparison",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Detailed comparison with pros and cons, user reviews, and expert insights",
+        "target_audience": "F1 fans looking for the best apps to follow the races",
+        "ai_citation_tips": "Use clear headings, bullet points, and concise paragraphs to make the content easily citable by AI chatbots"
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What are the best F1 Companion apps available?"
+        },
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "How do these apps compare in terms of real-time updates?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "Which F1 Companion app has the best user interface?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What additional features do these apps offer?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What do users think about these apps?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T08:38:09.882387",
+    "updated_at": "2026-03-26T08:38:09.882387",
+    "created_by": null
+  },
+  {
+    "id": "67bacc72-b171-42f1-804e-55b3cf44d25b",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "F1 Companion",
+    "content_type": "faq",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "What is an F1 Companion?",
+          "level": "h2",
+          "purpose": "A brief introduction to the concept of an F1 Companion and its significance for fans.",
+          "word_budget": 200
+        },
+        {
+          "text": "Benefits of Using an F1 Companion",
+          "level": "h3",
+          "purpose": "Discuss the various benefits of using an F1 Companion for F1 enthusiasts.",
+          "word_budget": 150
+        },
+        {
+          "text": "How to Choose the Best F1 Companion",
+          "level": "h3",
+          "purpose": "Provide tips and criteria for selecting the best F1 Companion app or service.",
+          "word_budget": 150
+        }
+      ],
+      "keywords": [
+        {
+          "term": "F1 Companion",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "Formula 1 app",
+          "type": "secondary",
+          "placement": "body"
+        },
+        {
+          "term": "F1 race updates",
+          "type": "lsi",
+          "placement": "body"
+        }
+      ],
+      "recommended_title": "Ultimate F1 Companion: Your Go-To Guide for Formula 1 Racing",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Provide a comprehensive list of features and benefits, along with a step-by-step guide on choosing the best F1 Companion.",
+        "target_audience": "F1 fans, racing enthusiasts, and casual viewers interested in Formula 1 racing.",
+        "ai_citation_tips": "Use clear, concise language and structured data to help AI chatbots understand and cite the content accurately."
+      },
+      "questions_to_answer": [
+        {
+          "source": "ai_suggested",
+          "priority": "high",
+          "question": "What features should an F1 Companion have?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "medium",
+          "question": "How can an F1 Companion enhance my race day experience?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "medium",
+          "question": "Are there any free F1 Companion apps available?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T08:38:46.267705",
+    "updated_at": "2026-03-26T08:38:46.267705",
+    "created_by": null
+  },
+  {
+    "id": "c808ea90-d6ef-4d66-a432-c030e6310471",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "F1 Companion",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "What is an F1 Companion?",
+          "level": "h2",
+          "purpose": "Define and explain the concept of an F1 Companion.",
+          "word_budget": 200
+        },
+        {
+          "text": "Benefits of Using an F1 Companion",
+          "level": "h3",
+          "purpose": "Detail the advantages of using an F1 Companion for fans.",
+          "word_budget": 150
+        },
+        {
+          "text": "Top Features of an F1 Companion",
+          "level": "h2",
+          "purpose": "Highlight key features that make an F1 Companion essential.",
+          "word_budget": 250
+        },
+        {
+          "text": "How to Choose the Best F1 Companion",
+          "level": "h3",
+          "purpose": "Provide tips on selecting the most suitable F1 Companion.",
+          "word_budget": 150
+        },
+        {
+          "text": "F1 Companion Tools and Apps",
+          "level": "h2",
+          "purpose": "Review popular F1 Companion tools and apps.",
+          "word_budget": 250
+        },
+        {
+          "text": "User Reviews and Testimonials",
+          "level": "h3",
+          "purpose": "Include user reviews and testimonials to build credibility.",
+          "word_budget": 150
+        },
+        {
+          "text": "Future of F1 Companions",
+          "level": "h2",
+          "purpose": "Discuss potential future developments in F1 Companion technology.",
+          "word_budget": 200
+        }
+      ],
+      "keywords": [
+        {
+          "term": "F1 Companion",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "Formula 1 tools",
+          "type": "secondary",
+          "placement": "body"
+        },
+        {
+          "term": "best F1 apps",
+          "type": "secondary",
+          "placement": "body"
+        },
+        {
+          "term": "F1 Companion features",
+          "type": "lsi",
+          "placement": "body"
+        }
+      ],
+      "recommended_title": "Your Ultimate F1 Companion: Everything You Need to Know About Formula 1",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "In-depth analysis of different F1 Companion tools, user testimonials, and future trends.",
+        "target_audience": "F1 fans who are looking for tools and apps to enhance their experience.",
+        "ai_citation_tips": "Use clear, concise headings and bullet points. Include a FAQ section to answer common questions. Ensure the content is comprehensive and well-researched."
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What is an F1 Companion and why do I need one?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What are the key features of a good F1 Companion?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "How do I choose the best F1 Companion for my needs?"
+        }
+      ],
+      "schema_recommendations": [
+        "Article",
+        "FAQPage"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T09:13:30.869643",
+    "updated_at": "2026-03-26T09:13:30.869643",
+    "created_by": null
+  },
+  {
+    "id": "436897bd-5ccd-4773-b439-a42f15fab2be",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "YouTube",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [],
+      "keywords": [
+        {
+          "term": "YouTube",
+          "type": "primary",
+          "placement": "title"
+        }
+      ],
+      "recommended_title": "Complete Guide to Youtube",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Data-driven analysis based on top-ranking content",
+        "target_audience": "People searching for YouTube",
+        "ai_citation_tips": "Use clear definitions, structured data, and direct answers to questions"
+      },
+      "questions_to_answer": [],
+      "schema_recommendations": [
+        "Article"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "draft",
+    "created_at": "2026-03-29T18:27:54.438863",
+    "updated_at": "2026-03-29T18:27:54.438863",
+    "created_by": null
+  },
+  {
+    "id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "Missing",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Understanding the Issue of Missing Items",
+          "level": "h2",
+          "purpose": "An overview of what missing items entail and why they are a concern",
+          "word_budget": 200
+        },
+        {
+          "text": "Common Causes of Missing Items",
+          "level": "h2",
+          "purpose": "Exploring the various reasons why items go missing",
+          "word_budget": 200
+        },
+        {
+          "text": "Human Error",
+          "level": "h3",
+          "purpose": "Discussing how human mistakes contribute to missing items",
+          "word_budget": 150
+        },
+        {
+          "text": "Logistical Issues",
+          "level": "h3",
+          "purpose": "Examining supply chain and logistical challenges that lead to missing items",
+          "word_budget": 150
+        },
+        {
+          "text": "Strategies to Prevent Items from Going Missing",
+          "level": "h2",
+          "purpose": "Providing actionable tips and strategies to minimize missing items",
+          "word_budget": 200
+        },
+        {
+          "text": "Implementing Better Tracking Systems",
+          "level": "h3",
+          "purpose": "Discussing the role of technology in tracking and preventing missing items",
+          "word_budget": 150
+        },
+        {
+          "text": "Employee Training and Awareness",
+          "level": "h3",
+          "purpose": "Highlighting the importance of training staff to prevent missing items",
+          "word_budget": 150
+        },
+        {
+          "text": "What to Do When Items Go Missing",
+          "level": "h2",
+          "purpose": "Steps to take when items are found to be missing",
+          "word_budget": 200
+        }
+      ],
+      "keywords": [
+        {
+          "term": "missing items",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "prevent missing items",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "missing items causes",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "tracking systems",
+          "type": "secondary",
+          "placement": "body"
+        },
+        {
+          "term": "employee training",
+          "type": "secondary",
+          "placement": "body"
+        },
+        {
+          "term": "logistic issues",
+          "type": "lsi",
+          "placement": "body"
+        }
+      ],
+      "recommended_title": "How to Deal with Missing Items: A Comprehensive Guide",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Providing a comprehensive, step-by-step guide on handling missing items, enriched with actionable insights and real-world examples",
+        "target_audience": "Businesses and individuals who handle inventory or logistics",
+        "ai_citation_tips": "Use clear, concise headers and bullet points to structure the content, ensuring key information is easily scannable and digestible for AI chatbots"
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What are the most common causes of missing items?"
+        },
+        {
+          "source": "ai_suggested",
+          "priority": "medium",
+          "question": "How can technology help prevent items from going missing?"
+        },
+        {
+          "source": "paa",
+          "priority": "high",
+          "question": "What steps should be taken immediately when items are found missing?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T09:20:41.591071",
+    "updated_at": "2026-03-26T09:20:41.591071",
+    "created_by": null
+  },
+  {
+    "id": "789f202f-da93-4c41-9b94-9d2895ab2901",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "youtube.com",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Introduction to YouTube.com",
+          "level": "h2",
+          "purpose": "Brief overview of YouTube.com and its significance in the digital landscape",
+          "word_budget": 200
+        },
+        {
+          "text": "The History and Evolution of YouTube.com",
+          "level": "h2",
+          "purpose": "Detailed history of YouTube.com from inception to present day",
+          "word_budget": 300
+        },
+        {
+          "text": "How to Use YouTube.com Effectively",
+          "level": "h2",
+          "purpose": "Step-by-step guide on navigating and utilizing YouTube.com",
+          "word_budget": 300
+        },
+        {
+          "text": "Monetizing Content on YouTube.com",
+          "level": "h2",
+          "purpose": "Insights into how creators can monetize their content on the platform",
+          "word_budget": 250
+        },
+        {
+          "text": "YouTube.com for Businesses",
+          "level": "h2",
+          "purpose": "Strategies for businesses to leverage YouTube.com for marketing and growth",
+          "word_budget": 200
+        },
+        {
+          "text": "Creating Engaging YouTube Content",
+          "level": "h3",
+          "purpose": "Tips and tricks for creating content that resonates with viewers",
+          "word_budget": 150
+        },
+        {
+          "text": "Analyzing YouTube Performance",
+          "level": "h3",
+          "purpose": "Understanding YouTube analytics to improve content strategy",
+          "word_budget": 100
+        }
+      ],
+      "keywords": [
+        {
+          "term": "YouTube.com",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "YouTube content creation",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "YouTube monetization",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "YouTube for businesses",
+          "type": "secondary",
+          "placement": "h2"
+        }
+      ],
+      "recommended_title": "Exploring the World of YouTube.com: A Comprehensive Guide",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Providing a comprehensive, step-by-step guide with actionable tips and insights that go beyond basic information",
+        "target_audience": "Individuals interested in learning about YouTube.com, content creators, and businesses",
+        "ai_citation_tips": "Use clear, concise language and structure content with well-defined headings and subheadings to increase the likelihood of being cited by AI chatbots"
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What is YouTube.com?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "How can I start using YouTube.com?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What are the best practices for content creation on YouTube.com?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T09:21:26.758443",
+    "updated_at": "2026-03-26T09:21:26.758443",
+    "created_by": null
+  },
+  {
+    "id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "YouTube",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Introduction to YouTube",
+          "level": "h2",
+          "purpose": "Overview of YouTube and its significance in the digital world",
+          "word_budget": 200
+        },
+        {
+          "text": "How to Create Engaging YouTube Content",
+          "level": "h2",
+          "purpose": "Tips and strategies for creating content that captures audience attention",
+          "word_budget": 300
+        },
+        {
+          "text": "Understanding Your Audience",
+          "level": "h3",
+          "purpose": "Identifying and catering to your target demographic",
+          "word_budget": 150
+        },
+        {
+          "text": "Optimizing Your Videos for Search",
+          "level": "h3",
+          "purpose": "Best practices for SEO on YouTube",
+          "word_budget": 150
+        },
+        {
+          "text": "Monetizing Your YouTube Channel",
+          "level": "h2",
+          "purpose": "Exploring different revenue streams available on YouTube",
+          "word_budget": 250
+        },
+        {
+          "text": "Ad Revenue and Partnerships",
+          "level": "h3",
+          "purpose": "Understanding how ads and partnerships work on YouTube",
+          "word_budget": 150
+        },
+        {
+          "text": "Merchandising and Crowdfunding",
+          "level": "h3",
+          "purpose": "Additional ways to generate income from your channel",
+          "word_budget": 150
+        }
+      ],
+      "keywords": [
+        {
+          "term": "YouTube",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "creating engaging content",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "YouTube SEO",
+          "type": "secondary",
+          "placement": "h3"
+        },
+        {
+          "term": "monetizing YouTube",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "ad revenue",
+          "type": "lsi",
+          "placement": "body"
+        },
+        {
+          "term": "channel partnerships",
+          "type": "lsi",
+          "placement": "body"
+        }
+      ],
+      "recommended_title": "Unlocking the Power of YouTube: A Comprehensive Guide",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Provides actionable tips and strategies not commonly found in other guides, with a focus on practical, real-world applications",
+        "target_audience": "Aspiring YouTubers, content creators, and small business owners looking to leverage YouTube for marketing",
+        "ai_citation_tips": "Include clear, concise answers to common questions about YouTube, use bullet points and numbered lists for easy readability, and ensure content is well-structured with clear headings"
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What are the best practices for creating engaging YouTube content?"
+        },
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "How can I optimize my YouTube videos for better search visibility?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What are the different ways to monetize a YouTube channel?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T09:29:30.923855",
+    "updated_at": "2026-03-26T09:29:30.923855",
+    "created_by": null
+  },
+  {
+    "id": "9a112122-0b98-4aee-aaad-380e6d7e5752",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "YouTube",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [
+        {
+          "text": "Understanding the YouTube Landscape",
+          "level": "h2",
+          "purpose": "An introduction to YouTube, its significance, and its role in digital marketing.",
+          "word_budget": 200
+        },
+        {
+          "text": "Creating Engaging Content for YouTube",
+          "level": "h2",
+          "purpose": "Tips and strategies for creating content that resonates with viewers.",
+          "word_budget": 250
+        },
+        {
+          "text": "Optimizing Your YouTube Channel",
+          "level": "h2",
+          "purpose": "Guidelines on optimizing channel settings, branding, and layout.",
+          "word_budget": 200
+        },
+        {
+          "text": "Leveraging SEO for YouTube",
+          "level": "h2",
+          "purpose": "How to use SEO techniques to improve video discoverability.",
+          "word_budget": 250
+        },
+        {
+          "text": "Promoting Your YouTube Channel",
+          "level": "h2",
+          "purpose": "Effective strategies for promoting your channel and videos.",
+          "word_budget": 200
+        },
+        {
+          "text": "Utilizing Social Media",
+          "level": "h3",
+          "purpose": "How to leverage other social media platforms to drive traffic to your YouTube channel.",
+          "word_budget": 100
+        },
+        {
+          "text": "Collaborating with Other Creators",
+          "level": "h3",
+          "purpose": "Benefits and strategies for collaborating with other YouTube creators.",
+          "word_budget": 100
+        }
+      ],
+      "keywords": [
+        {
+          "term": "YouTube",
+          "type": "primary",
+          "placement": "title"
+        },
+        {
+          "term": "YouTube SEO",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "YouTube channel optimization",
+          "type": "secondary",
+          "placement": "h2"
+        },
+        {
+          "term": "YouTube video promotion",
+          "type": "secondary",
+          "placement": "h2"
+        }
+      ],
+      "recommended_title": "Maximizing Your Impact on YouTube: A Comprehensive Guide",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Providing a comprehensive guide that covers all aspects of YouTube, from content creation to promotion, with actionable tips and strategies.",
+        "target_audience": "Aspiring and established YouTubers looking to improve their channel's performance.",
+        "ai_citation_tips": "Use clear, concise language and structure the content with well-defined sections and subheadings. Include a FAQ section to directly answer common questions and consider using bullet points and numbered lists for better readability."
+      },
+      "questions_to_answer": [
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "What makes a successful YouTube channel?"
+        },
+        {
+          "source": "competitor",
+          "priority": "high",
+          "question": "How can I improve my video's SEO?"
+        },
+        {
+          "source": "competitor",
+          "priority": "medium",
+          "question": "What are the best practices for promoting my YouTube channel?"
+        }
+      ],
+      "schema_recommendations": [
+        "FAQPage",
+        "Article",
+        "HowTo"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "generated",
+    "created_at": "2026-03-26T09:52:49.878084",
+    "updated_at": "2026-03-26T09:52:49.878084",
+    "created_by": null
+  },
+  {
+    "id": "e5729d12-4d52-48e9-9277-71407f90cec7",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "keyword": "Google",
+    "content_type": "blog",
+    "target_word_count": 1500,
+    "brief_json": {
+      "headings": [],
+      "keywords": [
+        {
+          "term": "Google",
+          "type": "primary",
+          "placement": "title"
+        }
+      ],
+      "recommended_title": "Complete Guide to Google",
+      "target_word_count": 1500,
+      "content_guidelines": {
+        "tone": "informative",
+        "unique_angle": "Data-driven analysis based on top-ranking content",
+        "target_audience": "People searching for Google",
+        "ai_citation_tips": "Use clear definitions, structured data, and direct answers to questions"
+      },
+      "questions_to_answer": [],
+      "schema_recommendations": [
+        "Article"
+      ]
+    },
+    "seo_score": null,
+    "aeo_score": null,
+    "status": "draft",
+    "created_at": "2026-03-29T18:10:34.544150",
+    "updated_at": "2026-03-29T18:10:34.544150",
+    "created_by": null
+  }
+]

@@ -1,0 +1,588 @@
+[
+  {
+    "id": "95012204-0693-4a50-946d-67de335f2227",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand": "Nike",
+    "keyword": "Shoes",
+    "hit_count": 6,
+    "miss_count": 9,
+    "hit_rate": 40.0,
+    "prompt_results": [
+      {
+        "prompt": "best Shoes",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "The best shoes can vary depending on factors like personal style, activity level, and foot type. Here are some popular and highly-regarded shoe options across different categories:\n\n**Running Shoes:**\n\n1. Nike Air Zoom Alphafly Next% - Designed for elite runners, these shoes feature a full-length carbon plate and responsive midsole.\n2. Brooks Ghost - A supportive and cushioned shoe for long-distance running.\n3. Asics Gel-Kayano - A high-performance shoe for runners with high arches or plantar fasciitis.\n\n**Casual Shoes:**\n\n1. Converse Chuck Taylor All Star - A classic, versatile shoe for every",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "top Shoes brands",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "Here are some top shoe brands across various categories:\n\n**Luxury Shoe Brands:**\n\n1. **Christian Louboutin**: Known for their high-end, stylish designs and signature red soles.\n2. **Gucci**: Offers luxurious, fashion-forward shoes with a mix of classic and modern styles.\n3. **Prada**: Italian luxury brand with sophisticated, elegant shoe designs.\n4. **Louis Vuitton**: Iconic French brand with high-end shoes that combine style and quality.\n5. **Jimmy Choo**: British luxury brand famous for their glamorous, high-end shoes.\n\n**Sportswear Shoe Brands:**\n\n1. **Nike**: Global leader in athletic foo",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "recommend Shoes for beginners",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "As a beginner, it's essential to choose shoes that provide comfort, support, and stability. Here are some shoe recommendations for beginners in various activities:\n\n**Running:**\n\n1. **Brooks Ghost**: A cushioned and supportive shoe ideal for beginners.\n2. **Asics Gel-Kayano**: Provides excellent arch support and stability.\n3. **Nike Air Zoom Pegasus**: A great all-around running shoe with a comfortable fit.\n\n**Hiking:**\n\n1. **Merrell Moab 2**: A waterproof and breathable shoe with good traction.\n2. **Keen Targhee II**: Offers excellent ankle support and stability.\n3. **Salomon Quest 4D**: A li",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "what Shoes should I buy",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "There are many types of shoes to choose from, and the best one for you will depend on your personal style, preferences, and needs. Here are some popular options to consider:\n\n1. **Sneakers**: Great for casual, everyday wear. Popular brands include Nike, Adidas, Converse, and Vans.\n2. **Boots**: Ankle boots, hiking boots, or dress boots can add a stylish touch to your outfit. Consider brands like Dr. Martens, Timberland, or UGG.\n3. **Sandals**: Perfect for warm weather, sandals are a great option for beach trips, pool days, or outdoor activities. Brands like Birkenstock, Teva, or Sanuk offer co",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Shoes comparison",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "When comparing shoes, there are several factors to consider. Here are some key aspects to evaluate:\n\n1. **Comfort**: Look for shoes with cushioning, arch support, and a comfortable fit.\n2. **Style**: Consider the shoe's design, color, and material to ensure it matches your personal style and preferences.\n3. **Purpose**: Different shoes are designed for specific activities, such as running, hiking, or formal events.\n4. **Quality**: Assess the shoe's construction, materials, and craftsmanship to determine its durability and lifespan.\n5. **Price**: Compare prices from different brands and retaile",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Shoes vs alternatives",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "The debate about shoes versus alternatives is a longstanding one, with proponents on both sides presenting compelling arguments. Here's a breakdown of the main points:\n\n**Shoes:**\n\nPros:\n\n1. **Protection**: Shoes provide a layer of protection for our feet from rough surfaces, sharp objects, and extreme temperatures.\n2. **Support**: Shoes can offer arch support, cushioning, and stability, which can help prevent foot pain and injuries.\n3. **Hygiene**: Shoes can help keep our feet clean and dry, which is especially important in public places or areas with poor sanitation.\n4. **Fashion**: Shoes co",
+        "competitors_cited": [
+          {
+            "brand": "Going",
+            "count": 4
+          },
+          {
+            "brand": "Alternatives",
+            "count": 3
+          },
+          {
+            "brand": "Pros",
+            "count": 2
+          },
+          {
+            "brand": "Hygiene",
+            "count": 2
+          },
+          {
+            "brand": "Cons",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "prompt": "What are the most comfortable Shoes for hiking?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "The most comfortable shoes for hiking can vary depending on personal preferences, hiking terrain, and individual foot needs. However, here are some popular and highly-recommended options:\n\n1. **Merrell Moab 2 Mid Waterproof**: A versatile, waterproof hiking boot with excellent ankle support and a comfortable, breathable mesh upper.\n2. **Salomon Quest 4D 3 GTX**: A lightweight, waterproof hiking boot with a comfortable, cushioned ride and a grippy Contagrip sole for traction on various terrain.\n3. **Keen Targhee II Mid WP**: A waterproof, mid-cut hiking boot with a comfortable, roomy toe box an",
+        "competitors_cited": [
+          {
+            "brand": "GTX",
+            "count": 4
+          },
+          {
+            "brand": "Mid",
+            "count": 2
+          },
+          {
+            "brand": "Vibram",
+            "count": 2
+          },
+          {
+            "brand": "Consider",
+            "count": 2
+          },
+          {
+            "brand": "However",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "Can you recommend Shoes for a wedding?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "Choosing the right shoes for a wedding can be a bit challenging, but I'm here to help. Here are some recommendations based on different styles, venues, and seasons:\n\n**For Women:**\n\n1. **Heels**: Classic high heels, such as stilettos or pumps, are a popular choice for weddings. Consider neutral colors like beige, champagne, or ivory to complement your outfit.\n2. **Wedges**: Wedges or block heel shoes are great for outdoor weddings or if you want to add some height without the discomfort of stilettos.\n3. **Flats**: Flats or ballet shoes are perfect for a more casual or rustic wedding. You can a",
+        "competitors_cited": [
+          {
+            "brand": "Consider",
+            "count": 2
+          },
+          {
+            "brand": "Wedges",
+            "count": 2
+          },
+          {
+            "brand": "Flats",
+            "count": 2
+          },
+          {
+            "brand": "Oxfords",
+            "count": 2
+          },
+          {
+            "brand": "Derbies",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "prompt": "I need help finding the perfect running Shoes, can you assist me?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "Finding the perfect running shoes can be a bit overwhelming, but I'm here to help. To get started, I'll need to know a bit more about your running habits and preferences. Please answer the following questions:\n\n1. **What is your running experience level**? (Beginner, Intermediate, Advanced)\n2. **What type of running do you do**? (Road running, Trail running, Track running, etc.)\n3. **How often do you run**? (Daily, 2-3 times a week, Weekly, etc.)\n4. **What is your average running distance**? (Less than 3 miles, 3-6 miles, More than 6 miles)\n5. **Do you have any foot issues or injuries**? (Flat",
+        "competitors_cited": [
+          {
+            "brand": "Finding",
+            "count": 1
+          },
+          {
+            "brand": "Please",
+            "count": 1
+          },
+          {
+            "brand": "Beginner",
+            "count": 1
+          },
+          {
+            "brand": "Intermediate",
+            "count": 1
+          },
+          {
+            "brand": "Advanced",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "What are the best Shoes for flat feet?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "The best shoes for flat feet are those that provide sufficient arch support, cushioning, and stability to reduce the risk of pain, discomfort, and potential complications. Here are some features to look for and some shoe recommendations:\n\n**Key Features:**\n\n1. **Arch Support**: Look for shoes with good arch support to help redistribute pressure and reduce strain on the feet.\n2. **Cushioning**: Adequate cushioning in the midsole and forefoot can help absorb shock and reduce pressure on the feet.\n3. **Stability**: Shoes with stable and supportive midsoles can help prevent excessive pronation (in",
+        "competitors_cited": [
+          {
+            "brand": "Replace",
+            "count": 2
+          },
+          {
+            "brand": "Key",
+            "count": 1
+          },
+          {
+            "brand": "Arch",
+            "count": 1
+          },
+          {
+            "brand": "Support",
+            "count": 1
+          },
+          {
+            "brand": "Look",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "Can you show me the latest fashion trends in Shoes?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "I'd be happy to give you an overview of the latest shoe trends. Keep in mind that fashion is constantly evolving, and trends may vary depending on the season, location, and personal style. Here are some of the current shoe trends:\n\n**Women's Shoes:**\n\n1. **Chunky Sneakers**: Thick-soled sneakers with bold designs and bright colors are still going strong.\n2. **Sustainable Shoes**: Eco-friendly shoes made from recycled materials, such as recycled plastic and plant-based materials, are gaining popularity.\n3. **Statement Boots**: Knee-high boots with unique designs, such as buckles, zippers, and e",
+        "competitors_cited": [
+          {
+            "brand": "Sneakers",
+            "count": 4
+          },
+          {
+            "brand": "Boots",
+            "count": 3
+          },
+          {
+            "brand": "Classic",
+            "count": 3
+          },
+          {
+            "brand": "Slip",
+            "count": 3
+          },
+          {
+            "brand": "Chunky",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "prompt": "Which Shoes are suitable for both work and casual events?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "There are many types of shoes that can be suitable for both work and casual events, depending on your personal style, the industry you work in, and the dress code. Here are some popular options:\n\n1. **Loafers**: Loafers are a versatile choice that can be dressed up or down. They come in various styles, such as slip-on, penny, or tassel loafers, and can be made from leather or suede.\n2. **Dress Boots**: Ankle boots or dress boots can add a polished touch to a work outfit, while also being suitable for casual events like dinner dates or nights out with friends.\n3. **Ballet Flats**: Ballet flats ",
+        "competitors_cited": [
+          {
+            "brand": "Loafers",
+            "count": 2
+          },
+          {
+            "brand": "Boots",
+            "count": 2
+          },
+          {
+            "brand": "Ballet",
+            "count": 2
+          },
+          {
+            "brand": "Derbies",
+            "count": 2
+          },
+          {
+            "brand": "Monk",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "prompt": "I'm looking for durable Shoes, what are my options?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "When it comes to durable shoes, there are several options to consider, depending on your specific needs and preferences. Here are some popular options:\n\n1. **Hiking boots**: Merrell, Keen, and Salomon offer high-quality, waterproof hiking boots that can withstand rough terrain and harsh weather conditions.\n2. **Work boots**: Brands like Timberland, Dr. Martens, and Red Wing offer durable work boots that can handle heavy use and tough environments.\n3. **Running shoes**: Brooks, Asics, and New Balance offer high-quality running shoes with durable materials and construction that can withstand reg",
+        "competitors_cited": [
+          {
+            "brand": "Brooks",
+            "count": 2
+          },
+          {
+            "brand": "New",
+            "count": 2
+          },
+          {
+            "brand": "Balance",
+            "count": 2
+          },
+          {
+            "brand": "Hiking",
+            "count": 1
+          },
+          {
+            "brand": "Merrell",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "Can you suggest some affordable Shoes for kids?",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "Here are some affordable shoe options for kids:\n\n1. **Converse Chuck Taylor All Star**: A classic and comfortable choice, available in various colors and sizes. ($30-$50)\n2. **Vans Old Skool**: A popular choice among kids, Vans offers a range of styles and colors at an affordable price. ($30-$50)\n3. **Nike Air Force 1**: A versatile and stylish option, Nike Air Force 1 is available in various colors and sizes. ($40-$60)\n4. **Adidas Superstar**: A classic basketball shoe, Adidas Superstar is a great choice for kids who love sports. ($30-$50)\n5. **New Balance 574**: A comfortable and supportive ",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "What are the top-rated Shoes for walking on concrete?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "When it comes to walking on concrete, you'll want shoes that provide excellent cushioning, support, and traction. Here are some top-rated shoes for walking on concrete:\n\n**Men's Shoes:**\n\n1. **Brooks Ghost**: A supportive and cushioned shoe with a Segmented Crash Pad for smooth heel-to-toe transition. (Amazon rating: 4.6/5)\n2. **Asics Gel-Kayano**: A high-performance shoe with a spacious toe box and a gel cushioning system for excellent shock absorption. (Amazon rating: 4.5/5)\n3. **New Balance Fresh Foam**: A lightweight and cushioned shoe with a supportive midfoot and a grippy outsole for tra",
+        "competitors_cited": [
+          {
+            "brand": "Amazon",
+            "count": 10
+          },
+          {
+            "brand": "Brooks",
+            "count": 2
+          },
+          {
+            "brand": "Segmented",
+            "count": 2
+          },
+          {
+            "brand": "Crash",
+            "count": 2
+          },
+          {
+            "brand": "Pad",
+            "count": 2
+          }
+        ]
+      }
+    ],
+    "competitors_cited": [
+      {
+        "brand": "Amazon",
+        "mentions": 10
+      },
+      {
+        "brand": "Boots",
+        "mentions": 5
+      },
+      {
+        "brand": "Going",
+        "mentions": 4
+      },
+      {
+        "brand": "GTX",
+        "mentions": 4
+      },
+      {
+        "brand": "Consider",
+        "mentions": 4
+      },
+      {
+        "brand": "Derbies",
+        "mentions": 4
+      },
+      {
+        "brand": "Sneakers",
+        "mentions": 4
+      },
+      {
+        "brand": "Brooks",
+        "mentions": 4
+      },
+      {
+        "brand": "Alternatives",
+        "mentions": 3
+      },
+      {
+        "brand": "Classic",
+        "mentions": 3
+      }
+    ],
+    "gap_analysis": "1. **Optimize product pages with structured data**: Add schema markup to Nike's shoe product pages, including 'Product' and 'Offer' types, to help AI models understand the context and relevance of Nike's content for 'Shoes' queries.\n2. **Enhance content strategy with targeted keywords**: Create high-quality, keyword-optimized content (e.g., blog posts, product descriptions) that explicitly associates Nike with 'Shoes', focusing on long-tail phrases like 'running shoes' or 'basketball shoes' to improve AI visibility.\n3. **Leverage authority signals through partnerships and reviews**: Collaborate with influential sneaker reviewers and bloggers to generate high-quality backlinks to Nike's website, increasing authority and relevance signals for AI models, and encourage customers to leave reviews on Nike's shoe products to improve social proof.\n4. **Develop a comprehensive shoe-related FAQs section**: Create a dedicated FAQs page on Nike's website, addressing common questions related to shoes (e.g., sizing, materials, styles), to provide AI models with a reliable source of information and increase Nike's visibility for voice search and featured snippets.",
+    "created_at": "2026-03-30T01:31:59.564349"
+  },
+  {
+    "id": "592854b8-d46b-440f-a47a-6cb4acc0aa1d",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand": "Nike",
+    "keyword": "Shoes",
+    "hit_count": 7,
+    "miss_count": 8,
+    "hit_rate": 46.7,
+    "prompt_results": [
+      {
+        "prompt": "best Shoes",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "The best shoes for you depend on your personal preferences, activities, and needs. Here are some popular and highly-regarded shoe options across various categories:\n\n**Running Shoes:**\n\n1. Nike Vaporfly Next% - Known for their exceptional cushioning and responsiveness.\n2. Brooks Ghost - Provides a smooth ride and supportive arch.\n3. Asics Gel-Kayano - Offers excellent support and stability for high-mileage runners.\n\n**Hiking Boots:**\n\n1. Merrell Moab 2 Mid Waterproof - Waterproof and breathable, with excellent ankle support.\n2. Salomon Quest 4D 3 GTX - Provides superior traction and comfort on",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "top Shoes brands",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "Here are some of the top shoe brands in the world:\n\n1. **Nike**: Known for their sports shoes, Nike is one of the most recognizable and popular brands globally.\n2. **Adidas**: Another sports giant, Adidas is famous for its iconic three-stripe design and high-quality shoes.\n3. **Converse**: This American brand is beloved for its classic Chuck Taylor All Star sneakers.\n4. **Vans**: Popular among skateboarders and surfers, Vans is a leading brand in action sports footwear.\n5. **Reebok**: Founded in 1895, Reebok is a well-established brand that offers a wide range of shoes for various activities.\n",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "recommend Shoes for beginners",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "As a beginner, it's essential to choose shoes that provide comfort, support, and stability. Here are some recommendations for beginners in various activities:\n\n**Running:**\n\n1. **Brooks Ghost**: A supportive and cushioned shoe for beginners, with a soft and smooth ride.\n2. **Asics Gel-Kayano**: A stability shoe that provides excellent support and comfort for runners with flat feet or high arches.\n3. **Nike Air Zoom Pegasus**: A versatile and responsive shoe that's perfect for beginners who want a lightweight and cushioned ride.\n\n**Hiking:**\n\n1. **Merrell Moab 2**: A waterproof and breathable s",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "what Shoes should I buy",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "There are so many amazing shoe options out there, and the best pair for you will depend on your personal style, preferences, and needs. Here are a few questions to help narrow down some options:\n\n1. **What will you be using the shoes for?** (e.g. daily wear, hiking, running, dancing, work)\n2. **What is your budget?** (e.g. under $50, $50-$100, $100-$200, over $200)\n3. **What style are you looking for?** (e.g. sneakers, boots, sandals, dress shoes, loafers)\n4. **Do you have any specific features in mind?** (e.g. waterproof, arch support, slip-resistant, breathable)\n5. **What is your favorite co",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Shoes comparison",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "When comparing shoes, there are several factors to consider. Here are some key points to think about:\n\n1. **Purpose**: What will you be using the shoes for? (e.g., running, hiking, everyday wear)\n2. **Comfort**: How comfortable are the shoes? Do they have cushioning, arch support, and a comfortable fit?\n3. **Quality**: What is the quality of the materials and construction? Are the shoes durable and well-made?\n4. **Style**: What is the style of the shoe? Is it fashionable, casual, or formal?\n5. **Price**: What is the price of the shoe? Is it within your budget?\n6. **Brand**: What is the reputat",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Shoes vs alternatives",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "The debate between shoes and alternatives is a complex and multifaceted one, involving various aspects of health, culture, and personal preference. Here are some points to consider:\n\n**Advantages of shoes:**\n\n1. **Protection**: Shoes provide a physical barrier between the feet and the ground, protecting them from rough surfaces, sharp objects, and extreme temperatures.\n2. **Support**: Shoes can offer arch support, cushioning, and stability, which can help alleviate foot pain and prevent injuries.\n3. **Hygiene**: Shoes can prevent the feet from coming into contact with dirt, dust, and other con",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "What are the most comfortable Shoes for hiking?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "The most comfortable shoes for hiking depend on several factors, including the type of terrain, weather conditions, and personal preferences. Here are some of the most popular and highly-recommended comfortable hiking shoe options:\n\n1. **Merrell Moab 2 Mid Waterproof**: Known for their excellent ankle support, breathability, and waterproofing.\n2. **Salomon Quest 4D 3 GTX**: Offers a comfortable and supportive fit, with a waterproof and breathable membrane.\n3. **Keen Targhee II Mid WP**: Features a roomy toe box and a comfortable, cushioned midsole.\n4. **La Sportiva Raptor GTX**: Provides excel",
+        "competitors_cited": [
+          {
+            "brand": "Merrell",
+            "count": 1
+          },
+          {
+            "brand": "Salomon",
+            "count": 1
+          },
+          {
+            "brand": "Keen",
+            "count": 1
+          },
+          {
+            "brand": "La Sportiva",
+            "count": 1
+          },
+          {
+            "brand": "Hoka One One",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "Can you recommend Shoes for a formal event?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "For a formal event, the right shoes can make a big difference in completing your overall look. Here are some recommendations:\n\n**For Men:**\n\n1. **Black Tie:** Black patent leather oxfords or opera pumps are classic choices for a black-tie event.\n2. **Formal Gala:** Black or dark brown leather dress shoes, such as cap-toe oxfords or brogues, are suitable for a formal gala.\n3. **Wedding:** Black or dark brown leather dress shoes, such as loafers or slip-ons, are popular choices for a wedding.\n\n**For Women:**\n\n1. **High Heels:** Stiletto heels, pump heels, or block heels in neutral colors like bl",
+        "competitors_cited": [
+          {
+            "brand": "Christian Louboutin",
+            "count": 1
+          },
+          {
+            "brand": "Jimmy Choo",
+            "count": 1
+          },
+          {
+            "brand": "Manolo Blahnik",
+            "count": 1
+          },
+          {
+            "brand": "Gucci",
+            "count": 1
+          },
+          {
+            "brand": "Prada",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "I need help finding the perfect pair of running Shoes.",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "Finding the perfect pair of running shoes can be a bit overwhelming, but I'm here to help. To get started, let's consider a few factors that will help narrow down the options:\n\n1. **Your running style**: Are you a beginner, intermediate, or advanced runner? Do you run on trails, roads, or a mix of both?\n2. **Your foot shape and size**: Do you have narrow, medium, or wide feet? Do you have any foot issues, such as flat feet, high arches, or plantar fasciitis?\n3. **Your running goals**: Are you training for a specific event, such as a marathon or 5K, or just running for fitness?\n4. **Your person",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "What are the best Shoes for playing basketball?",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "The best shoes for playing basketball depend on several factors such as your playing style, foot type, and personal preferences. Here are some popular and highly-recommended basketball shoes:\n\n**Top Picks:**\n\n1. **Nike LeBron series**: Known for their support, cushioning, and responsive feel. Popular models include the LeBron 19, LeBron 18, and LeBron 17.\n2. **Nike Kobe series**: Offers excellent traction, support, and a low-profile design. Popular models include the Kobe 6, Kobe 5, and Kobe 4.\n3. **Adidas Dame series**: Provides superior support, cushioning, and a comfortable fit. Popular mod",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Can you show me some stylish Shoes for women?",
+        "status": "ok",
+        "brand_mentioned": true,
+        "response_snippet": "Here are some stylish shoes for women:\n\n**1. High Heels**\n- **Stiletto**: Classic, sleek, and elegant, perfect for formal events.\n- **Block Heel**: Comfortable and chic, great for everyday wear.\n- **Kitten Heel**: Low, subtle, and versatile, suitable for work or a night out.\n\n**2. Flats**\n- **Ballet Flats**: Soft, feminine, and perfect for casual outings.\n- **Loafers**: Sleek, sophisticated, and great for work or formal events.\n- **Mules**: Comfortable, stylish, and suitable for both casual and dressy occasions.\n\n**3. Boots**\n- **Ankle Boots**: Versatile, stylish, and perfect for dressing up o",
+        "competitors_cited": []
+      },
+      {
+        "prompt": "Which Shoes are waterproof and suitable for rainy days?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "There are many types of shoes that are waterproof and suitable for rainy days. Here are some popular options:\n\n1. **Rain Boots**: Also known as wellies or gumboots, these are classic waterproof shoes made of rubber or PVC. They are usually knee-high and have a rugged sole for traction on wet and muddy surfaces.\n2. **Waterproof Hiking Boots**: Designed for outdoor activities, these boots are made with waterproof membranes like Gore-Tex or eVent. They are perfect for hiking, backpacking, or walking in wet conditions.\n3. **Waterproof Sneakers**: Many sneaker brands offer waterproof versions of th",
+        "competitors_cited": [
+          {
+            "brand": "Gore-Tex",
+            "count": 5
+          },
+          {
+            "brand": "Muck",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "prompt": "Can you suggest Shoes that are good for people with flat feet?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "If you have flat feet, it's essential to wear shoes that provide arch support and stability to reduce discomfort and prevent further complications. Here are some shoe suggestions that are suitable for people with flat feet:\n\n**Running Shoes:**\n\n1. **Brooks Adrenaline GTS**: Offers excellent arch support and stability for flat feet.\n2. **Asics Gel-Kayano**: Provides a spacious toe box and supportive ride for flat feet.\n3. **New Balance Fresh Foam**: Features a supportive and cushioned midsole for comfort.\n\n**Walking Shoes:**\n\n1. **New Balance 928**: Offers a supportive and stable ride with a ro",
+        "competitors_cited": [
+          {
+            "brand": "New Balance",
+            "count": 3
+          },
+          {
+            "brand": "Brooks",
+            "count": 2
+          },
+          {
+            "brand": "Asics",
+            "count": 2
+          },
+          {
+            "brand": "Merrell",
+            "count": 1
+          },
+          {
+            "brand": "Keen",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "How do I choose the right size of Shoes when buying online?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "Choosing the right size of shoes when buying online can be challenging, but here are some steps to help you make a more informed decision:\n\n1. **Know your size**: Start by knowing your shoe size in different systems, such as US, UK, EU, or centimeters. You can refer to a size chart or measure your foot to determine your size.\n2. **Check the size chart**: Look for the size chart provided by the online retailer or the shoe brand. Compare your size to the chart to ensure you're selecting the correct size.\n3. **Read reviews**: Check reviews from other customers who have purchased the same shoe sty",
+        "competitors_cited": [
+          {
+            "brand": "Brannock",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "prompt": "What are the latest trends in Shoes for men this season?",
+        "status": "ok",
+        "brand_mentioned": false,
+        "response_snippet": "As of my knowledge cutoff in 2023, the latest trends in shoes for men include:\n\n1. **Sustainable and Eco-Friendly**: With the increasing focus on environmental sustainability, eco-friendly shoes made from recycled materials, biodegradable materials, and production methods with minimal waste are gaining popularity.\n2. **Bold and Bright Colors**: Vibrant colors, bold patterns, and statement-making designs are trending in men's shoes, adding a pop of personality to outfits.\n3. **Utility Chic**: Inspired by workwear and outdoor gear, utility-chic shoes with functional details like buckles, straps,",
+        "competitors_cited": []
+      }
+    ],
+    "competitors_cited": [
+      {
+        "brand": "Gore-Tex",
+        "mentions": 5
+      },
+      {
+        "brand": "New Balance",
+        "mentions": 3
+      },
+      {
+        "brand": "Merrell",
+        "mentions": 2
+      },
+      {
+        "brand": "Keen",
+        "mentions": 2
+      },
+      {
+        "brand": "Muck",
+        "mentions": 2
+      },
+      {
+        "brand": "Brooks",
+        "mentions": 2
+      },
+      {
+        "brand": "Asics",
+        "mentions": 2
+      },
+      {
+        "brand": "Salomon",
+        "mentions": 1
+      },
+      {
+        "brand": "La Sportiva",
+        "mentions": 1
+      },
+      {
+        "brand": "Hoka One One",
+        "mentions": 1
+      }
+    ],
+    "gap_analysis": "Gap analysis unavailable: All AI providers failed. nova: An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts:; groq: Groq returned 429: {\"error\":{\"message\":\"Rate limit reached fo",
+    "created_at": "2026-03-30T01:49:33.823702"
+  }
+]

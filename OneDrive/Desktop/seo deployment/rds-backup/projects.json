@@ -1,0 +1,18 @@
+[
+  {
+    "id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "name": "AI 1st SEO",
+    "owner_email": "support@ai1stseo.com",
+    "plan": "free",
+    "created_at": "2026-03-19T23:11:39.327543",
+    "updated_at": "2026-03-19T23:11:39.327543"
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Project",
+    "owner_email": "admin@ai1stseo.com",
+    "plan": "free",
+    "created_at": "2026-03-26T02:09:11.450318",
+    "updated_at": "2026-03-26T02:09:11.450318"
+  }
+]
