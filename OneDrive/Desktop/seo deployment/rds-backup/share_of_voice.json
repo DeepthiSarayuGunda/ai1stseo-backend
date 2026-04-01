@@ -1,0 +1,140 @@
+[
+  {
+    "id": "6416855e-fde5-46e0-acde-d9a63a1563b0",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand": "Nike",
+    "competitors": [
+      "Adidas"
+    ],
+    "keywords": [
+      "Shoes"
+    ],
+    "results": [
+      {
+        "keyword": "Shoes",
+        "mentions": {
+          "Nike": 2,
+          "Adidas": 2
+        },
+        "responses": [
+          {
+            "prompt": "What are the best Shoes? Please recommend specific brands and products.",
+            "status": "ok",
+            "response": "The best shoes for you will depend on your personal preferences, lifestyle, and the activities you plan to use them for. Here are some top recommendations across various categories:\n\n**Running Shoes:**\n\n1. **Nike Zoom Pegasus 38**: A great all-around running shoe with excellent cushioning and support.\n2. **Asics Gel-Kayano 28**: A high-end running shoe designed for long-distance running with superior support and stability.\n3. **Brooks Ghost 13**: A supportive and cushioned running shoe ideal for runners with high arches or plantar fasciitis.\n\n**Hiking Boots:**\n\n1. **Merrell Moab 2 Mid Waterproof**: A waterproof and breathable hiking boot with excellent ankle support and traction.\n2. **Salomon Quest 4D 3 GTX**: A lightweight and comfortable hiking boot with a waterproof membrane and great grip.\n3. **Keen Targhee II Mid WP**: A sturdy and waterproof hiking boot with a roomy toe box and excellent support.\n\n**Casual Sneakers:**\n\n1. **Converse Chuck Taylor All Star**: A classic and stylish "
+          },
+          {
+            "prompt": "Recommend top Shoes brands. Be specific with brand names.",
+            "status": "ok",
+            "response": "Here are some top shoe brands across various categories:\n\n**Luxury:**\n1. Gucci - Known for their high-end, stylish shoes with excellent craftsmanship.\n2. Prada - Offers elegant, sophisticated shoes with a focus on quality and comfort.\n3. Christian Louboutin - Famous for their iconic red-soled shoes, perfect for special occasions.\n\n**Sports:**\n1. Nike - A popular choice for athletes and fitness enthusiasts, offering a wide range of sports shoes.\n2. Adidas - Known for their innovative designs and technology, Adidas is a top pick for sports shoes.\n3. New Balance - Offers high-quality, comfortable shoes for running, training, and other sports activities.\n\n**Casual:**\n1. Converse - Famous for their Chuck Taylor All Star sneakers, perfect for casual wear.\n2. Vans - A popular choice for skaters and non-skaters alike, offering stylish and comfortable shoes.\n3. Steve Madden - Provides trendy, affordable shoes for everyday wear.\n\n**Formal:**\n1. Allen Edmonds - Offers high-quality, sophisticated "
+          }
+        ],
+        "total_prompts": 2
+      }
+    ],
+    "sov_summary": {
+      "Nike": {
+        "total_probes": 2,
+        "is_user_brand": true,
+        "mention_count": 2,
+        "sov_percentage": 100.0
+      },
+      "Adidas": {
+        "total_probes": 2,
+        "is_user_brand": false,
+        "mention_count": 2,
+        "sov_percentage": 100.0
+      }
+    },
+    "total_probes": 2,
+    "scanned_at": "2026-03-30T01:31:44.330787"
+  },
+  {
+    "id": "9c61eeab-c0b1-4f82-9044-64e97802d349",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand": "Nike",
+    "competitors": [
+      "Puma"
+    ],
+    "keywords": [
+      "Shoes"
+    ],
+    "results": [
+      {
+        "keyword": "Shoes",
+        "mentions": {
+          "Nike": 10,
+          "Puma": 3
+        },
+        "responses": [
+          {
+            "prompt": "What are the best Shoes? Please recommend specific brands.",
+            "status": "ok",
+            "response": "The best shoes for you will depend on your specific needs, preferences, and activities. Here are some top recommendations across various categories:\n\n**Running Shoes:**\n\n1. **Nike** (e.g., Nike Air Zoom Pegasus, Nike Vaporfly) - Known for their innovative technology and comfortable designs.\n2. **Asics** (e.g., Asics Gel-Kayano, Asics Gel-Nimbus) - Popular for their supportive and cushioned shoes.\n3. **Brooks** (e.g., Brooks Ghost, Brooks Launch) - Offers a wide range of shoes for different running styles and preferences.\n\n**Hiking Boots:**\n\n1. **Merrell** (e.g., Merrell Moab, Merrell All Out Blaze) - Provides high-quality, waterproof hiking boots with excellent ankle support.\n2. **Keen** (e.g., Keen Targhee, Keen Terradora) - Known for their comfortable, breathable, and durable hiking boot"
+          },
+          {
+            "prompt": "Recommend top Shoes brands. Be specific.",
+            "status": "ok",
+            "response": "Here are some top shoe brands, categorized for your convenience:\n\n**Luxury/Fashion:**\n1. **Christian Louboutin** (known for their signature red soles and high-end designs)\n2. **Gucci** (offers stylish, sophisticated shoes with a focus on Italian craftsmanship)\n3. **Prada** (famous for their sleek, understated designs and exceptional quality)\n\n**Sports/Performance:**\n1. **Nike** (innovative, high-performance shoes for various sports and activities)\n2. **Adidas** (popular for their iconic Superstar and Stan Smith designs, as well as high-tech athletic shoes)\n3. **New Balance** (reliable, supportive shoes for running, walking, and other sports)\n\n**Casual/Streetwear:**\n1. **Converse** (classic Chuck Taylor All Star sneakers and other laid-back designs)\n2. **Vans** (skate-inspired shoes with a "
+          },
+          {
+            "prompt": "What Shoes should I buy? Name specific brands.",
+            "status": "ok",
+            "response": "The type of shoes you should buy depends on your personal style, preferences, and the activities you plan to use them for. Here are some popular brands across various categories:\n\n**For Everyday Wear:**\n1. **Converse** (Chuck Taylor All Star or One Star) - classic, comfortable, and versatile.\n2. **Vans** (Old Skool or Sk8-Hi) - great for casual, everyday wear.\n3. **Adidas** (Superstar or Stan Smith) - stylish and comfortable.\n\n**For Running or Working Out:**\n1. **Nike** (Air Zoom Pegasus or Vaporfly) - high-quality, supportive, and comfortable.\n2. **Asics** (Gel-Kayano or Gel-Nimbus) - great for long-distance running and support.\n3. **Brooks** (Ghost or Launch) - supportive and comfortable for various running styles.\n\n**For Hiking or Outdoor Activities:**\n1. **Merrell** (Moab or All Out) -"
+          },
+          {
+            "prompt": "Best Shoes for beginners \u2014 which brands?",
+            "status": "ok",
+            "response": "As a beginner, it's essential to choose shoes that provide comfort, support, and stability. Here are some popular brands and styles that are great for beginners:\n\n**Running Shoes:**\n\n1. **Asics**: Asics Gel-Kayano or Asics Gel-Cumulus are excellent choices for beginners.\n2. **Brooks**: Brooks Ghost or Brooks Launch are popular options for new runners.\n3. **New Balance**: New Balance Fresh Foam or New Balance 860 are great for beginners.\n4. **Nike**: Nike Air Zoom Pegasus or Nike Air Max are popular choices for beginners.\n\n**Hiking Shoes:**\n\n1. **Merrell**: Merrell Moab or Merrell All Out Blaze are excellent choices for hiking beginners.\n2. **Keen**: Keen Targhee or Keen Ridge Flex are great for hiking and outdoor activities.\n3. **Salomon**: Salomon Quest or Salomon Speedcross are popular o"
+          },
+          {
+            "prompt": "Top rated Shoes brands in 2025",
+            "status": "ok",
+            "response": "Based on the latest trends and consumer preferences, here are some top-rated shoe brands in 2025:\n\n1. **Nike**: Known for their innovative designs, comfort, and high-quality materials, Nike remains a favorite among consumers.\n2. **Adidas**: With their iconic Superstar and Stan Smith designs, Adidas continues to be a popular choice for fashion and athletic enthusiasts.\n3. **Vans**: This California-based brand is famous for its casual, laid-back style and has become a staple in the fashion world.\n4. **New Balance**: With a focus on comfort, performance, and style, New Balance has gained a loyal following among runners, athletes, and fashion enthusiasts.\n5. **Converse**: Iconic Chuck Taylor All Star sneakers have made Converse a household name, and the brand continues to innovate with new des"
+          },
+          {
+            "prompt": "Compare the leading Shoes brands",
+            "status": "ok",
+            "response": "There are many leading shoe brands in the market, each with its own unique features, styles, and target audience. Here's a comparison of some of the top shoe brands:\n\n1. **Nike**:\n\t* Known for: Sports shoes, innovative technology, and trendy designs.\n\t* Price range: $50-$200.\n\t* Target audience: Athletes, fitness enthusiasts, and fashion-conscious consumers.\n2. **Adidas**:\n\t* Known for: Sports shoes, fashion collaboration, and classic designs.\n\t* Price range: $50-$200.\n\t* Target audience: Athletes, fashion enthusiasts, and young adults.\n3. **Converse**:\n\t* Known for: Classic Chuck Taylor All Star shoes, comfort, and affordability.\n\t* Price range: $50-$100.\n\t* Target audience: Young adults, casual wearers, and those who value comfort.\n4. **Vans**:\n\t* Known for: Skateboarding shoes, relaxed "
+          },
+          {
+            "prompt": "Which Shoes brands do experts recommend?",
+            "status": "ok",
+            "response": "Experts recommend a variety of shoe brands, depending on factors such as purpose (running, hiking, fashion, etc.), personal style, and budget. Here are some popular shoe brands recommended by experts:\n\n**For Running and Fitness:**\n1. Nike - Known for their innovative technology and wide range of models.\n2. Brooks - Recommended for their supportive and cushioned shoes.\n3. Asics - Popular among runners for their high-performance and durable shoes.\n4. New Balance - Offers a wide range of models for different running styles and preferences.\n5. Saucony - Recommended for their lightweight and flexible shoes.\n\n**For Hiking and Outdoor:**\n1. Merrell - Known for their high-quality and durable hiking shoes.\n2. Keen - Recommended for their comfortable and waterproof shoes.\n3. Salomon - Popular among "
+          },
+          {
+            "prompt": "Most popular Shoes right now \u2014 name brands",
+            "status": "ok",
+            "response": "Here are some of the most popular shoe brands right now, across various categories:\n\n**Sneakers:**\n\n1. **Nike**: particularly popular models like Air Force 1, Air Max, and Jordan\n2. **Adidas**: popular models like Superstar, Stan Smith, and Yeezy\n3. **Converse**: Chuck Taylor All Star and One Star are still trendy\n4. **Vans**: popular for their skateboarding and lifestyle shoes\n5. **Air Jordan**: a subsidiary of Nike, known for their high-end basketball shoes\n\n**Luxury:**\n\n1. **Gucci**: high-end fashion shoes with bold designs and premium materials\n2. **Prada**: sleek and sophisticated shoes with a focus on quality and craftsmanship\n3. **Louis Vuitton**: iconic monogram pattern and luxurious materials\n4. **Christian Louboutin**: known for their red-soled stilettos and high-end fashion shoe"
+          },
+          {
+            "prompt": "Premium vs budget Shoes \u2014 which brands for each?",
+            "status": "ok",
+            "response": "When it comes to shoes, the premium and budget categories can vary greatly in terms of quality, materials, and price. Here are some well-known brands for each category:\n\n**Premium Shoe Brands:**\n\n1. **Gucci**: Known for their high-end, stylish, and luxurious shoes.\n2. **Christian Louboutin**: Famous for their red-soled stilettos and high-quality, fashionable shoes.\n3. **Louis Vuitton**: Offers premium, stylish, and durable shoes with a focus on luxury and craftsmanship.\n4. **Prada**: Italian luxury brand offering high-end, sophisticated, and stylish shoes.\n5. **Berluti**: French luxury brand known for their high-quality, handcrafted shoes with a focus on comfort and style.\n6. **Tom Ford**: Offers premium, stylish, and sophisticated shoes with a focus on luxury and attention to detail.\n7. *"
+          },
+          {
+            "prompt": "If I want the best Shoes, which brand should I choose?",
+            "status": "ok",
+            "response": "The best shoe brand for you depends on several factors, including your personal style, budget, activities, and preferences. Here are some top shoe brands across various categories:\n\n1. **Luxury and Fashion**:\n\t* Gucci: Known for high-end fashion and sleek designs.\n\t* Prada: Offers sophisticated, elegant shoes with a focus on quality and craftsmanship.\n\t* Christian Louboutin: Famous for their iconic red-soled stilettos and luxurious designs.\n2. **Sports and Performance**:\n\t* Nike: A popular choice for running, basketball, and other athletic shoes.\n\t* Adidas: Offers high-quality shoes for sports like soccer, basketball, and running.\n\t* New Balance: Known for their supportive and comfortable running shoes.\n3. **Comfort and Casual**:\n\t* Clarks: Offers comfortable, stylish shoes for everyday we"
+          }
+        ],
+        "total_prompts": 10
+      }
+    ],
+    "sov_summary": {
+      "Nike": {
+        "total_probes": 10,
+        "is_user_brand": true,
+        "mention_count": 10,
+        "sov_percentage": 100.0
+      },
+      "Puma": {
+        "total_probes": 10,
+        "is_user_brand": false,
+        "mention_count": 3,
+        "sov_percentage": 30.0
+      }
+    },
+    "total_probes": 10,
+    "scanned_at": "2026-03-30T01:49:13.977509"
+  }
+]

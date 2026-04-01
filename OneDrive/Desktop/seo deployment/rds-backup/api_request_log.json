@@ -1,0 +1,5702 @@
+[
+  {
+    "id": "c91b9401-bc8c-4378-9988-0b704a3dcd2b",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1379,
+    "created_at": "2026-03-25T18:20:49.821612"
+  },
+  {
+    "id": "2ca1540b-b8b8-44fc-aecf-fd892193696f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 323,
+    "created_at": "2026-03-25T18:20:57.145455"
+  },
+  {
+    "id": "c31a08d1-4ec7-4afd-98d7-83c9ed3e2435",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 287,
+    "created_at": "2026-03-25T18:20:58.907993"
+  },
+  {
+    "id": "bad6a5ac-2829-435b-aec5-a91d65d6c7f3",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 273,
+    "created_at": "2026-03-25T18:21:05.110785"
+  },
+  {
+    "id": "7f4fc00f-9159-4fb8-a87f-297b9565a1d4",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 323,
+    "created_at": "2026-03-25T18:31:20.824193"
+  },
+  {
+    "id": "a2e12d86-a47d-48cb-a148-b53d92434d4e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 306,
+    "created_at": "2026-03-25T18:33:38.822818"
+  },
+  {
+    "id": "dcf23281-acc4-4b08-95c3-5e0c4cd5faa7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 114,
+    "created_at": "2026-03-25T23:24:40.487780"
+  },
+  {
+    "id": "b3b5be23-9f61-43a5-acc3-a00c628d6a59",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:32:19.904044"
+  },
+  {
+    "id": "d6da9b1d-f7d7-42a6-b691-e1d6f62f6023",
+    "endpoint": "/api/docs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:33:55.971636"
+  },
+  {
+    "id": "6d7e6ea7-5748-4cad-949e-df31467135c3",
+    "endpoint": "/api/docs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.363547"
+  },
+  {
+    "id": "8fa3f5b4-951c-496f-a6ea-a08ef6429028",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.459621"
+  },
+  {
+    "id": "ed10d356-ffa4-441f-b16a-97de604d0b3f",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.461874"
+  },
+  {
+    "id": "f9e9b262-08df-4e09-ad1e-1d137f54dd02",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.744555"
+  },
+  {
+    "id": "4d22e16c-e555-409b-ae33-babbe0230ab1",
+    "endpoint": "/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.742875"
+  },
+  {
+    "id": "2ef17b6f-14a1-4b6a-97f6-48d06f536d52",
+    "endpoint": "/api/analyze",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.744958"
+  },
+  {
+    "id": "5e48c83c-3e56-4e7b-bfc5-a8413d3781c6",
+    "endpoint": "/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.854470"
+  },
+  {
+    "id": "0ac53de5-18c1-4627-b821-7993e5d57c41",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.855033"
+  },
+  {
+    "id": "049f18c9-0edb-45d3-98b4-e7f9845f685a",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:38.855277"
+  },
+  {
+    "id": "fef87d18-14eb-4a00-96c9-7077a86dddc9",
+    "endpoint": "/chat",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:39.022848"
+  },
+  {
+    "id": "0469de24-f0b6-46c6-b0ac-0181eeed14a4",
+    "endpoint": "/chat",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:39.022983"
+  },
+  {
+    "id": "b18c8a53-0ef9-436f-aae7-cf59c06bd626",
+    "endpoint": "/api/stats",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:39.120956"
+  },
+  {
+    "id": "7c6e4e2a-2d56-4b91-b92a-3e13287e5d49",
+    "endpoint": "/api/stats",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:34:39.121165"
+  },
+  {
+    "id": "4947c356-3791-4d09-a67d-98791fde21e1",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:35:18.976359"
+  },
+  {
+    "id": "2c2444c9-ac58-42cc-830a-66c059e31bfd",
+    "endpoint": "/",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:35:23.320083"
+  },
+  {
+    "id": "910190a8-3123-4d50-8440-7f5cb82c6634",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:35:23.537712"
+  },
+  {
+    "id": "955c4237-212e-443e-aca3-203f33f807d5",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T00:35:23.650282"
+  },
+  {
+    "id": "aaca858f-f748-4e23-9efc-97e246dffe67",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 30,
+    "created_at": "2026-03-26T00:35:23.877239"
+  },
+  {
+    "id": "458aa30e-9fa3-400a-87b4-fdb156f3895f",
+    "endpoint": "/api/seo",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T00:36:19.840529"
+  },
+  {
+    "id": "d07ed6d0-d03d-4cf5-8455-26492fe2aa85",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:18:13.477150"
+  },
+  {
+    "id": "459731fc-d0d0-472f-8b00-4173ffa2c333",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 714,
+    "created_at": "2026-03-26T16:18:29.449519"
+  },
+  {
+    "id": "5f8f8958-a550-4fac-9134-d81f65d15d8f",
+    "endpoint": "/api/auth/signup",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 201,
+    "response_time_ms": 849,
+    "created_at": "2026-03-26T16:18:48.439162"
+  },
+  {
+    "id": "2025437d-d5aa-4e41-a4ce-30d9b06c2ffe",
+    "endpoint": "/api/auth/verify",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 401,
+    "created_at": "2026-03-26T16:18:51.894180"
+  },
+  {
+    "id": "84b22571-6986-4083-861f-1353d13c7f92",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 684,
+    "created_at": "2026-03-26T16:22:03.288027"
+  },
+  {
+    "id": "75a4b9db-e1f0-4c67-9865-2c3e491f0a39",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 627,
+    "created_at": "2026-03-26T16:22:04.281137"
+  },
+  {
+    "id": "777c5b6d-a2f1-4aa8-be2a-0cd761e18833",
+    "endpoint": "/api/webhooks/events",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:26:49.160140"
+  },
+  {
+    "id": "3a5a4f4a-cc01-4e5f-a19a-8dc93e2b1578",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 2,
+    "created_at": "2026-03-26T16:26:49.183063"
+  },
+  {
+    "id": "373b2330-0098-4c0d-901c-239369d63044",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:26:49.201849"
+  },
+  {
+    "id": "6d6cd254-6771-43b0-834e-58be0e9c342b",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:26:49.205461"
+  },
+  {
+    "id": "7549308c-395c-4366-83ef-4304a3e2d5d2",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 570,
+    "created_at": "2026-03-26T16:26:50.462108"
+  },
+  {
+    "id": "1d9cb65f-9825-4e4c-9798-59bf2c77d658",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:27:54.943608"
+  },
+  {
+    "id": "5b6edc40-0586-436e-8cc8-293443eb33e4",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 637,
+    "created_at": "2026-03-26T16:27:58.639663"
+  },
+  {
+    "id": "75ccf115-1dd6-4174-9569-4fc790a7907e",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:27:58.681683"
+  },
+  {
+    "id": "6af44430-ced4-430e-8142-92a85402945b",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:28:13.417356"
+  },
+  {
+    "id": "87729287-a08c-40e4-bef1-5abaf285f553",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:28:13.424348"
+  },
+  {
+    "id": "c8126ed4-9613-4b07-8f8e-dbf827200c9d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 280,
+    "created_at": "2026-03-26T16:29:21.821981"
+  },
+  {
+    "id": "39b76124-03aa-449c-8964-156d84a16799",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 635,
+    "created_at": "2026-03-26T16:29:26.339259"
+  },
+  {
+    "id": "585b1630-7245-4280-88a3-e4f1297d8ea1",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:29:26.359485"
+  },
+  {
+    "id": "59077a94-94e6-4d2b-b3c6-f35dbb33644e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 398,
+    "created_at": "2026-03-26T16:29:29.184897"
+  },
+  {
+    "id": "4a57a60e-1ab2-457c-a5d2-c0829def1b98",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 278,
+    "created_at": "2026-03-26T16:29:29.623598"
+  },
+  {
+    "id": "5724600b-b287-4fda-8dab-fe098237327f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 601,
+    "created_at": "2026-03-26T16:29:29.624468"
+  },
+  {
+    "id": "8e74b82b-11bd-4872-92bd-dd0aa40307b9",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 469,
+    "created_at": "2026-03-26T16:29:31.883851"
+  },
+  {
+    "id": "2efabf87-631f-42fa-aafd-43e057c659aa",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 155,
+    "created_at": "2026-03-26T16:29:34.859229"
+  },
+  {
+    "id": "0b8ae1a6-5a89-44f6-94dc-c1e8ff6b3f15",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 412,
+    "created_at": "2026-03-26T16:29:44.319199"
+  },
+  {
+    "id": "4c171f01-5784-44e1-bec9-13e361ec9122",
+    "endpoint": "/api/admin/usage",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 406,
+    "created_at": "2026-03-26T16:29:47.401244"
+  },
+  {
+    "id": "1d59e3f5-40a9-4f7d-b41f-b4e9975a5973",
+    "endpoint": "/api/admin/ai-costs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 552,
+    "created_at": "2026-03-26T16:29:49.843248"
+  },
+  {
+    "id": "9805f888-8351-4e5e-86a7-5a592127e331",
+    "endpoint": "/api/admin/errors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 377,
+    "created_at": "2026-03-26T16:29:52.224289"
+  },
+  {
+    "id": "f4dbec68-e9a4-49e2-b039-991347a023bc",
+    "endpoint": "/api/admin/health",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 307,
+    "created_at": "2026-03-26T16:29:54.885589"
+  },
+  {
+    "id": "58432ca0-d87d-4798-947f-35eb195b6b81",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 254,
+    "created_at": "2026-03-26T16:30:05.316759"
+  },
+  {
+    "id": "68628421-8428-4fd5-b0b2-38f5cbce4fd9",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 615,
+    "created_at": "2026-03-26T16:30:12.719513"
+  },
+  {
+    "id": "7c0373f3-7e29-41dc-a70d-7ce9a2ba62c5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 250,
+    "created_at": "2026-03-26T16:30:35.579059"
+  },
+  {
+    "id": "e9712771-2032-4d71-a125-306bba643da0",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 168,
+    "created_at": "2026-03-26T16:30:40.981154"
+  },
+  {
+    "id": "0cf4d901-bce7-4b3d-adbf-15436004b37b",
+    "endpoint": "/api/auth/signup",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:43.012328"
+  },
+  {
+    "id": "ecbf7181-8689-41bd-b140-ca39ea528093",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:43.011330"
+  },
+  {
+    "id": "2a4b5011-1e14-428f-998a-3c32dc86bae1",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:44.118972"
+  },
+  {
+    "id": "d8c11b72-c12e-44f3-bc6a-518ccd1e636f",
+    "endpoint": "/api/auth/verify",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:46.218510"
+  },
+  {
+    "id": "e06f0c80-6fd2-49d0-a2ca-2861d353f6a1",
+    "endpoint": "/api/auth/forgot-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:46.218360"
+  },
+  {
+    "id": "82830143-41cd-42b5-b194-4592959e07c0",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:49.334017"
+  },
+  {
+    "id": "fb29eff2-176a-4ea1-9a5e-9d52ef9ac9c8",
+    "endpoint": "/api/admin/usage",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:49.343354"
+  },
+  {
+    "id": "535c28af-6fea-4c14-867d-b414c5a85c04",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:49.359022"
+  },
+  {
+    "id": "436a6b9c-173e-4d51-8fbd-08c11dd83f1c",
+    "endpoint": "/api/admin/errors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:51.661286"
+  },
+  {
+    "id": "705a8d11-17e0-4948-a44f-c13284510da9",
+    "endpoint": "/api/admin/health",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:51.659502"
+  },
+  {
+    "id": "f9fd0d8d-9708-4f9c-aa99-ed130696dd16",
+    "endpoint": "/api/admin/ai-costs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:52.715189"
+  },
+  {
+    "id": "c140a2de-f52b-43c8-a2e2-9c55cc919b11",
+    "endpoint": "/api/admin/requests",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:57.542399"
+  },
+  {
+    "id": "c44d69f9-cc5a-4ffd-b89f-cddef919dd67",
+    "endpoint": "/api/data/audits",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:57.550205"
+  },
+  {
+    "id": "06d805e4-f6cc-47b9-a4c5-ea1bd49f595f",
+    "endpoint": "/api/data/geo-probes",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:30:57.555842"
+  },
+  {
+    "id": "e8a0691c-5d37-43d8-824e-e9c6de8cb152",
+    "endpoint": "/api/data/ai-visibility",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.390710"
+  },
+  {
+    "id": "44aa3f3a-58c1-4474-a206-c5def38c0551",
+    "endpoint": "/api/data/social-posts",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.423330"
+  },
+  {
+    "id": "45809738-ee9a-4aed-9160-ecdd9830f711",
+    "endpoint": "/api/data/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.572089"
+  },
+  {
+    "id": "e6f92e4a-0ede-4e1f-b103-ac326d8b27e5",
+    "endpoint": "/api/keys",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.459200"
+  },
+  {
+    "id": "66de3afd-d7c2-4199-8fa1-a6239048ff85",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.625506"
+  },
+  {
+    "id": "d461751a-3ec6-4ac4-b3c1-9b93ff7b3529",
+    "endpoint": "/api/data/competitors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.626526"
+  },
+  {
+    "id": "18a0ec45-d9e4-4ff6-a926-bd85ece610d6",
+    "endpoint": "/api/data/reports",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.691699"
+  },
+  {
+    "id": "596d4ab1-d32b-4623-a805-fd330ac8a3cf",
+    "endpoint": "/api/webhooks/events",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:49.693715"
+  },
+  {
+    "id": "f1e69a2d-eb4c-472e-ba8e-cd027800e563",
+    "endpoint": "/api/data/benchmarks/compare",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.488822"
+  },
+  {
+    "id": "1341ddc2-5f51-4701-bbf1-2cc3e828af1b",
+    "endpoint": "/api/webhooks",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.488988"
+  },
+  {
+    "id": "e2bc9818-2d78-4ebe-b81e-e923166f0a4b",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.538887"
+  },
+  {
+    "id": "2ef60062-b411-4a3b-ba49-4d52a84361c5",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.538923"
+  },
+  {
+    "id": "7b403ef2-6536-4780-9645-7a07d00d4d2e",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.559192"
+  },
+  {
+    "id": "08ddcb7b-16b7-4b84-8b62-d1b18d62cb95",
+    "endpoint": "/geo-test",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.563128"
+  },
+  {
+    "id": "9b87bf8c-547a-4753-a3ee-c8284d421748",
+    "endpoint": "/audit/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:31:50.563493"
+  },
+  {
+    "id": "56fe9f36-4400-4cad-a719-ea065d71e15f",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 611,
+    "created_at": "2026-03-26T16:31:51.368691"
+  },
+  {
+    "id": "f37b4552-b60d-430b-bec6-3558cef73b80",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 84,
+    "created_at": "2026-03-26T16:32:01.604740"
+  },
+  {
+    "id": "8c79ff00-32de-4b20-a4e8-e553ca5e2b27",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 621,
+    "created_at": "2026-03-26T16:32:03.690533"
+  },
+  {
+    "id": "a5cb9d20-7397-4e7b-b9ef-9bdd1a1ba4b3",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 74,
+    "created_at": "2026-03-26T16:32:05.346845"
+  },
+  {
+    "id": "e76dddb0-d3c4-4536-a47e-d55f4a721c89",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 258,
+    "created_at": "2026-03-26T16:32:05.778923"
+  },
+  {
+    "id": "a8657102-7eb1-48b5-bfdf-decc0f94b8be",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 69,
+    "created_at": "2026-03-26T16:32:12.704898"
+  },
+  {
+    "id": "2e365ce1-85b8-4235-9403-512fb1ee5896",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:14.939458"
+  },
+  {
+    "id": "328f6d8d-449e-48d4-9221-09f65b84c422",
+    "endpoint": "/api/auth/forgot-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:17.054334"
+  },
+  {
+    "id": "f80b275b-1065-48c0-934c-9c004de0ac2b",
+    "endpoint": "/api/auth/verify",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:17.052280"
+  },
+  {
+    "id": "2bf10cef-cd2e-4541-9b9c-d684d7290df3",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:18.223315"
+  },
+  {
+    "id": "acae4313-e2be-4d62-a219-8dc159850a24",
+    "endpoint": "/api/auth/signup",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:19.336693"
+  },
+  {
+    "id": "7dfaf0f6-a438-4e0c-8f82-ba16da4a5af2",
+    "endpoint": "/api/admin/ai-costs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:19.337143"
+  },
+  {
+    "id": "37b6cdd9-d5cb-4f4e-bf01-ff75e8659f1b",
+    "endpoint": "/api/admin/usage",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:20.404725"
+  },
+  {
+    "id": "d444b28c-a87d-47e5-bf34-7b2b5a2e36d1",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:21.430336"
+  },
+  {
+    "id": "641c12b2-5e94-4ecc-a7fa-389b19529cc9",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:23.645391"
+  },
+  {
+    "id": "e964fe4d-a6b2-4692-8e33-e7b2ec8282cb",
+    "endpoint": "/api/admin/health",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:23.647252"
+  },
+  {
+    "id": "597bc154-d9f5-4190-afca-3da50e74eec0",
+    "endpoint": "/api/admin/errors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:24.843858"
+  },
+  {
+    "id": "05e1ec83-8a4c-4573-81f8-24c26b71381a",
+    "endpoint": "/api/admin/requests",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:26.032220"
+  },
+  {
+    "id": "bc3f4684-abc6-4bd9-a17b-b12d490dfdc2",
+    "endpoint": "/api/data/geo-probes",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:27.170468"
+  },
+  {
+    "id": "c6a4f02f-cffe-4c24-ac4b-445ae8198d80",
+    "endpoint": "/api/data/audits",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:27.173893"
+  },
+  {
+    "id": "27657c6c-f386-4515-8c77-db29db27d088",
+    "endpoint": "/api/data/ai-visibility",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:29.454627"
+  },
+  {
+    "id": "5e2ac5e4-d24b-4c8a-b6a7-7a148cb9b8a7",
+    "endpoint": "/api/data/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:29.454587"
+  },
+  {
+    "id": "455be9cd-0547-40b5-8068-5c59b17436cb",
+    "endpoint": "/api/data/social-posts",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:29.478819"
+  },
+  {
+    "id": "eb9ac570-461e-49a6-b8bd-9effe609f04c",
+    "endpoint": "/api/data/benchmarks/compare",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:29.478819"
+  },
+  {
+    "id": "aa1924d2-de17-4fd2-b2df-f5291362cd44",
+    "endpoint": "/api/data/reports",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:30.408817"
+  },
+  {
+    "id": "c3629477-8abf-4689-b9b4-27959351fe54",
+    "endpoint": "/api/data/competitors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:32:46.452811"
+  },
+  {
+    "id": "b84b0528-c656-4f00-a0ad-adbd1cc3dda9",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:35:42.923415"
+  },
+  {
+    "id": "02ea607a-cb9a-4ebc-bd0e-db4f93a04efb",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1358,
+    "created_at": "2026-03-26T16:35:50.798231"
+  },
+  {
+    "id": "64cf1c59-2e7c-4d82-8993-50b00c999d3a",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:35:50.799219"
+  },
+  {
+    "id": "e8649a2d-6077-43bb-91d5-e5b918f58d01",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:35:50.818875"
+  },
+  {
+    "id": "2e2e8ee0-697c-4fe7-8030-6e15e9ec2981",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:35:50.841136"
+  },
+  {
+    "id": "a8f1173f-3e81-425e-a126-fd96bf6f77ee",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:35:50.862823"
+  },
+  {
+    "id": "388fe803-115e-48e6-b6aa-c9600bedc32d",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:46:23.327230"
+  },
+  {
+    "id": "131ea26a-3cd4-4739-a339-acd24584c7af",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1401,
+    "created_at": "2026-03-26T16:46:28.526193"
+  },
+  {
+    "id": "1cca98f2-dbe1-4fa4-8111-e02889be1b67",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:46:28.538531"
+  },
+  {
+    "id": "882fbefb-5262-4051-a827-079990e9edf5",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T16:46:28.550994"
+  },
+  {
+    "id": "94a18fb3-9314-4df9-88ec-8e62a5f14cc8",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 711,
+    "created_at": "2026-03-26T17:10:44.934118"
+  },
+  {
+    "id": "3c6d72a7-17f9-4b13-916f-26a3707400dd",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 330,
+    "created_at": "2026-03-26T17:11:28.671018"
+  },
+  {
+    "id": "c46c1621-2b67-4039-8e88-706150a4595b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 292,
+    "created_at": "2026-03-26T17:11:33.194049"
+  },
+  {
+    "id": "b9e1614e-a806-4632-9e25-438fbc0205a8",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 312,
+    "created_at": "2026-03-26T17:11:37.150127"
+  },
+  {
+    "id": "d7a1ffb0-6456-4d11-92c8-9bdb73410f81",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:11:37.194221"
+  },
+  {
+    "id": "fbfb7f5e-bea6-4ffe-badf-bf7075c3dec4",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:11:37.197266"
+  },
+  {
+    "id": "c59df69b-1343-44d8-8c12-2935d908b558",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 15850,
+    "created_at": "2026-03-26T17:13:36.654605"
+  },
+  {
+    "id": "b3221048-3f87-4310-90c8-d847bb8b8141",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:23.325201"
+  },
+  {
+    "id": "8bd86ab7-e0cd-48c6-93a9-2cd4c36e79b7",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:23.390730"
+  },
+  {
+    "id": "ea652317-0e6b-4d93-ad13-a327a69f99b6",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:23.393993"
+  },
+  {
+    "id": "cc87e2e2-867d-42d8-bc71-ba059d10700b",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:23.393833"
+  },
+  {
+    "id": "86c6c64c-2fc1-4ba5-8ff6-7c3cff1d5de4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 121,
+    "created_at": "2026-03-26T17:16:27.810737"
+  },
+  {
+    "id": "7ce5864f-d635-4b6b-95e2-7f5e8fe66654",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1845,
+    "created_at": "2026-03-26T17:16:34.234147"
+  },
+  {
+    "id": "52269e8b-1e31-4a26-ad10-bb23a025960a",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:34.250903"
+  },
+  {
+    "id": "6d8c30a0-c4f2-4643-ab3a-7dab234bc825",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:16:34.250724"
+  },
+  {
+    "id": "6b9e47c5-2b95-4313-95a5-e3a541bca4b8",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 544,
+    "created_at": "2026-03-26T17:23:29.878879"
+  },
+  {
+    "id": "b1fc5271-71f1-4c92-87a2-99184ad90b75",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:23:29.879269"
+  },
+  {
+    "id": "28d46c8c-8489-412d-94e0-87cd4d8f29b8",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 130,
+    "created_at": "2026-03-26T17:23:45.318417"
+  },
+  {
+    "id": "21945096-bae0-457d-97c9-25f27d8ff3d2",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 917,
+    "created_at": "2026-03-26T17:23:46.778206"
+  },
+  {
+    "id": "1d5145da-9b7f-430b-b7ac-ceed69eea80c",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 100,
+    "created_at": "2026-03-26T17:23:52.161678"
+  },
+  {
+    "id": "6d6de221-93aa-4957-bf10-0f987f8e4a31",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 73,
+    "created_at": "2026-03-26T17:23:55.818297"
+  },
+  {
+    "id": "2ff4ba8a-a72d-4b74-9b54-3ae1bdb467a5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 76,
+    "created_at": "2026-03-26T17:23:57.758285"
+  },
+  {
+    "id": "cf85691a-f4e4-4f6f-9abf-0c0ee8799ee8",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 81,
+    "created_at": "2026-03-26T17:23:59.697788"
+  },
+  {
+    "id": "89065272-6e77-4346-a494-98333d7728a0",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 99,
+    "created_at": "2026-03-26T17:24:03.947324"
+  },
+  {
+    "id": "312c13cf-d08c-4d58-9623-b77455f8d420",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 93,
+    "created_at": "2026-03-26T17:28:16.708200"
+  },
+  {
+    "id": "4fa1ea2b-237b-4946-a095-70208e534007",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1730,
+    "created_at": "2026-03-26T17:28:19.479815"
+  },
+  {
+    "id": "a7441367-d21b-487d-836f-92a68d8af079",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 114,
+    "created_at": "2026-03-26T17:28:20.359617"
+  },
+  {
+    "id": "09d26f93-2c1c-4e14-80f4-aab2f75b7aad",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1549,
+    "created_at": "2026-03-26T17:28:25.997132"
+  },
+  {
+    "id": "4de5044e-b80e-408b-8655-b38a12b60097",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:28:26.018668"
+  },
+  {
+    "id": "781338db-8f31-4344-ad76-0bd5d924373f",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:28:26.021512"
+  },
+  {
+    "id": "a4d767b0-1337-440f-acdd-ef3a0038e460",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 157,
+    "created_at": "2026-03-26T17:29:56.475040"
+  },
+  {
+    "id": "d720a8b8-b3c7-42fe-bcf9-718cab32efc0",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 231,
+    "created_at": "2026-03-26T17:30:00.259332"
+  },
+  {
+    "id": "907eb135-99fe-43d7-a77e-eae1fc86ee70",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:30:00.260081"
+  },
+  {
+    "id": "91ec32e2-b827-4313-a8ba-88f73e75767b",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:30:00.276305"
+  },
+  {
+    "id": "1634404d-4511-44df-9859-c564b4289e28",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 8,
+    "created_at": "2026-03-26T17:30:12.859153"
+  },
+  {
+    "id": "289aa88a-bc14-434f-b4e9-b55335531bc2",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 426,
+    "created_at": "2026-03-26T17:30:12.859415"
+  },
+  {
+    "id": "229fcfb9-db1a-4456-80c1-aaae7a3af20c",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 15821,
+    "created_at": "2026-03-26T17:30:20.931169"
+  },
+  {
+    "id": "0e39a259-6bd8-49c2-aa65-68f4c1d383bf",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 66,
+    "created_at": "2026-03-26T17:30:24.797954"
+  },
+  {
+    "id": "2df1a7f1-ee0c-40e2-b3be-8bdcebd3cdfe",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 322,
+    "created_at": "2026-03-26T17:30:32.139801"
+  },
+  {
+    "id": "6eb0d630-6bbf-42a4-9102-e32d105a7886",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 72,
+    "created_at": "2026-03-26T17:32:01.741569"
+  },
+  {
+    "id": "1e424aeb-88c8-426f-b727-a1a2008aaf0b",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:32:01.789547"
+  },
+  {
+    "id": "1635657f-5dca-4dd5-8a1d-dfc15c215b30",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:32:09.256728"
+  },
+  {
+    "id": "21569f85-ae0c-400b-b70f-21a23e3ba083",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:32:09.256606"
+  },
+  {
+    "id": "0e1aae9b-d363-4491-90be-153e1dd5b7f2",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1567,
+    "created_at": "2026-03-26T17:32:09.256606"
+  },
+  {
+    "id": "fde9052e-61ab-4867-8715-6c4edbae6b0d",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 15820,
+    "created_at": "2026-03-26T17:32:38.736862"
+  },
+  {
+    "id": "9590e7ff-05fa-49aa-b6f3-0ed7ad0716f2",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 226,
+    "created_at": "2026-03-26T17:38:13.660124"
+  },
+  {
+    "id": "54a50bed-ef46-41e8-b72e-df7d388c90c7",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:38:38.957901"
+  },
+  {
+    "id": "445ca12c-0dae-4c5f-a444-d3e0a8dea998",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:38:38.961021"
+  },
+  {
+    "id": "10ad47a2-bbf8-460a-bdfe-a76445de3b41",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:38:38.963334"
+  },
+  {
+    "id": "c396c9fc-5212-4ad6-95d5-09fe2f622de0",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:47:09.473798"
+  },
+  {
+    "id": "b4411ee8-a7a4-4551-ae15-57b61938ff46",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:47:09.474306"
+  },
+  {
+    "id": "42613db7-6df2-466f-b682-630ab487d916",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1902,
+    "created_at": "2026-03-26T17:47:09.479127"
+  },
+  {
+    "id": "bb48414b-2fce-455a-9389-707c13a6cce7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 657,
+    "created_at": "2026-03-26T17:47:12.817399"
+  },
+  {
+    "id": "d31442f5-1182-42f6-b72b-e8e5f0fe807f",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 680,
+    "created_at": "2026-03-26T17:47:13.794009"
+  },
+  {
+    "id": "1a7f728d-692c-4568-a5d6-f4e43239037f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 95,
+    "created_at": "2026-03-26T17:47:16.718428"
+  },
+  {
+    "id": "5da3c2a9-c7a1-4539-a004-ad6cc00615c3",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:57:40.788883"
+  },
+  {
+    "id": "46813d7f-e2c5-4ce9-a783-66ee4fc3851f",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:57:40.788926"
+  },
+  {
+    "id": "08b48f4e-082d-4608-a4bd-250b75db8c41",
+    "endpoint": "/api/webhooks/events",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:57:40.812672"
+  },
+  {
+    "id": "0763662b-01dc-4c34-a180-2f762f624c22",
+    "endpoint": "/api/data/audits",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:57:40.829550"
+  },
+  {
+    "id": "bfacec98-89a2-4608-91aa-5bf519905a2e",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T17:57:40.834934"
+  },
+  {
+    "id": "5fb1b1f0-e185-4eae-9d38-16731649559a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 374,
+    "created_at": "2026-03-26T18:00:04.884222"
+  },
+  {
+    "id": "08e57fb3-5c12-48de-97a1-19526934cd36",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 950,
+    "created_at": "2026-03-26T18:00:07.464086"
+  },
+  {
+    "id": "16d9b5d1-ed76-406a-abf0-c57a9b58bc51",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T18:00:24.221097"
+  },
+  {
+    "id": "00f173e6-7aa9-4759-8287-90140b694311",
+    "endpoint": "/api/webhooks/events",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.270984"
+  },
+  {
+    "id": "d7e6d6ea-6b3b-4d11-aeef-15984ef31dba",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 4,
+    "created_at": "2026-03-26T18:02:16.273796"
+  },
+  {
+    "id": "8c42a753-f679-484b-8976-13c24536abd3",
+    "endpoint": "/api/geo-probe/history",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.271839"
+  },
+  {
+    "id": "22485e1d-12ea-4b30-8073-d3a85f6ba7b1",
+    "endpoint": "/api/data/audits",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.253954"
+  },
+  {
+    "id": "f99feffe-5d2d-4e8b-9a92-c78d87597d08",
+    "endpoint": "/api/keys",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.291224"
+  },
+  {
+    "id": "30ab4b0c-9d2e-4210-baa7-b7b5b4d452e8",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.271654"
+  },
+  {
+    "id": "1067db38-f919-4f8a-9d07-a8b18f26fb1b",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.291018"
+  },
+  {
+    "id": "22226595-6238-4a23-bad5-4e95d98c4a82",
+    "endpoint": "/api/geo-probe/models",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.293829"
+  },
+  {
+    "id": "a0688944-4145-4224-967b-81446da80523",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.299013"
+  },
+  {
+    "id": "4066d9e3-b742-46db-a4cd-2ae05ae97dad",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.311264"
+  },
+  {
+    "id": "fd27afb5-917c-4023-b7b7-d1019a2f6561",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:16.316818"
+  },
+  {
+    "id": "265f10f1-40b2-40c6-ae45-569c8d4e7d39",
+    "endpoint": "/api/chatbot/session",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:24.968930"
+  },
+  {
+    "id": "5564587b-08c4-4b52-a4d3-54c0d2971a39",
+    "endpoint": "/api/aeo/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:02:24.971782"
+  },
+  {
+    "id": "8bc53d3e-3539-4a39-93eb-e1fcb43f3116",
+    "endpoint": "/api/content-score",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 213,
+    "created_at": "2026-03-26T18:02:31.973187"
+  },
+  {
+    "id": "866d81c7-dad8-41b8-9fe3-657e58d2f137",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1588,
+    "created_at": "2026-03-26T18:04:38.935306"
+  },
+  {
+    "id": "5a33177f-6076-4d4e-aea0-bf5c18367903",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T18:04:44.265351"
+  },
+  {
+    "id": "c46cb28b-aadb-466e-ba3d-9ef4c2e4e223",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 30879,
+    "created_at": "2026-03-26T18:06:10.156068"
+  },
+  {
+    "id": "015e9060-5357-4c45-8eaf-585a006a2bb6",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1214,
+    "created_at": "2026-03-26T18:07:23.609586"
+  },
+  {
+    "id": "2dd12dfb-d0ad-4914-b7ea-3ff096882ae4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 208,
+    "created_at": "2026-03-26T18:07:26.635410"
+  },
+  {
+    "id": "e01355f6-f237-4ab1-84c2-dd7639440e26",
+    "endpoint": "/api/geo-probe/models",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5032,
+    "created_at": "2026-03-26T18:07:33.281644"
+  },
+  {
+    "id": "8f6d547c-759b-4c66-adbd-a13f856ba78c",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 655,
+    "created_at": "2026-03-26T18:07:45.990943"
+  },
+  {
+    "id": "6f900217-7986-4dfb-aa4a-14002b66331c",
+    "endpoint": "/api/chatbot/session",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T18:07:46.994329"
+  },
+  {
+    "id": "5c02f054-dd2c-476e-801b-cff8afb774ad",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 31137,
+    "created_at": "2026-03-26T18:07:52.823662"
+  },
+  {
+    "id": "9f472c29-30c9-45b7-9754-4531411f79ef",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T18:07:52.823822"
+  },
+  {
+    "id": "1d09f3fc-4079-45dc-855b-e343df2a735a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 244,
+    "created_at": "2026-03-26T18:07:55.107481"
+  },
+  {
+    "id": "6f956682-855d-42e6-8a90-1f153d3d0b2a",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1110,
+    "created_at": "2026-03-26T18:07:58.720350"
+  },
+  {
+    "id": "d35c4c29-ccca-4278-b8fe-b82661818ac0",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:07:58.743038"
+  },
+  {
+    "id": "821db15c-b7d0-46fc-bf8b-51038e421868",
+    "endpoint": "/api/geo-probe/history",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9,
+    "created_at": "2026-03-26T18:08:00.125779"
+  },
+  {
+    "id": "9df83f4c-12a7-4f7e-8106-57fd6ca2fe7b",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:08:00.125981"
+  },
+  {
+    "id": "8ae52b27-4f8c-4e5c-9c17-ad0c7701ff8c",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:08:00.127118"
+  },
+  {
+    "id": "cebb22cc-4e72-40a3-9ec1-b729c2298e4d",
+    "endpoint": "/api/aeo/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 2,
+    "created_at": "2026-03-26T18:08:00.182354"
+  },
+  {
+    "id": "d340ed9d-d4e9-442a-8df7-0bead360222c",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2,
+    "created_at": "2026-03-26T18:08:00.227692"
+  },
+  {
+    "id": "3c8ef021-b3b7-435b-95b4-b37d2e513c7d",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:08:00.227704"
+  },
+  {
+    "id": "bc9b4cf8-cc18-4b8d-b9f9-42bd50b2a372",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 845,
+    "created_at": "2026-03-26T18:12:21.888889"
+  },
+  {
+    "id": "60725661-e8ca-43a0-a6fa-d603f26a5edf",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:12:21.894132"
+  },
+  {
+    "id": "c4c6cbe3-5c62-48ce-b2b7-5c400a5e81df",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 213,
+    "created_at": "2026-03-26T18:17:39.379028"
+  },
+  {
+    "id": "e5c5c524-ed0a-4a25-b1aa-38d28ac3408d",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 846,
+    "created_at": "2026-03-26T18:17:42.109977"
+  },
+  {
+    "id": "ee8295ef-3a93-4463-8e25-100b89f4a1c4",
+    "endpoint": "/api/content-briefs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:18:03.713025"
+  },
+  {
+    "id": "bd24ec7d-bc2e-4ff7-a29b-efd5ebf21135",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 503,
+    "response_time_ms": 30835,
+    "created_at": "2026-03-26T18:19:38.295872"
+  },
+  {
+    "id": "57b11ff0-6f32-472c-a978-b49a649308b9",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 839,
+    "created_at": "2026-03-26T18:19:40.729645"
+  },
+  {
+    "id": "6ff51763-8a2d-4ad1-9d16-cff5f9ce1d71",
+    "endpoint": "/api/data/audits",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T18:19:41.956558"
+  },
+  {
+    "id": "a82df380-5c88-463f-bab0-62b70d1e62b4",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 228,
+    "created_at": "2026-03-26T18:35:02.596651"
+  },
+  {
+    "id": "f1f6d9f8-893b-4ee8-90cb-c0de69e7768b",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 611,
+    "created_at": "2026-03-26T18:38:24.543602"
+  },
+  {
+    "id": "22bf4c4e-4254-4e3f-9588-ad491041dadb",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 82,
+    "created_at": "2026-03-26T18:38:28.459045"
+  },
+  {
+    "id": "8ba3479b-115a-4098-9f6f-8a57761a2d36",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 281,
+    "created_at": "2026-03-26T18:39:10.943126"
+  },
+  {
+    "id": "9ca82261-bf47-475a-87ad-30fd6c94025e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 75,
+    "created_at": "2026-03-26T18:43:12.696828"
+  },
+  {
+    "id": "1ac2ba4e-4d7b-49b9-977c-3dd90860a311",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 244,
+    "created_at": "2026-03-26T18:43:22.955972"
+  },
+  {
+    "id": "570ce16c-9987-445c-9a37-27d7e5d61bdf",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 503,
+    "response_time_ms": 31083,
+    "created_at": "2026-03-26T18:44:11.802957"
+  },
+  {
+    "id": "1843ecae-f389-4ca2-bf89-39adb6abb319",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 209,
+    "created_at": "2026-03-26T18:44:19.355655"
+  },
+  {
+    "id": "0bd95ccb-1d8b-453c-8e51-be0f50ce6528",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 384,
+    "created_at": "2026-03-26T18:46:00.561128"
+  },
+  {
+    "id": "d972891b-3010-444a-8854-32261ae3ab5f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 119,
+    "created_at": "2026-03-26T18:46:10.761508"
+  },
+  {
+    "id": "a3943031-b90d-468d-9c84-8db49219823a",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 536,
+    "created_at": "2026-03-26T18:46:11.542215"
+  },
+  {
+    "id": "f9891ccd-3f6c-4fa7-b307-ecadf68ab427",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 295,
+    "created_at": "2026-03-26T18:46:15.041870"
+  },
+  {
+    "id": "3698a64a-406a-4370-a8c3-a9d2a3af6d77",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 375,
+    "created_at": "2026-03-26T18:46:15.542076"
+  },
+  {
+    "id": "3714a5ce-9bda-41a6-bbac-633719bd6107",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 325,
+    "created_at": "2026-03-26T18:46:19.242514"
+  },
+  {
+    "id": "147c2725-abae-4a66-9a1a-63d1ae2c75d7",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 687,
+    "created_at": "2026-03-26T18:46:22.361191"
+  },
+  {
+    "id": "715c6af5-596c-4458-b132-ccb883ac800d",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 322,
+    "created_at": "2026-03-26T18:46:22.361099"
+  },
+  {
+    "id": "00a59a2c-14db-4b62-977d-7114ae601d5c",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 363,
+    "created_at": "2026-03-26T18:49:04.487271"
+  },
+  {
+    "id": "3499567e-cf86-4710-be5c-ccc71d2bf7ed",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 300,
+    "created_at": "2026-03-26T18:49:47.083055"
+  },
+  {
+    "id": "0847d48a-6048-46ff-93eb-ca8289f8f8cb",
+    "endpoint": "/api/auth/forgot-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 301,
+    "created_at": "2026-03-26T18:51:47.701852"
+  },
+  {
+    "id": "7093464e-5895-4903-860c-36d940bffaad",
+    "endpoint": "/api/auth/reset-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 558,
+    "created_at": "2026-03-26T18:51:58.446955"
+  },
+  {
+    "id": "50644668-4136-42fa-b964-ed47ff0ef86b",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 471,
+    "created_at": "2026-03-26T18:51:59.265105"
+  },
+  {
+    "id": "55111408-c246-4912-99a7-f57313168a71",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 672,
+    "created_at": "2026-03-26T19:17:31.261373"
+  },
+  {
+    "id": "531b199d-5b8a-473c-873d-0ec5ca9b491d",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 628,
+    "created_at": "2026-03-26T19:17:35.116084"
+  },
+  {
+    "id": "80274448-db7d-4d63-af71-f374dfc15fc1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 320,
+    "created_at": "2026-03-26T19:17:38.979201"
+  },
+  {
+    "id": "005e394a-2678-44c7-96aa-cef2337dda00",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 292,
+    "created_at": "2026-03-26T19:17:39.550695"
+  },
+  {
+    "id": "a2f316dc-56d1-43bf-afdb-0eedde1b220a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 449,
+    "created_at": "2026-03-26T19:17:39.553173"
+  },
+  {
+    "id": "3f507f4f-e402-4a52-8905-af4c71279478",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 818,
+    "created_at": "2026-03-26T19:17:48.675591"
+  },
+  {
+    "id": "40faa6e5-f073-44ad-82e6-6e9e8249e33c",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 910,
+    "created_at": "2026-03-26T19:39:14.296478"
+  },
+  {
+    "id": "f2d9902d-06b4-4347-af92-4ec21849efa5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 300,
+    "created_at": "2026-03-26T19:39:18.241578"
+  },
+  {
+    "id": "69fca7c5-371d-4235-9fd6-8ebd8c34f9a9",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 309,
+    "created_at": "2026-03-26T19:39:18.641345"
+  },
+  {
+    "id": "2e0436f7-7442-4a43-8ab1-6031905eb1d1",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 487,
+    "created_at": "2026-03-26T21:49:40.216062"
+  },
+  {
+    "id": "ab0387dd-e955-4673-8b62-67fcb9914fbb",
+    "endpoint": "/api/auth/signup",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 409,
+    "response_time_ms": 685,
+    "created_at": "2026-03-26T21:49:58.100494"
+  },
+  {
+    "id": "19f4c062-fcd7-480f-b52a-5d60ecc14972",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 588,
+    "created_at": "2026-03-26T21:50:17.739341"
+  },
+  {
+    "id": "57c495eb-5d4a-4fcb-85f0-ea7972aff5a8",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 312,
+    "created_at": "2026-03-26T21:50:24.018811"
+  },
+  {
+    "id": "a8b182a2-e1a7-4163-a1f6-bc5403749e3d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 263,
+    "created_at": "2026-03-26T21:50:47.215309"
+  },
+  {
+    "id": "d66fb752-8216-4f96-b325-741689a80608",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T21:50:47.248754"
+  },
+  {
+    "id": "ece9092c-44d3-4a79-a3c4-c0465632a033",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T21:50:47.245927"
+  },
+  {
+    "id": "fb060247-8c51-4705-a16c-fb2217f0aca1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 296,
+    "created_at": "2026-03-26T21:51:13.739873"
+  },
+  {
+    "id": "79c41d2e-49de-4431-9707-8910d0a84f0c",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 290,
+    "created_at": "2026-03-26T21:51:38.158449"
+  },
+  {
+    "id": "70995bc1-ee8b-439a-978d-6773f9e44b37",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T21:51:38.176248"
+  },
+  {
+    "id": "c37a2b46-0976-426f-b2e9-fe7c9ff24f98",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T21:53:14.658493"
+  },
+  {
+    "id": "76f10c46-c580-4183-9d39-da443663d1dc",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 203,
+    "created_at": "2026-03-26T21:53:18.781888"
+  },
+  {
+    "id": "d32c595b-4423-4355-ac79-d39f9e9181b6",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 31083,
+    "created_at": "2026-03-26T21:54:22.302970"
+  },
+  {
+    "id": "c68d21b5-6bff-40d6-ad4c-e2395b97d112",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 495,
+    "created_at": "2026-03-26T21:54:30.342915"
+  },
+  {
+    "id": "e995138b-9f6d-4e06-842c-fdcf2a777c4b",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 71,
+    "created_at": "2026-03-26T21:54:45.825154"
+  },
+  {
+    "id": "d59c3a7d-f245-4728-a4b8-f516de82db6f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 264,
+    "created_at": "2026-03-26T21:55:14.983132"
+  },
+  {
+    "id": "9c4ffa66-e3ea-4e61-945e-22de9149d2b2",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 325,
+    "created_at": "2026-03-26T21:55:20.779461"
+  },
+  {
+    "id": "8e1c3580-06dc-4968-84ab-d336fefe1c5f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 288,
+    "created_at": "2026-03-26T21:55:58.079910"
+  },
+  {
+    "id": "5fafb93c-5fe7-4f26-b3f0-751f7c831ec2",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T21:55:58.108330"
+  },
+  {
+    "id": "55b1ea4a-5aa6-40f0-a0c7-b39e71bb3da1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 261,
+    "created_at": "2026-03-26T22:00:04.472846"
+  },
+  {
+    "id": "8f8aaed6-9554-4f2a-8802-cacf16ee41e6",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 181,
+    "created_at": "2026-03-26T22:00:19.786446"
+  },
+  {
+    "id": "82b860be-2ed2-4791-9dcc-eff4969fc75e",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 644,
+    "created_at": "2026-03-26T22:01:15.748475"
+  },
+  {
+    "id": "070c263c-b566-4743-97ae-5f6273793490",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 299,
+    "created_at": "2026-03-26T22:01:38.549639"
+  },
+  {
+    "id": "919f0ec6-d40f-4a33-8c95-b9df0da8e7b8",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 206,
+    "created_at": "2026-03-26T22:04:57.257687"
+  },
+  {
+    "id": "8006e1c0-e5c0-49b0-b9eb-5b72adb47f5f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 440,
+    "created_at": "2026-03-26T22:05:08.956593"
+  },
+  {
+    "id": "e3282a7c-952a-4b47-8f13-3a4c4a23c993",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 324,
+    "created_at": "2026-03-26T22:10:26.062864"
+  },
+  {
+    "id": "5506ce89-fa9b-42a1-9440-2527ccb18b6d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 295,
+    "created_at": "2026-03-26T22:12:31.930715"
+  },
+  {
+    "id": "a12073e2-a25f-4f06-b1d8-6b1caf9182de",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:13:12.798682"
+  },
+  {
+    "id": "b894d2bf-a5fb-4ba8-b362-c3b077083966",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T22:18:39.467047"
+  },
+  {
+    "id": "6dc372a5-a2a1-4140-952e-44390d6f5f01",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:18:39.467141"
+  },
+  {
+    "id": "2583fcfd-1244-40d4-ba4f-483a7abc2df4",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:20:40.191904"
+  },
+  {
+    "id": "8dafc05a-f917-4d03-bce9-f5c7af770148",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:20:40.191979"
+  },
+  {
+    "id": "5c54db42-e5af-440d-aa83-6548399ad933",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:23:04.377434"
+  },
+  {
+    "id": "859ea178-4ff0-46e3-b40a-43f8e4028f6d",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:23:04.392368"
+  },
+  {
+    "id": "5dda62e4-bc20-4629-a461-803dfe7d7890",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 330,
+    "created_at": "2026-03-26T22:24:54.039485"
+  },
+  {
+    "id": "11dd5e3f-7a7f-40df-89ab-fced0251c6c5",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:24:54.040567"
+  },
+  {
+    "id": "5818d9b7-8783-4d45-9479-707055f895f7",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:24:54.040467"
+  },
+  {
+    "id": "1c1895ad-9cbb-42f6-9b56-be280f4e9d95",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:24:54.056476"
+  },
+  {
+    "id": "5400179a-d538-40ac-bcc8-0fd94b2a68a7",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T22:24:54.098989"
+  },
+  {
+    "id": "a337582d-3fc8-4ba9-9f01-8059230ded17",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 302,
+    "created_at": "2026-03-26T22:25:28.355253"
+  },
+  {
+    "id": "bc7929a9-011d-4168-b09c-5cde8cf29bf4",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 387,
+    "created_at": "2026-03-26T22:26:16.222493"
+  },
+  {
+    "id": "0e48b1db-15c0-4880-a343-c554f96d5d7a",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 378,
+    "created_at": "2026-03-26T22:26:34.625089"
+  },
+  {
+    "id": "2ddac814-81c3-47e6-ae81-764115a9e70d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 301,
+    "created_at": "2026-03-26T22:26:57.140311"
+  },
+  {
+    "id": "36f87c41-c527-461d-a47d-3c2b43677ef9",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 226,
+    "created_at": "2026-03-26T22:28:02.933022"
+  },
+  {
+    "id": "47ce48d8-38a7-4029-b8b6-568af042266f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 358,
+    "created_at": "2026-03-26T22:30:43.986488"
+  },
+  {
+    "id": "1c7dc413-b9cd-4121-a0ff-fd4f013d2877",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 370,
+    "created_at": "2026-03-26T22:33:59.490889"
+  },
+  {
+    "id": "14d6d16c-9a8b-4037-ab59-6020c5e56c3b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 314,
+    "created_at": "2026-03-26T22:34:09.969639"
+  },
+  {
+    "id": "b1bad842-c370-45a9-873a-de1a2ec6593e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 679,
+    "created_at": "2026-03-26T22:36:28.311332"
+  },
+  {
+    "id": "3c170949-86db-4389-a13b-eb6cfd6141e3",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 202,
+    "created_at": "2026-03-26T22:36:47.474701"
+  },
+  {
+    "id": "85cf1fa9-0dd8-4e75-9c58-d6680ebeb2c9",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:36:47.488922"
+  },
+  {
+    "id": "bac7c454-e40a-4e66-865d-52f9d139731f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 341,
+    "created_at": "2026-03-26T22:40:19.080422"
+  },
+  {
+    "id": "5d1b8671-242d-41e0-9402-eac021d28aa8",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-26T22:42:01.615523"
+  },
+  {
+    "id": "b41fb041-aa5b-462b-a6cb-2f884a25a816",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 308,
+    "created_at": "2026-03-26T22:42:34.138596"
+  },
+  {
+    "id": "2ac3d851-49e1-47ea-b5a2-2ea1939b4f0a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 248,
+    "created_at": "2026-03-26T22:43:07.065198"
+  },
+  {
+    "id": "b669d244-1571-4378-8f13-fb626ab37c5b",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 380,
+    "created_at": "2026-03-26T22:43:26.042146"
+  },
+  {
+    "id": "b9899674-5038-4669-92dc-ee3067874219",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 371,
+    "created_at": "2026-03-26T22:43:55.322373"
+  },
+  {
+    "id": "bc88b039-cd4c-4e21-91b2-b4bf0b7e0aa9",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 386,
+    "created_at": "2026-03-26T22:47:38.881662"
+  },
+  {
+    "id": "cffc4450-a654-4ae1-be15-68c0231d38d1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 294,
+    "created_at": "2026-03-26T22:49:14.854078"
+  },
+  {
+    "id": "88295930-c95b-4b4c-83dd-c0dd0a70f72c",
+    "endpoint": "/dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-26T23:34:03.195412"
+  },
+  {
+    "id": "0d82dd6e-b1ed-49e3-8a32-9c4c89f34d44",
+    "endpoint": "/api/brand/resolve",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 794,
+    "created_at": "2026-03-26T23:34:07.199481"
+  },
+  {
+    "id": "aac88fab-0833-4151-a1dd-5129892fa307",
+    "endpoint": "/api/aeo/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 772,
+    "created_at": "2026-03-26T23:34:09.341447"
+  },
+  {
+    "id": "93304e63-4a3b-44fc-8806-c3e6a14931b3",
+    "endpoint": "/api/geo-probe",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3849,
+    "created_at": "2026-03-26T23:34:21.066826"
+  },
+  {
+    "id": "e1679b2d-ba15-42a9-8533-da197fcbd7e8",
+    "endpoint": "/api/ai/ranking-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9422,
+    "created_at": "2026-03-26T23:34:25.319357"
+  },
+  {
+    "id": "f0d86da3-a540-4c91-b4dd-90ea9b841d72",
+    "endpoint": "/api/chatbot/session",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2,
+    "created_at": "2026-03-26T23:34:25.323545"
+  },
+  {
+    "id": "71d40499-00b1-441f-8fc8-a33562b16190",
+    "endpoint": "/api/content/generate",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2434,
+    "created_at": "2026-03-26T23:34:33.736083"
+  },
+  {
+    "id": "3d6b19d7-c381-45a9-a189-da6c89fad021",
+    "endpoint": "/api/chatbot/chat",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2854,
+    "created_at": "2026-03-26T23:34:43.014711"
+  },
+  {
+    "id": "b506ffb4-d4a0-4cac-8331-8e0dff042558",
+    "endpoint": "/api/geo-probe/compare",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9399,
+    "created_at": "2026-03-26T23:35:02.318336"
+  },
+  {
+    "id": "7a7dc578-8c30-459b-a2f4-f32980a8a06a",
+    "endpoint": "/api/geo-probe/site",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 6010,
+    "created_at": "2026-03-26T23:35:20.216815"
+  },
+  {
+    "id": "0751102c-014e-4769-953a-eab047be8ae5",
+    "endpoint": "/api/geo-probe/trend",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 10,
+    "created_at": "2026-03-26T23:35:20.231412"
+  },
+  {
+    "id": "a5d14323-b0f2-468b-8840-f481a8be435c",
+    "endpoint": "/api/geo-probe/batch",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 4602,
+    "created_at": "2026-03-26T23:35:35.078365"
+  },
+  {
+    "id": "f83d3e10-e802-409e-b711-9bbf17e2e5fd",
+    "endpoint": "/api/geo-probe/history",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 10,
+    "created_at": "2026-03-26T23:35:35.086664"
+  },
+  {
+    "id": "2cc8f461-8e21-4a83-886f-aa21805511ef",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 417,
+    "created_at": "2026-03-26T23:58:08.941771"
+  },
+  {
+    "id": "06e93774-34b8-4a96-91f2-e7a5ec38a9e6",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 375,
+    "created_at": "2026-03-26T23:58:17.869560"
+  },
+  {
+    "id": "8f2038d7-903b-40ab-af1c-7f6c87ad3c0d",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 7,
+    "created_at": "2026-03-27T00:01:32.755513"
+  },
+  {
+    "id": "c5bed452-fb61-4cb7-aac3-0a7a08ebf5d2",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 355,
+    "created_at": "2026-03-27T00:33:31.032027"
+  },
+  {
+    "id": "09a016dd-e126-4d56-add0-912441f29c3f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 388,
+    "created_at": "2026-03-27T00:38:25.942523"
+  },
+  {
+    "id": "13d688b9-a2d1-4f5e-a2e0-1566c1f719f2",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 436,
+    "created_at": "2026-03-27T02:09:28.434920"
+  },
+  {
+    "id": "eacadf3f-be41-4e98-8aee-b128af1bb85f",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5363,
+    "created_at": "2026-03-27T02:09:41.444330"
+  },
+  {
+    "id": "1c0d244b-5094-488f-b7c2-d20a617fef7d",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 503,
+    "response_time_ms": 31083,
+    "created_at": "2026-03-27T02:10:16.146027"
+  },
+  {
+    "id": "2b7e0464-6628-4afe-a9c9-4ac52a8b6944",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5541,
+    "created_at": "2026-03-27T02:14:01.165318"
+  },
+  {
+    "id": "e0ff5e52-76d1-4d82-bbfc-cd5275e06ca9",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-27T02:17:23.286336"
+  },
+  {
+    "id": "91c8e1cd-1da1-4836-bd0f-4a86f618df87",
+    "endpoint": "/api/ai-visibility",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2925,
+    "created_at": "2026-03-27T02:30:36.457097"
+  },
+  {
+    "id": "70610198-b304-48cb-bb0e-6f7a33c19626",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-27T02:32:56.904347"
+  },
+  {
+    "id": "69ef6e22-0bb8-4832-aa1a-33f96a216280",
+    "endpoint": "/api/ai-visibility",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 4234,
+    "created_at": "2026-03-27T02:32:56.923862"
+  },
+  {
+    "id": "1ebe0c3d-6d21-4c88-a802-6e312e9d317e",
+    "endpoint": "/api/benchmarks",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T02:33:19.667864"
+  },
+  {
+    "id": "d272bd83-9e3c-4efa-a664-71ec2903c30d",
+    "endpoint": "/api/scheduled-jobs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T02:34:10.523441"
+  },
+  {
+    "id": "bd9e64a4-66be-468b-b39b-d8079b647c4f",
+    "endpoint": "/api/scheduled-jobs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 139,
+    "created_at": "2026-03-27T02:39:07.520572"
+  },
+  {
+    "id": "e9e623d3-d171-41f7-8fa4-9abf2142eb56",
+    "endpoint": "/api/schedule/create",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9,
+    "created_at": "2026-03-27T02:39:12.049517"
+  },
+  {
+    "id": "3f325933-0869-48ae-9a6a-1c0f1c20d2d6",
+    "endpoint": "/api/scheduled-jobs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 12,
+    "created_at": "2026-03-27T02:39:38.964490"
+  },
+  {
+    "id": "f733b44e-2333-4814-8149-eabf12d8431b",
+    "endpoint": "/api/schedule/run-now/undefined",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 128,
+    "created_at": "2026-03-27T02:42:39.406075"
+  },
+  {
+    "id": "3c28b80b-d79d-40f4-a61f-4f60e05709fe",
+    "endpoint": "/api/schedule/create",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 127,
+    "created_at": "2026-03-27T14:55:37.488061"
+  },
+  {
+    "id": "85212c5a-e596-45d6-8fc0-8e234b178e27",
+    "endpoint": "/api/scheduled-jobs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 24,
+    "created_at": "2026-03-27T14:56:01.863010"
+  },
+  {
+    "id": "ab379314-5f5c-44b9-8e94-7a56642d5b32",
+    "endpoint": "/api/scheduled-jobs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 10,
+    "created_at": "2026-03-27T14:56:01.890811"
+  },
+  {
+    "id": "6417cc1d-110f-497c-8ed5-d72ea11635ee",
+    "endpoint": "/api/schedule/run-now/Infinity",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 404,
+    "response_time_ms": 29,
+    "created_at": "2026-03-27T14:56:59.652920"
+  },
+  {
+    "id": "8e05aa5c-a7ce-4f60-8c28-ce8ed5a0a41a",
+    "endpoint": "/api/reports",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5,
+    "created_at": "2026-03-27T14:58:07.857765"
+  },
+  {
+    "id": "722bb34e-6537-4710-ad90-06ec3ee7bd5e",
+    "endpoint": "/api/history/strategy",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T14:58:07.919174"
+  },
+  {
+    "id": "818d237b-93ad-416d-afa5-eef750ce9074",
+    "endpoint": "/api/geo",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3231,
+    "created_at": "2026-03-27T15:02:44.155978"
+  },
+  {
+    "id": "210cf296-e1b5-4731-8a24-f688391d5723",
+    "endpoint": "/api/geo",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2186,
+    "created_at": "2026-03-27T15:06:48.720396"
+  },
+  {
+    "id": "6d50be3e-6dc9-4b77-8b79-037497050360",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-27T15:07:19.540471"
+  },
+  {
+    "id": "2555e685-1e26-430e-b535-7c2a5682250a",
+    "endpoint": "/api/geo",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2413,
+    "created_at": "2026-03-27T15:07:26.852346"
+  },
+  {
+    "id": "329b24ac-51b1-4561-b86e-8397a847d09f",
+    "endpoint": "/api/trends",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:24.321839"
+  },
+  {
+    "id": "db1bff2d-ff6d-437e-b3dd-900d8ad7e357",
+    "endpoint": "/api/stats",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:24.323656"
+  },
+  {
+    "id": "c323cf56-7a7e-4202-ad02-5ee60b5a4231",
+    "endpoint": "/api/reports",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:24.432544"
+  },
+  {
+    "id": "1afa7728-c31e-4db7-aa28-ad1176697bcc",
+    "endpoint": "/api/benchmarks",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:24.322781"
+  },
+  {
+    "id": "36316604-e7b5-4215-a6d3-c687ff5855a5",
+    "endpoint": "/api/trends",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:33.320630"
+  },
+  {
+    "id": "2478aae1-0b47-443d-b6e7-b4a49f99bd72",
+    "endpoint": "/api/history/strategy",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:08:33.320630"
+  },
+  {
+    "id": "8961c740-8663-46ee-b6c7-f0836039308d",
+    "endpoint": "/api/stats",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 132,
+    "created_at": "2026-03-27T15:10:23.778273"
+  },
+  {
+    "id": "b2822848-4b08-4885-b023-c87c7385d19a",
+    "endpoint": "/api/trends",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 11,
+    "created_at": "2026-03-27T15:10:31.878290"
+  },
+  {
+    "id": "34290513-2b99-41c0-9826-f867df1d052d",
+    "endpoint": "/api/history/strategy",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 16,
+    "created_at": "2026-03-27T15:10:31.889966"
+  },
+  {
+    "id": "9cdd94b7-1821-43b7-8bf8-9f65bd6e63a3",
+    "endpoint": "/api/trends",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 14,
+    "created_at": "2026-03-27T15:10:31.941260"
+  },
+  {
+    "id": "5844e5e2-eda5-48f5-8c84-8f787d6271cd",
+    "endpoint": "/api/reports",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 11,
+    "created_at": "2026-03-27T15:10:40.351273"
+  },
+  {
+    "id": "064fc5e9-a136-484f-be26-1e0c2be0a214",
+    "endpoint": "/api/stats",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 29,
+    "created_at": "2026-03-27T15:10:57.767446"
+  },
+  {
+    "id": "1e13e69b-041e-47aa-9256-fc6feb58fd7b",
+    "endpoint": "/api/history/strategy",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 10,
+    "created_at": "2026-03-27T15:13:13.850370"
+  },
+  {
+    "id": "adc37449-07d4-46a1-b3f6-ffe0522644c7",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-27T15:56:54.464627"
+  },
+  {
+    "id": "faceb60d-679f-4e92-a038-d085516907de",
+    "endpoint": "/api/stats",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 60,
+    "created_at": "2026-03-27T15:56:54.530598"
+  },
+  {
+    "id": "cd6bbf94-fd09-4771-bffa-c28f94f5c163",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T02:52:08.970568"
+  },
+  {
+    "id": "13c45c36-705d-4a51-9e56-0638a849146b",
+    "endpoint": "/api/brand/resolve",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 679,
+    "created_at": "2026-03-29T02:52:11.465447"
+  },
+  {
+    "id": "aca795bc-9438-4a12-848b-f198f63ab43d",
+    "endpoint": "/api/geo-probe",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 15341,
+    "created_at": "2026-03-29T02:52:36.548316"
+  },
+  {
+    "id": "3a0d1d63-3df2-4ba2-82af-4d178b75d20f",
+    "endpoint": "/api/aeo/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 895,
+    "created_at": "2026-03-29T02:52:40.543119"
+  },
+  {
+    "id": "bfa00fc2-fc96-4e1b-9a0e-f11fd0deec11",
+    "endpoint": "/api/chatbot/session",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 2,
+    "created_at": "2026-03-29T02:52:49.709950"
+  },
+  {
+    "id": "3197200c-cf5b-4238-a0fd-7af0ba92c59e",
+    "endpoint": "/api/geo-probe",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 500,
+    "response_time_ms": 15411,
+    "created_at": "2026-03-29T02:52:58.383195"
+  },
+  {
+    "id": "3dcf2656-7081-441c-be19-db5e237cd7e7",
+    "endpoint": "/api/chatbot/chat",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3770,
+    "created_at": "2026-03-29T02:53:03.114647"
+  },
+  {
+    "id": "c52d84c3-3071-40fb-9bf0-9dc1db4dcb4c",
+    "endpoint": "/api/ai/ranking-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9062,
+    "created_at": "2026-03-29T02:53:07.692351"
+  },
+  {
+    "id": "8d0f0745-49cb-4e7a-8f8d-cc6074de5ee3",
+    "endpoint": "/api/geo-probe/batch",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5088,
+    "created_at": "2026-03-29T02:53:36.585162"
+  },
+  {
+    "id": "e6772781-5efd-4319-b368-9f7e7936ad6d",
+    "endpoint": "/api/brand/resolve",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 914,
+    "created_at": "2026-03-29T02:53:59.735109"
+  },
+  {
+    "id": "1541a73f-08f7-47c2-a5d3-d450c1ed342d",
+    "endpoint": "/geo-scanner",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:14.925550"
+  },
+  {
+    "id": "e664c6ea-89ab-496a-9bad-a87315d5d367",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:28.299584"
+  },
+  {
+    "id": "dd8435f9-905f-4cf6-8bdb-7aa5e2908fc7",
+    "endpoint": "/api/geo-probe",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:28.299841"
+  },
+  {
+    "id": "4f7fff12-b28c-4778-869e-82809ab1ce4c",
+    "endpoint": "/dev1-dashboard",
+    "method": "HEAD",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:28.299968"
+  },
+  {
+    "id": "399a5b48-eeaa-44c1-881a-e1c09cd960e8",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:28.312757"
+  },
+  {
+    "id": "9f13b4e0-3c2b-4298-8faf-eca1945c6fe2",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 4,
+    "created_at": "2026-03-29T03:00:28.329363"
+  },
+  {
+    "id": "9f13fcf6-0135-4f89-8de4-0324a20f4fb0",
+    "endpoint": "/api/brand/resolve",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T03:00:30.044963"
+  },
+  {
+    "id": "75b8ec9f-4321-409e-a27a-e4c8ddd4e412",
+    "endpoint": "/api/geo-probe/site",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5844,
+    "created_at": "2026-03-29T03:00:30.049494"
+  },
+  {
+    "id": "75a374e0-d32f-4684-8a38-46f6a9f66f4b",
+    "endpoint": "/api/geo-probe/compare",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9843,
+    "created_at": "2026-03-29T03:00:31.854874"
+  },
+  {
+    "id": "1204dba2-be82-42e6-ba02-5c4310d75512",
+    "endpoint": "/favicon.ico",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3,
+    "created_at": "2026-03-29T03:00:33.077283"
+  },
+  {
+    "id": "235740dd-f418-4764-b337-4fbd4e75bed9",
+    "endpoint": "/api/aeo/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1855,
+    "created_at": "2026-03-29T03:00:34.769331"
+  },
+  {
+    "id": "5f691ea4-3e73-4183-bac9-f41b11801436",
+    "endpoint": "/api/chatbot/session",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3,
+    "created_at": "2026-03-29T03:00:34.771644"
+  },
+  {
+    "id": "923a150d-2332-4d7c-a7ad-4c1441443648",
+    "endpoint": "/api/content/generate",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3210,
+    "created_at": "2026-03-29T03:00:39.185751"
+  },
+  {
+    "id": "75bdd2e7-f2b1-4a78-a3a1-e7b5eef45180",
+    "endpoint": "/api/ai/ranking-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 12665,
+    "created_at": "2026-03-29T03:00:48.055216"
+  },
+  {
+    "id": "59c8aa2d-863c-4d99-8f6f-e2676a80ed86",
+    "endpoint": "/api/chatbot/chat",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5151,
+    "created_at": "2026-03-29T03:00:52.660916"
+  },
+  {
+    "id": "83a74bdf-4777-49bd-b14c-d92a1e01ecb6",
+    "endpoint": "/api/geo-probe/compare",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 12435,
+    "created_at": "2026-03-29T03:01:05.275246"
+  },
+  {
+    "id": "027b21b2-97bd-4d60-a299-390581217580",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 71,
+    "created_at": "2026-03-29T18:54:30.920307"
+  },
+  {
+    "id": "93668815-8c13-413e-bec2-1fc9effc0aac",
+    "endpoint": "/api/geo-probe/batch",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5371,
+    "created_at": "2026-03-29T03:01:15.439426"
+  },
+  {
+    "id": "2e03fb51-1564-4896-8955-c0791b3f3bdc",
+    "endpoint": "/api/geo-probe/history",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 9,
+    "created_at": "2026-03-29T03:01:15.451833"
+  },
+  {
+    "id": "046fc1ad-fd77-45dc-955b-92735d7f4bea",
+    "endpoint": "/api/llm/citation-probe",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 8363,
+    "created_at": "2026-03-29T03:02:11.022557"
+  },
+  {
+    "id": "e1a08f62-5c88-4072-b55c-9f14f8e7450d",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 400,
+    "response_time_ms": 5,
+    "created_at": "2026-03-29T07:26:41.175532"
+  },
+  {
+    "id": "a8f47687-bdee-4b1f-bba5-7af8f0a95490",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T16:27:28.918236"
+  },
+  {
+    "id": "f6c03bb9-f37b-45da-a5c0-80123313064a",
+    "endpoint": "/dev1-dashboard",
+    "method": "HEAD",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-29T16:27:28.919839"
+  },
+  {
+    "id": "ccecc87a-6dee-40a5-b0a2-d323cbc76094",
+    "endpoint": "/favicon.ico",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T16:27:28.985761"
+  },
+  {
+    "id": "31b3cb92-f5f7-4f9f-9f63-1a2837ea6b6d",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 387,
+    "created_at": "2026-03-29T16:27:37.598335"
+  },
+  {
+    "id": "ea9e49a7-e175-4876-9a79-9a098df81051",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 366,
+    "created_at": "2026-03-29T16:27:40.304611"
+  },
+  {
+    "id": "5e62ad49-7e1b-4c17-9dc5-42248db0fd01",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 818,
+    "created_at": "2026-03-29T17:21:13.876402"
+  },
+  {
+    "id": "3fc80122-16f1-488c-843d-a51dbd032ca2",
+    "endpoint": "/api/auth/login",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 5,
+    "created_at": "2026-03-29T17:25:11.840551"
+  },
+  {
+    "id": "f1656623-19c5-4cb9-865d-17d938d256c7",
+    "endpoint": "/api/auth/login",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:25:11.840551"
+  },
+  {
+    "id": "cf1b928a-5757-408c-8bd5-93af2f6a190a",
+    "endpoint": "/dev1-dashboard",
+    "method": "HEAD",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-29T17:25:11.881803"
+  },
+  {
+    "id": "fed66abd-9381-426a-82be-3cb030f35f3e",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:25:11.881974"
+  },
+  {
+    "id": "e06dc014-0be2-48dc-9969-64bf89167405",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:25:11.902464"
+  },
+  {
+    "id": "c706b19f-907b-481c-95ae-c67206c38cb9",
+    "endpoint": "/api/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 367,
+    "created_at": "2026-03-29T17:28:53.857440"
+  },
+  {
+    "id": "1d9d11dd-6aae-4428-b39f-148cf23a2383",
+    "endpoint": "/api/content-brief",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3868,
+    "created_at": "2026-03-29T17:29:17.329887"
+  },
+  {
+    "id": "d7117911-197a-4296-ae4a-28b90e19fc1c",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 445,
+    "created_at": "2026-03-29T17:31:14.834225"
+  },
+  {
+    "id": "57dda259-af72-4a6e-8d32-29433ef22707",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 278,
+    "created_at": "2026-03-29T17:31:18.450767"
+  },
+  {
+    "id": "d6d39410-afc4-444f-96c7-8694755450eb",
+    "endpoint": "/api/ai-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 4943,
+    "created_at": "2026-03-29T17:31:18.884480"
+  },
+  {
+    "id": "afe60ef7-a5aa-48c9-b5ca-d0970413d598",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 298,
+    "created_at": "2026-03-29T17:31:18.890312"
+  },
+  {
+    "id": "b3b48a30-9e62-49cc-9c2b-69fbcbcf3307",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 426,
+    "created_at": "2026-03-29T17:31:29.297619"
+  },
+  {
+    "id": "05868dd6-69aa-4d22-bdd6-2e748da42dcf",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 305,
+    "created_at": "2026-03-29T17:31:54.737775"
+  },
+  {
+    "id": "a2cec6e8-2488-4add-9de4-c2cb3d6524cf",
+    "endpoint": "/api/admin/users/4e00e77f-e7e1-4e8c-9a8d-5505a1693121/role",
+    "method": "PUT",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 341,
+    "created_at": "2026-03-29T17:31:55.183057"
+  },
+  {
+    "id": "0c25e0f8-65d5-4fef-87b5-d01aa30f8dea",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 318,
+    "created_at": "2026-03-29T17:32:24.161766"
+  },
+  {
+    "id": "b5294461-ce13-45bc-ae7e-5e89c0bdd5c4",
+    "endpoint": "/api/admin/users/4e00e77f-e7e1-4e8c-9a8d-5505a1693121/role",
+    "method": "PUT",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 426,
+    "created_at": "2026-03-29T17:32:24.697945"
+  },
+  {
+    "id": "16f3e4be-3207-454c-acc9-1430c5ce4458",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 316,
+    "created_at": "2026-03-29T17:33:11.278394"
+  },
+  {
+    "id": "1c69335c-9f61-49d8-9852-6738a4730415",
+    "endpoint": "/api/admin/usage",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 397,
+    "created_at": "2026-03-29T17:33:25.598097"
+  },
+  {
+    "id": "d68e643d-2324-4d78-b4a9-83135c440e4c",
+    "endpoint": "/api/admin/ai-costs",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 332,
+    "created_at": "2026-03-29T17:33:31.980387"
+  },
+  {
+    "id": "49b31373-ddf5-4329-a291-86dcfb0b9618",
+    "endpoint": "/api/admin/errors",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 278,
+    "created_at": "2026-03-29T17:33:33.918323"
+  },
+  {
+    "id": "835d9634-721a-4a92-aa96-49c269029bad",
+    "endpoint": "/api/admin/health",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 309,
+    "created_at": "2026-03-29T17:33:38.937966"
+  },
+  {
+    "id": "a23cf0c1-9e5b-4d30-b272-b1d0fd1f0c9c",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 302,
+    "created_at": "2026-03-29T17:33:55.638019"
+  },
+  {
+    "id": "8448cdd8-5765-4396-9712-5f0a2895e527",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 225,
+    "created_at": "2026-03-29T17:47:02.598721"
+  },
+  {
+    "id": "47d4785d-8cc4-488b-b494-dcfd17887b1c",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 75,
+    "created_at": "2026-03-29T17:47:09.307066"
+  },
+  {
+    "id": "43101243-f31b-4072-ae3d-415894e8df56",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 295,
+    "created_at": "2026-03-29T17:49:13.127198"
+  },
+  {
+    "id": "1a7ec817-f8b4-4815-91f8-903c66d4f3b2",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 164,
+    "created_at": "2026-03-29T17:49:18.111630"
+  },
+  {
+    "id": "59ce0ce7-8317-4f58-a8d5-98494cff58b8",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 403,
+    "response_time_ms": 195,
+    "created_at": "2026-03-29T17:49:32.129858"
+  },
+  {
+    "id": "e4a16e4e-d874-41be-a540-435a630902e5",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 1,
+    "created_at": "2026-03-29T17:51:46.214888"
+  },
+  {
+    "id": "2859a99a-2ffe-460f-b80d-01d896ca70e6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 298,
+    "created_at": "2026-03-29T17:51:46.214888"
+  },
+  {
+    "id": "d87e0642-41d8-4b79-bac9-47ad3428873e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 557,
+    "created_at": "2026-03-29T17:51:54.385178"
+  },
+  {
+    "id": "e6a8cae3-2f85-44e3-9118-9bdb7e2fee34",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:51:54.391801"
+  },
+  {
+    "id": "ed285fd9-1d71-445c-a2b5-936ced8b2f67",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:51:54.427033"
+  },
+  {
+    "id": "ba0d77fd-f652-4213-b161-63eafcc9457a",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 79,
+    "created_at": "2026-03-29T17:52:56.886633"
+  },
+  {
+    "id": "cfd9c484-062f-4c29-a91d-4b7b82fb865d",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:52:56.910939"
+  },
+  {
+    "id": "a45b1f08-cbf5-422c-b12a-3e09f40e850e",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:52:56.913540"
+  },
+  {
+    "id": "95ee69d4-bf12-424d-ab12-6fbe521c99c7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 319,
+    "created_at": "2026-03-29T17:52:59.906850"
+  },
+  {
+    "id": "7c79f77d-61d6-4055-9e33-84052fefb6d7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 312,
+    "created_at": "2026-03-29T17:53:00.293038"
+  },
+  {
+    "id": "289f248b-dfa0-4e58-a504-351ad99c7300",
+    "endpoint": "/analyze",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 405,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:58:31.926002"
+  },
+  {
+    "id": "83d63cc9-e2a6-4968-90b7-6a6f4e28a576",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 340,
+    "created_at": "2026-03-29T17:58:58.825613"
+  },
+  {
+    "id": "8b9baa41-e442-4f94-9bb9-9223208c1855",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:58:58.847698"
+  },
+  {
+    "id": "d440085f-d5b4-4220-9a55-8a985305a6e9",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 288,
+    "created_at": "2026-03-29T17:58:59.182565"
+  },
+  {
+    "id": "dedd9eb5-094e-4373-bf1e-f4b6823f0b8e",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 415,
+    "created_at": "2026-03-29T17:59:40.410003"
+  },
+  {
+    "id": "56f11632-75f2-4ce4-bf03-413c82018c5f",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:59:40.444060"
+  },
+  {
+    "id": "10825608-86db-4f41-887a-65075b8deafa",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T17:59:40.447353"
+  },
+  {
+    "id": "daccfd5f-5d75-4336-b35c-626200e75947",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 325,
+    "created_at": "2026-03-29T17:59:40.814107"
+  },
+  {
+    "id": "43e38a03-7ab2-49e4-9e64-8f70b98103ea",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 321,
+    "created_at": "2026-03-29T17:59:40.822928"
+  },
+  {
+    "id": "181228cd-39ff-43f6-a1c3-3a49b64a6ede",
+    "endpoint": "/api/openclaw/status",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T18:01:56.966691"
+  },
+  {
+    "id": "9f5f53fb-73e4-4ec3-ab0b-91a8372822bc",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 317,
+    "created_at": "2026-03-29T18:01:57.333766"
+  },
+  {
+    "id": "92e0d99f-17a1-43d2-b3bc-38d0d24cccd5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 329,
+    "created_at": "2026-03-29T18:10:10.546364"
+  },
+  {
+    "id": "6d7f10d9-5f22-4e03-b59b-4bbc0268fa54",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 365,
+    "created_at": "2026-03-29T18:15:58.821996"
+  },
+  {
+    "id": "49fc30e2-46c4-44e6-b7e6-5ab9bb177409",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 358,
+    "created_at": "2026-03-29T18:17:05.388018"
+  },
+  {
+    "id": "391c5e56-d1ca-4e7a-a381-1574db869a40",
+    "endpoint": "/api/admin/users/4e00e77f-e7e1-4e8c-9a8d-5505a1693121/role",
+    "method": "PUT",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 282,
+    "created_at": "2026-03-29T18:17:05.724366"
+  },
+  {
+    "id": "a1e9a853-9448-45e9-b6ea-06d561a4fdd5",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 337,
+    "created_at": "2026-03-29T18:17:31.025440"
+  },
+  {
+    "id": "d44d4ad7-72f8-407a-b1fe-fc1f96c12c76",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 475,
+    "created_at": "2026-03-29T18:17:43.306609"
+  },
+  {
+    "id": "ad65da82-9886-4e7f-9abc-55e6e003a452",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 250,
+    "created_at": "2026-03-29T18:18:25.642657"
+  },
+  {
+    "id": "7c2e5ad2-1494-416f-a2a6-0ee1506f3365",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 276,
+    "created_at": "2026-03-29T18:25:23.747810"
+  },
+  {
+    "id": "2624af03-e1c5-4f68-b8a0-677b69a25584",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 84,
+    "created_at": "2026-03-29T18:25:42.722846"
+  },
+  {
+    "id": "0844a7d8-22d9-4216-a5b3-43f7fda70e91",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 529,
+    "created_at": "2026-03-29T18:25:43.647974"
+  },
+  {
+    "id": "04475f01-c500-442c-ac3d-f5fbf8d3f380",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 89,
+    "created_at": "2026-03-29T18:25:50.722937"
+  },
+  {
+    "id": "ae3d208d-7503-4a2e-a1ab-0fd8a20e4f56",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 473,
+    "created_at": "2026-03-29T18:25:51.462913"
+  },
+  {
+    "id": "715a644b-a2c5-44ec-ba7f-5452f486b9c5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 307,
+    "created_at": "2026-03-29T18:26:00.722962"
+  },
+  {
+    "id": "4146e302-148c-40c4-a617-eb42780fecaf",
+    "endpoint": "/api/auth/forgot-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 414,
+    "created_at": "2026-03-29T18:28:29.825606"
+  },
+  {
+    "id": "70c011da-8d49-4310-936e-b4b6991c48e9",
+    "endpoint": "/api/auth/reset-password",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 513,
+    "created_at": "2026-03-29T18:32:27.789350"
+  },
+  {
+    "id": "fe3c780b-a1f2-4f3a-bc87-3cb88900c1e0",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 320,
+    "created_at": "2026-03-29T18:32:33.445482"
+  },
+  {
+    "id": "83596c58-c17b-4de7-bfca-6a0e67e7dc46",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 235,
+    "created_at": "2026-03-29T18:32:37.008442"
+  },
+  {
+    "id": "7adb0482-c215-4d0b-8271-2a93f3440266",
+    "endpoint": "/dev1-dashboard",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-29T18:34:34.368185"
+  },
+  {
+    "id": "d71ed533-8e76-42b4-8ec7-cb2be23428d2",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 601,
+    "created_at": "2026-03-29T18:49:36.534792"
+  },
+  {
+    "id": "25a5b8a2-dad3-4275-a89c-1f3d35fd1c8e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 63,
+    "created_at": "2026-03-29T18:52:49.514391"
+  },
+  {
+    "id": "33827758-a77b-477a-8f84-05f883e4b40e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 262,
+    "created_at": "2026-03-29T18:53:41.198755"
+  },
+  {
+    "id": "6080174a-20c2-4ce6-9c77-93f52ffdb2a7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 71,
+    "created_at": "2026-03-29T18:56:03.015194"
+  },
+  {
+    "id": "bee45658-fa8b-4762-9688-08851ff2e247",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 327,
+    "created_at": "2026-03-29T19:00:40.498909"
+  },
+  {
+    "id": "4b73a238-e676-473c-8246-1ec4973ccee7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 64,
+    "created_at": "2026-03-29T19:04:46.449906"
+  },
+  {
+    "id": "f01ffa6e-50a8-4bcf-ab7e-63b073fa264b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 286,
+    "created_at": "2026-03-29T19:04:57.109094"
+  },
+  {
+    "id": "445be59c-c91d-4108-9ba8-9952ed747f90",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 83,
+    "created_at": "2026-03-29T19:05:00.749790"
+  },
+  {
+    "id": "f5f4ff70-4729-4559-a675-519ed9b68473",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 72,
+    "created_at": "2026-03-29T19:05:32.448645"
+  },
+  {
+    "id": "5af58cce-7a16-4034-b8cc-a754a288072d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 261,
+    "created_at": "2026-03-29T19:05:41.455622"
+  },
+  {
+    "id": "78efe7a6-dc3e-4716-a356-a004e553a82e",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 252,
+    "created_at": "2026-03-29T19:14:22.958505"
+  },
+  {
+    "id": "30db77b2-704d-4ce8-ae41-8b01ceaf92d1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 61,
+    "created_at": "2026-03-29T19:31:39.713668"
+  },
+  {
+    "id": "6b23a4cd-81ed-4fdc-934d-937742955fe5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 70,
+    "created_at": "2026-03-29T19:31:56.976733"
+  },
+  {
+    "id": "4d6f9525-8538-4e0d-891a-cb2c57f9d91c",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 58,
+    "created_at": "2026-03-29T19:37:05.740843"
+  },
+  {
+    "id": "a6bdb82c-a42d-47dc-8d7a-c25099bef1c4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 103,
+    "created_at": "2026-03-29T19:38:34.032951"
+  },
+  {
+    "id": "342b65b9-ba87-4a5f-9d88-37f9bb86ba00",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 85,
+    "created_at": "2026-03-29T19:40:20.232988"
+  },
+  {
+    "id": "53e30242-100b-4151-b2a1-f4c1877954c6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 132,
+    "created_at": "2026-03-29T19:40:23.534184"
+  },
+  {
+    "id": "ad48be71-7fba-4663-9f6b-a508c7f70ebf",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 72,
+    "created_at": "2026-03-29T19:46:36.716018"
+  },
+  {
+    "id": "59c2b46a-433a-44b1-af86-f00ef7d1bab8",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 402,
+    "created_at": "2026-03-29T19:53:30.080883"
+  },
+  {
+    "id": "4364ab28-df06-4a3f-87ab-04916906b46b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 256,
+    "created_at": "2026-03-29T20:06:34.121458"
+  },
+  {
+    "id": "50b3a78f-8eaa-4447-86f9-d7337c8d13f7",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 384,
+    "created_at": "2026-03-29T20:15:28.285912"
+  },
+  {
+    "id": "c71c66ec-4381-464d-9c26-daae5b2d7d10",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 213,
+    "created_at": "2026-03-29T20:16:19.175524"
+  },
+  {
+    "id": "2a7e4802-c766-45bf-9a4d-7fba4fe9b441",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 233,
+    "created_at": "2026-03-29T20:23:40.319009"
+  },
+  {
+    "id": "389a72a6-5ea4-4aa5-b8c8-61d9c75b3d3d",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 138,
+    "created_at": "2026-03-29T20:23:53.081239"
+  },
+  {
+    "id": "c064ff43-c33a-4532-8e2f-c3e8967674f8",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 406,
+    "created_at": "2026-03-29T20:49:10.601210"
+  },
+  {
+    "id": "41208801-e144-41a3-a4c2-2e5c63f61b11",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 96,
+    "created_at": "2026-03-29T20:49:16.566627"
+  },
+  {
+    "id": "01241f84-a260-42c5-9225-44d3d05369b4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 241,
+    "created_at": "2026-03-29T20:58:08.808853"
+  },
+  {
+    "id": "682d09a5-f9e1-47ac-a5d9-070bf1ba8a27",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 258,
+    "created_at": "2026-03-29T21:02:21.942513"
+  },
+  {
+    "id": "ecedf2c2-bf29-4c15-9cee-f09bda43949f",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 86,
+    "created_at": "2026-03-29T21:04:48.065442"
+  },
+  {
+    "id": "001ef39d-23b0-4bb3-9732-e88d0b1f4200",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 397,
+    "created_at": "2026-03-29T23:27:04.112270"
+  },
+  {
+    "id": "9fac14ea-e43c-4a48-a82c-1ba8a301cca4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 117,
+    "created_at": "2026-03-29T23:27:19.435539"
+  },
+  {
+    "id": "51322463-e8d5-4653-9f1b-1b0272ca32eb",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 249,
+    "created_at": "2026-03-30T01:50:00.398836"
+  },
+  {
+    "id": "2e3275d7-8af0-49b2-b2fd-91616df80232",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 595,
+    "created_at": "2026-03-30T15:35:57.751237"
+  },
+  {
+    "id": "3837b323-17b7-4b31-89a0-5dbcafc38622",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 533,
+    "created_at": "2026-03-30T15:35:59.043839"
+  },
+  {
+    "id": "bf33d875-7642-4e88-a190-f6232efeead1",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 315,
+    "created_at": "2026-03-30T15:36:00.903965"
+  },
+  {
+    "id": "1e62dbe2-fe81-470f-bba3-ac8c8ff4a5dd",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 578,
+    "created_at": "2026-03-30T15:36:06.475694"
+  },
+  {
+    "id": "e39e7c9c-9242-4575-b2fd-48da8130e86f",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 100,
+    "created_at": "2026-03-30T15:36:06.710276"
+  },
+  {
+    "id": "8d628508-6f55-430e-807d-476d941f78b3",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 257,
+    "created_at": "2026-03-30T15:36:16.891857"
+  },
+  {
+    "id": "9ac439af-d611-4a95-8298-8fd98fbdf8b6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 369,
+    "created_at": "2026-03-30T15:36:21.915729"
+  },
+  {
+    "id": "e28540ad-eb0f-44bc-a7e9-8451bccb6085",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 385,
+    "created_at": "2026-03-30T15:36:31.948630"
+  },
+  {
+    "id": "cc9564c8-ecd5-4e7b-9760-090f6a475671",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 434,
+    "created_at": "2026-03-30T15:36:42.043926"
+  },
+  {
+    "id": "89278b33-ebed-447b-b285-f13bd056946a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 441,
+    "created_at": "2026-03-30T15:37:01.800444"
+  },
+  {
+    "id": "b00db99c-eb8a-4d3d-b17d-ffc6ea459329",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 396,
+    "created_at": "2026-03-30T15:37:02.352358"
+  },
+  {
+    "id": "9dbb3690-cb35-40c6-9551-88681cbb843a",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 796,
+    "created_at": "2026-03-30T15:37:41.970612"
+  },
+  {
+    "id": "9ef4c1c9-71b0-4666-bb3e-129739c71774",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 830,
+    "created_at": "2026-03-30T15:58:02.143963"
+  },
+  {
+    "id": "58713fb9-7c3d-4ca2-a5e2-63cd48fa1920",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 287,
+    "created_at": "2026-03-30T15:58:13.994688"
+  },
+  {
+    "id": "1e834456-24be-4f70-8fe2-c5f00c912506",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 293,
+    "created_at": "2026-03-30T15:58:32.553129"
+  },
+  {
+    "id": "d4139ef2-9594-4468-afd0-4a481cfc58fa",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 298,
+    "created_at": "2026-03-30T15:58:32.952825"
+  },
+  {
+    "id": "48f05268-ad22-4950-a949-0879841e30c2",
+    "endpoint": "/api/admin/metrics",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 538,
+    "created_at": "2026-03-30T15:58:45.842470"
+  },
+  {
+    "id": "bdee9120-1f26-4013-ad5a-eb6d0be68f03",
+    "endpoint": "/dev1-dashboard__",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-30T19:46:59.002177"
+  },
+  {
+    "id": "1e03d6c7-f3bb-4ce8-8548-755e40211bf2",
+    "endpoint": "/favicon.ico",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 2,
+    "created_at": "2026-03-31T00:13:56.630061"
+  },
+  {
+    "id": "63196876-4757-4b5a-b717-2d73d086ed7a",
+    "endpoint": "/api/brand/resolve",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 3,
+    "created_at": "2026-03-31T00:14:28.333484"
+  },
+  {
+    "id": "7234a398-96af-4466-8183-d8a4acab3263",
+    "endpoint": "/api/ai/ranking-recommendations",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 8119,
+    "created_at": "2026-03-31T00:16:05.168844"
+  },
+  {
+    "id": "bef5968e-3e5e-4313-9ef2-dd20a8bce827",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 421,
+    "created_at": "2026-03-31T00:52:49.920607"
+  },
+  {
+    "id": "d511a6a6-6528-44bc-8baf-10f84a05e742",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 79,
+    "created_at": "2026-03-31T00:56:19.338037"
+  },
+  {
+    "id": "b0794987-6df0-43b2-876f-8160fd129f5e",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 562,
+    "created_at": "2026-03-31T00:56:20.319794"
+  },
+  {
+    "id": "6dc3b5a1-635a-41dd-85a8-a30698acdc04",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 254,
+    "created_at": "2026-03-31T00:56:36.560873"
+  },
+  {
+    "id": "29f0e83a-404c-4d58-beda-86c0dc8dcabf",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 392,
+    "created_at": "2026-03-31T02:23:20.564081"
+  },
+  {
+    "id": "b16c9f12-5da7-4916-84ad-77fbde6488c6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 246,
+    "created_at": "2026-03-31T02:54:47.052810"
+  },
+  {
+    "id": "855ca099-ad5f-4dd5-a630-6da90d39f6c5",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 404,
+    "created_at": "2026-03-31T03:53:30.981821"
+  },
+  {
+    "id": "e318e6e5-40ba-4ed6-908b-362ae169e6fb",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 941,
+    "created_at": "2026-03-31T15:44:05.425140"
+  },
+  {
+    "id": "56601193-84ce-45ae-9158-8ad099d9d7b6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 313,
+    "created_at": "2026-03-31T15:44:17.584290"
+  },
+  {
+    "id": "7d4707a4-35a0-48ca-bae3-36eeda269065",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 422,
+    "created_at": "2026-03-31T15:44:18.204460"
+  },
+  {
+    "id": "c2edde30-f5d5-41f9-a083-0592343c1941",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 644,
+    "created_at": "2026-03-31T15:45:00.543187"
+  },
+  {
+    "id": "ed036659-3580-4a91-94c2-d2f7f32b34d4",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 339,
+    "created_at": "2026-03-31T15:45:27.265721"
+  },
+  {
+    "id": "75cb3327-0054-41ab-a5c4-76128c18a398",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 338,
+    "created_at": "2026-03-31T15:45:55.320217"
+  },
+  {
+    "id": "39a1351d-1892-4256-bd46-d28fb141564b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 332,
+    "created_at": "2026-03-31T15:46:29.343791"
+  },
+  {
+    "id": "955adcab-71e9-4efe-baae-b63467e74ff8",
+    "endpoint": "/robots.txt",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-31T16:47:51.900844"
+  },
+  {
+    "id": "db31a0d5-5c5f-4ad6-922f-32cdb0c79d0b",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 400,
+    "created_at": "2026-03-31T18:57:03.811126"
+  },
+  {
+    "id": "5abecf79-e4fd-4ca1-9cd7-e889c15f9e3a",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 115,
+    "created_at": "2026-03-31T18:57:07.755630"
+  },
+  {
+    "id": "d3a43d3f-e4a2-4d56-9189-6b705c5fd4e0",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 401,
+    "response_time_ms": 83,
+    "created_at": "2026-03-31T18:57:16.716476"
+  },
+  {
+    "id": "1adb3fa9-a892-49ef-8f8b-23e08785b94e",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 585,
+    "created_at": "2026-03-31T18:57:17.671061"
+  },
+  {
+    "id": "dadb7eb7-2e89-47fa-bac0-210bb6789495",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 441,
+    "created_at": "2026-03-31T18:57:21.375885"
+  },
+  {
+    "id": "31eb2f7a-7688-4af4-a1a3-1b9601a6b3d6",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 304,
+    "created_at": "2026-03-31T18:57:21.975142"
+  },
+  {
+    "id": "b4c3610c-4d4a-4c27-8b55-4ceb93af2ae7",
+    "endpoint": "/api/admin/overview",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 818,
+    "created_at": "2026-03-31T18:57:41.647060"
+  },
+  {
+    "id": "bdd1cffa-bb72-4602-9fe6-bb4fdf166832",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 761,
+    "created_at": "2026-03-31T19:10:32.566024"
+  },
+  {
+    "id": "725b3f55-afb7-42b4-8db8-8e52f7cd3d26",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 316,
+    "created_at": "2026-03-31T19:10:35.507204"
+  },
+  {
+    "id": "cc7231da-7b08-40a6-8718-e6dbdb981868",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 289,
+    "created_at": "2026-03-31T19:10:35.847059"
+  },
+  {
+    "id": "5636e705-f17d-4ae6-98d6-cc310ec8ae29",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 466,
+    "created_at": "2026-03-31T19:12:13.927364"
+  },
+  {
+    "id": "67b0ec51-7407-4862-a699-281536ba0805",
+    "endpoint": "/api/admin/users/05cff44d-ae01-4753-a043-b17506333d53/role",
+    "method": "PUT",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 278,
+    "created_at": "2026-03-31T19:12:14.266594"
+  },
+  {
+    "id": "5244854a-807d-4a1c-8fbf-e2dfa7ee751a",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 365,
+    "created_at": "2026-03-31T19:12:17.022470"
+  },
+  {
+    "id": "a378c9da-df0d-49c2-a52c-3e90058d5b7e",
+    "endpoint": "/api/admin/users/b559c0d7-6d56-4668-9595-77013e91b86f/role",
+    "method": "PUT",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 260,
+    "created_at": "2026-03-31T19:12:17.347263"
+  },
+  {
+    "id": "cf24971b-61af-4738-a1d2-0331adebfe54",
+    "endpoint": "/api/admin/users",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 325,
+    "created_at": "2026-03-31T19:12:26.706118"
+  },
+  {
+    "id": "fa5d7492-0f0a-434b-a60b-5c6cf16f4e48",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 453,
+    "created_at": "2026-03-31T20:04:59.432192"
+  },
+  {
+    "id": "38066bc8-8a2e-4f31-be6d-6c92bb9b8ebb",
+    "endpoint": "/api/admin/me",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 320,
+    "created_at": "2026-03-31T20:09:37.393609"
+  },
+  {
+    "id": "a2c982a1-6a89-4c62-b745-3e84e38cfbd4",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 540,
+    "created_at": "2026-03-31T20:09:38.241133"
+  },
+  {
+    "id": "5cd26848-37bc-4edb-ba66-61d2814d4480",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-31T21:54:36.770894"
+  },
+  {
+    "id": "005a99fd-1681-4f28-8bfd-49e3a24dcc37",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 1,
+    "created_at": "2026-03-31T22:39:19.955799"
+  },
+  {
+    "id": "8d09336e-83b4-4d92-b5d1-a93616f1dc0c",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 304,
+    "response_time_ms": 0,
+    "created_at": "2026-03-31T22:39:20.071816"
+  },
+  {
+    "id": "5e7c4c25-c7d2-42ae-8c37-bf0b86a8e11d",
+    "endpoint": "/robots.txt",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-31T22:39:20.082697"
+  },
+  {
+    "id": "50a58274-fd3d-4a69-99fc-c611be6da33f",
+    "endpoint": "/",
+    "method": "HEAD",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-31T22:39:20.126467"
+  },
+  {
+    "id": "679e35a0-240b-4ffc-85cc-f5e6c7f93337",
+    "endpoint": "/",
+    "method": "GET",
+    "user_id": null,
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "status_code": 200,
+    "response_time_ms": 0,
+    "created_at": "2026-03-31T22:39:20.946411"
+  }
+]
