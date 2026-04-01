@@ -1,0 +1,389 @@
+[
+  {
+    "id": "2f7675c2-3375-47eb-af30-af02d1381966",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "d2484321-63bd-4dcb-87fa-9e50d0682fef",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "history of Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "6a5f6e30-ecb3-484c-bb98-c1ca2a96aec8",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "Google products",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "7655871b-4f18-44a9-90fc-130b30acbfa9",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "impact of Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "3de1c16e-b8ce-42d3-b596-71d5aec0549e",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "future of Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "fd43c678-eac9-4c45-ac9c-526d7bc196a7",
+    "brief_id": "135ccedb-a03f-465e-937b-010c4c5fd8ac",
+    "keyword": "AI in Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h3"
+  },
+  {
+    "id": "0e2f4b87-e1a6-4b2e-b602-b68d3495d967",
+    "brief_id": "89dfce6c-230b-4e0d-aef6-85bd04022425",
+    "keyword": "Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "a3459761-721a-4dfa-af50-ab9993586e24",
+    "brief_id": "89dfce6c-230b-4e0d-aef6-85bd04022425",
+    "keyword": "search engine",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "da5158da-639c-4c3b-98d8-f8ee026f1cc2",
+    "brief_id": "89dfce6c-230b-4e0d-aef6-85bd04022425",
+    "keyword": "ecosystem",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "b6c005c6-7033-4d73-9bb4-e70bae858706",
+    "brief_id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "keyword": "F1 Companion",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "36d6dc38-3ec2-4448-a5be-8f2d28295955",
+    "brief_id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "keyword": "real-time updates",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "e9e4bafd-b437-4c1d-8695-1ab4b9a74c4c",
+    "brief_id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "keyword": "user interface",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h3"
+  },
+  {
+    "id": "3c26622c-d653-4249-8ab9-4050f776cbf4",
+    "brief_id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "keyword": "additional features",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h3"
+  },
+  {
+    "id": "c01aebb1-bb7f-4b1e-a99e-e2f68dfb1b50",
+    "brief_id": "4a256d97-826e-4355-9855-d50521cdb378",
+    "keyword": "user reviews",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "23f0df3b-4e6f-4f0d-b76e-5af8b4d95c66",
+    "brief_id": "67bacc72-b171-42f1-804e-55b3cf44d25b",
+    "keyword": "F1 Companion",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "350c4908-1f83-4f6e-9ea1-05667a1c2f30",
+    "brief_id": "67bacc72-b171-42f1-804e-55b3cf44d25b",
+    "keyword": "Formula 1 app",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "2a97544a-ae4e-4c3c-8ab2-17eef1c0edeb",
+    "brief_id": "67bacc72-b171-42f1-804e-55b3cf44d25b",
+    "keyword": "F1 race updates",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "940b7eb0-fad8-4745-aaed-ced5540c6bf1",
+    "brief_id": "c808ea90-d6ef-4d66-a432-c030e6310471",
+    "keyword": "F1 Companion",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "f0180c96-61fb-4b1f-a00e-be21f9846360",
+    "brief_id": "c808ea90-d6ef-4d66-a432-c030e6310471",
+    "keyword": "Formula 1 tools",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "e644d9c7-7dd8-4c8a-8e6e-b9a321515923",
+    "brief_id": "c808ea90-d6ef-4d66-a432-c030e6310471",
+    "keyword": "best F1 apps",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "1a47c99a-3e55-4f04-be34-0a59fc4e298b",
+    "brief_id": "c808ea90-d6ef-4d66-a432-c030e6310471",
+    "keyword": "F1 Companion features",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "40b852e5-17cd-474e-8cc3-d4f51fb5d44d",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "missing items",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "f82feeb3-c5ef-4465-8228-bffe9973f472",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "prevent missing items",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "7f1296b4-035d-4e58-8ccf-b2e5082487eb",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "missing items causes",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "616a8bad-2a7e-4879-b786-520fb99de48b",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "tracking systems",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "acca0760-01e1-4daa-8c7e-9a830ac776ea",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "employee training",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "dc2a6be3-2554-4a67-a8d8-ad3e64e8def8",
+    "brief_id": "27604e96-5a2c-4673-be73-3491defdcf92",
+    "keyword": "logistic issues",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "fb9cd878-4bd1-41cd-8c34-c92b0d014305",
+    "brief_id": "789f202f-da93-4c41-9b94-9d2895ab2901",
+    "keyword": "YouTube.com",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "b8889fb9-7e08-4fc1-bc1a-a2c8bcda5feb",
+    "brief_id": "789f202f-da93-4c41-9b94-9d2895ab2901",
+    "keyword": "YouTube content creation",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "8dcb4ead-9e33-46cc-afea-d2f1dba9b2ad",
+    "brief_id": "789f202f-da93-4c41-9b94-9d2895ab2901",
+    "keyword": "YouTube monetization",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "fc4a66bb-7c2c-43c5-b16a-c94c135335ba",
+    "brief_id": "789f202f-da93-4c41-9b94-9d2895ab2901",
+    "keyword": "YouTube for businesses",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "dc39f40c-94ea-4b7f-afae-4e6788c4f095",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "YouTube",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "a80b730f-95ec-4545-8dff-0c71774b70fb",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "creating engaging content",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "574b8d38-00fd-4d74-8cf8-6961423930b3",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "YouTube SEO",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h3"
+  },
+  {
+    "id": "638c191c-b61e-4a6e-8c6c-8e6d320ffd15",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "monetizing YouTube",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "042abeb2-d24e-48f2-a821-34fac4e5d293",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "ad revenue",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "ff680603-c5b9-4cd1-b7f5-5d1a1c797589",
+    "brief_id": "30791cc9-7315-459a-91f1-8004bcf7c0e3",
+    "keyword": "channel partnerships",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "body"
+  },
+  {
+    "id": "50b9858d-bb10-4237-9497-630f0edf8526",
+    "brief_id": "9a112122-0b98-4aee-aaad-380e6d7e5752",
+    "keyword": "YouTube",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "4d8d804e-1e43-4968-99df-a3bde5139ede",
+    "brief_id": "9a112122-0b98-4aee-aaad-380e6d7e5752",
+    "keyword": "YouTube SEO",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "271d5b8b-2991-48de-b7ca-08c49b993469",
+    "brief_id": "9a112122-0b98-4aee-aaad-380e6d7e5752",
+    "keyword": "YouTube channel optimization",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "be3ad914-99ac-4647-b6f8-282807757f05",
+    "brief_id": "9a112122-0b98-4aee-aaad-380e6d7e5752",
+    "keyword": "YouTube video promotion",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "h2"
+  },
+  {
+    "id": "6d2207bf-3c3d-42c0-a0f3-892ea80c72e2",
+    "brief_id": "e5729d12-4d52-48e9-9277-71407f90cec7",
+    "keyword": "Google",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  },
+  {
+    "id": "30ac5b7b-8e66-4a70-8127-8eed37bfc25c",
+    "brief_id": "436897bd-5ccd-4773-b439-a42f15fab2be",
+    "keyword": "YouTube",
+    "volume": null,
+    "difficulty": null,
+    "intent": null,
+    "placement": "title"
+  }
+]

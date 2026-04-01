@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://ollama.sageaios.com")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3:30b-a3b")
-OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "120"))
+OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "15"))
 
 NOVA_MODEL = os.environ.get("NOVA_MODEL", "us.amazon.nova-lite-v1:0")
 BEDROCK_REGION = os.environ.get("AWS_REGION_NAME", os.environ.get("AWS_REGION", "us-east-1"))
@@ -68,6 +68,12 @@ def call_ollama(prompt: str) -> str:
     base = OLLAMA_URL.rstrip("/")
     model = OLLAMA_MODEL
 
+    # Quick connectivity check — fail fast if server is unreachable
+    try:
+        requests.get(f"{base}/api/tags", timeout=5)
+    except Exception:
+        raise RuntimeError(f"Ollama server unreachable at {base}")
+
     if not model:
         try:
             tags = requests.get(f"{base}/api/tags", timeout=10).json()
@@ -94,19 +100,65 @@ def call_ollama(prompt: str) -> str:
     return text
 
 
+# ── Groq (fast cloud fallback) ────────────────────────────────────────────────
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+
+def call_groq(prompt: str) -> str:
+    """Call Groq API. Fast cloud LLM fallback."""
+    if not GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY not set")
+    t0 = time.time()
+    resp = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+        json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}], "max_tokens": 1024},
+        timeout=30,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"Groq returned {resp.status_code}: {resp.text[:300]}")
+    text = resp.json()["choices"][0]["message"]["content"]
+    logger.info("Groq responded in %.2fs (%d chars)", time.time() - t0, len(text))
+    return text
+
+
 # ── Unified interface ─────────────────────────────────────────────────────────
 
 def generate(prompt: str, provider: str = "nova") -> str:
-    """Call the specified AI provider. Returns response text."""
+    """Call the specified AI provider with automatic fallback chain.
+
+    Fallback order: requested provider → Groq → Ollama → Nova (skipping the one already tried).
+    """
+    # Build fallback chain based on requested provider
     if provider == "ollama":
-        return call_ollama(prompt)
-    else:
-        return call_nova(prompt)
+        chain = [("ollama", call_ollama), ("groq", call_groq), ("nova", call_nova)]
+    elif provider == "groq":
+        chain = [("groq", call_groq), ("nova", call_nova), ("ollama", call_ollama)]
+    else:  # nova (default)
+        chain = [("nova", call_nova), ("groq", call_groq), ("ollama", call_ollama)]
+
+    errors = []
+    for name, fn in chain:
+        try:
+            return fn(prompt)
+        except Exception as e:
+            logger.warning("Provider '%s' failed: %s", name, str(e)[:200])
+            errors.append(f"{name}: {str(e)[:100]}")
+
+    raise RuntimeError(f"All AI providers failed. " + "; ".join(errors))
 
 
 def get_available_providers() -> list[dict]:
     """Check which providers are available."""
     providers = []
+
+    # Check Groq (fastest)
+    if GROQ_API_KEY:
+        providers.append({"name": "groq", "available": True, "reason": f"model: {GROQ_MODEL}"})
+    else:
+        providers.append({"name": "groq", "available": False, "reason": "GROQ_API_KEY not set"})
 
     # Check Ollama
     try:

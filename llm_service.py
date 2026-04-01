@@ -102,11 +102,17 @@ def _query_groq(keyword, model="llama-3.3-70b-versatile"):
     return resp.choices[0].message.content
 
 def _query_claude(keyword, model="claude-3-haiku-20240307"):
-    """Route Claude queries through Bedrock Nova directly, fallback to Anthropic API."""
+    """Route Claude queries through Bedrock Nova, then Groq, then Anthropic API."""
     # Try Bedrock Nova first (no API key needed, uses IAM role)
     try:
         from ai_provider import call_nova
         return call_nova(f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources.")
+    except Exception:
+        pass
+    # Try Groq as fast fallback
+    try:
+        from ai_provider import call_groq
+        return call_groq(f"Answer comprehensively: '{keyword}'. Include brands, tools, stats, cite sources.")
     except Exception:
         pass
     # Fallback to Anthropic API if key is set

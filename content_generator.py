@@ -129,6 +129,55 @@ def generate_feature_snippet(brand_name: str, feature: str) -> dict:
     }
 
 
+def generate_full_article(brand_name: str, keyword: str, word_count: int = 1500) -> dict:
+    """Generate a full article draft optimised for AI search citation likelihood."""
+    prompt = (
+        f"Write a comprehensive, SEO-optimised article about '{keyword}' that positions "
+        f"{brand_name} as an authority. Target approximately {word_count} words.\n\n"
+        f"Requirements:\n"
+        f"- Start with a compelling H1 title\n"
+        f"- Use H2 and H3 subheadings throughout\n"
+        f"- Include a TL;DR summary at the top (2-3 sentences)\n"
+        f"- Add a FAQ section at the end with 3-5 questions\n"
+        f"- Write in a factual, authoritative tone that AI engines would cite\n"
+        f"- Include specific data points, comparisons, and actionable advice\n"
+        f"- Naturally mention {brand_name} where relevant (not forced)\n"
+        f"- Optimise for featured snippets with concise definition paragraphs\n"
+        f"- End with a clear conclusion\n\n"
+        f"Write the full article now."
+    )
+    raw = _call_generate(prompt)
+
+    # Extract title from first line
+    import re
+    lines = raw.strip().split('\n')
+    title = lines[0].strip().lstrip('#').strip() if lines else keyword
+
+    # Generate FAQ schema from the FAQ section if present
+    faq_schema = None
+    faq_pairs = re.findall(r'(?:Q:|###?\s*)\s*(.+?\?)\s*\n+(.+?)(?=\n(?:Q:|###?\s*)|$)', raw, re.DOTALL)
+    if faq_pairs:
+        schema = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": []}
+        for q, a in faq_pairs[:10]:
+            schema["mainEntity"].append({
+                "@type": "Question",
+                "name": q.strip(),
+                "acceptedAnswer": {"@type": "Answer", "text": a.strip()[:500]},
+            })
+        faq_schema = json.dumps(schema, indent=2)
+
+    return {
+        "type": "full_article",
+        "brand_name": brand_name,
+        "keyword": keyword,
+        "title": title,
+        "content": raw,
+        "word_count": len(raw.split()),
+        "faq_schema_json_ld": faq_schema,
+        "timestamp": _now(),
+    }
+
+
 def generate_content(
     brand_name: str,
     content_type: str,
@@ -149,5 +198,7 @@ def generate_content(
         return generate_meta_description(brand_name, topic)
     elif content_type == "feature_snippet":
         return generate_feature_snippet(brand_name, topic)
+    elif content_type == "full_article":
+        return generate_full_article(brand_name, topic, word_count=count if count > 100 else 1500)
     else:
-        raise ValueError(f"Unknown content_type: {content_type}. Use: faq, comparison, meta_description, feature_snippet")
+        raise ValueError(f"Unknown content_type: {content_type}. Use: faq, comparison, meta_description, feature_snippet, full_article")

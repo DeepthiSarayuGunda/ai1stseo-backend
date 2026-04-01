@@ -6,6 +6,112 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-01 02:40 — RDS Shutdown + Data Export (Troy)
+
+**Per Gurbachan's directive:** Moving away from RDS PostgreSQL to individual DynamoDB tables per app.
+
+**What was done:**
+- Exported all 1,256 rows from 30 tables to `rds-backup/` as JSON files
+- Exported full schema to `rds-backup/_schema.json`
+- Created final RDS snapshot: `ai1stseo-final-backup-20260401`
+- RDS instance stopped (not deleted — can be restarted if needed)
+- Data is safe in 3 places: local JSON, RDS snapshot, stopped instance
+
+**Tables with data (backed up):**
+- `users` (8), `projects` (2), `audits` (14), `geo_probes` (336), `content_briefs` (11)
+- `brief_keywords` (43), `admin_metrics` (8), `ai_usage_log` (18), `api_request_log` (570)
+- `answer_fingerprints` (215), `model_comparisons` (11), `uptime_checks` (15)
+- `monitored_sites` (1), `prompt_simulations` (2), `share_of_voice` (2)
+
+**Impact:** All endpoints that write to RDS will return errors until DynamoDB migration is complete. Auth (Cognito) still works. SEO analyzer still works. Only data persistence is affected.
+
+**Next:** Create DynamoDB tables and update the data API to use DynamoDB instead of PostgreSQL.
+
+**DynamoDB tables created (2026-04-01):**
+| DynamoDB Table | Replaces RDS | PK | GSI |
+|---------------|-------------|-----|-----|
+| ai1stseo-users | users | id | email-index |
+| ai1stseo-audits | audits + audit_checks | id | url-index |
+| ai1stseo-geo-probes | geo_probes | id | keyword-index |
+| ai1stseo-content-briefs | content_briefs | id | — |
+| ai1stseo-social-posts | social_posts | id | — |
+| ai1stseo-admin-metrics | admin_metrics | metric_date | — |
+| ai1stseo-api-logs | api_request_log | id | endpoint-index |
+| ai1stseo-webhooks | webhooks | id | — |
+| ai1stseo-api-keys | api_keys | key_hash | — |
+| ai1stseo-competitors | competitors | id | — |
+| ai1stseo-monitor | monitored_sites + uptime_checks | id | — |
+
+All tables use PAY_PER_REQUEST billing. New modules: `dynamodb_helper.py` (DynamoDB operations) and `data_api_dynamo.py` (data API using DynamoDB).
+
+---
+
+## 2026-03-31 01:15 — Contact Form + Deepthi Lambda Deploy + DB Security (Troy)
+
+**Contact form:**
+- `POST /api/contact` endpoint live on `ai1stseo-backend` Lambda
+- Accepts `{name, email, message}`, sends via SES to `support@ai1stseo.com`
+- `contact.html` on the repo — Amira deploys to Amplify at `/contact`
+
+**Deepthi's Lambda updated:**
+- Deployed her latest code (GEO Scanner Agent, answer fingerprint, model comparison, multilang probe, prompt simulator, share of voice) to `ai1stseo-geo-engine` Lambda
+- Her routes verified: geo-probe/models (200), geo-probe/history (200), aeo/analyze (400), chatbot/session (200), brand/resolve (400)
+- Did NOT touch `ai1stseo-backend` — per-dev routing keeps them separate
+
+**Database security hardening:**
+- ✅ Deletion protection enabled
+- ✅ SSL enforcement via custom parameter group (`ai1stseo-pg15-secure`, `rds.force_ssl=1`)
+- ✅ `pgcrypto` extension installed for row-level encryption capability
+- ✅ DB credentials stored in Secrets Manager (`ai1stseo/db-credentials`)
+- ⚠️ Encryption at rest still off (requires new instance from encrypted snapshot — planned separately)
+
+**EC2 fully terminated:**
+- Instance `i-0d59b5c1a433f0255` terminated (not just stopped)
+- AMI + snapshot cleaned up automatically
+- No orphaned EBS volumes or Elastic IPs (EIP on RDS is needed)
+
+---
+
+## 2026-03-26 18:17 — Content Briefs & Scoring Routes Added (Troy)
+
+**Issue:** GET `/api/content-briefs` was returning index.html instead of JSON. The route was never in the deployed `app.py` — it was in Samarveer's later commits but missed all previous merges.
+
+**Fix:** Added three routes + three compute functions to `app.py`:
+- `GET /api/content-briefs` — list briefs with keyword filter (calls `db.get_content_briefs()`)
+- `GET /api/content-briefs/<id>` — get single brief (calls `db.get_content_brief_by_id()`)
+- `POST /api/content-score` — score a URL for readability + SEO + AEO (40/35/25 weighted)
+- `compute_readability_score()` — Flesch Reading Ease approximation
+- `compute_seo_score()` — 5 on-page SEO checks (title, meta, H1, images, canonical)
+- `compute_aeo_score()` — 5 AI-extractable content checks (FAQ schema, definitions, Q&A headings, lists, tables)
+
+**Status:**
+- `/api/content-score` — fully working (tested: ai1stseo.com → readability 66.4, SEO 40.0, AEO 0.0, overall 32.6)
+- `/api/content-briefs` — route registered, returns JSON, but 500 because `get_content_briefs()` is not yet defined in `db.py`. **Samarveer needs to add this function and push.**
+
+---
+
+## 2026-03-26 18:07 — Full Team Merge + Deepthi's GEO Routes Fixed (Troy)
+
+**What happened:** Rebuilt the Lambda with everyone's code merged. Used Samarveer's 73MB zip as the base (has all dependencies + Deepthi's GEO modules), injected Troy's blueprints (auth, admin, data API, webhooks, API keys), added Mangum Lambda handler, request logging, and CORS for all subdomains.
+
+**What's now live (45+ routes):**
+- Troy's infrastructure: auth, admin dashboard (9 endpoints), data API (22 endpoints), webhooks, API keys, request logging
+- Samarveer's features: `/api/content-brief`, `/api/content-score`, `/api/content-briefs`, `call_llm`, citation gap analysis (10th category)
+- Deepthi's GEO engine: `/api/geo-probe/*` (models, history, batch, compare, trend, schedule, site), `/api/aeo/analyze`, `/api/ai/*` (citation-probe, geo-monitor, ranking-recommendations), `/api/chatbot/*` (session, chat, history, sessions), `/api/brand/resolve`
+- Shared: `/api/analyze` (251 checks across 10 categories), `/api/health`, `/api/ai-recommendations`
+
+**Verified working:**
+- All Samarveer routes: content-brief (400), content-score (400), content-briefs (500 — db connection, route exists)
+- All Deepthi routes: geo-probe/models (200), geo-probe/history (200), chatbot/session (200), aeo/analyze (400)
+- All Troy routes: auth (400), admin (401), data API (401), webhooks (200), API keys (401)
+- CORS: automationhub + monitor both returning correct headers
+
+**EC2 shutdown:** Stopped `i-0d59b5c1a433f0255` (54.226.251.216). All services migrated to Lambda/App Runner/Amplify. Saving ~$30/mo.
+
+**DNS updates:** `seoaudit.ai1stseo.com` and `seoanalysis.ai1stseo.com` CNAMEs updated (Samarveer fixed to point to API Gateway).
+
+---
+
 ## 2026-03-26 12:21 — Lambda Merge Fix (Troy)
 
 **What happened:** Someone deployed a 73MB zip (`lambda_deploy.zip`) directly to the `ai1stseo-backend` Lambda, overwriting the existing 26MB package. The new deploy didn't include the auth module (`auth.py`), breaking login for all users (`/api/auth/login` returned 405).
