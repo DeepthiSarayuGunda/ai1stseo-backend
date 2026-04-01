@@ -3405,6 +3405,7 @@ if IS_LAMBDA:
         pass
 
 # ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
+import sqlite3
 
 SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
