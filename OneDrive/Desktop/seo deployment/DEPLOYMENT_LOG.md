@@ -6,6 +6,29 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-01 11:00 — Email Lead Collection Endpoint + DynamoDB Table (Troy)
+
+**Per Amira's request:** PDF download email gate needs backend storage.
+
+**What was done:**
+- Created DynamoDB table: `ai1stseo-email-leads` (PK: `id`, GSI: `email-index`, PAY_PER_REQUEST)
+- Added `POST /api/collect-email` endpoint to `app.py` — no auth required (public lead capture)
+- Accepts: `{email, source, page_url, report_type}`
+- Returns: `{status: "success"}` on save
+
+**For Amira:** Update your PDF download JS to POST to `https://api.ai1stseo.com/api/collect-email` with the email before generating the PDF. Example:
+```js
+fetch('https://api.ai1stseo.com/api/collect-email', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({email: userEmail, source: 'pdf_download', page_url: window.location.href, report_type: 'seo_audit'})
+});
+```
+
+**Note:** This endpoint is in `app.py` but NOT yet deployed to Lambda. Will be included in the next Lambda deploy (DynamoDB migration).
+
+---
+
 ## 2026-04-01 02:40 — RDS Shutdown + Data Export (Troy)
 
 **Per Gurbachan's directive:** Moving away from RDS PostgreSQL to individual DynamoDB tables per app.
