@@ -27,6 +27,23 @@ Check the latest entry below to understand the current state of all services bef
 
 **Next:** Create DynamoDB tables and update the data API to use DynamoDB instead of PostgreSQL.
 
+**DynamoDB tables created (2026-04-01):**
+| DynamoDB Table | Replaces RDS | PK | GSI |
+|---------------|-------------|-----|-----|
+| ai1stseo-users | users | id | email-index |
+| ai1stseo-audits | audits + audit_checks | id | url-index |
+| ai1stseo-geo-probes | geo_probes | id | keyword-index |
+| ai1stseo-content-briefs | content_briefs | id | — |
+| ai1stseo-social-posts | social_posts | id | — |
+| ai1stseo-admin-metrics | admin_metrics | metric_date | — |
+| ai1stseo-api-logs | api_request_log | id | endpoint-index |
+| ai1stseo-webhooks | webhooks | id | — |
+| ai1stseo-api-keys | api_keys | key_hash | — |
+| ai1stseo-competitors | competitors | id | — |
+| ai1stseo-monitor | monitored_sites + uptime_checks | id | — |
+
+All tables use PAY_PER_REQUEST billing. New modules: `dynamodb_helper.py` (DynamoDB operations) and `data_api_dynamo.py` (data API using DynamoDB).
+
 ---
 
 ## 2026-03-31 01:15 — Contact Form + Deepthi Lambda Deploy + DB Security (Troy)
