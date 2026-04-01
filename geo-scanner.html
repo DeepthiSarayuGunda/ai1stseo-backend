@@ -178,6 +178,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 <nav class="nav" style="justify-content:center" aria-label="Dashboard navigation">
   <a href="/dashboard.html">← Dashboard</a>
   <a href="/">Home</a>
+  <a href="#month1-research" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:#34d399">📊 Month 1 Research</a>
 </nav>
 
 <!-- Scanner Input Card -->
@@ -547,6 +548,84 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <label>Interval (minutes)</label><input id="sj-int" type="number" value="60">
   <button style="background:#6366f1" onclick="createSchedule()">Register Schedule</button>
   <div id="sj-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- MONTH 1 RESEARCH SECTION                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section-title" id="month1-research" style="margin-top:48px"><span>📊</span> Month 1 — Research &amp; Platform Mastery</div>
+
+<div class="grid">
+
+<!-- Keyword Universe Builder -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Keyword Universe Builder</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Generate 200 categorised natural-language queries across 8 topic clusters</p>
+  <label>Brand</label><input id="m1-ku-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Topic / Industry</label><input id="m1-ku-topic" placeholder="e.g. AI SEO tools">
+  <button style="background:#10b981" onclick="m1KeywordUniverse()">Generate 200 Keywords</button>
+  <div id="m1-ku-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:400px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Benchmark Runner -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Benchmark Runner</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Full tool suite on 5 brands — GEO, AEO, E-E-A-T, Cross-Model, Site Detection</p>
+  <label>Primary Brand</label><input id="m1-bm-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Competitors (comma-separated)</label><input id="m1-bm-comp" placeholder="e.g. Semrush, Ahrefs">
+  <label>Visibility Brands (comma-separated)</label><input id="m1-bm-vis" placeholder="e.g. HubSpot, Moz">
+  <label>Keywords (comma-separated, optional)</label><textarea id="m1-bm-kw" rows="2" placeholder="Leave empty to use Keyword Universe"></textarea>
+  <button style="background:#f59e0b;color:#000" onclick="m1Benchmark()">Run Full Benchmark</button>
+  <div id="m1-bm-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:400px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Provider Behaviour Engine -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Provider Behaviour Engine</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Compare Nova, Ollama, Claude, Groq, OpenAI, Gemini, Perplexity empirically</p>
+  <label>Brand</label><input id="m1-pb-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keywords (comma-separated, optional)</label><textarea id="m1-pb-kw" rows="2" placeholder="Leave empty to use Keyword Universe"></textarea>
+  <button style="background:#8b5cf6" onclick="m1ProviderBehaviour()">Compare All Providers</button>
+  <div id="m1-pb-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:400px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Monitoring Activator -->
+<div class="card" style="position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Monitoring Activator</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Activate weekly Nova, 3-day competitive, weekly Ollama scheduled jobs</p>
+  <label>Brand</label><input id="m1-ma-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>Keywords (comma-separated, optional)</label><textarea id="m1-ma-kw" rows="2" placeholder="Leave empty to use Keyword Universe"></textarea>
+  <button style="background:#0891b2" onclick="m1MonitoringActivate()">Activate Monitoring</button>
+  <div id="m1-ma-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:400px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
+<!-- Baseline Report (full-width) -->
+<div class="card" style="grid-column:1/-1;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#238636,#3fb950)"></div>
+  <span class="tag tag-live">LIVE</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Month 1 Baseline Report</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Run all 8 deliverables: Keyword Universe, Benchmark, Provider Guide, Answer Taxonomy, GEO Baseline, Monitoring, E-E-A-T Register, Technical Debt</p>
+  <label>Brand</label><input id="m1-all-brand" class="sync-brand" placeholder="Auto-filled from above">
+  <label>URL</label><input id="m1-all-url" class="sync-url" placeholder="Auto-filled from above">
+  <label>Topic / Industry</label><input id="m1-all-topic" placeholder="e.g. AI SEO tools">
+  <div class="row2">
+    <div><label>Competitors (comma-separated)</label><input id="m1-all-comp" placeholder="e.g. Semrush, Ahrefs"></div>
+    <div><label>Visibility Brands (comma-separated)</label><input id="m1-all-vis" placeholder="e.g. HubSpot, Moz"></div>
+  </div>
+  <label>Brand Pages to Audit (comma-separated URLs)</label><textarea id="m1-all-pages" rows="2" placeholder="e.g. https://ai1stseo.com/, https://ai1stseo.com/features"></textarea>
+  <button class="btn-scan" onclick="m1RunAll()">🚀 Generate Month 1 Report</button>
+  <div id="m1-all-progress" style="display:none;margin-top:12px;padding:14px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:.82rem;color:#8b949e"></div>
+  <div id="m1-all-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:500px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
 
 </div>
@@ -1450,6 +1529,186 @@ async function createSchedule() {
     });
     show('sj-out', d);
   } catch (e) { showFriendly('sj-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+// ── Month 1 Research Functions ───────────────────────────────────────────────
+
+function m1Show(id, data) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  if (typeof data === 'object') {
+    // Build friendly summary if possible
+    let html = '';
+    if (data.error) {
+      html = `<div style="color:#f85149">❌ ${esc(data.error)}</div>`;
+    } else if (data.total_keywords) {
+      html = `<div style="color:#3fb950;font-weight:700;margin-bottom:8px">✅ Generated ${data.total_keywords} keywords</div>`;
+      html += `<div style="font-size:.78rem;color:#8b949e;margin-bottom:8px">By intent: ${JSON.stringify(data.summary?.by_intent_type || {})}</div>`;
+      html += `<div style="font-size:.78rem;color:#8b949e;margin-bottom:8px">By value: ${JSON.stringify(data.summary?.by_commercial_value || {})}</div>`;
+      html += `<div style="font-size:.78rem;color:#8b949e">Tier 1: ${data.summary?.tier_1_count || 0} | Tier 2: ${data.summary?.tier_2_count || 0} | Tier 3: ${data.summary?.tier_3_count || 0}</div>`;
+      if (data.keywords) {
+        html += `<details style="margin-top:10px"><summary style="cursor:pointer;color:#58a6ff;font-size:.78rem">View all keywords</summary><pre style="margin-top:6px;font-size:.72rem;color:#7d8590">${esc(JSON.stringify(data.keywords.slice(0,50), null, 2))}</pre></details>`;
+      }
+    } else if (data.comparison_summary) {
+      html = `<div style="color:#3fb950;font-weight:700;margin-bottom:8px">✅ Benchmark Complete</div>`;
+      data.comparison_summary.forEach(b => {
+        const color = b.avg_visibility_score > 50 ? '#3fb950' : b.avg_visibility_score > 25 ? '#d29922' : '#f85149';
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;margin-bottom:4px;font-size:.82rem"><span style="color:#c9d1d9">${esc(b.brand)}</span><span style="color:${color};font-weight:700">${(b.avg_visibility_score||0).toFixed(1)}% visibility</span></div>`;
+      });
+    } else if (data.provider_ranking) {
+      html = `<div style="color:#3fb950;font-weight:700;margin-bottom:8px">✅ Provider Analysis Complete</div>`;
+      data.provider_ranking.forEach(p => {
+        const pct = (p.citation_rate * 100).toFixed(1);
+        const color = p.citation_rate > 0.5 ? '#3fb950' : p.citation_rate > 0.2 ? '#d29922' : '#f85149';
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;margin-bottom:4px;font-size:.82rem"><span style="color:#c9d1d9">${esc(p.provider)}</span><span style="color:${color};font-weight:700">${pct}% citation rate</span></div>`;
+      });
+      if (data.nova_vs_ollama) {
+        html += `<div style="margin-top:10px;padding:10px;background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:8px;font-size:.78rem;color:#8b949e">Nova vs Ollama agreement: <strong style="color:#58a6ff">${(data.nova_vs_ollama.agreement_rate*100).toFixed(1)}%</strong></div>`;
+      }
+    } else if (data.monitoring_summary) {
+      html = `<div style="color:#3fb950;font-weight:700;margin-bottom:8px">✅ Monitoring Activated</div>`;
+      html += `<div style="font-size:.82rem;color:#8b949e">Keywords monitored: ${data.monitoring_summary.total_keywords_monitored}</div>`;
+      html += `<div style="font-size:.82rem;color:#8b949e">Schedules active: ${data.monitoring_summary.schedules_active}</div>`;
+      html += `<div style="font-size:.82rem;color:#8b949e">Providers: ${(data.monitoring_summary.providers_active||[]).join(', ')}</div>`;
+    } else if (data.deliverables) {
+      const completed = data.completed || 0;
+      const failed = data.failed || 0;
+      html = `<div style="color:#3fb950;font-weight:700;margin-bottom:8px">✅ Month 1 Report Complete — ${completed}/8 deliverables</div>`;
+      if (failed > 0) html += `<div style="color:#f85149;font-size:.82rem;margin-bottom:8px">${failed} deliverable(s) failed</div>`;
+      html += `<div style="font-size:.82rem;color:#8b949e;margin-bottom:8px">Elapsed: ${(data.elapsed_seconds||0).toFixed(0)}s</div>`;
+      Object.entries(data.deliverables).forEach(([k, v]) => {
+        const icon = v === 'complete' ? '✅' : '❌';
+        html += `<div style="padding:4px 10px;font-size:.78rem;color:#c9d1d9">${icon} ${k}: ${v}</div>`;
+      });
+    } else {
+      html = `<pre style="font-size:.72rem;color:#7d8590">${esc(JSON.stringify(data, null, 2).substring(0, 5000))}</pre>`;
+    }
+    el.innerHTML = html;
+  } else {
+    el.textContent = String(data);
+  }
+}
+
+function m1PollJob(jobId, outId, progressEl) {
+  let elapsed = 0;
+  const interval = setInterval(async () => {
+    elapsed += 5;
+    try {
+      const d = await api('GET', `/api/month1/job/${jobId}`);
+      if (d.status === 'complete') {
+        clearInterval(interval);
+        if (progressEl) progressEl.style.display = 'none';
+        m1Show(outId, d.result || d);
+      } else if (d.status === 'failed') {
+        clearInterval(interval);
+        if (progressEl) progressEl.innerHTML = '❌ Job failed';
+        m1Show(outId, {error: d.error || 'Job failed'});
+      } else {
+        // Still pending
+        const el = document.getElementById(outId);
+        el.style.display = 'block';
+        let msg = `⏳ Running… ${elapsed}s elapsed`;
+        if (elapsed >= 180) msg += ' — taking longer than expected. Results will be saved when complete.';
+        el.innerHTML = `<div style="color:#8b949e">${msg}</div>`;
+        if (progressEl) progressEl.innerHTML = msg;
+      }
+    } catch (e) {
+      // Network error on poll — keep trying
+      const el = document.getElementById(outId);
+      el.style.display = 'block';
+      el.innerHTML = `<div style="color:#d29922">⏳ Checking… (${elapsed}s)</div>`;
+    }
+  }, 5000);
+}
+
+async function m1KeywordUniverse() {
+  const outId = 'm1-ku-out';
+  m1Show(outId, {error: '🔄 Generating 200 keywords…'});
+  document.getElementById(outId).querySelector('div').style.color = '#8b949e';
+  try {
+    const d = await api('POST', '/api/month1/keyword-universe', {
+      brand: document.getElementById('m1-ku-brand').value.trim(),
+      topic: document.getElementById('m1-ku-topic').value.trim()
+    });
+    m1Show(outId, d);
+  } catch (e) { m1Show(outId, {error: e.message}); }
+}
+
+async function m1Benchmark() {
+  const outId = 'm1-bm-out';
+  m1Show(outId, {error: '🔄 Starting benchmark job…'});
+  document.getElementById(outId).querySelector('div').style.color = '#8b949e';
+  try {
+    const kw = document.getElementById('m1-bm-kw').value.split(',').map(k=>k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/month1/benchmark', {
+      brand: document.getElementById('m1-bm-brand').value.trim(),
+      competitors: document.getElementById('m1-bm-comp').value.split(',').map(k=>k.trim()).filter(Boolean),
+      visibility_brands: document.getElementById('m1-bm-vis').value.split(',').map(k=>k.trim()).filter(Boolean),
+      keywords: kw.length ? kw : undefined
+    });
+    if (d.job_id) { m1PollJob(d.job_id, outId); }
+    else { m1Show(outId, d); }
+  } catch (e) { m1Show(outId, {error: e.message}); }
+}
+
+async function m1ProviderBehaviour() {
+  const outId = 'm1-pb-out';
+  m1Show(outId, {error: '🔄 Starting provider analysis job…'});
+  document.getElementById(outId).querySelector('div').style.color = '#8b949e';
+  try {
+    const kw = document.getElementById('m1-pb-kw').value.split(',').map(k=>k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/month1/provider-behaviour', {
+      brand: document.getElementById('m1-pb-brand').value.trim(),
+      keywords: kw.length ? kw : undefined
+    });
+    if (d.job_id) { m1PollJob(d.job_id, outId); }
+    else { m1Show(outId, d); }
+  } catch (e) { m1Show(outId, {error: e.message}); }
+}
+
+async function m1MonitoringActivate() {
+  const outId = 'm1-ma-out';
+  m1Show(outId, {error: '🔄 Activating monitoring schedules…'});
+  document.getElementById(outId).querySelector('div').style.color = '#8b949e';
+  try {
+    const kw = document.getElementById('m1-ma-kw').value.split(',').map(k=>k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/month1/monitoring/activate', {
+      brand: document.getElementById('m1-ma-brand').value.trim(),
+      keywords: kw.length ? kw : undefined
+    });
+    m1Show(outId, d);
+  } catch (e) { m1Show(outId, {error: e.message}); }
+}
+
+async function m1RunAll() {
+  const outId = 'm1-all-out';
+  const progId = 'm1-all-progress';
+  const prog = document.getElementById(progId);
+  prog.style.display = 'block';
+  prog.innerHTML = '🔄 Starting Month 1 full run…';
+  m1Show(outId, {error: '⏳ Submitting job…'});
+  document.getElementById(outId).querySelector('div').style.color = '#8b949e';
+  try {
+    const pages = document.getElementById('m1-all-pages').value.split(',').map(k=>k.trim()).filter(Boolean);
+    const d = await api('POST', '/api/month1/run-all', {
+      brand: document.getElementById('m1-all-brand').value.trim(),
+      url: document.getElementById('m1-all-url').value.trim(),
+      topic: document.getElementById('m1-all-topic').value.trim(),
+      competitors: document.getElementById('m1-all-comp').value.split(',').map(k=>k.trim()).filter(Boolean),
+      visibility_brands: document.getElementById('m1-all-vis').value.split(',').map(k=>k.trim()).filter(Boolean),
+      pages: pages
+    });
+    if (d.job_id) {
+      prog.innerHTML = '🔄 Job submitted. Polling for results every 5 seconds…';
+      m1PollJob(d.job_id, outId, prog);
+    } else {
+      prog.style.display = 'none';
+      m1Show(outId, d);
+    }
+  } catch (e) {
+    prog.innerHTML = '❌ Request failed';
+    m1Show(outId, {error: e.message});
+  }
 }
 </script>
 </div><!-- /page-wrap -->
