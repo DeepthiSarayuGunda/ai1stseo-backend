@@ -144,7 +144,24 @@ def require_admin(f):
 
 
 def _get_user_role(email):
-    """Look up user role from RDS. Returns 'member' if not found."""
+    """Look up user role from DynamoDB (primary) or RDS (fallback). Returns 'member' if not found."""
+    # Try DynamoDB first (current architecture)
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if items:
+            return items[0].get('role', 'member')
+    except Exception:
+        pass
+    # Fallback to RDS (if still available)
     try:
         from database import query_one
         row = query_one("SELECT role FROM users WHERE email = %s", (email,))
@@ -154,7 +171,44 @@ def _get_user_role(email):
 
 
 def _sync_user_to_db(email, cognito_sub, name=''):
-    """Upsert user to RDS on login — syncs Cognito data to local users table."""
+    """Upsert user to DynamoDB (primary) or RDS (fallback) on login."""
+    # Try DynamoDB first
+    try:
+        import boto3, uuid
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        now = datetime.now(timezone.utc).isoformat()
+        if items:
+            table.update_item(
+                Key={'userId': items[0]['userId']},
+                UpdateExpression='SET last_login = :ll, cognito_sub = :cs, #n = :nm',
+                ExpressionAttributeNames={'#n': 'name'},
+                ExpressionAttributeValues={':ll': now, ':cs': cognito_sub, ':nm': name},
+            )
+            return items[0].get('role', 'member')
+        else:
+            table.put_item(Item={
+                'userId': str(uuid.uuid4()),
+                'email': email,
+                'cognito_sub': cognito_sub,
+                'name': name,
+                'role': 'member',
+                'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                'created_at': now,
+                'last_login': now,
+            })
+            return 'member'
+    except Exception:
+        pass
+    # Fallback to RDS
     try:
         from database import execute, query_one
         existing = query_one("SELECT id, role FROM users WHERE email = %s", (email,))
@@ -165,7 +219,6 @@ def _sync_user_to_db(email, cognito_sub, name=''):
             )
             return existing['role']
         else:
-            # Default project
             project_id = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
             execute(
                 "INSERT INTO users (cognito_sub, email, name, role, project_id, last_login) "
