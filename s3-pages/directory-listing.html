@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Business Name — AI1stSEO Directory</title>
+    <meta name="description" id="metaDesc" content="">
+    <script id="schemaLD" type="application/ld+json">{}</script>
+    <style>
+        :root { --bg: #0a0a0a; --text: #fff; --muted: rgba(255,255,255,0.6); --faint: rgba(255,255,255,0.3); --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --accent: #00d4ff; --green: #00ff88; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        a { color: var(--accent); text-decoration: none; }
+        nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+        .nav-logo { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .breadcrumb { padding: 16px 32px; font-size: 0.85rem; color: var(--faint); max-width: 1100px; margin: 0 auto; }
+        .breadcrumb a { color: var(--muted); }
+        .listing { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+        .listing-hero { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 32px; }
+        .listing-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #00d4ff, #7b2cbf); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0; }
+        .listing-info h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+        .listing-info .category-tag { display: inline-block; padding: 4px 12px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 16px; font-size: 0.75rem; color: var(--accent); margin-right: 8px; }
+        .listing-info .ai-tag { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: #00ff88; }
+        .listing-info .rating { color: #f59e0b; font-size: 1rem; margin-top: 8px; }
+        .listing-info .rating span { color: var(--muted); font-size: 0.85rem; }
+        .bluf { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; border-left: 4px solid var(--accent); }
+        .bluf p { font-size: 1rem; line-height: 1.7; color: var(--muted); }
+        .facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 32px; }
+        .fact-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .fact-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--faint); margin-bottom: 4px; }
+        .fact-value { font-size: 1rem; font-weight: 600; }
+        .section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+        .section h2 { font-size: 1.2rem; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .faq-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--accent); }
+        .faq-a { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+        .cta-box { background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(123,44,191,0.1)); border: 1px solid rgba(0,212,255,0.3); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 24px; }
+        .cta-box h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .cta-box p { color: var(--muted); margin-bottom: 16px; font-size: 0.9rem; }
+        .cta-btn { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: 700; border-radius: 10px; font-size: 0.95rem; }
+        .loading { text-align: center; padding: 80px 20px; color: var(--muted); }
+        .loading h2 { color: var(--accent); margin-bottom: 12px; }
+        footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--faint); font-size: 0.8rem; }
+        @media (max-width: 768px) { .listing-hero { flex-direction: column; } nav { padding: 12px 16px; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">AI1stSEO Directory</a>
+        <div style="display:flex;gap:16px;align-items:center;">
+            <a href="https://www.ai1stseo.com" style="color:var(--muted);font-size:0.9rem;">Home</a>
+            <a href="/directory" style="color:var(--muted);font-size:0.9rem;">Top 10</a>
+        </div>
+    </nav>
+    <div class="breadcrumb">
+        <a href="https://www.ai1stseo.com">Home</a> / <a href="/directory">Ottawa</a> / <a href="/directory">Dentists</a> / <span style="color:var(--text);" id="breadcrumbName">Loading...</span>
+    </div>
+    <div class="listing" id="content">
+        <div class="loading"><h2>Loading business details...</h2></div>
+    </div>
+    <footer>&copy; 2026 AI1stSEO Directory. AI-optimized business listings for ChatGPT, Gemini, Perplexity, and Claude.</footer>
+
+<script>
+const API = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+const slug = new URLSearchParams(window.location.search).get('biz');
+
+function stars(r) { return '★'.repeat(Math.floor(r)) + (r % 1 >= 0.5 ? '½' : '') + '☆'.repeat(5 - Math.ceil(r)); }
+function citationLabel(v) { return v ? '<span style="color:#00ff88;">Cited</span>' : '<span style="color:#f44336;">Not Found</span>'; }
+
+async function load() {
+  if (!slug) { document.getElementById('content').innerHTML = '<div class="loading"><h2>No business specified</h2><p><a href="/directory">Browse the directory</a></p></div>'; return; }
+  try {
+    const r = await fetch(`${API}/api/directory/listings/${slug}`);
+    if (!r.ok) throw new Error('Not found');
+    const b = await r.json();
+
+    const cats = Array.isArray(b.subcategories) ? b.subcategories : [];
+    const rating = b.rating || 0;
+    const reviews = b.review_count || 0;
+    const ai = b.ai_score || 0;
+    const faqs = Array.isArray(b.faq_json) ? b.faq_json : [];
+    const hours = typeof b.hours_json === 'object' ? b.hours_json : {};
+    const hoursStr = Object.entries(hours).map(([k,v]) => `${k} ${v}`).join(', ') || 'Contact for hours';
+
+    document.title = `${b.name} — AI1stSEO Directory | Best Dentists in Ottawa`;
+    document.getElementById('metaDesc').content = `${b.name} in ${b.city || 'Ottawa'} — ${rating}/5 rating, ${reviews} reviews. ${cats.join(', ')} dentistry. AI-optimized listing.`;
+    document.getElementById('breadcrumbName').textContent = b.name;
+
+    document.getElementById('content').innerHTML = `
+      <div class="listing-hero">
+        <div class="listing-icon">🦷</div>
+        <div class="listing-info">
+          <h1>${b.name}</h1>
+          <div>
+            ${cats.map(c => `<span class="category-tag">${c.charAt(0).toUpperCase() + c.slice(1)}</span>`).join('')}
+            ${ai >= 80 ? '<span class="category-tag ai-tag">AI Citation Ready</span>' : ''}
+          </div>
+          <div class="rating">${stars(rating)} <span>${rating} / 5 (${reviews} reviews)</span></div>
+        </div>
+      </div>
+      <div class="bluf"><p>${b.ai_summary || 'Business summary not yet generated.'}</p></div>
+      <div class="facts-grid">
+        <div class="fact-card"><div class="fact-label">Category</div><div class="fact-value">Dentist — ${cats.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' & ')}</div></div>
+        <div class="fact-card"><div class="fact-label">Location</div><div class="fact-value">${b.address || 'N/A'}</div></div>
+        <div class="fact-card"><div class="fact-label">Rating</div><div class="fact-value">${rating} / 5 (${reviews} reviews)</div></div>
+        <div class="fact-card"><div class="fact-label">Hours</div><div class="fact-value">${hoursStr}</div></div>
+        <div class="fact-card"><div class="fact-label">Phone</div><div class="fact-value">${b.phone || 'N/A'}</div></div>
+        <div class="fact-card"><div class="fact-label">Website</div><div class="fact-value"><a href="${b.website || '#'}" target="_blank">${(b.website || '').replace('https://','')}</a></div></div>
+        <div class="fact-card"><div class="fact-label">AI Visibility Score</div><div class="fact-value" style="color:#00ff88;">${ai} / 100</div></div>
+      </div>
+      ${faqs.length ? `<div class="section"><h2>Frequently Asked Questions</h2>${faqs.map(f => `<div class="faq-item"><div class="faq-q">${f.question}</div><div class="faq-a">${f.answer}</div></div>`).join('')}</div>` : ''}
+      <div class="section" style="border-left:4px solid #a855f7;">
+        <h2>AI Citation Status</h2>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">How AI search engines reference this business:</p>
+        <div class="facts-grid" style="margin-bottom:0;">
+          <div class="fact-card"><div class="fact-label">ChatGPT</div><div class="fact-value">${citationLabel(b.citation_chatgpt)}</div></div>
+          <div class="fact-card"><div class="fact-label">Gemini</div><div class="fact-value">${citationLabel(b.citation_gemini)}</div></div>
+          <div class="fact-card"><div class="fact-label">Perplexity</div><div class="fact-value">${citationLabel(b.citation_perplexity)}</div></div>
+          <div class="fact-card"><div class="fact-label">Claude</div><div class="fact-value">${citationLabel(b.citation_claude)}</div></div>
+        </div>
+      </div>
+      <div class="cta-box"><h3>Is this your business?</h3><p>Claim your listing to update information, respond to reviews, and boost your AI visibility score.</p><a href="#" class="cta-btn">Claim This Listing</a></div>`;
+
+    // JSON-LD schema
+    const schema = {"@context":"https://schema.org","@graph":[
+      {"@type":"LocalBusiness","name":b.name,"description":b.ai_summary||'',"address":{"@type":"PostalAddress","streetAddress":b.address||'',"addressLocality":b.city||'Ottawa',"addressRegion":b.province||'ON',"addressCountry":"CA"},"telephone":b.phone||'',"url":b.website||'',"aggregateRating":{"@type":"AggregateRating","ratingValue":String(rating),"reviewCount":String(reviews)}},
+      faqs.length ? {"@type":"FAQPage","mainEntity":faqs.map(f=>({"@type":"Question","name":f.question,"acceptedAnswer":{"@type":"Answer","text":f.answer}}))} : null
+    ].filter(Boolean)};
+    document.getElementById('schemaLD').textContent = JSON.stringify(schema);
+  } catch(e) {
+    document.getElementById('content').innerHTML = `<div class="loading"><h2>Business not found</h2><p>${e.message}. <a href="/directory">Browse the directory</a></p></div>`;
+  }
+}
+load();
+</script>
+</body>
+</html>

@@ -3202,6 +3202,13 @@ def serve_directory():
     return render_template('directory_category.html')
 
 
+@app.route('/directory-listing.html')
+@app.route('/directory-listing')
+def serve_directory_listing():
+    """AI Business Directory — individual listing detail page."""
+    return render_template('directory_listing.html')
+
+
 # ── Month 1 Research API ──────────────────────────────────────────────────────
 
 @app.route('/api/month1/keyword-universe', methods=['POST'])
