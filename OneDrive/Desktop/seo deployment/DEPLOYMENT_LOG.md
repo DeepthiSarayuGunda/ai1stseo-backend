@@ -6,6 +6,37 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-02 19:00 — DynamoDB Migration Complete + RDS Deleted (Troy)
+
+**Full migration from RDS PostgreSQL to DynamoDB. RDS instance deleted.**
+
+**Modules updated to DynamoDB:**
+- `app.py` — swapped `data_api` import to `data_api_dynamo`, request logging writes to DynamoDB
+- `admin_api.py` — all 9 endpoints rewritten for DynamoDB scans/queries
+- `webhook_api.py` — CRUD + dispatch rewritten for DynamoDB
+- `apikey_api.py` — key storage, validation, rate limiting rewritten for DynamoDB
+- `admin_aggregation.py` — daily metrics aggregation rewritten for DynamoDB
+- `ai_inference.py` — AI usage logging writes to DynamoDB
+- `auth.py` — role lookup checks DynamoDB first, RDS fallback removed
+
+**Data migrated (981 rows):**
+- users (8) → ai1stseo-users
+- audits (14) → ai1stseo-audits
+- geo_probes (336) → ai1stseo-geo-probes
+- content_briefs (11) → ai1stseo-content-briefs
+- admin_metrics (8) → ai1stseo-admin-metrics
+- api_request_log (570) + ai_usage_log (18) → ai1stseo-api-logs
+- monitored_sites (1) + uptime_checks (15) → ai1stseo-monitor
+
+**RDS deleted:**
+- Instance `ai1stseo-db` deleted (was already stopped since Apr 1)
+- Final snapshot preserved: `ai1stseo-final-backup-20260401`
+- Saves ~$15/month
+
+**Impact:** All backend modules now use DynamoDB exclusively. No RDS dependency remains. Lambda deploy needed to make changes live.
+
+---
+
 ## 2026-04-02 18:15 — OpenClaw Gateway Installed on seo-dev (Troy)
 
 **OpenClaw Gateway v2026.4.1 installed and running on Gurbachan's Tailscale server.**
