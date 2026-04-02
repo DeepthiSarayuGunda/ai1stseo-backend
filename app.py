@@ -38,6 +38,13 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# --- AI Business Directory routes (isolated module) ---
+try:
+    from directory.routes import register_directory_routes
+    register_directory_routes(app)
+except Exception:
+    pass
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
