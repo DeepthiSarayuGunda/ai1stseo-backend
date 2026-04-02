@@ -65,54 +65,26 @@ def handle_405(e):
     return e
 
 # ── Database initialization ────────────────────────────────────────────────────
-# Try RDS first, fall back to DynamoDB if RDS is stopped
-USE_DYNAMODB = False
-try:
-    from db import init_db
-    init_db()
-    print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
-except Exception as e:
-    print(f"⚠ RDS init failed, switching to DynamoDB: {e}")
-    USE_DYNAMODB = True
+# RDS is stopped per Gurbachan/Troy directive — use DynamoDB directly.
+# Set USE_DYNAMODB=True to skip the RDS connection attempt (avoids 10s+ timeout on Lambda cold start).
+# To re-enable RDS: set env var USE_RDS=1
+USE_DYNAMODB = not bool(os.environ.get("USE_RDS"))
+if not USE_DYNAMODB:
+    try:
+        from db import init_db
+        init_db()
+        print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+    except Exception as e:
+        print(f"⚠ RDS init failed, switching to DynamoDB: {e}")
+        USE_DYNAMODB = True
+
+if USE_DYNAMODB:
     try:
         from db_dynamo import init_db
         init_db()
         print("✓ DynamoDB mode active")
     except Exception as e2:
         print(f"⚠ DynamoDB init also failed: {e2}")
-    # Initialize new feature tables
-    try:
-        from answer_fingerprint import init_fingerprint_tables
-        init_fingerprint_tables()
-        print("✓ answer_fingerprints table initialized")
-    except Exception as e2:
-        print(f"⚠ answer_fingerprints init: {e2}")
-    try:
-        from model_comparison import init_comparison_tables
-        init_comparison_tables()
-        print("✓ model_comparisons table initialized")
-    except Exception as e2:
-        print(f"⚠ model_comparisons init: {e2}")
-    try:
-        from multilang_probe import init_multilang_columns
-        init_multilang_columns()
-        print("✓ multilang columns initialized")
-    except Exception as e2:
-        print(f"⚠ multilang init: {e2}")
-    try:
-        from share_of_voice import init_sov_tables
-        init_sov_tables()
-        print("✓ share_of_voice table initialized")
-    except Exception as e2:
-        print(f"⚠ share_of_voice init: {e2}")
-    try:
-        from prompt_simulator import init_simulator_tables
-        init_simulator_tables()
-        print("✓ prompt_simulations table initialized")
-    except Exception as e2:
-        print(f"⚠ prompt_simulations init: {e2}")
-except Exception as e:
-    print(f"⚠ RDS init failed (will retry on first request): {e}")
 
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
