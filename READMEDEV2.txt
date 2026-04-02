@@ -1,21 +1,20 @@
 READMEDEV2 - Samar's Changes Summary (Dev 2 - Content & NLP)
 ==============================================================
-Updated: April 1, 2026 (covers March 23 - April 1 work)
+Updated: April 2, 2026 (covers March 23 - April 2 work)
 
 FILES MODIFIED/CREATED BY DEV 2:
 ----------------------------------
-1. app.py (modified — added routes, functions, DynamoDB fallback)
+1. app.py (modified — routes, functions, DynamoDB default, Lambda cold start fix)
 2. db.py (modified — added content briefs CRUD, keyword filtering)
 3. db_dynamo.py (NEW — DynamoDB replacement for db.py)
 4. bedrock_helper.py (modified — Nova Lite field name fix)
-5. audit.html (modified — citation gap UI, content brief UI)
-6. OneDrive/Desktop/seo deployment/audit.html (S3 version)
-7. DEV2-CHANGES.md (NEW — full changelog for team)
-8. MERGE-FOR-TROY.py (NEW — merge checklist)
-9. dns-update.json (NEW — DNS fix for seoaudit/seoanalysis subdomains)
+5. audit.html (modified — citation gap UI, content brief UI, API_BASE fix, dropdown styling)
+6. DEV2-CHANGES.md (NEW — full changelog for team)
+7. MERGE-FOR-TROY.py (NEW — merge checklist)
+8. dns-update.json (NEW — DNS fix for seoaudit/seoanalysis subdomains)
 
 ========================================================================
-FULL CHANGELOG (March 23 - April 1)
+FULL CHANGELOG (March 23 - April 2)
 ========================================================================
 
 1. CITATION GAP ANALYSIS (10th SEO Category) — March 23
@@ -52,12 +51,13 @@ FULL CHANGELOG (March 23 - April 1)
 - compute_aeo_score() — 13 AI Engine Optimization checks
 - POST /api/content-score — weighted: 40% SEO + 35% AEO + 25% Readability
 
-6. LAMBDA DEPLOYMENT — March 25-26
--------------------------------------
+6. LAMBDA DEPLOYMENT — March 25-26, April 2
+----------------------------------------------
 - Backend migrated to Lambda + API Gateway (from App Runner)
 - Lambda: ai1stseo-backend (python3.11, handler: app.handler via Mangum)
 - API Gateway: cwb0hb27bf.execute-api.us-east-1.amazonaws.com
 - Deploy bucket: s3://ai1stseo-lambda-deploy
+- April 2: Re-deployed with all Dev 2 code merged, DynamoDB default, cold start fix
 
 7. AUTOMATION HUB (Lambda) — March 25-26
 -------------------------------------------
@@ -74,49 +74,96 @@ FULL CHANGELOG (March 23 - April 1)
 - seoanalysis.ai1stseo.com → API Gateway (was pointing to dead EC2)
 - automationhub.ai1stseo.com CORS added to backend
 
-9. DYNAMODB MIGRATION — April 1
-----------------------------------
+9. DYNAMODB MIGRATION — April 1-2
+------------------------------------
 - Created db_dynamo.py — drop-in DynamoDB replacement for db.py
   - save_content_brief() → ai1stseo-content-briefs table
   - get_content_briefs(keyword_filter=) → scan with Attr filter
   - get_content_brief_by_id() → get_item by id
   - insert_probe() → ai1stseo-geo-probes table
   - insert_visibility_batch() → ai1stseo-geo-probes table
-- Updated app.py: USE_DYNAMODB flag auto-detects when RDS is stopped
-- All 'from db import' calls now check USE_DYNAMODB first
+- Updated app.py: USE_DYNAMODB defaults to True (RDS is stopped)
+  - Set env var USE_RDS=1 to re-enable RDS if needed
+- All 'from db import' calls check USE_DYNAMODB first
 - RDS is stopped per Troy/Gurbachan directive — DynamoDB is the new backend
 - No changes to Troy's code or anyone else's modules
+
+10. LAMBDA COLD START FIX — April 2
+--------------------------------------
+- Problem: Lambda init was timing out (10s+) because app.py tried to
+  connect to the stopped RDS instance before falling back to DynamoDB
+- Fix: USE_DYNAMODB now defaults to True, skipping the RDS connection
+  attempt entirely. Cold start dropped from 10s+ timeout to under 3s.
+- To re-enable RDS: set Lambda env var USE_RDS=1
+
+11. CLOUDFRONT /api/* FIX — April 2
+--------------------------------------
+- Problem: CloudFront /api/* behavior was forwarding the Host header
+  (ai1stseo.com) to API Gateway, which returned 403 Forbidden because
+  ai1stseo.com isn't a configured custom domain on the HTTP API
+- Fix: Removed Host from forwarded headers in /api/* cache behavior
+  (kept Authorization, Origin, Accept, Content-Type)
+- All frontend API calls now route correctly through CloudFront
+
+12. AUDIT.HTML API_BASE FIX — April 2
+----------------------------------------
+- Problem: S3 audit.html had API_BASE pointing to the dead App Runner
+  URL (sgnmqxb2sw.us-east-1.awsapprunner.com) — all API calls failed
+- Fix: Updated API_BASE to Lambda API Gateway
+  (cwb0hb27bf.execute-api.us-east-1.amazonaws.com)
+- Synced local audit.html with S3 version (59KB full version)
+- Uploaded to S3 and invalidated CloudFront cache
+
+13. DROPDOWN STYLING FIX — April 2
+-------------------------------------
+- Content type dropdown in AI Content Brief Generator had white
+  background with invisible text on the options
+- Fixed: dark background (#1a1a2e) + white text on all <option> elements
+- Matches the dark theme of the rest of the UI
+
+========================================================================
+VERIFIED WORKING ENDPOINTS (April 2)
+========================================================================
+All tested via both direct API Gateway and CloudFront:
+  GET  /api/health          — 200, 200 checks, 10 categories, citationgap:20
+  POST /api/content-score   — 200, returns SEO+AEO+readability scores
+  GET  /api/content-briefs  — 200, returns briefs from DynamoDB
+  POST /api/content-brief   — 200, generates AI brief via Nova Lite, saves to DynamoDB
+  POST /api/analyze         — 200, full 200-check SEO audit
 
 ========================================================================
 DO NOT TOUCH
 ========================================================================
 - call_llm() or Ollama URLs/model names (set per Gurbachan's instructions)
 - categoryMeta in audit.html (add to it, don't modify existing)
-- API_BASE in S3 audit.html
 - Content brief persistence functions
 - Troy's auth, admin, data API, webhooks modules
+- directory/ module (Troy's AI Business Directory — isolated, no impact)
 
 ========================================================================
-CURRENT ARCHITECTURE (as of April 1)
+CURRENT ARCHITECTURE (as of April 2)
 ========================================================================
 Frontend:
   - S3 bucket: ai1stseo-website
-  - CloudFront: E16GYTIVXY9IOU (updated from E334N0LB3C46TV)
+  - CloudFront: E16GYTIVXY9IOU
   - Domain: www.ai1stseo.com / ai1stseo.com
   - Deploy: Amira does manual S3 upload (NOT auto-deploy from GitHub)
+  - audit.html API_BASE: cwb0hb27bf.execute-api.us-east-1.amazonaws.com
 
 Backend API:
   - Lambda: ai1stseo-backend (python3.11)
   - API Gateway: cwb0hb27bf.execute-api.us-east-1.amazonaws.com
   - Custom domains: api.ai1stseo.com, seoaudit.ai1stseo.com, seoanalysis.ai1stseo.com
+  - CloudFront /api/* routes to API Gateway (Host header NOT forwarded)
 
 Automation Hub:
   - Lambda: automation-hub (Node.js 20.x)
   - Domain: automationhub.ai1stseo.com
 
 Database:
-  - DynamoDB (NEW): ai1stseo-content-briefs, ai1stseo-geo-probes, + 9 more tables
+  - DynamoDB (ACTIVE): ai1stseo-content-briefs, ai1stseo-geo-probes, + 9 more tables
   - RDS PostgreSQL: STOPPED (backup in rds-backup/ on repo)
+  - USE_DYNAMODB=True by default; set USE_RDS=1 env var to re-enable
 
 LLM Config:
   - Primary: Nova Lite (amazon.nova-lite-v1:0) via AWS Bedrock
@@ -129,14 +176,15 @@ Auth: Cognito us-east-1_DVvth47zH (unaffected by DB migration)
 ========================================================================
 API ENDPOINTS (Dev 2 owned)
 ========================================================================
-POST /api/analyze          — 236-check SEO audit (10 categories incl citationgap)
-POST /api/content-brief    — AI content brief generator
-GET  /api/content-briefs   — List saved briefs (?keyword= filter)
-POST /api/content-score    — Content scoring engine (SEO+AEO+readability)
+POST /api/analyze            — 200-check SEO audit (10 categories incl citationgap)
+POST /api/content-brief      — AI content brief generator
+GET  /api/content-briefs     — List saved briefs (?keyword= filter)
+POST /api/content-score      — Content scoring engine (SEO+AEO+readability)
 POST /api/ai-recommendations — AI-powered SEO recommendations
+GET  /api/health             — Health check with category counts
 
 ========================================================================
 BRANCH INFO
 ========================================================================
-Branch: dev2-samar-merge
-All Dev 2 code is here. Troy merges into main when ready.
+Branch: dev2-samar-merge (merged into main April 2)
+All Dev 2 code is on both branches. Kept in sync.
