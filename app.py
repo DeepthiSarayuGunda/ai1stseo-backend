@@ -4,7 +4,7 @@ SEO Analyzer Backend - Flask API
 Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
-from flask import Flask, jsonify, request, send_from_directory, redirect
+from flask import Flask, jsonify, request, send_from_directory, redirect, render_template
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -3194,6 +3194,12 @@ def serve_dashboard_redirect():
 def serve_admin():
     """Admin dashboard — overview, users, usage, AI costs, errors, health."""
     return send_from_directory('.', 'admin.html')
+
+
+@app.route('/directory')
+def serve_directory():
+    """AI Business Directory — Top 10 dentists in Ottawa."""
+    return render_template('directory_category.html')
 
 
 # ── Month 1 Research API ──────────────────────────────────────────────────────
