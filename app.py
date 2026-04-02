@@ -45,6 +45,42 @@ try:
 except Exception:
     pass
 
+# --- Troy's blueprints: auth, admin, data API, webhooks, API keys ---
+try:
+    from auth import auth_bp
+    app.register_blueprint(auth_bp)
+    print("✓ auth blueprint registered")
+except Exception as e:
+    print(f"⚠ auth blueprint: {e}")
+
+try:
+    from admin_api import admin_bp
+    app.register_blueprint(admin_bp)
+    print("✓ admin_api blueprint registered")
+except Exception as e:
+    print(f"⚠ admin_api blueprint: {e}")
+
+try:
+    from data_api import data_bp
+    app.register_blueprint(data_bp)
+    print("✓ data_api blueprint registered")
+except Exception as e:
+    print(f"⚠ data_api blueprint: {e}")
+
+try:
+    from webhook_api import webhook_bp
+    app.register_blueprint(webhook_bp)
+    print("✓ webhook_api blueprint registered")
+except Exception as e:
+    print(f"⚠ webhook_api blueprint: {e}")
+
+try:
+    from apikey_api import apikey_bp
+    app.register_blueprint(apikey_bp)
+    print("✓ apikey_api blueprint registered")
+except Exception as e:
+    print(f"⚠ apikey_api blueprint: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
