@@ -38,6 +38,33 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# --- Blueprint registrations (auth, admin, data, webhooks, API keys) ---
+try:
+    from auth import auth_bp
+    app.register_blueprint(auth_bp)
+except Exception:
+    pass
+try:
+    from admin_api import admin_bp
+    app.register_blueprint(admin_bp)
+except Exception:
+    pass
+try:
+    from data_api import data_bp
+    app.register_blueprint(data_bp)
+except Exception:
+    pass
+try:
+    from webhook_api import webhook_bp
+    app.register_blueprint(webhook_bp)
+except Exception:
+    pass
+try:
+    from apikey_api import apikey_bp
+    app.register_blueprint(apikey_bp)
+except Exception:
+    pass
+
 # --- AI Business Directory routes (isolated module) ---
 try:
     from directory.routes import register_directory_routes
