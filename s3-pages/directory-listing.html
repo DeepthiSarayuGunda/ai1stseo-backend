@@ -69,7 +69,7 @@ function stars(r) { return '★'.repeat(Math.floor(r)) + (r % 1 >= 0.5 ? '½' : 
 function citationLabel(v) { return v ? '<span style="color:#00ff88;">Cited</span>' : '<span style="color:#f44336;">Not Found</span>'; }
 
 async function load() {
-  if (!slug) { document.getElementById('content').innerHTML = '<div class="loading"><h2>No business specified</h2><p><a href="/directory">Browse the directory</a></p></div>'; return; }
+  if (!slug) { window.location.href = '/directory'; return; }
   try {
     const r = await fetch(`${API}/api/directory/listings/${slug}`);
     if (!r.ok) throw new Error('Not found');

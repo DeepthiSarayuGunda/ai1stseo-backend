@@ -3245,6 +3245,13 @@ def serve_directory_listing():
     return render_template('directory_listing.html')
 
 
+@app.route('/directory-compare.html')
+@app.route('/directory-compare')
+def serve_directory_compare():
+    """AI Business Directory — compare two businesses side by side."""
+    return render_template('directory_compare.html')
+
+
 # ── Month 1 Research API ──────────────────────────────────────────────────────
 
 @app.route('/api/month1/keyword-universe', methods=['POST'])
