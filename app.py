@@ -64,11 +64,22 @@ def handle_405(e):
         return jsonify({'error': 'Method not allowed', 'status': 'error'}), 405
     return e
 
-# ── RDS initialization ────────────────────────────────────────────────────────
+# ── Database initialization ────────────────────────────────────────────────────
+# Try RDS first, fall back to DynamoDB if RDS is stopped
+USE_DYNAMODB = False
 try:
     from db import init_db
     init_db()
     print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+except Exception as e:
+    print(f"⚠ RDS init failed, switching to DynamoDB: {e}")
+    USE_DYNAMODB = True
+    try:
+        from db_dynamo import init_db
+        init_db()
+        print("✓ DynamoDB mode active")
+    except Exception as e2:
+        print(f"⚠ DynamoDB init also failed: {e2}")
     # Initialize new feature tables
     try:
         from answer_fingerprint import init_fingerprint_tables
@@ -2313,9 +2324,12 @@ def generate_content_brief():
             response_data['ai_generated'] = False
             response_data['note'] = 'LLM unavailable — brief generated from SERP data analysis'
         
-        # Save brief to database
+        # Save brief to database (DynamoDB or RDS)
         try:
-            from db import save_content_brief
+            if USE_DYNAMODB:
+                from db_dynamo import save_content_brief
+            else:
+                from db import save_content_brief
             brief_id = save_content_brief(
                 keyword=keyword,
                 content_type=content_type,
@@ -2339,7 +2353,10 @@ def generate_content_brief():
 def list_content_briefs():
     """Retrieve past content briefs, optionally filtered by keyword."""
     try:
-        from db import get_content_briefs, get_content_brief_by_id
+        if USE_DYNAMODB:
+            from db_dynamo import get_content_briefs, get_content_brief_by_id
+        else:
+            from db import get_content_briefs, get_content_brief_by_id
         brief_id = request.args.get('id')
         if brief_id:
             brief = get_content_brief_by_id(brief_id)
@@ -3117,8 +3134,11 @@ def geo_prompt_simulator_history(brand_name):
 
 @app.route('/api/data/geo-probes', methods=['POST'])
 def data_geo_probes():
-    """POST /api/data/geo-probes — persist GEO probe results to RDS."""
-    from db import insert_probe
+    """POST /api/data/geo-probes — persist GEO probe results."""
+    if USE_DYNAMODB:
+        from db_dynamo import insert_probe
+    else:
+        from db import insert_probe
     data = request.get_json() or {}
     keyword = (data.get('keyword') or '').strip()
     brand = (data.get('brand') or data.get('brand_name') or '').strip()
@@ -3145,8 +3165,11 @@ def data_geo_probes():
 
 @app.route('/api/data/ai-visibility', methods=['POST'])
 def data_ai_visibility():
-    """POST /api/data/ai-visibility — persist batch visibility results to RDS."""
-    from db import insert_visibility_batch
+    """POST /api/data/ai-visibility — persist batch visibility results."""
+    if USE_DYNAMODB:
+        from db_dynamo import insert_visibility_batch
+    else:
+        from db import insert_visibility_batch
     data = request.get_json() or {}
     brand = (data.get('brand') or data.get('brand_name') or '').strip()
     ai_model = (data.get('ai_model') or data.get('provider') or 'nova').strip()
