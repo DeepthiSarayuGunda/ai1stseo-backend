@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEO Platform — AI Answer Engine Optimization</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a0a1a 0%,#1a1040 40%,#0d1117 100%);min-height:100vh;color:#e2e8f0}
+        .container{max-width:1100px;margin:0 auto;padding:20px}
+        .header{text-align:center;padding:32px 20px 24px}
+        .header h1{font-size:2.5em;background:linear-gradient(135deg,#c084fc,#818cf8,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header p{color:#94a3b8;font-size:1em;margin-top:6px}
+        .nav-links{display:flex;justify-content:center;gap:16px;margin-top:12px;flex-wrap:wrap}
+        .nav-links a{color:#818cf8;text-decoration:none;font-size:.85em;padding:4px 14px;border:1px solid rgba(129,140,248,.2);border-radius:16px;transition:all .3s}
+        .nav-links a:hover{background:rgba(129,140,248,.12);border-color:#818cf8}
+        .search-card{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:24px}
+        .search-form{display:flex;gap:10px}
+        .search-input{flex:1;padding:14px 20px;font-size:1em;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;outline:none;transition:all .3s}
+        .search-input:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.15)}
+        .search-input::placeholder{color:#64748b}
+        .search-btn{padding:14px 28px;font-size:1em;font-weight:600;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;border-radius:10px;cursor:pointer;transition:all .3s}
+        .search-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.35)}
+        .search-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+        .etag{padding:5px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:18px;font-size:.82em;color:#94a3b8;cursor:pointer;transition:all .3s}
+        .etag:hover{background:rgba(129,140,248,.15);color:#a5b4fc;border-color:#818cf8}
+        .loading{display:none;text-align:center;padding:50px 20px}
+        .loading.active{display:block}
+        .spinner{width:42px;height:42px;border:3px solid rgba(255,255,255,.08);border-top:3px solid #818cf8;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading h2{color:#a5b4fc;font-size:1.15em}
+        .loading p{color:#64748b;font-size:.9em}
+        .results{display:none}
+        .results.active{display:block}
+        .section-label{font-size:.72em;text-transform:uppercase;letter-spacing:1.5px;color:#818cf8;font-weight:700;margin:24px 0 10px;padding-left:4px}
+        .card{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:16px;transition:border-color .3s}
+        .card:hover{border-color:rgba(129,140,248,.25)}
+        .card-title{font-size:1.1em;font-weight:600;color:#e2e8f0;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+        /* Hero scores row */
+        .hero-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+        .hero-score{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px;text-align:center}
+        .hero-score .val{font-size:2.4em;font-weight:800;line-height:1}
+        .hero-score .lbl{font-size:.78em;color:#94a3b8;margin-top:4px}
+        /* Score components */
+        .comp-row{margin-bottom:8px}
+        .comp-row label{display:flex;justify-content:space-between;font-size:.85em;color:#94a3b8;margin-bottom:3px}
+        .bar-track{height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+        .bar-fill{height:100%;border-radius:4px;transition:width .9s ease}
+        /* Missing items */
+        .missing-item{padding:8px 14px;background:rgba(248,113,113,.07);border-left:3px solid #f87171;border-radius:0 8px 8px 0;margin-bottom:6px;font-size:.87em;color:#fca5a5}
+        /* Will AI Choose You */
+        .choose-hero{display:flex;align-items:center;gap:20px;padding:18px;border-radius:14px;margin-bottom:14px}
+        .choose-hero .big{font-size:2.2em;font-weight:800}
+        .choose-hero .summary{font-size:.92em;color:#cbd5e1;line-height:1.55}
+        .choose-reason{padding:8px 14px;background:rgba(255,255,255,.03);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;margin-bottom:6px;font-size:.87em;color:#fbbf24}
+        /* AI answer / preview boxes */
+        .ai-box{background:rgba(129,140,248,.06);border:1px solid rgba(129,140,248,.15);border-radius:12px;padding:18px;color:#cbd5e1;line-height:1.7;font-size:.93em}
+        .ai-box-label{font-size:.72em;text-transform:uppercase;letter-spacing:1px;color:#818cf8;margin-bottom:8px;font-weight:600}
+        .preview-box{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:12px;padding:18px;color:#6ee7b7;line-height:1.7;font-size:.93em}
+        .preview-label{font-size:.72em;text-transform:uppercase;letter-spacing:1px;color:#34d399;margin-bottom:8px;font-weight:600}
+        .copy-btn{margin-top:10px;padding:7px 18px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.85em;transition:all .3s}
+        .copy-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.4)}
+        /* FAQ */
+        .faq-item{padding:10px 14px;background:rgba(129,140,248,.05);border-left:3px solid #818cf8;border-radius:0 10px 10px 0;margin-bottom:6px;color:#a5b4fc;font-size:.9em}
+        /* Fix plan */
+        .fix-item{display:flex;gap:12px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:7px;align-items:flex-start}
+        .fix-icon{font-size:1.4em;flex-shrink:0}
+        .fix-text{font-size:.88em;color:#cbd5e1;line-height:1.5}
+        .fix-impact{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;font-size:.7em;font-weight:600}
+        .impact-High{background:rgba(239,68,68,.12);color:#f87171}
+        .impact-Medium{background:rgba(245,158,11,.12);color:#fbbf24}
+        /* Competitor table */
+        .comp-table{width:100%;border-collapse:separate;border-spacing:0 5px}
+        .comp-table th{text-align:left;padding:6px 10px;color:#94a3b8;font-size:.78em;text-transform:uppercase;letter-spacing:.5px}
+        .comp-table td{padding:10px;background:rgba(255,255,255,.03);color:#e2e8f0;font-size:.86em}
+        .comp-table tr td:first-child{border-radius:8px 0 0 8px}
+        .comp-table tr td:last-child{border-radius:0 8px 8px 0}
+        .yes{color:#34d399}.no{color:#f87171}
+        .c-green{color:#34d399}.c-blue{color:#818cf8}.c-yellow{color:#fbbf24}.c-red{color:#f87171}
+        
+/* AI SERP Simulation */
+.serp-answer{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:12px;padding:16px;margin-bottom:14px;color:#6ee7b7;line-height:1.65;font-size:.9em}
+.serp-answer-label{font-size:.7em;text-transform:uppercase;letter-spacing:1px;color:#34d399;margin-bottom:6px;font-weight:600}
+.serp-rank{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;margin-bottom:5px;font-size:.87em;transition:all .2s}
+.serp-rank.cited{background:rgba(52,211,153,.06);border-left:3px solid #34d399}
+.serp-rank.not-cited{background:rgba(255,255,255,.02);border-left:3px solid rgba(255,255,255,.08)}
+.serp-rank.user-row{background:rgba(129,140,248,.08);border-left:3px solid #818cf8;font-weight:600}
+.serp-pos{font-size:1.1em;font-weight:800;min-width:28px;text-align:center}
+.serp-domain{flex:1;color:#e2e8f0}
+.serp-badge{font-size:.68em;padding:2px 8px;border-radius:8px;font-weight:600}
+.serp-badge.yes{background:rgba(52,211,153,.12);color:#34d399}
+.serp-badge.no{background:rgba(248,113,113,.1);color:#f87171}
+.serp-reason{font-size:.75em;color:#94a3b8}
+/* Boost to 90 */
+.boost-hero{display:flex;align-items:center;justify-content:center;gap:20px;padding:20px;margin-bottom:16px}
+.boost-score{text-align:center}
+.boost-score .num{font-size:2.8em;font-weight:800;line-height:1}
+.boost-score .lbl{font-size:.72em;color:#94a3b8;margin-top:2px}
+.boost-arrow{font-size:2em;color:#818cf8}
+.boost-item{display:flex;gap:12px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:7px;align-items:flex-start}
+.boost-icon{font-size:1.3em;flex-shrink:0}
+.boost-area{font-weight:600;color:#e2e8f0;font-size:.88em}
+.boost-action{color:#94a3b8;font-size:.82em;margin-top:2px}
+.boost-gain{font-size:.72em;font-weight:700;color:#34d399;padding:2px 8px;background:rgba(52,211,153,.1);border-radius:8px;white-space:nowrap;margin-left:auto;flex-shrink:0;align-self:center}
+.boost-btn{display:block;width:100%;padding:14px;margin-top:14px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:1em;transition:all .3s;text-align:center}
+.boost-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.4)}
+@media(max-width:768px){.header h1{font-size:1.8em}.search-form{flex-direction:column}.hero-scores{grid-template-columns:repeat(2,1fr)}}
+    
+/* OpenClaw Status Banner */
+.openclaw-banner{margin-bottom:20px;padding:14px 20px;border-radius:14px;display:flex;align-items:center;gap:14px;transition:all .5s;cursor:pointer}
+.openclaw-banner.online{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2)}
+.openclaw-banner.offline{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.15)}
+.openclaw-banner.checking{background:rgba(129,140,248,.05);border:1px solid rgba(129,140,248,.15)}
+.oc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.oc-dot.green{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.5);animation:pulse-dot 2s infinite}
+.oc-dot.red{background:#f87171;box-shadow:0 0 8px rgba(248,113,113,.4)}
+.oc-dot.blue{background:#818cf8;animation:spin .8s linear infinite;width:10px;height:10px;border:2px solid rgba(129,140,248,.3);border-top:2px solid #818cf8;border-radius:50%}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.5}}
+.oc-text{flex:1}
+.oc-title{font-size:.92em;font-weight:600;color:#e2e8f0}
+.oc-sub{font-size:.78em;color:#94a3b8;margin-top:2px}
+.oc-badge{padding:4px 12px;border-radius:8px;font-size:.72em;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.oc-badge.online{background:rgba(52,211,153,.12);color:#34d399}
+.oc-badge.offline{background:rgba(248,113,113,.1);color:#f87171}
+.oc-link{color:#818cf8;font-size:.78em;text-decoration:none;margin-left:8px;transition:color .2s}
+.oc-link:hover{color:#a5b4fc}
+
+/* AI Assistant Chat */
+.ai-assist-btn{position:fixed;bottom:24px;left:24px;z-index:1000;display:flex;align-items:center;gap:8px;padding:12px 22px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:600;font-size:.92em;box-shadow:0 6px 24px rgba(16,185,129,.4);transition:all .3s}
+.ai-assist-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(16,185,129,.5)}
+.ai-assist-panel{position:fixed;bottom:80px;left:24px;width:360px;max-height:480px;background:linear-gradient(180deg,#1a1040 0%,#0d1117 100%);border:1px solid rgba(52,211,153,.2);border-radius:16px;z-index:1003;display:none;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.ai-assist-panel.open{display:flex}
+.assist-header{padding:14px 18px;background:linear-gradient(135deg,rgba(5,150,105,.12),rgba(16,185,129,.08));border-bottom:1px solid rgba(255,255,255,.06);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between}
+.assist-header h3{font-size:1em;color:#e2e8f0;display:flex;align-items:center;gap:8px}
+.assist-close{background:none;border:none;color:#94a3b8;font-size:1.2em;cursor:pointer}
+.assist-close:hover{color:#e2e8f0}
+.assist-messages{flex:1;overflow-y:auto;padding:14px;min-height:200px;max-height:320px}
+.assist-msg{margin-bottom:10px;padding:10px 14px;border-radius:12px;font-size:.85em;line-height:1.55;max-width:90%}
+.assist-msg.bot{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.15);color:#a7f3d0}
+.assist-msg.user{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.15);color:#c7d2fe;margin-left:auto}
+.assist-input-row{padding:10px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px}
+.assist-input{flex:1;padding:10px 14px;font-size:.88em;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;outline:none;font-family:inherit}
+.assist-input:focus{border-color:#34d399}
+.assist-input::placeholder{color:#64748b}
+.assist-send{padding:10px 16px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:.85em;transition:all .2s}
+.assist-send:hover{transform:translateY(-1px)}
+.assist-send:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:500px){.ai-assist-panel{left:10px;right:10px;width:auto}}
+
+/* Footer */
+.site-footer{text-align:center;padding:30px 20px 20px;margin-top:40px;border-top:1px solid rgba(255,255,255,.06)}
+.site-footer .built-by{font-size:.82em;color:#64748b;letter-spacing:.5px}
+.site-footer .built-by span{color:#a5b4fc;font-weight:600}
+
+/* AI Agent Insights */
+.agent-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;margin-bottom:14px;transition:border-color .3s}
+.agent-card:hover{border-color:rgba(129,140,248,.2)}
+.agent-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.agent-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4em;flex-shrink:0}
+.agent-name{font-size:1em;font-weight:700;color:#e2e8f0}
+.agent-focus{font-size:.76em;color:#94a3b8;margin-top:2px}
+.agent-health{font-size:.68em;padding:3px 10px;border-radius:8px;font-weight:600;margin-left:auto;text-transform:uppercase;letter-spacing:.5px}
+.agent-health.good{background:rgba(52,211,153,.1);color:#34d399}
+.agent-health.warning{background:rgba(251,191,36,.1);color:#fbbf24}
+.agent-health.critical{background:rgba(248,113,113,.1);color:#f87171}
+.agent-issue{margin-bottom:12px;padding:14px;background:rgba(255,255,255,.03);border-radius:12px;border-left:3px solid rgba(129,140,248,.3)}
+.agent-issue.good-issue{border-left-color:#34d399;background:rgba(52,211,153,.04)}
+.ai-issue-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ai-issue-name{font-size:.88em;font-weight:600;color:#e2e8f0}
+.ai-issue-score{font-size:.75em;padding:2px 8px;background:rgba(255,255,255,.06);border-radius:6px;color:#94a3b8;font-weight:600}
+.ai-edu{margin-top:8px}
+.ai-edu-row{display:flex;gap:8px;margin-bottom:6px;font-size:.82em;line-height:1.55}
+.ai-edu-tag{flex-shrink:0;font-size:.68em;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.ai-edu-tag.why{background:rgba(129,140,248,.1);color:#a5b4fc}
+.ai-edu-tag.fix{background:rgba(52,211,153,.1);color:#6ee7b7}
+.ai-edu-text{color:#94a3b8}
+</style>
+
+<style>
+:root{--bg-body:#f8fafc;--text-main:#1e293b;--text-muted:#475569;--text-dim:#64748b;--card-bg:#ffffff;--card-border:rgba(0,0,0,.08);--card-shadow:0 1px 3px rgba(0,0,0,.06);--input-bg:#ffffff;--input-border:#d1d5db;--input-focus:#6366f1;--accent:#6366f1;--accent-light:#818cf8;--accent-bg:rgba(99,102,241,.06);--green:#059669;--green-bg:rgba(5,150,105,.08);--red:#dc2626;--red-bg:rgba(220,38,38,.06);--yellow:#d97706;--yellow-bg:rgba(217,119,6,.06);--purple:#7c3aed;--bar-bg:#e2e8f0;--nav-bg:rgba(99,102,241,.06);--nav-border:rgba(99,102,241,.15);--nav-text:#6366f1;--badge-good-bg:rgba(5,150,105,.1);--badge-good:#059669;--badge-med-bg:rgba(217,119,6,.1);--badge-med:#d97706;--badge-low-bg:rgba(220,38,38,.08);--badge-low:#dc2626;--footer-border:#e2e8f0;--overlay-bg:rgba(0,0,0,.15);--panel-bg:#ffffff;--assist-bot-bg:rgba(5,150,105,.06);--assist-bot-border:rgba(5,150,105,.12);--assist-bot-text:#065f46;--assist-user-bg:rgba(99,102,241,.06);--assist-user-border:rgba(99,102,241,.12);--assist-user-text:#3730a3;--serp-cited-bg:rgba(5,150,105,.05);--serp-not-bg:#f8fafc;--serp-user-bg:rgba(99,102,241,.06);--missing-bg:rgba(220,38,38,.05);--choose-bg:rgba(0,0,0,.02);--fix-bg:#f8fafc;--faq-bg:rgba(99,102,241,.04);--faq-text:#4f46e5;--section-label:#6366f1;--hero-bg:#f1f5f9;--hero-border:#e2e8f0}
+[data-theme="dark"]{--bg-body:linear-gradient(135deg,#0a0a1a 0%,#1a1040 40%,#0d1117 100%);--text-main:#e2e8f0;--text-muted:#94a3b8;--text-dim:#64748b;--card-bg:rgba(255,255,255,.05);--card-border:rgba(255,255,255,.08);--card-shadow:0 1px 3px rgba(0,0,0,.2);--input-bg:rgba(255,255,255,.07);--input-border:rgba(255,255,255,.12);--input-focus:#818cf8;--accent:#818cf8;--accent-light:#a5b4fc;--accent-bg:rgba(129,140,248,.08);--green:#34d399;--green-bg:rgba(52,211,153,.08);--red:#f87171;--red-bg:rgba(248,113,113,.07);--yellow:#fbbf24;--yellow-bg:rgba(251,191,36,.08);--purple:#c084fc;--bar-bg:rgba(255,255,255,.06);--nav-bg:rgba(129,140,248,.08);--nav-border:rgba(129,140,248,.2);--nav-text:#818cf8;--badge-good-bg:rgba(52,211,153,.12);--badge-good:#34d399;--badge-med-bg:rgba(251,191,36,.12);--badge-med:#fbbf24;--badge-low-bg:rgba(248,113,113,.12);--badge-low:#f87171;--footer-border:rgba(255,255,255,.06);--overlay-bg:rgba(0,0,0,.4);--panel-bg:linear-gradient(180deg,#1a1040 0%,#0d1117 100%);--assist-bot-bg:rgba(52,211,153,.08);--assist-bot-border:rgba(52,211,153,.15);--assist-bot-text:#a7f3d0;--assist-user-bg:rgba(129,140,248,.08);--assist-user-border:rgba(129,140,248,.15);--assist-user-text:#c7d2fe;--serp-cited-bg:rgba(52,211,153,.06);--serp-not-bg:rgba(255,255,255,.02);--serp-user-bg:rgba(129,140,248,.08);--missing-bg:rgba(248,113,113,.07);--choose-bg:rgba(255,255,255,.03);--fix-bg:rgba(255,255,255,.03);--faq-bg:rgba(129,140,248,.05);--faq-text:#a5b4fc;--section-label:#818cf8;--hero-bg:rgba(255,255,255,.05);--hero-border:rgba(255,255,255,.08)}
+body{background:var(--bg-body)!important;color:var(--text-main)!important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+h1,h2,.card-title,.agent-name,.boost-area,.fix-text,.ai-issue-name{color:var(--text-main)!important}
+p,.header p,.sub,.oc-sub,.boost-action,.agent-focus,.ai-edu-text,.comp-row label span:first-child,.serp-reason{color:var(--text-muted)!important}
+.card,.search-card,.agent-card{background:var(--card-bg)!important;border:1px solid var(--card-border)!important;box-shadow:var(--card-shadow)!important}
+.card:hover,.agent-card:hover{border-color:rgba(99,102,241,.2)!important}
+.hero-score{background:var(--hero-bg)!important;border:1px solid var(--hero-border)!important}
+.hero-score .lbl,.comp-row label,.boost-score .lbl{color:var(--text-muted)!important}
+.search-input,.assist-input{background:var(--input-bg)!important;border:1px solid var(--input-border)!important;color:var(--text-main)!important}
+.search-input:focus,.assist-input:focus{border-color:var(--input-focus)!important;box-shadow:0 0 0 3px rgba(99,102,241,.12)!important}
+.search-input::placeholder,.assist-input::placeholder{color:var(--text-dim)!important}
+.nav-links a{color:var(--nav-text)!important;border:1px solid var(--nav-border)!important;background:var(--nav-bg)!important}
+.nav-links a:hover{background:rgba(99,102,241,.12)!important;border-color:var(--accent)!important}
+.section-label,.lab-stitle{color:var(--section-label)!important}
+.etag{background:var(--nav-bg)!important;border:1px solid var(--nav-border)!important;color:var(--text-muted)!important}
+.etag:hover{background:rgba(99,102,241,.12)!important;color:var(--accent)!important;border-color:var(--accent)!important}
+.bar-track{background:var(--bar-bg)!important}
+.missing-item{background:var(--missing-bg)!important;border-left:3px solid var(--red)!important;color:var(--red)!important}
+.choose-reason{background:var(--choose-bg)!important;border-left:3px solid var(--yellow)!important;color:var(--yellow)!important}
+.ai-box{background:var(--accent-bg)!important;border:1px solid rgba(99,102,241,.12)!important;color:var(--text-main)!important}
+.ai-box-label{color:var(--accent)!important}
+.preview-box{background:var(--green-bg)!important;border:1px solid rgba(5,150,105,.12)!important;color:var(--green)!important}
+.preview-label{color:var(--green)!important}
+.faq-item{background:var(--faq-bg)!important;border-left:3px solid var(--accent)!important;color:var(--faq-text)!important}
+.fix-item{background:var(--fix-bg)!important}
+.boost-item{background:var(--fix-bg)!important}
+.boost-gain{color:var(--green)!important;background:var(--green-bg)!important}
+.boost-arrow{color:var(--accent)!important}
+.comp-table th{color:var(--text-muted)!important}
+.comp-table td{background:var(--fix-bg)!important;color:var(--text-main)!important}
+.yes{color:var(--green)!important}.no{color:var(--red)!important}
+.c-green{color:var(--green)!important}.c-blue{color:var(--accent)!important}.c-yellow{color:var(--yellow)!important}.c-red{color:var(--red)!important}
+.serp-answer{background:var(--green-bg)!important;border:1px solid rgba(5,150,105,.12)!important;color:var(--green)!important}
+.serp-answer-label{color:var(--green)!important}
+.serp-rank.cited{background:var(--serp-cited-bg)!important;border-left:3px solid var(--green)!important}
+.serp-rank.not-cited{background:var(--serp-not-bg)!important;border-left:3px solid var(--bar-bg)!important}
+.serp-rank.user-row{background:var(--serp-user-bg)!important;border-left:3px solid var(--accent)!important}
+.serp-domain{color:var(--text-main)!important}
+.serp-badge.yes{background:var(--badge-good-bg)!important;color:var(--badge-good)!important}
+.serp-badge.no{background:var(--badge-low-bg)!important;color:var(--badge-low)!important}
+.badge-good{background:var(--badge-good-bg)!important;color:var(--badge-good)!important}
+.badge-med{background:var(--badge-med-bg)!important;color:var(--badge-med)!important}
+.badge-low{background:var(--badge-low-bg)!important;color:var(--badge-low)!important}
+.openclaw-banner.online{background:var(--green-bg)!important;border:1px solid rgba(5,150,105,.15)!important}
+.openclaw-banner.offline{background:var(--red-bg)!important;border:1px solid rgba(220,38,38,.12)!important}
+.openclaw-banner.checking{background:var(--accent-bg)!important;border:1px solid rgba(99,102,241,.12)!important}
+.oc-title{color:var(--text-main)!important}
+.oc-sub{color:var(--text-muted)!important}
+.oc-link{color:var(--accent)!important}
+.spinner{border:3px solid var(--bar-bg)!important;border-top:3px solid var(--accent)!important}
+.loading h2{color:var(--accent)!important}
+.loading p{color:var(--text-dim)!important}
+.site-footer{border-top:1px solid var(--footer-border)!important}
+.site-footer .built-by{color:var(--text-dim)!important}
+.site-footer .built-by span{color:var(--accent)!important}
+.ai-lab-overlay.open{background:var(--overlay-bg)!important}
+.ai-lab-panel{background:var(--panel-bg)!important}
+.lab-header{background:var(--accent-bg)!important;border-bottom:1px solid var(--card-border)!important}
+.lab-header h2{color:var(--text-main)!important}
+.lab-header p{color:var(--text-muted)!important}
+.lab-close{color:var(--text-muted)!important}
+.lab-close:hover{color:var(--text-main)!important}
+.mode-btn{background:var(--fix-bg)!important;border:1px solid var(--card-border)!important;color:var(--text-main)!important}
+.mode-btn.active{border-color:var(--accent)!important;background:var(--accent-bg)!important;color:var(--accent)!important}
+.tool-btn{background:var(--fix-bg)!important;border:1px solid var(--card-border)!important;color:var(--text-main)!important}
+.tool-btn:hover{border-color:var(--accent)!important;background:var(--accent-bg)!important;color:var(--accent)!important}
+.lab-out{background:var(--fix-bg)!important;border:1px solid var(--card-border)!important;color:var(--text-main)!important}
+.lab-out .ot{color:var(--accent)!important}
+.lab-out .om{color:var(--text-muted)!important}
+.lab-out .tip{background:var(--accent-bg)!important;color:var(--accent)!important;border-left:3px solid var(--accent)!important}
+.af-section{background:var(--fix-bg)!important;border:1px solid var(--card-border)!important}
+.af-content{color:var(--text-main)!important}
+.af-faq-q{color:var(--accent)!important}
+.af-faq-a{color:var(--text-muted)!important}
+.af-struct-h{color:var(--text-main)!important}
+.af-struct-c{color:var(--text-muted)!important}
+.assist-header{background:var(--green-bg)!important;border-bottom:1px solid var(--card-border)!important}
+.assist-header h3{color:var(--text-main)!important}
+.assist-close{color:var(--text-muted)!important}
+.assist-close:hover{color:var(--text-main)!important}
+.ai-assist-panel{background:var(--panel-bg)!important;border:1px solid rgba(5,150,105,.15)!important;box-shadow:0 12px 40px rgba(0,0,0,.1)!important}
+.assist-msg.bot{background:var(--assist-bot-bg)!important;border:1px solid var(--assist-bot-border)!important;color:var(--assist-bot-text)!important}
+.assist-msg.user{background:var(--assist-user-bg)!important;border:1px solid var(--assist-user-border)!important;color:var(--assist-user-text)!important}
+.assist-input-row{border-top:1px solid var(--card-border)!important}
+.agent-header .agent-icon{border:1px solid var(--card-border)!important}
+.agent-issue{background:var(--fix-bg)!important;border-left:3px solid rgba(99,102,241,.2)!important}
+.agent-issue.good-issue{border-left-color:var(--green)!important;background:var(--green-bg)!important}
+.ai-issue-score{background:var(--bar-bg)!important;color:var(--text-muted)!important}
+.ai-edu-tag.why{background:var(--accent-bg)!important;color:var(--accent)!important}
+.ai-edu-tag.fix{background:var(--green-bg)!important;color:var(--green)!important}
+.impact-High{background:var(--red-bg)!important;color:var(--red)!important}
+.impact-Medium{background:var(--yellow-bg)!important;color:var(--yellow)!important}
+table th{color:var(--text-muted)!important}
+table td{background:var(--fix-bg)!important;color:var(--text-main)!important}
+.empty{color:var(--text-dim)!important}
+.empty h2{color:var(--text-muted)!important}
+.theme-toggle-float{position:fixed;top:16px;right:16px;z-index:999;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:6px 14px;cursor:pointer;font-size:.85em;color:var(--text-main);transition:all .3s;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:6px}
+.theme-toggle-float:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn{color:#fff!important}
+
+/* === UI POLISH ENHANCEMENTS === */
+/* Smooth page load fade-in */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.header{animation:fadeInUp .5s ease}
+.search-card{animation:fadeInUp .6s ease}
+.openclaw-banner{animation:fadeInUp .7s ease}
+
+/* Results cards stagger animation */
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.results.active .hero-scores{animation:slideIn .4s ease}
+.results.active .card{animation:slideIn .5s ease both}
+.results.active .card:nth-child(2){animation-delay:.05s}
+.results.active .card:nth-child(3){animation-delay:.1s}
+.results.active .card:nth-child(4){animation-delay:.15s}
+.results.active .card:nth-child(5){animation-delay:.2s}
+.results.active .section-label{animation:slideIn .3s ease both}
+
+/* Score number count-up glow */
+.hero-score .val{transition:color .3s}
+.hero-score:hover{transform:translateY(-3px);transition:transform .2s ease;box-shadow:0 8px 24px rgba(99,102,241,.12)}
+
+/* Better progress bar animation */
+.bar-fill{transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* Card hover lift effect */
+.card{transition:all .25s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.08)}
+
+/* Nav links smooth hover */
+.nav-links a{transition:all .25s ease;position:relative}
+.nav-links a:hover{transform:translateY(-1px)}
+
+/* Search button pulse on idle */
+@keyframes subtlePulse{0%,100%{box-shadow:0 4px 14px rgba(99,102,241,.25)}50%{box-shadow:0 4px 20px rgba(99,102,241,.45)}}
+.search-btn:not(:disabled){animation:subtlePulse 3s ease infinite}
+.search-btn:hover{animation:none}
+
+/* Better loading animation */
+@keyframes loadPulse{0%,100%{opacity:.6}50%{opacity:1}}
+.loading.active h2{animation:loadPulse 1.5s ease infinite}
+
+/* Smooth scroll behavior */
+html{scroll-behavior:smooth}
+
+/* Better etag hover */
+.etag{transition:all .2s ease}
+.etag:hover{transform:translateY(-1px)}
+
+/* Agent card hover */
+.agent-card{transition:all .25s ease}
+.agent-card:hover{transform:translateY(-2px)}
+
+/* Boost items hover */
+.boost-item{transition:all .2s ease}
+.boost-item:hover{background:var(--accent-bg);transform:translateX(4px)}
+
+/* Fix items hover */
+.fix-item{transition:all .2s ease}
+.fix-item:hover{background:var(--accent-bg);transform:translateX(4px)}
+
+/* SERP rank hover */
+.serp-rank{transition:all .2s ease}
+.serp-rank:hover{transform:translateX(4px)}
+
+/* Better focus states for accessibility */
+.search-input:focus,.assist-input:focus{outline:2px solid var(--accent);outline-offset:2px}
+.search-btn:focus-visible,.copy-btn:focus-visible,.boost-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Improved mobile spacing */
+@media(max-width:768px){
+    .container{padding:12px}
+    .header{padding:20px 12px 16px}
+    .header h1{font-size:1.6em}
+    .search-card{padding:16px}
+    .card{padding:16px}
+    .hero-scores{gap:8px}
+    .hero-score{padding:12px}
+    .hero-score .val{font-size:1.8em}
+    .nav-links{gap:8px}
+    .nav-links a{font-size:.78em;padding:3px 10px}
+    .boost-hero{flex-direction:column;gap:10px}
+    .choose-hero{flex-direction:column;gap:10px;text-align:center}
+}
+@media(max-width:400px){
+    .header h1{font-size:1.4em}
+    .hero-scores{grid-template-columns:repeat(2,1fr)}
+    .search-form{flex-direction:column}
+    .search-btn{width:100%}
+}
+</style>
+
+<script>
+(function(){
+    var s=localStorage.getItem('theme');
+    if(s==='dark') document.documentElement.setAttribute('data-theme','dark');
+})();
+</script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🤖 AEO Platform</h1>
+        <p>AI Answer Engine Optimization — Get cited by ChatGPT, Gemini & AI Search</p>
+        <div class="nav-links">
+            <a href="/ai-visibility.html">🔮 AI Visibility Tool</a>
+            <a href="/history.html">📊 History</a>
+            <a href="/benchmarks.html">🎯 Benchmarks</a>
+            <a href="/scheduler.html">⏰ Scheduler</a>
+            <a href="/compare.html">⚖️ Compare</a>
+            <a href="/trends.html">📈 Trends</a>
+            <a href="/editor.html">✏️ Editor</a>
+            <a href="/geo.html">🌍 GEO</a>
+            <a href="/aeo-scorer.html">📝 AEO Scorer</a>
+            <a href="/diagnosis.html">🔍 Diagnosis</a>
+            <a href="/monitoring.html">📡 Monitoring</a>
+            <a href="/reverse-engineer.html">🕵️ Reverse Engineer</a>
+            <a href="/directory-category.html">📂 Directory</a>
+        </div>
+    </div>
+    <div class="openclaw-banner checking" id="openclawBanner" onclick="window.location='/openclaw'">
+        <div class="oc-dot blue" id="ocDot"></div>
+        <div class="oc-text">
+            <div class="oc-title" id="ocTitle">Checking OpenClaw Connection...</div>
+            <div class="oc-sub" id="ocSub">Connecting to AWS Bedrock...</div>
+        </div>
+        <span class="oc-badge offline" id="ocBadge" style="display:none">Offline</span>
+        <a href="/openclaw.html" class="oc-link" onclick="event.stopPropagation()">View Status →</a>
+    </div>
+    <div class="search-card">
+        <form class="search-form" id="searchForm">
+            <input type="text" class="search-input" id="topicInput" placeholder="Enter keyword to optimize for AI answers..." required>
+            <button type="submit" class="search-btn" id="analyzeBtn">🔍 Analyze</button>
+        </form>
+        <div class="examples">
+            <span style="color:#64748b;margin-right:6px">Try:</span>
+            <div class="etag" onclick="setEx('best protein powder')">best protein powder</div>
+            <div class="etag" onclick="setEx('how to rank a website')">how to rank a website</div>
+            <div class="etag" onclick="setEx('AI SEO tools')">AI SEO tools</div>
+            <div class="etag" onclick="setEx('electric vehicle chargers')">electric vehicle chargers</div>
+        </div>
+    </div>
+    <div class="loading" id="loadingBox">
+        <div class="spinner"></div>
+        <h2>Running AEO Analysis...</h2>
+        <p>Scoring AI visibility, simulating answers, checking citation readiness...</p>
+    </div>
+    <div class="results" id="resultsBox"></div>
+</div>
+
+<script>
+function setEx(t){document.getElementById('topicInput').value=t;document.getElementById('topicInput').focus()}
+function sc(s){return s>=70?'c-green':s>=55?'c-blue':s>=40?'c-yellow':'c-red'}
+function barCol(s,m){var p=s/m*100;return p>=70?'#34d399':p>=50?'#818cf8':p>=35?'#fbbf24':'#f87171'}
+
+document.getElementById('searchForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const topic=document.getElementById('topicInput').value.trim();
+    if(!topic)return;
+    document.getElementById('loadingBox').classList.add('active');
+    document.getElementById('resultsBox').classList.remove('active');
+    document.getElementById('analyzeBtn').disabled=true;
+    try{
+        const resp=await fetch('https://gl0vuc0iw8.execute-api.us-east-1.amazonaws.com/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic})});
+        const data=await resp.json();
+        if(!resp.ok||!data.success)throw new Error(data.error||'Analysis failed');
+        render(data);
+    }catch(err){alert('Error: '+err.message)}
+    finally{document.getElementById('loadingBox').classList.remove('active');document.getElementById('analyzeBtn').disabled=false}
+});
+
+function render(data){
+    const box=document.getElementById('resultsBox');
+    const a=data.aeo;
+    const aeo=a.aeo_score;
+    const vis=a.ai_visibility;
+    const choose=a.will_ai_choose_you;
+    let html='';
+
+    // === HERO SCORES ===
+    html+=`<div class="hero-scores">
+        <div class="hero-score"><div class="val ${sc(aeo.score)}">${aeo.score}</div><div class="lbl">AEO Score</div></div>
+        <div class="hero-score"><div class="val ${sc(vis.score)}">${vis.score}</div><div class="lbl">AI Visibility</div></div>
+        <div class="hero-score"><div class="val" style="color:${choose.color}">${choose.likelihood}</div><div class="lbl">AI Selection</div></div>
+        <div class="hero-score"><div class="val c-blue">${aeo.grade}</div><div class="lbl">AEO Grade</div></div>
+        <div class="hero-score"><div class="val c-blue">${vis.grade}</div><div class="lbl">Visibility Grade</div></div>
+    </div>`;
+
+    // === AEO SECTION ===
+    html+=`<div class="section-label">🤖 AEO — AI ANSWER OPTIMIZATION</div>`;
+
+    // 1. AEO Score Breakdown
+    html+=`<div class="card">
+        <div class="card-title">📊 AEO Score Breakdown</div>
+        ${Object.values(aeo.components).map(c=>`
+            <div class="comp-row">
+                <label><span>${c.label}</span><span>${c.score}/${c.max}</span></label>
+                <div class="bar-track"><div class="bar-fill" style="width:${c.score/c.max*100}%;background:${barCol(c.score,c.max)}"></div></div>
+            </div>
+        `).join('')}
+        ${aeo.missing.length?`<div style="margin-top:12px">
+            <div style="font-size:.85em;color:#f87171;font-weight:600;margin-bottom:6px">⚠ Missing Elements:</div>
+            ${aeo.missing.map(m=>`<div class="missing-item">${m}</div>`).join('')}
+        </div>`:'<div style="margin-top:10px;color:#34d399;font-size:.87em">✅ No critical missing elements.</div>'}
+    </div>`;
+
+    // 2. AI Visibility Score
+    html+=`<div class="card">
+        <div class="card-title">🔮 AI Visibility Score</div>
+        <div style="padding:12px 16px;background:rgba(129,140,248,.06);border-radius:10px;border-left:3px solid #818cf8;margin-bottom:14px;font-size:.92em;color:#cbd5e1">${vis.verdict}</div>
+        ${Object.values(vis.breakdown).map(b=>`
+            <div class="comp-row">
+                <label><span>${b.label}</span><span>${b.score}/${b.max}</span></label>
+                <div class="bar-track"><div class="bar-fill" style="width:${b.score/b.max*100}%;background:${barCol(b.score,b.max)}"></div></div>
+            </div>
+        `).join('')}
+    </div>`;
+
+    // 3. AI Answer Block
+    html+=`<div class="card">
+        <div class="card-title">💬 AI Answer Block</div>
+        <div class="ai-box" id="answerBlock">
+            <div class="ai-box-label">Generated answer for "${data.query}"</div>
+            ${a.answer_block}
+        </div>
+        <button class="copy-btn" onclick="copyText('answerBlock',this)">📋 Copy Answer</button>
+    </div>`;
+
+    // 4. AI Search Preview
+    html+=`<div class="card">
+        <div class="card-title">🤖 AI Search Preview</div>
+        <div class="preview-box">
+            <div class="preview-label">How AI would answer "${data.query}"</div>
+            ${a.ai_search_preview}
+        </div>
+    </div>`;
+
+    // === AI SERP SIMULATION ===
+    const serp = a.ai_serp_simulation;
+    html+=`<div class="section-label">🔍 AI SERP SIMULATION — WHO GETS CITED?</div>`;
+    html+=`<div class="card">
+        <div class="card-title">🔍 AI Search Results Simulation</div>
+        <div class="serp-answer">
+            <div class="serp-answer-label">AI-Generated Answer for "${data.query}"</div>
+            ${serp.ai_answer}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:${serp.would_be_cited?'rgba(52,211,153,.06)':'rgba(248,113,113,.06)'}">
+            <span style="font-size:1.6em">${serp.would_be_cited?'✅':'❌'}</span>
+            <div>
+                <div style="font-weight:600;color:${serp.would_be_cited?'#34d399':'#f87171'};font-size:.95em">${serp.would_be_cited?'Your content WOULD be cited':'Your content would NOT be cited'}</div>
+                <div style="font-size:.82em;color:#94a3b8">${serp.verdict}</div>
+            </div>
+        </div>
+        <div style="font-size:.78em;color:#818cf8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Citation Rankings</div>`;
+
+    // Build sorted list with user inserted
+    const allRanks = serp.citations.map((c,i) => ({...c, isUser: false}));
+    allRanks.push({domain: '→ Your Content', score: serp.user_score, reason: 'Your current optimization level', cited: serp.would_be_cited, isUser: true});
+    allRanks.sort((a,b) => b.score - a.score);
+
+    allRanks.forEach((r,i) => {
+        const cls = r.isUser ? 'user-row' : (r.cited ? 'cited' : 'not-cited');
+        html+=`<div class="serp-rank ${cls}">
+            <div class="serp-pos" style="color:${r.isUser?'#818cf8':r.cited?'#34d399':'#64748b'}">#${i+1}</div>
+            <div class="serp-domain">${r.domain} <span class="serp-reason">${r.reason}</span></div>
+            <div style="text-align:right">
+                <div style="font-weight:700;color:${r.score>=70?'#34d399':r.score>=50?'#fbbf24':'#f87171'}">${r.score}</div>
+                <span class="serp-badge ${r.cited?'yes':'no'}">${r.cited?'Cited':'Not Cited'}</span>
+            </div>
+        </div>`;
+    });
+    html+=`</div>`;
+
+    // === WILL AI CHOOSE YOU ===
+    html+=`<div class="section-label">🎯 WILL AI CHOOSE YOU?</div>`;
+    const chooseBg = choose.likelihood==='High'?'rgba(52,211,153,.08)':choose.likelihood==='Medium'?'rgba(251,191,36,.08)':'rgba(248,113,113,.08)';
+    const chooseBorder = choose.likelihood==='High'?'rgba(52,211,153,.25)':choose.likelihood==='Medium'?'rgba(251,191,36,.25)':'rgba(248,113,113,.25)';
+    html+=`<div class="card">
+        <div class="choose-hero" style="background:${chooseBg};border:1px solid ${chooseBorder}">
+            <div class="big" style="color:${choose.color}">${choose.likelihood==='High'?'✅':choose.likelihood==='Medium'?'⚠️':'❌'} ${choose.likelihood}</div>
+            <div class="summary">${choose.summary}</div>
+        </div>
+        ${choose.reasons.length?choose.reasons.map(r=>`<div class="choose-reason">• ${r}</div>`).join(''):''}
+    </div>`;
+
+    
+    // === AI AGENT INSIGHTS ===
+    if(a.agent_insights && a.agent_insights.agents){
+        html+=`<div class="section-label">🤖 AI AGENT INSIGHTS — MULTI-AGENT ANALYSIS</div>`;
+        a.agent_insights.agents.forEach(function(agent){
+            html+=`<div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon" style="background:${agent.color}15;border:1px solid ${agent.color}30">${agent.icon}</div>
+                    <div>
+                        <div class="agent-name">${agent.name}</div>
+                        <div class="agent-focus">${agent.focus}</div>
+                    </div>
+                    <span class="agent-health ${agent.health}">${agent.health}</span>
+                </div>`;
+            agent.issues.forEach(function(issue){
+                var isGood = issue.status === 'good';
+                html+=`<div class="agent-issue ${isGood ? 'good-issue' : ''}">
+                    <div class="ai-issue-top">
+                        <div class="ai-issue-name">${isGood ? '✅ ' : '⚠️ '}${issue.issue}</div>
+                        <div class="ai-issue-score">${issue.score}</div>
+                    </div>
+                    <div class="ai-edu">
+                        <div class="ai-edu-row">
+                            <span class="ai-edu-tag why">Why</span>
+                            <span class="ai-edu-text">${issue.why}</span>
+                        </div>
+                        <div class="ai-edu-row">
+                            <span class="ai-edu-tag fix">${isGood ? 'Tip' : 'Fix'}</span>
+                            <span class="ai-edu-text">${issue.fix}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html+=`</div>`;
+        });
+    }
+
+    // === OPTIMIZE FOR AI ===
+    html+=`<div class="section-label">✨ OPTIMIZE FOR AI (AEO)</div>`;
+
+    // FAQ Suggestions
+    html+=`<div class="card">
+        <div class="card-title">❓ FAQ Suggestions</div>
+        ${a.faq.map((q,i)=>`<div class="faq-item">${i+1}. ${q}</div>`).join('')}
+    </div>`;
+
+    // Fix Plan
+    html+=`<div class="card">
+        <div class="card-title">🛠️ Fix Plan</div>
+        ${a.optimize_for_ai.map((f,i)=>`
+            <div class="fix-item">
+                <div class="fix-icon">${f.icon}</div>
+                <div>
+                    <div class="fix-text"><strong>Step ${i+1}:</strong> ${f.step}</div>
+                    <span class="fix-impact impact-${f.impact}">${f.impact} Impact</span>
+                </div>
+            </div>
+        `).join('')}
+    </div>`;
+
+    // === BOOST TO 90+ ===
+    const boost = a.boost_to_90;
+    html+=`<div class="section-label">🚀 BOOST TO 90+ — SCORE OPTIMIZER</div>`;
+    html+=`<div class="card">
+        <div class="card-title">🚀 Boost Your AEO Score to 90+</div>
+        <div class="boost-hero">
+            <div class="boost-score">
+                <div class="num ${sc(boost.current_aeo)}">${boost.current_aeo}</div>
+                <div class="lbl">Current (${boost.grade_before})</div>
+            </div>
+            <div class="boost-arrow">→</div>
+            <div class="boost-score">
+                <div class="num c-green">${boost.projected_aeo}</div>
+                <div class="lbl">Projected (${boost.grade_after})</div>
+            </div>
+        </div>
+        <div style="text-align:center;margin-bottom:16px;font-size:.88em;color:#a5b4fc">${boost.summary}</div>`;
+
+    boost.boosts.forEach(b => {
+        html+=`<div class="boost-item">
+            <div class="boost-icon">${b.icon}</div>
+            <div style="flex:1">
+                <div class="boost-area">${b.area}</div>
+                <div class="boost-action">${b.action}</div>
+            </div>
+            <div class="boost-gain">+${b.gain} pts</div>
+        </div>`;
+    });
+
+    html+=`<button class="boost-btn" onclick="applyBoost()">⚡ Apply All Fixes — Boost to ${boost.projected_aeo}</button>`;
+    html+=`<button class="boost-btn" style="margin-top:8px;background:linear-gradient(135deg,#059669,#10b981)" onclick="exportReport()">📄 Export Full Report</button>`;
+    html+=`</div>`;
+
+    // === SEO SECTION (below) ===
+    html+=`<div class="section-label">📈 SEO — TRADITIONAL ANALYSIS</div>`;
+
+    // Competitor Snapshot
+    const cs=a.competitor_snapshot;
+    html+=`<div class="card">
+        <div class="card-title">🏆 Competitor Snapshot</div>
+        <div class="hero-scores" style="margin-bottom:14px">
+            <div class="hero-score"><div class="val c-blue">${cs.avg_title_length}</div><div class="lbl">Avg Title Length</div></div>
+            <div class="hero-score"><div class="val c-green">${cs.question_usage.split(' ')[0]}</div><div class="lbl">Use Questions</div></div>
+            <div class="hero-score"><div class="val c-yellow">${cs.avg_content_length}</div><div class="lbl">Avg Content Len</div></div>
+        </div>
+        <table class="comp-table">
+            <thead><tr><th>Domain</th><th>Title Len</th><th>Questions?</th><th>Content Len</th></tr></thead>
+            <tbody>
+            ${cs.competitors.map(c=>`
+                <tr>
+                    <td style="font-weight:600">${c.name}</td>
+                    <td>${c.title_len} chars</td>
+                    <td class="${c.uses_questions?'yes':'no'}">${c.uses_questions?'✅ Yes':'❌ No'}</td>
+                    <td>${c.content_len} words</td>
+                </tr>
+            `).join('')}
+            </tbody>
+        </table>
+    </div>`;
+
+    box.innerHTML=html;
+    box.classList.add('active');
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyText(id,btn){
+    const el=document.getElementById(id);
+    if(!el) return;
+    const label=el.querySelector('.ai-box-label,.preview-label');
+    let text='';
+    if(label){
+        const clone=el.cloneNode(true);
+        const lbl=clone.querySelector('.ai-box-label,.preview-label');
+        if(lbl) lbl.remove();
+        text=clone.textContent.trim();
+    } else {
+        text=el.textContent.trim();
+    }
+    // Use clipboard API if available, fallback to textarea trick for HTTP
+    if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(()=>{
+            const orig=btn.textContent;btn.textContent='✅ Copied!';setTimeout(()=>{btn.textContent=orig},2000);
+        });
+    } else {
+        const ta=document.createElement('textarea');
+        ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';
+        document.body.appendChild(ta);ta.select();
+        try{document.execCommand('copy');const orig=btn.textContent;btn.textContent='✅ Copied!';setTimeout(()=>{btn.textContent=orig},2000);}
+        catch(e){alert('Copy failed. Please select and copy manually.')}
+        document.body.removeChild(ta);
+    }
+}
+
+function exportReport(){
+    const topic=document.getElementById('topicInput').value.trim();
+    if(!topic){alert('Run an analysis first');return}
+    fetch('https://gl0vuc0iw8.execute-api.us-east-1.amazonaws.com/api/export-report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic})})
+    .then(r=>r.json()).then(data=>{
+        if(!data.success){alert('Export failed: '+(data.error||'Unknown'));return}
+        const blob=new Blob([data.report],{type:'text/plain'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;a.download='AEO_Report_'+topic.replace(/\s+/g,'_')+'.txt';
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }).catch(e=>alert('Export error: '+e.message));
+}
+
+function applyBoost(){
+    const topic=document.getElementById('topicInput').value.trim();
+    if(!topic){alert('Run an analysis first');return}
+    // Open AI Lab and trigger auto_fix
+    document.getElementById('labPanel').classList.add('open');
+    document.getElementById('labOverlay').classList.add('open');
+    runTool('auto_fix');
+}
+</script>
+<!-- AI Lab Panel -->
+<style>
+.ai-lab-btn{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;align-items:center;gap:8px;padding:12px 22px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;border-radius:14px;cursor:pointer;font-weight:600;font-size:.92em;box-shadow:0 6px 24px rgba(99,102,241,.4);transition:all .3s}
+.ai-lab-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.5)}
+.ai-lab-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1001;backdrop-filter:blur(3px)}
+.ai-lab-overlay.open{display:block}
+.ai-lab-panel{position:fixed;top:0;right:-420px;width:400px;height:100vh;background:linear-gradient(180deg,#1a1040 0%,#0d1117 100%);border-left:1px solid rgba(129,140,248,.15);z-index:1002;transition:right .35s ease;overflow-y:auto;display:flex;flex-direction:column}
+.ai-lab-panel.open{right:0}
+.lab-header{padding:18px 20px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(99,102,241,.08));border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;position:relative}
+.lab-header h2{font-size:1.15em;color:#e2e8f0;display:flex;align-items:center;gap:8px}
+.lab-header p{font-size:.8em;color:#94a3b8;margin-top:3px}
+.lab-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:1.2em;cursor:pointer}
+.lab-close:hover{color:#e2e8f0}
+.lab-section{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.04)}
+.lab-stitle{font-size:.7em;text-transform:uppercase;letter-spacing:1.5px;color:#818cf8;font-weight:700;margin-bottom:8px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mode-btn{padding:10px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;text-align:center;transition:all .2s;color:#cbd5e1}
+.mode-btn:hover{border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.06)}
+.mode-btn.active{border-color:#818cf8;background:rgba(129,140,248,.1);color:#a5b4fc}
+.mode-btn .mi{font-size:1.2em;display:block;margin-bottom:3px}
+.mode-btn .mn{font-size:.82em;font-weight:600}
+.mode-btn .md{font-size:.68em;color:#94a3b8;margin-top:1px}
+.tool-list{display:flex;flex-direction:column;gap:5px}
+.tool-btn{display:flex;align-items:center;gap:9px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;cursor:pointer;transition:all .2s;color:#cbd5e1;font-size:.86em;text-align:left;width:100%}
+.tool-btn:hover{border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.06);color:#a5b4fc}
+.tool-btn .ti{font-size:1.1em;flex-shrink:0}
+.tool-btn:disabled{opacity:.4;cursor:not-allowed}
+.lab-output{padding:14px 20px;flex:1}
+.lab-out{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:14px;min-height:60px;font-size:.85em;color:#cbd5e1;line-height:1.6}
+.lab-out .ot{font-size:.72em;text-transform:uppercase;letter-spacing:1px;color:#818cf8;margin-bottom:6px;font-weight:600}
+.lab-out .om{font-size:.7em;color:#94a3b8;margin-bottom:8px}
+.lab-out .tip{margin-top:10px;padding:7px 11px;background:rgba(129,140,248,.06);border-radius:7px;font-size:.8em;color:#a5b4fc;border-left:3px solid #818cf8}
+.lab-out .oi{padding:7px 10px;background:rgba(255,255,255,.03);border-radius:7px;margin-bottom:5px;font-size:.86em}
+.lab-out .fq{font-weight:600;color:#a5b4fc;margin-bottom:2px}
+.lab-out .fa{color:#94a3b8;font-size:.88em}
+.lab-out .si{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.03);border-radius:7px;margin-bottom:4px}
+.si-impact{font-size:.73em;font-weight:600;color:#34d399}
+.si-pri{font-size:.66em;padding:2px 6px;border-radius:7px;font-weight:600}
+.si-pri.High{background:rgba(239,68,68,.1);color:#f87171}
+.si-pri.Medium{background:rgba(245,158,11,.1);color:#fbbf24}
+.si-pri.Low{background:rgba(59,130,246,.1);color:#60a5fa}
+.lab-copy{margin-top:8px;padding:6px 14px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:600;font-size:.8em}
+.lab-copy:hover{transform:translateY(-1px)}
+
+.af-section{margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px}
+.af-label{font-size:.7em;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.af-label.green{color:#34d399}
+.af-label.blue{color:#818cf8}
+.af-label.yellow{color:#fbbf24}
+.af-label.purple{color:#c084fc}
+.af-content{font-size:.85em;color:#cbd5e1;line-height:1.65}
+.af-copy{padding:4px 10px;background:rgba(129,140,248,.12);color:#a5b4fc;border:1px solid rgba(129,140,248,.2);border-radius:6px;cursor:pointer;font-size:.72em;font-weight:600;float:right;transition:all .2s}
+.af-copy:hover{background:rgba(129,140,248,.2)}
+.af-faq-q{font-weight:600;color:#a5b4fc;font-size:.86em;margin-bottom:2px}
+.af-faq-a{color:#94a3b8;font-size:.83em;margin-bottom:8px}
+.af-struct-h{font-weight:600;color:#e2e8f0;font-size:.86em}
+.af-struct-c{color:#94a3b8;font-size:.82em;margin-bottom:6px}
+
+.provider-real{color:#34d399;font-weight:600}
+.provider-sim{color:#94a3b8}
+.lab-spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.1);border-top:2px solid #818cf8;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle}
+@media(max-width:500px){.ai-lab-panel{width:100%;right:-100%}}
+</style>
+
+<button class="ai-lab-btn" onclick="toggleLab()">
+    <span style="font-size:1.3em">🧠</span> AI Lab
+</button>
+<div class="ai-lab-overlay" id="labOverlay" onclick="toggleLab()"></div>
+<div class="ai-lab-panel" id="labPanel">
+    <div class="lab-header">
+        <h2>🧠 AI Lab</h2>
+        <p>Advanced AI tools & strategy controls</p>
+        <button class="lab-close" onclick="toggleLab()">✕</button>
+    </div>
+
+    <div class="lab-section">
+        <div class="lab-stitle">A. AI Strategy Mode</div>
+        <div class="mode-grid">
+            <div class="mode-btn active" data-mode="gemini" onclick="setMode(this,'gemini')">
+                <span class="mi">⚡</span><span class="mn">Gemini</span><span class="md">Fast & structured</span>
+            </div>
+            <div class="mode-btn" data-mode="perplexity" onclick="setMode(this,'perplexity')">
+                <span class="mi">🔍</span><span class="mn">Perplexity</span><span class="md">Research-focused</span>
+            </div>
+            <div class="mode-btn" data-mode="chatgpt" onclick="setMode(this,'chatgpt')">
+                <span class="mi">💬</span><span class="mn">ChatGPT</span><span class="md">Content-focused</span>
+            </div>
+            <div class="mode-btn" data-mode="deepseek" onclick="setMode(this,'deepseek')">
+                <span class="mi">📊</span><span class="mn">DeepSeek</span><span class="md">Analytical</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="lab-section">
+        <div class="lab-stitle">B. Quick AI Tools</div>
+        <div class="tool-list">
+            <button class="tool-btn" onclick="runTool('answer_paragraph')"><span class="ti">🎯</span> Generate Answer Paragraph</button>
+            <button class="tool-btn" onclick="runTool('improve_aeo')"><span class="ti">📈</span> Improve AEO Score</button>
+            <button class="tool-btn" onclick="runTool('create_faq')"><span class="ti">❓</span> Create FAQ Section</button>
+            <button class="tool-btn" onclick="runTool('rewrite_visibility')"><span class="ti">✏️</span> Rewrite for AI Visibility</button>
+        </div>
+    </div>
+
+    <div class="lab-section">
+        <div class="lab-stitle">C. Smart Suggestions</div>
+        <div class="tool-list">
+            <button class="tool-btn" onclick="runTool('smart_suggestions')"><span class="ti">💡</span> Get Actionable Steps to Boost AEO</button>
+        </div>
+    </div>
+
+    <div class="lab-section" style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(52,211,153,.06));border-bottom:1px solid rgba(52,211,153,.12)">
+        <div class="lab-stitle" style="color:#34d399">🚀 Auto-Fix with AI</div>
+        <button class="tool-btn" onclick="runTool('auto_fix')" style="background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(52,211,153,.08));border-color:rgba(52,211,153,.2);font-weight:600;padding:14px 12px">
+            <span class="ti" style="font-size:1.3em">⚡</span>
+            <div>
+                <div style="color:#34d399;font-size:.92em">Generate Optimized Content</div>
+                <div style="color:#94a3b8;font-size:.72em;margin-top:2px">Answer + FAQ + Title + Meta + Structure</div>
+            </div>
+        </button>
+    </div>
+
+    <div class="lab-output">
+        <div class="lab-stitle">Output</div>
+        <div class="lab-out" id="labOutput">
+            <div style="color:#64748b;font-size:.88em">Select a tool above to generate AI-optimized content for your keyword.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let labMode = 'gemini';
+function toggleLab(){
+    document.getElementById('labPanel').classList.toggle('open');
+    document.getElementById('labOverlay').classList.toggle('open');
+}
+function setMode(el, mode){
+    labMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+}
+function getKeyword(){
+    return document.getElementById('topicInput').value.trim();
+}
+async function runTool(tool){
+    const topic = getKeyword();
+    if(!topic){alert('Enter a keyword first');return}
+    const out = document.getElementById('labOutput');
+    out.innerHTML = '<span class="lab-spin"></span> Generating...';
+    try{
+        const resp = await fetch('https://gl0vuc0iw8.execute-api.us-east-1.amazonaws.com/api/ai-lab',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,tool,mode:labMode})});
+        const data = await resp.json();
+        if(!data.success) throw new Error(data.error||'Failed');
+        renderLabOutput(data.result);
+    }catch(e){out.innerHTML=`<div style="color:#f87171">Error: ${e.message}</div>`}
+}
+function renderLabOutput(r){
+    const out = document.getElementById('labOutput');
+    let h = `<div class="ot">${r.type.replace(/_/g,' ')}</div><div class="om">${r.is_real ? '<span style="color:#34d399">⚡ Powered by '+r.provider+'</span>' : '<span style="color:#94a3b8">🔮 '+r.mode+' Mode (Simulated)</span>'}</div>`;
+
+    if(r.type==='answer_paragraph'){
+        h+=`<div style="line-height:1.7">${r.content}</div>`;
+        h+=`<div class="tip">${r.tip}</div>`;
+        h+=`<button class="lab-copy" onclick="copyLab(this)">Copy</button>`;
+    }
+    else if(r.type==='improve_aeo'){
+        r.improvements.forEach((item,i)=>{h+=`<div class="oi"><strong>${i+1}.</strong> ${item}</div>`});
+        h+=`<div class="tip">Estimated boost: ${r.estimated_boost}. ${r.tip}</div>`;
+    }
+    else if(r.type==='create_faq'){
+        r.faqs.forEach(f=>{h+=`<div class="oi"><div class="fq">Q: ${f.q}</div><div class="fa">A: ${f.a}</div></div>`});
+        h+=`<div class="tip">${r.tip}</div>`;
+        h+=`<button class="lab-copy" onclick="copyLab(this)">Copy FAQ</button>`;
+    }
+    else if(r.type==='rewrite_visibility'){
+        h+=`<div class="oi"><strong>Title:</strong> ${r.title}</div>`;
+        h+=`<div class="oi"><strong>Intro:</strong> ${r.intro}</div>`;
+        h+=`<div class="oi"><strong>Structure:</strong><br>${r.recommended_structure.map((s,i)=>`${i+1}. ${s}`).join('<br>')}</div>`;
+        h+=`<div class="tip">${r.tip}</div>`;
+        h+=`<button class="lab-copy" onclick="copyLab(this)">Copy</button>`;
+    }
+    else if(r.type==='smart_suggestions'){
+        r.suggestions.forEach(s=>{
+            h+=`<div class="si"><div><span class="si-pri ${s.priority}">${s.priority}</span> ${s.action}</div><span class="si-impact">${s.impact}</span></div>`;
+        });
+        h+=`<div class="tip">Total potential: ${r.total_potential}. ${r.tip}</div>`;
+    }
+    else if(r.type==='auto_fix'){
+        // Direct Answer
+        h+=`<div class="af-section">
+            <div class="af-label green"><span>✅</span> Direct Answer Paragraph <button class="af-copy" onclick="copySection(this)">Copy</button></div>
+            <div class="af-content">${r.direct_answer}</div>
+        </div>`;
+        // SEO Title
+        h+=`<div class="af-section">
+            <div class="af-label blue"><span>🏷️</span> SEO Title <button class="af-copy" onclick="copySection(this)">Copy</button></div>
+            <div class="af-content" style="font-weight:600;font-size:.95em">${r.seo_title}</div>
+        </div>`;
+        // Meta Description
+        h+=`<div class="af-section">
+            <div class="af-label yellow"><span>📝</span> Meta Description <button class="af-copy" onclick="copySection(this)">Copy</button></div>
+            <div class="af-content">${r.meta_description}</div>
+        </div>`;
+        // FAQ Section
+        h+=`<div class="af-section">
+            <div class="af-label purple"><span>❓</span> FAQ Section (5 Questions) <button class="af-copy" onclick="copySection(this)">Copy</button></div>`;
+        r.faqs.forEach((f,i)=>{
+            h+=`<div class="af-faq-q">${i+1}. ${f.q}</div><div class="af-faq-a">${f.a}</div>`;
+        });
+        h+=`</div>`;
+        // Structured Content
+        h+=`<div class="af-section">
+            <div class="af-label green"><span>📐</span> Recommended Structure <button class="af-copy" onclick="copySection(this)">Copy</button></div>`;
+        r.structured_content.forEach((s,i)=>{
+            h+=`<div class="af-struct-h">${i+1}. ${s.heading}</div><div class="af-struct-c">${s.content}</div>`;
+        });
+        h+=`</div>`;
+        h+=`<div class="tip">${r.tip}</div>`;
+        h+=`<button class="lab-copy" onclick="copyLab(this)">📋 Copy All Content</button>`;
+    }
+    out.innerHTML=h;
+}
+function copySection(btn){
+    const sec=btn.closest('.af-section');
+    if(!sec) return;
+    const texts=[];
+    sec.querySelectorAll('.af-content, .af-faq-q, .af-faq-a, .af-struct-h, .af-struct-c').forEach(el=>texts.push(el.textContent.trim()));
+    const combined=texts.join('\n');
+    navigator.clipboard.writeText(combined).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)});
+}
+function copyLab(btn){
+    const out=document.getElementById('labOutput');
+    if(!out) return;
+    // Collect text from content elements, skip labels and buttons
+    const texts=[];
+    out.querySelectorAll('.af-content, .af-faq-q, .af-faq-a, .af-struct-h, .af-struct-c, .oi, .si').forEach(el=>texts.push(el.textContent.trim()));
+    const text = texts.length > 0 ? texts.join('\n') : out.textContent.trim();
+    navigator.clipboard.writeText(text).then(()=>{
+        const orig=btn.textContent;
+        btn.textContent='✅ Copied!';
+        setTimeout(()=>{btn.textContent=orig},2000);
+    });
+}
+</script>
+
+<script>
+// OpenClaw Status Check
+async function checkOpenClawStatus(){
+    const banner=document.getElementById('openclawBanner');
+    const dot=document.getElementById('ocDot');
+    const title=document.getElementById('ocTitle');
+    const sub=document.getElementById('ocSub');
+    const badge=document.getElementById('ocBadge');
+    try{
+        const r=await fetch('https://gl0vuc0iw8.execute-api.us-east-1.amazonaws.com/api/openclaw/status');
+        const d=await r.json();
+        if(d.connected){
+            banner.className='openclaw-banner online';
+            dot.className='oc-dot green';
+            title.textContent='OpenClaw Connected';
+            sub.textContent='AI-powered summarization is active using '+d.model+' on AWS Bedrock';
+            badge.className='oc-badge online';
+            badge.textContent='Online';
+            badge.style.display='inline-block';
+        }else{
+            banner.className='openclaw-banner offline';
+            dot.className='oc-dot red';
+            title.textContent='OpenClaw Offline';
+            sub.textContent=d.error||'AWS Bedrock connection unavailable';
+            badge.className='oc-badge offline';
+            badge.textContent='Offline';
+            badge.style.display='inline-block';
+        }
+    }catch(e){
+        banner.className='openclaw-banner offline';
+        dot.className='oc-dot red';
+        title.textContent='OpenClaw Offline';
+        sub.textContent='Could not reach status endpoint';
+        badge.className='oc-badge offline';
+        badge.textContent='Offline';
+        badge.style.display='inline-block';
+    }
+}
+checkOpenClawStatus();
+// Re-check every 60 seconds
+setInterval(checkOpenClawStatus,60000);
+</script>
+
+
+<footer class="site-footer">
+    <div class="built-by">Built by <span>Deepthi Gunda</span></div>
+</footer>
+<button class="ai-assist-btn" onclick="toggleAssist()" aria-label="AI Assistant">
+    <span style="font-size:1.3em">💬</span> AI Assistant
+</button>
+<div class="ai-assist-panel" id="assistPanel">
+    <div class="assist-header">
+        <h3>🤖 AI Assistant</h3>
+        <button class="assist-close" onclick="toggleAssist()">✕</button>
+    </div>
+    <div class="assist-messages" id="assistMsgs">
+        <div class="assist-msg bot">Hi! I'm your AEO assistant. Ask me about SEO scores, AI visibility, citation gaps, or how to improve your content.</div>
+    </div>
+    <div class="assist-input-row">
+        <input type="text" class="assist-input" id="assistInput" placeholder="Ask about SEO, AEO, scores..." onkeydown="if(event.key==='Enter')sendAssist()">
+        <button class="assist-send" id="assistSendBtn" onclick="sendAssist()">Send</button>
+    </div>
+</div>
+
+<script>
+function toggleAssist(){
+    document.getElementById('assistPanel').classList.toggle('open');
+    if(document.getElementById('assistPanel').classList.contains('open')){
+        document.getElementById('assistInput').focus();
+    }
+}
+async function sendAssist(){
+    const input=document.getElementById('assistInput');
+    const msg=input.value.trim();
+    if(!msg)return;
+    const msgs=document.getElementById('assistMsgs');
+    msgs.innerHTML+='<div class="assist-msg user">'+msg.replace(/</g,'&lt;')+'</div>';
+    input.value='';
+    document.getElementById('assistSendBtn').disabled=true;
+    msgs.scrollTop=msgs.scrollHeight;
+    try{
+        const r=await fetch('https://gl0vuc0iw8.execute-api.us-east-1.amazonaws.com/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+        const d=await r.json();
+        msgs.innerHTML+='<div class="assist-msg bot">'+d.response+'</div>';
+    }catch(e){
+        msgs.innerHTML+='<div class="assist-msg bot" style="color:#fca5a5">Sorry, something went wrong. Try again.</div>';
+    }
+    document.getElementById('assistSendBtn').disabled=false;
+    msgs.scrollTop=msgs.scrollHeight;
+}
+</script>
+
+<button class="theme-toggle-float" onclick="(function(){var h=document.documentElement;if(h.getAttribute('data-theme')==='dark'){h.removeAttribute('data-theme');localStorage.setItem('theme','light');this.textContent='\u263C Light';}else{h.setAttribute('data-theme','dark');localStorage.setItem('theme','dark');this.textContent='\u263E Dark';}}).call(this)">&#9790; Dark</button>
+<script>if(localStorage.getItem('theme')==='dark'){document.querySelector('.theme-toggle-float').innerHTML='&#9788; Light';}</script>
+</body>
+</html>
