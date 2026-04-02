@@ -6,6 +6,35 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-02 18:15 — OpenClaw Gateway Installed on seo-dev (Troy)
+
+**OpenClaw Gateway v2026.4.1 installed and running on Gurbachan's Tailscale server.**
+
+**What was done:**
+- Upgraded Node.js from v20.20.0 to v22.22.2 (OpenClaw requires Node 22+)
+- Installed OpenClaw globally via `npm install -g openclaw@latest`
+- Ran non-interactive onboarding with Ollama provider pointing to local accelerator
+- Installed as systemd user service (`openclaw-gateway.service`), enabled with lingering
+- Configured agent timeout to 120s for the 30B model
+- Customized workspace SOUL.md with site monitor identity and capabilities
+- Installed 4 ClawHub skills: `seo-geo-audit`, `site-monitor`, `seo-competitor-analysis`, `geo-seo-optimizer`
+- Tested agent — responding correctly using local Ollama qwen3:30b-a3b
+
+**Configuration:**
+| Setting | Value |
+|---------|-------|
+| Version | OpenClaw 2026.4.1 |
+| Port | 18789 (loopback) |
+| Auth | Token mode |
+| Model | ollama/qwen3:30b-a3b (local LAN) |
+| Workspace | /opt/ai1stseo/openclaw-workspace |
+| Service | systemd user service, enabled, running |
+| Skills | seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer |
+
+**Next steps:** Connect messaging channels (WhatsApp QR pairing requires phone), wire up Phase 1 integration (report delivery via /hooks/agent).
+
+---
+
 ## 2026-04-01 22:55 — Local Ollama Accelerator Integration (Troy)
 
 **Connected site monitor to Gurbachan's local Ollama accelerator on LAN (192.168.2.200:11434).**
