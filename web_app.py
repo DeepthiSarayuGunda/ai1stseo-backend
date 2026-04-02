@@ -30,6 +30,7 @@ DB_DIR = '/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__))
 # --- DynamoDB feature flags (GEO Scanner + AEO Month 1 only) ---
 USE_DYNAMO_AEO = os.environ.get('USE_DYNAMO_AEO', 'false').lower() == 'true'
 USE_DYNAMO_GEO = os.environ.get('USE_DYNAMO_GEO', 'false').lower() == 'true'
+USE_DYNAMO_DIRECTORY = os.environ.get('USE_DYNAMO_DIRECTORY', 'false').lower() == 'true'
 
 aeo_repo = None
 geo_repo = None
