@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+*.zip
+.elasticbeanstalk/
+.DS_Store
+*.log
+/OneDrive/Documents/NetBeansProjects/usermanager/target/

@@ -1,0 +1,25 @@
+﻿version: 1.0
+runtime: python311
+
+build:
+  commands:
+    build:
+      - pip3 install --target /app/.local -r requirements.txt
+
+run:
+  command: python3 -m gunicorn application:application --bind 0.0.0.0:8080 --workers 4 --timeout 120
+  network:
+    port: 8080
+  env:
+    - name: PYTHONPATH
+      value: /app/.local
+    - name: GROQ_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
+    - name: ANTHROPIC_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
+    - name: OPENAI_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
+    - name: GEMINI_API_KEY
+      value: REPLACE_WITH_YOUR_KEY
+    - name: PERPLEXITY_API_KEY
+      value: REPLACE_WITH_YOUR_KEY

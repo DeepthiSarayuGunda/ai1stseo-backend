@@ -1,0 +1,7 @@
+# Test Diagram
+
+```mermaid
+graph LR
+    A[Start] --> B[Process]
+    B --> C[End]
+```

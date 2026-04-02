@@ -1,0 +1,82 @@
+[
+  {
+    "id": "4b7c651c-7e44-4e89-a610-9cd08782c13d",
+    "cognito_sub": "placeholder-amira",
+    "email": "amirarobleh@gmail.com",
+    "name": "Amira Robleh",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-24T23:27:45.672903",
+    "last_login": null
+  },
+  {
+    "id": "6edd9945-7ce7-46a1-8b16-15d577e711ce",
+    "cognito_sub": "placeholder-troy",
+    "email": "troysauriol@gmail.com",
+    "name": "Troy Sauriol",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-24T23:27:45.672903",
+    "last_login": null
+  },
+  {
+    "id": "543f84a5-2c0f-4e9d-803f-70c3d41ac6d5",
+    "cognito_sub": "d4089458-2031-7091-9e8a-bde34e7dbf58",
+    "email": "gurby1@gmail.com",
+    "name": "Gurbachan Singh",
+    "role": "member",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-25T13:40:54.705930",
+    "last_login": "2026-03-25T13:40:54.705930"
+  },
+  {
+    "id": "4e00e77f-e7e1-4e8c-9a8d-5505a1693121",
+    "cognito_sub": "144884a8-6031-70a6-4048-9c9c2d2c0022",
+    "email": "gundadeepthisarayu@gmail.com",
+    "name": "Deepthi",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-26T21:49:58.651054",
+    "last_login": "2026-03-29T17:49:32.579667"
+  },
+  {
+    "id": "647bc6d6-6ec3-4597-9e4c-4080fa85827d",
+    "cognito_sub": "f4e89448-f071-70a2-f837-1ddb250e5e2b",
+    "email": "saur0024@algonquinlive.com",
+    "name": "Troy Sauriol",
+    "role": "member",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-25T03:32:17.116820",
+    "last_login": "2026-03-31T00:56:19.873330"
+  },
+  {
+    "id": "05cff44d-ae01-4753-a043-b17506333d53",
+    "cognito_sub": "14e8e4a8-9041-70d4-a3a8-4a3eb5491374",
+    "email": "toorsamar24@gmail.com",
+    "name": "Samar Toor",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-26T16:31:51.090844",
+    "last_login": "2026-03-30T15:36:01.443747"
+  },
+  {
+    "id": "b559c0d7-6d56-4668-9595-77013e91b86f",
+    "cognito_sub": "e4a8c4a8-5071-70d2-a728-2b3f293d7d40",
+    "email": "tabasumshrma1010@gmail.com",
+    "name": "Tabasum Sharma",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-25T03:35:22.017639",
+    "last_login": "2026-03-26T17:23:46.204721"
+  },
+  {
+    "id": "8b7a17f9-90e4-4436-8df4-1127b0777987",
+    "cognito_sub": "b4d83468-5091-70a3-66c6-7608b35ad138",
+    "email": "amira.robleh@gmail.com",
+    "name": "Amira Robleh",
+    "role": "admin",
+    "project_id": "24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2",
+    "created_at": "2026-03-25T03:23:59.927985",
+    "last_login": "2026-03-31T20:09:37.906560"
+  }
+]

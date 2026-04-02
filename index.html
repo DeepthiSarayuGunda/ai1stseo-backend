@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AISEO Master - AI-First SEO Platform</title>
+    <script type="module" crossorigin src="/assets/index-Bfah4_p8.js"></script>
+    <script>
+      // Intercept ALL navigation to /audit/ and force full page reload with all categories
+      (function() {
+        // Intercept history.pushState
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            window.location.href = newUrl;
+            return;
+          }
+          return originalPushState.apply(this, arguments);
+        };
+
+        // Intercept history.replaceState
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function(state, title, url) {
+          if (url && url.includes('/audit/')) {
+            const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+            let newUrl = url;
+            if (url.includes('?cats=')) {
+              newUrl = url.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+            } else if (url.includes('?')) {
+              newUrl = url + '&cats=' + allCats;
+            } else {
+              newUrl = url + '?cats=' + allCats;
+            }
+            window.location.href = newUrl;
+            return;
+          }
+          return originalReplaceState.apply(this, arguments);
+        };
+
+        // Intercept clicks on links
+        document.addEventListener('click', function(e) {
+          const target = e.target.closest('a, button');
+          if (target) {
+            const href = target.getAttribute('href') || target.getAttribute('data-href') || '';
+            if (href.includes('/audit/')) {
+              e.preventDefault();
+              e.stopPropagation();
+              const allCats = 'technical,onpage,content,mobile,performance,security,social,local,geo';
+              let newUrl = href;
+              if (href.includes('?cats=')) {
+                newUrl = href.replace(/\?cats=[^&]*/, '?cats=' + allCats);
+              } else if (href.includes('?')) {
+                newUrl = href + '&cats=' + allCats;
+              } else {
+                newUrl = href + '?cats=' + allCats;
+              }
+              window.location.href = newUrl;
+            }
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Inject GEO Scanner Agent card into the React dashboard
+      (function() {
+        var injected = false;
+        function tryInject() {
+          if (injected) return;
+          if (document.getElementById('geo-scanner-card')) { injected = true; return; }
+          // Find "GEO Visibility Scanner" text on the page to locate the card grid
+          var allEls = document.querySelectorAll('*');
+          var geoCard = null;
+          for (var i = 0; i < allEls.length; i++) {
+            var el = allEls[i];
+            if (el.children.length === 0 && el.textContent.trim() === 'GEO Visibility Scanner') {
+              geoCard = el;
+              break;
+            }
+          }
+          if (!geoCard) return;
+          // Walk up to find the card container (the clickable card wrapper)
+          var cardEl = geoCard;
+          for (var j = 0; j < 8; j++) {
+            if (!cardEl.parentElement) break;
+            cardEl = cardEl.parentElement;
+            // The grid parent has multiple card children
+            if (cardEl.children.length >= 3) {
+              // This is likely the grid
+              var grid = cardEl;
+              injected = true;
+
+              var card = document.createElement('div');
+              card.id = 'geo-scanner-card';
+              card.style.cssText = 'background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border:2px solid #238636;border-radius:16px;padding:24px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-height:160px;';
+              card.onmouseover = function(){ card.style.borderColor='#3fb950'; card.style.transform='translateY(-2px)'; card.style.boxShadow='0 4px 20px rgba(35,134,54,0.3)'; };
+              card.onmouseout = function(){ card.style.borderColor='#238636'; card.style.transform='none'; card.style.boxShadow='none'; };
+              card.onclick = function(){ window.location.href='/geo-scanner'; };
+              card.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">🔬</div>'
+                + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:4px">GEO Scanner Agent</div>'
+                + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — runs 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
+                + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>';
+
+              grid.insertBefore(card, grid.firstChild);
+              return;
+            }
+          }
+        }
+        var observer = new MutationObserver(tryInject);
+        observer.observe(document.body, { childList: true, subtree: true });
+        // Also try on interval in case MutationObserver misses it
+        var interval = setInterval(function() { tryInject(); if (injected) clearInterval(interval); }, 500);
+        setTimeout(function(){ observer.disconnect(); clearInterval(interval); }, 30000);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            max-width: 400px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(255,255,255,0.15);
+        }
+        input::placeholder { color: rgba(255,255,255,0.5); }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(30, 35, 50, 0.9) inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+        .btn:active { transform: translateY(0); }
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ff6b6b;
+        }
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4caf50;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .links a:hover { text-decoration: underline; }
+        .forgot-link {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .forgot-link a {
+            color: #7b2cbf;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .forgot-link a:hover { text-decoration: underline; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">AISEO Master</div>
+        <div id="pageSubtitle" class="subtitle">Sign in to your account</div>
+        
+        <div id="errorMessage" class="message error-message"></div>
+        <div id="successMessage" class="message success-message"></div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="forgot-link">
+                <a href="#" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
+
+        <!-- FORGOT PASSWORD: Step 1 - Enter Email -->
+        <form id="forgotForm" class="hidden">
+            <div class="form-group">
+                <label for="forgotEmail">Email Address</label>
+                <input type="email" id="forgotEmail" placeholder="Enter your account email" required>
+            </div>
+            <button type="submit" class="btn">Send Reset Code</button>
+            <div style="text-align:center; margin-top:15px;">
+                <a href="#" onclick="showLogin(); return false;" style="color:#00d4ff; text-decoration:none; font-size:0.9rem;">← Back to Sign In</a>
+            </div>
+        </form>
+
+        <!-- FORGOT PASSWORD: Step 2 - Enter Code + New Password -->
+        <form id="resetForm" class="hidden">
+            <input type="hidden" id="resetEmail">
+            <div class="form-group">
+                <label for="resetCode">Verification Code</label>
+                <input type="text" id="resetCode" placeholder="Enter 6-digit code" required maxlength="6" style="text-align:center; font-size:1.5rem; letter-spacing:8px;">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="Min 8 chars, uppercase, lowercase, number" required minlength="8">
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword" placeholder="Confirm new password" required>
+            </div>
+            <button type="submit" class="btn">Reset Password</button>
+            <div style="text-align:center; margin-top:15px;">
+                <a href="#" onclick="resendResetCode(); return false;" style="color:#7b2cbf; text-decoration:none; font-size:0.85rem;">Didn't get the code? Resend</a>
+            </div>
+        </form>
+
+        <div class="links">
+            <div style="margin-bottom: 15px;">Don't have an account? <a href="/signup.html" style="color: #7b2cbf;">Sign Up</a></div>
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:5001';
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+
+        function showMsg(div, msg) { div.textContent = msg; div.style.display = 'block'; }
+        function hideMsg() { errorDiv.style.display = 'none'; successDiv.style.display = 'none'; }
+
+        function showLogin() {
+            hideMsg();
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('forgotForm').classList.add('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
+            document.getElementById('pageSubtitle').textContent = 'Sign in to your account';
+        }
+
+        function showForgotPassword() {
+            hideMsg();
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('forgotForm').classList.remove('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
+            document.getElementById('pageSubtitle').textContent = 'Reset your password';
+        }
+
+        function showResetForm(email) {
+            hideMsg();
+            document.getElementById('forgotForm').classList.add('hidden');
+            document.getElementById('resetForm').classList.remove('hidden');
+            document.getElementById('resetEmail').value = email;
+            document.getElementById('pageSubtitle').textContent = 'Enter your new password';
+        }
+
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMsg();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const r = await fetch(API + '/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await r.json();
+                if (data.status === 'success') {
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userName', data.name);
+                    localStorage.setItem('userEmail', data.email);
+                    if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+                    window.location.href = '/';
+                } else {
+                    showMsg(errorDiv, data.message || 'Invalid email or password');
+                }
+            } catch (err) {
+                showMsg(errorDiv, 'Connection error. Please try again.');
+            }
+        });
+
+        // FORGOT PASSWORD - Step 1: Send code
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMsg();
+            const email = document.getElementById('forgotEmail').value;
+            try {
+                const r = await fetch(API + '/api/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await r.json();
+                showMsg(successDiv, 'If an account exists, a reset code has been sent to your email.');
+                showResetForm(email);
+            } catch (err) {
+                showMsg(errorDiv, 'Connection error. Please try again.');
+            }
+        });
+
+        // FORGOT PASSWORD - Step 2: Reset with code
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMsg();
+            const email = document.getElementById('resetEmail').value;
+            const code = document.getElementById('resetCode').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNew = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmNew) {
+                showMsg(errorDiv, 'Passwords do not match');
+                return;
+            }
+            try {
+                const r = await fetch(API + '/api/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code, newPassword })
+                });
+                const data = await r.json();
+                if (data.status === 'success') {
+                    showMsg(successDiv, 'Password reset successful! Redirecting to sign in...');
+                    setTimeout(() => showLogin(), 2000);
+                } else {
+                    showMsg(errorDiv, data.message || 'Reset failed');
+                }
+            } catch (err) {
+                showMsg(errorDiv, 'Connection error. Please try again.');
+            }
+        });
+
+        // Resend reset code
+        async function resendResetCode() {
+            const email = document.getElementById('resetEmail').value;
+            hideMsg();
+            try {
+                await fetch(API + '/api/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                showMsg(successDiv, 'New reset code sent to your email!');
+            } catch (err) {}
+        }
+    </script>
+</body>
+</html>

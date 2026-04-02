@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+        }
+        .info-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        .info-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        .danger-zone {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 12px;
+        }
+        .danger-title {
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .danger-text {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: linear-gradient(90deg, #f44336, #d32f2f);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            margin-right: 10px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .back-link a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ff6b6b;
+        }
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">AISEO Master</div>
+        <div class="subtitle">Account Settings</div>
+        
+        <div id="errorMessage" class="message error-message"></div>
+        <div id="successMessage" class="message success-message"></div>
+        
+        <div class="info-section">
+            <div class="info-label">Full Name</div>
+            <div class="info-value" id="userName">Loading...</div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-label">Email Address</div>
+            <div class="info-value" id="userEmail">Loading...</div>
+        </div>
+        
+        <div class="danger-zone">
+            <div class="danger-title">⚠️ Danger Zone</div>
+            <div class="danger-text">
+                Once you delete your account, there is no going back. This will permanently delete your account and remove all your data from our servers.
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='/'">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">Delete Account</button>
+        </div>
+        
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('authToken');
+        const userName = localStorage.getItem('userName');
+        const userEmail = localStorage.getItem('userEmail');
+        
+        // Check if logged in
+        if (!token || !userName || !userEmail) {
+            window.location.href = '/login.html';
+        }
+        
+        // Display user info
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userEmail').textContent = userEmail;
+        
+        async function confirmDelete() {
+            const confirmed = confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.');
+            
+            if (!confirmed) return;
+            
+            const doubleConfirm = confirm('This is your last chance. Type your email to confirm deletion: ' + userEmail);
+            
+            if (!doubleConfirm) return;
+            
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5001/api/delete-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    successDiv.textContent = 'Account deleted successfully. Redirecting...';
+                    successDiv.style.display = 'block';
+                    
+                    // Clear local storage
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    
+                    // Redirect to home after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.message || 'Failed to delete account';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

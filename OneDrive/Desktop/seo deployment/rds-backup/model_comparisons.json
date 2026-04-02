@@ -1,0 +1,292 @@
+[
+  {
+    "id": "9c2350ef-5879-40ea-95db-3e7683ac80d1",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "Nike",
+    "keyword": "Running Shoes",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Running shoes are a crucial investment for runners, as they can significantly impact performance, comfort, and injury prevention. With numerous options available, it can be challenging to choose the best running shoes for your needs. Here's a detailed guide to help you make an informed decision:\n\n**Types of Running Shoes:**\n\n1. **Neutral Running Shoes:** Designed for runners with neutral foot pronation, these shoes provide cushioning and support without excessive stability features. Examples: Brooks Ghost, Nike Pegasus, Asics Gel-Kayano.\n2. **Stability Running Shoes:** Suitable for runners with mild to moderate overpronation, these shoes offer additional support and stability features to help correct foot movement. Examples: Brooks Adrenaline, Asics Gel-Kayano, New Balance Fresh Foam.\n3. **Motion Control Running Shoes:** Designed for runners with severe overpronation, these shoes provide maximum support and stability to help control excessive foot movement. Examples: Brooks Beast, Asics Gel-Foundation, New Balance 928.\n4. **Trail Running Shoes:** Built for off-road running, these shoes feature aggressive tread patterns, water-resistant materials, and additional ankle support. Examples: Salomon Speedcross, Brooks Cascadia, Hoka One One Challenger.\n5. **Racing Flats:** Lightweight, minimalistic shoes designed for speed and competition. Examples: Nike Vaporfly, Adidas Adizero, New Balance FuelCell.\n\n**Key Features to Consider:**\n\n1. **Cushioning:** Look for shoes with adequate midsole cushioning to absorb impact and provide comfort.\n2. **Support:** Consider the level of arch support and stability features needed based on your foot pronation.\n3. **Fit:** Ensure a comfortable, secure fit with a breathable upper material.\n4. **Weight:** Lighter shoes can enhance running efficiency, but may sacrifice support and cushioning.\n5. **Drop:** The heel-to-toe offset can affect running form and comfort. Options range from 0mm to 12mm.\n\n**Top Running Shoe Brands:**\n\n1. **Nike:** Kn",
+      "nova": "",
+      "ollama": ""
+    },
+    "comparison_result": {
+      "consensus": "Running shoes are a crucial investment for runners",
+      "disagreements": [],
+      "brand_sentiment": {
+        "GROQ": "neutral"
+      },
+      "brand_mentioned_by": [
+        "GROQ"
+      ],
+      "brand_not_mentioned_by": []
+    },
+    "models_mentioning": [
+      "GROQ"
+    ],
+    "disagreements": [],
+    "created_at": "2026-03-30T00:35:33.897885"
+  },
+  {
+    "id": "61e2d033-05af-47d9-a2fc-28f8dba0acda",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "Nike",
+    "keyword": "Shoes",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "The world of shoes is vast and diverse, with numerous options available to suit different needs, preferences, and budgets. Here's a detailed guide to help you navigate the best options:\n\n**Types of Shoes:**\n\n1. **Running Shoes:** Designed for athletes and fitness enthusiasts, running shoes provide excellent arch support, cushioning, and traction. Top brands include:\n\t* Nike (e.g., Air Zoom Pegasus, Vaporfly)\n\t* Adidas (e.g., Ultraboost, Supernova)\n\t* Asics (e.g., Gel-Kayano, Gel-Nimbus)\n2. **Hiking Boots:** Suitable for outdoor enthusiasts, hiking boots offer rugged durability, waterproofing, and ankle support. Top brands include:\n\t* Merrell (e.g., Moab, All Out Blaze)\n\t* Keen (e.g., Targhee, Newport)\n\t* Salomon (e.g., Quest, X Ultra)\n3. **Dress Shoes:** Elegant and sophisticated, dress shoes are perfect for formal events and business meetings. Top brands include:\n\t* Allen Edmonds (e.g., Park Avenue, Fifth Avenue)\n\t* Johnston & Murphy (e.g., Melville, Waverly)\n\t* Church's (e.g., Consul, Diplomat)\n4. **Sandals:** Ideal for warm weather, sandals provide breathability and comfort. Top brands include:\n\t* Birkenstock (e.g., Gizeh, Arizona)\n\t* Teva (e.g., Terra-Float, Omnium)\n\t* Sanuk (e.g., Beaumont, Vagabond)\n5. **Boots:** From ankle boots to knee-high boots, this style is versatile and can be dressed up or down. Top brands include:\n\t* Dr. Martens (e.g., 1460, Adrian)\n\t* Timberland (e.g., 6-Inch Premium, Chelsea)\n\t* UGG (e.g., Classic Short, Ultra Collection)\n\n**Sustainable and Eco-Friendly Options:**\n\n1. **Veja:** A French brand offering eco-friendly sneakers made from organic cotton and wild rubber.\n2. **Patagonia:** A US-based brand providing environmentally responsible footwear options, such as the Dune and Rover styles.\n3. **Reef:** A US-based brand offering eco-friendly sandals and shoes made from recycled materials.\n\n**Innovative and Technological Options:**\n\n1. **Nike Flyknit:** A revolutionary knitting technology providing a seamless, lightweight, and supportiv",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/a394e454-ce51-492c-a1a7-3646cc62f4a2 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "consensus": "Nike is a top brand for running shoes",
+      "disagreements": [],
+      "brand_sentiment": {
+        "GROQ": "neutral"
+      },
+      "brand_mentioned_by": [
+        "GROQ"
+      ],
+      "brand_not_mentioned_by": []
+    },
+    "models_mentioning": [
+      "GROQ"
+    ],
+    "disagreements": [],
+    "created_at": "2026-03-30T00:52:01.347971"
+  },
+  {
+    "id": "ebc11df3-9a6f-4016-964e-864e40a214fa",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "Nike",
+    "keyword": "Shoes",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "The world of shoes is vast and diverse, with numerous options to suit different needs, preferences, and occasions. Here's a comprehensive overview of the best options available:\n\n**Types of Shoes:**\n\n1. **Running Shoes:** For runners, the best options include:\n\t* Nike Air Zoom Alphafly Next%: Known for their exceptional cushioning and support.\n\t* Brooks Ghost: Offers a smooth ride and balanced feel.\n\t* Asics Gel-Kayano: Provides excellent support and stability for high-mileage runners.\n2. **Hiking Boots:** For outdoor enthusiasts, consider:\n\t* Merrell Moab 2 Mid Waterproof: Offers excellent ankle support and water resistance.\n\t* Salomon Quest 4D 3 GTX: Provides great traction and comfort on uneven terrain.\n\t* Keen Targhee II Mid WP: Features a comfortable fit and excellent waterproofing.\n3. **Dress Shoes:** For formal events, look at:\n\t* Allen Edmonds Park Avenue: Classic, stylish, and comfortable oxfords.\n\t* Johnston & Murphy Melville: Offers a sophisticated, refined look.\n\t* Cole Haan Pinch Weekender: Combines style and comfort with a sleek design.\n4. **Sneakers:** For casual wear, consider:\n\t* Adidas Ultraboost: Known for their exceptional comfort and style.\n\t* Converse Chuck Taylor All Star: A classic, versatile option.\n\t* Vans Old Skool: Offers a comfortable, laid-back fit.\n5. **Sandals:** For warm weather, look at:\n\t* Birkenstock Gizeh: Features a contoured footbed and adjustable straps.\n\t* Teva Terra-Float: Offers excellent arch support and a comfortable fit.\n\t* Sanuk Beaumont: Provides a relaxed, casual vibe.\n\n**Brands:**\n\n1. **Nike:** Known for their innovative designs, excellent quality, and wide range of options.\n2. **Adidas:** Offers a mix of style, comfort, and performance, with popular lines like Ultraboost and Superstar.\n3. **New Balance:** Provides a wide range of models, from running shoes to lifestyle sneakers, with a focus on comfort and support.\n4. **Clarks:** Specializes in comfortable, high-quality footwear with a focus on walking shoes and san",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/5b72eaa2-2e58-4b5a-b85a-90a8c4ba1fd9 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "consensus": "Nike is a notable brand in the world of shoes",
+      "disagreements": [],
+      "brand_sentiment": {
+        "GROQ": "positive"
+      },
+      "brand_mentioned_by": [
+        "GROQ"
+      ],
+      "brand_not_mentioned_by": []
+    },
+    "models_mentioning": [
+      "GROQ"
+    ],
+    "disagreements": [],
+    "created_at": "2026-03-30T01:31:25.852740"
+  },
+  {
+    "id": "9bceb3cf-42c5-4187-85b0-f7f4b6e6b52d",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "Nike",
+    "keyword": "Shoes",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "The world of shoes is vast and varied, with numerous options available to suit different needs, preferences, and budgets. Here's a comprehensive overview of the best shoe options in various categories, including specific product and brand recommendations:\n\n**Running Shoes:**\n\n1. **Nike Air Zoom Pegasus**: A popular choice among runners, offering a responsive and cushioned ride.\n2. **Asics Gel-Kayano**: Designed for high-mileage runners, providing excellent support and stability.\n3. **Brooks Ghost**: A supportive and smooth ride, ideal for long-distance running.\n\n**Hiking Boots:**\n\n1. **Merrell Moab 2**: Waterproof and breathable, with excellent traction and ankle support.\n2. **Salomon Quest 4D**: A sturdy and comfortable boot, suitable for challenging terrain.\n3. **Keen Targhee II**: A lightweight and flexible option, perfect for day hikes.\n\n**Dress Shoes:**\n\n1. **Allen Edmonds Park Avenue**: A classic, stylish option with exceptional quality and craftsmanship.\n2. **Johnston & Murphy Melville**: A versatile and comfortable dress shoe, suitable for formal events.\n3. **Cole Haan Pinch**: A sleek and modern design, offering superior comfort and style.\n\n**Casual Shoes:**\n\n1. **Converse Chuck Taylor All Star**: A timeless and iconic design, perfect for casual, everyday wear.\n2. **Vans Old Skool**: A popular choice among skaters and sneaker enthusiasts, offering a comfortable and durable design.\n3. **Adidas Superstar**: A classic and stylish option, suitable for both casual and athletic wear.\n\n**Sandals:**\n\n1. **Birkenstock Gizeh**: A comfortable and supportive sandal, ideal for warm weather and outdoor activities.\n2. **Teva Terra-Float**: A lightweight and quick-drying option, perfect for water sports and beach activities.\n3. **Sanuk Beaumont**: A stylish and comfortable sandal, suitable for casual, everyday wear.\n\n**Work Boots:**\n\n1. **Timberland Pro**: A durable and protective option, designed for heavy-duty work and rugged terrain.\n2. **Dr. Martens Ironbridge**: A com",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/68d306a5-0cf5-495c-a073-3152b1e6e65c is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "consensus": "Nike is a popular choice among runners",
+      "disagreements": [],
+      "brand_sentiment": {
+        "GROQ": "positive"
+      },
+      "brand_mentioned_by": [
+        "GROQ"
+      ],
+      "brand_not_mentioned_by": []
+    },
+    "models_mentioning": [
+      "GROQ"
+    ],
+    "disagreements": [],
+    "created_at": "2026-03-30T01:48:05.588549"
+  },
+  {
+    "id": "d4d00365-36d8-44a8-bbe4-7d1068a256f3",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "AI1stSEO",
+    "keyword": "best SEO tools",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "There are numerous SEO tools available, each with its unique features, pricing, and benefits. Here are some of the best SEO tools, categorized by their primary function:\n\n**Keyword Research Tools:**\n\n1. **Ahrefs**: A comprehensive tool for keyword research, backlink analysis, and content optimization. Offers a vast database of keywords, content analyzer, and competitor analysis. (Pricing: $99-$999/month)\n2. **SEMrush**: An all-in-one tool for keyword research, technical SEO audit, and competitor analysis. Provides insights into keyword trends, technical issues, and backlink opportunities. (Pricing: $99.95-$449.95/month)\n3. **Moz Keyword Explorer**: A keyword research tool that offers a vast database of keywords, prioritizes keywords by relevance and difficulty, and provides suggestions for content optimization. (Pricing: $99-$599/month)\n\n**Technical SEO Tools:**\n\n1. **Screaming Frog SEO Spider**: A website crawler that analyzes technical SEO issues, such as broken links, duplicate content, and meta tags. Offers a free version and a paid version with additional features. (Pricing: Free-$149/year)\n2. **DeepCrawl**: A comprehensive technical SEO audit tool that identifies issues and provides recommendations for improvement. Offers a 30-day free trial and custom pricing for enterprises.\n3. **Ahrefs Site Audit**: A technical SEO audit tool that analyzes website structure, content, and links, providing recommendations for improvement. (Pricing: $99-$999/month)\n\n**Backlink Analysis Tools:**\n\n1. **Ahrefs Backlink Analyzer**: A tool that analyzes backlinks, providing insights into anchor text, referral traffic, and link equity. (Pricing: $99-$999/month)\n2. **Moz Link Explorer**: A tool that analyzes backlinks, providing insights into link equity, anchor text, and referral traffic. (Pricing: $99-$599/month)\n3. **SEMrush Backlink Analytics**: A tool that analyzes backlinks, providing insights into link equity, anchor text, and referral traffic. (Pricing: $99.95-$449.95/month)\n",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/becb70b2-ee89-48ef-9d87-8c19272c6136 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "consensus": "The models agree that there are numerous SEO tools available, but none mention the brand 'AI1stSEO'.",
+      "disagreements": [],
+      "brand_sentiment": {
+        "GROQ": "neutral"
+      },
+      "brand_mentioned_by": [],
+      "brand_not_mentioned_by": [
+        "GROQ"
+      ]
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T03:36:40.030531"
+  },
+  {
+    "id": "95ff2ce9-326b-4946-aa3b-365d9ac9083f",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "What is AI SEO Tools?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Groq returned 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01km431dkxfay9e3hqgeqa7fae` service tier `on_demand` on requests per minute (RPM): L",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/becb70b2-ee89-48ef-9d87-8c19272c6136 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "All models failed"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T03:47:48.966815"
+  },
+  {
+    "id": "f07e6722-6348-4381-9e41-8c33857bba65",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "What does technical SEO mean in AI SEO Tools?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Groq returned 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01km431dkxfay9e3hqgeqa7fae` service tier `on_demand` on requests per minute (RPM): L",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/becb70b2-ee89-48ef-9d87-8c19272c6136 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "All models failed"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T03:47:55.982484"
+  },
+  {
+    "id": "e6453bba-d37c-4e38-a773-f930aaec2658",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "How would you define link building?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Link building is a crucial aspect of search engine optimization (SEO) that involves acquiring hyperlinks from other websites to your own website. The goal of link building is to increase the authority, credibility, and ranking of your website in search engine results pages (SERPs). Here's a detailed overview of link building, including the best options available:\n\n**Definition of Link Building:**\nLink building is the process of obtaining hyperlinks from other websites to your own website. These hyperlinks, also known as \"backlinks,\" are used by search engines like Google to determine the relevance, authority, and ranking of your website. High-quality backlinks from authoritative sources can significantly improve your website's visibility, drive referral traffic, and increase conversions.\n\n**Types of Link Building:**\nThere are several types of link building strategies, including:\n\n1. **Guest Blogging:** Writing informative and engaging content for other websites in exchange for a backlink to your website.\n2. **Resource Pages:** Creating a resource page on your website that links to other high-quality websites in your niche, and asking them to link back to you.\n3. **Broken Link Building:** Finding broken links on other websites and offering to replace them with a working link to a similar article or resource on your website.\n4. **Reviews:** Requesting reviews from customers, partners, or influencers, and asking them to link to your website.\n5. **Content Marketing:** Creating high-quality, shareable content that naturally attracts links from other websites.\n6. **Partnerships:** Collaborating with other businesses or organizations to create content, products, or services that link to each other's websites.\n7. **Linkable Assets:** Creating linkable assets like infographics, e-books, whitepapers, or webinars that provide value to others and attract links.\n\n**Best Options for Link Building:**\nSome of the best options for link building include:\n\n1. **Ahrefs:** A comprehensi",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/becb70b2-ee89-48ef-9d87-8c19272c6136 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "Analysis failed: All AI providers failed. nova: An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts:; groq: Groq returned 429: {\"error\":{\"message\":\"Rate limit reached fo"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T03:48:08.246779"
+  },
+  {
+    "id": "df12b22e-85cf-4920-84bb-4aa4ac57788b",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "What is AI SEO Tools?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Groq returned 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01km431dkxfay9e3hqgeqa7fae` service tier `on_demand` on tokens per day (TPD): Limit ",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/257f3bbc-f6e5-481f-8173-7010497d91d9 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "All models failed"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T04:15:48.670251"
+  },
+  {
+    "id": "47cc0723-6685-4332-8c19-0dfbcd58952e",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "What does technical SEO mean in AI SEO Tools?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Groq returned 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01km431dkxfay9e3hqgeqa7fae` service tier `on_demand` on tokens per day (TPD): Limit ",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/257f3bbc-f6e5-481f-8173-7010497d91d9 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "All models failed"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T04:15:55.686724"
+  },
+  {
+    "id": "d177bc79-c577-4908-9750-61a21cdb2e24",
+    "project_id": "00000000-0000-0000-0000-000000000001",
+    "brand_name": "HubSpot, Moz",
+    "keyword": "How would you define link building?",
+    "models_queried": [
+      "nova",
+      "groq",
+      "ollama"
+    ],
+    "raw_responses": {
+      "groq": "Groq returned 429: {\"error\":{\"message\":\"Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01km431dkxfay9e3hqgeqa7fae` service tier `on_demand` on tokens per day (TPD): Limit ",
+      "nova": "An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::823766426087:assumed-role/AppRunnerRole/257f3bbc-f6e5-481f-8173-7010497d91d9 is not authorized to p",
+      "ollama": "Ollama server unreachable at https://ollama.sageaios.com"
+    },
+    "comparison_result": {
+      "error": "All models failed"
+    },
+    "models_mentioning": [],
+    "disagreements": [],
+    "created_at": "2026-03-31T04:16:02.701631"
+  }
+]

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - AI1stSEO</title>
+    <script type="module" crossorigin src="/assets/index-DHXIsnai.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-5EfaFiA8.css">
+  </head>
+  <body class="bg-[#0a0a0a] text-white min-h-screen">
+    <div id="root"></div>
+
+    <script>
+      (function() {
+        var done = false;
+        function inject() {
+          if (done) return;
+          if (document.getElementById('ai-vis-card')) { done = true; return; }
+
+          // Find the AEO Platform card to locate the grid
+          var all = document.querySelectorAll('*');
+          var target = null;
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].children.length === 0 && all[i].textContent.trim() === 'AEO Platform') {
+              target = all[i]; break;
+            }
+          }
+          if (!target) return;
+
+          // Walk up to find the actual card element (the clickable container)
+          var cardEl = target;
+          for (var k = 0; k < 6; k++) {
+            if (!cardEl.parentElement) break;
+            cardEl = cardEl.parentElement;
+            // The card container typically has onclick or is a direct child of the grid
+            if (cardEl.parentElement && cardEl.parentElement.children.length >= 3) break;
+          }
+
+          var grid = cardEl.parentElement;
+          if (!grid || grid.children.length < 3) return;
+          done = true;
+
+          // Create new card cloning the same classes as existing cards
+          var newCard = cardEl.cloneNode(false);
+          newCard.id = 'ai-vis-card';
+          newCard.style.cursor = 'pointer';
+          newCard.style.position = 'relative';
+          newCard.onclick = function(){ window.location.href='/geo-scanner.html'; };
+          newCard.innerHTML = ''
+            + '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:#238636;border-radius:8px 8px 0 0"></div>'
+            + '<div style="font-size:1.6rem;margin-bottom:8px;margin-top:4px">🔬</div>'
+            + '<div style="font-size:1rem;font-weight:700;color:#e1e4e8;margin-bottom:6px">AI Visibility Scanner</div>'
+            + '<div style="font-size:0.82rem;color:#8b949e;line-height:1.5;margin-bottom:12px">Full AI visibility scan — 4 scanner agents across AI models. Plain-English report with scores and recommendations.</div>'
+            + '<span style="display:inline-block;padding:3px 10px;background:#238636;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:600">NEW</span>';
+
+          // Append after AEO Platform card (at the end of the grid)
+          grid.appendChild(newCard);
+        }
+
+        var obs = new MutationObserver(inject);
+        obs.observe(document.body, { childList: true, subtree: true });
+        var iv = setInterval(function() { inject(); if (done) clearInterval(iv); }, 500);
+        setTimeout(function(){ obs.disconnect(); clearInterval(iv); }, 30000);
+      })();
+    </script>
+
+    <script>
+      // Replace personalized greeting with generic title
+      var hg = setInterval(function() {
+        var els = document.querySelectorAll('h1, h2, [class*="text-3xl"], [class*="text-4xl"]');
+        for (var i = 0; i < els.length; i++) {
+          if (els[i].textContent.trim().match(/^Good (morning|afternoon|evening)/i)) {
+            els[i].textContent = 'AI-First SEO Dashboard';
+            clearInterval(hg); return;
+          }
+        }
+      }, 300);
+      setTimeout(function(){ clearInterval(hg); }, 15000);
+    </script>
+  </body>
+</html>

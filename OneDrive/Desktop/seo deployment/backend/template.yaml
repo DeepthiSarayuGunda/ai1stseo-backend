@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI 1st SEO Backend - Lambda + API Gateway (seo-backend service)
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        DB_HOST: ai1stseo-db.ca5mm2skodf2.us-east-1.rds.amazonaws.com
+        DB_NAME: ai1stseo
+        DB_USER: ai1stseo_admin
+        DB_PORT: "5432"
+        COGNITO_USER_POOL_ID: us-east-1_DVvth47zH
+        COGNITO_CLIENT_ID: 7scsae79o2g9idc92eputcrvrg
+        COGNITO_REGION: us-east-1
+        OLLAMA_URL: https://ollama.sageaios.com
+        OLLAMA_MODEL: qwen3:30b-a3b
+        NOVA_MODEL: amazon.nova-lite-v1:0
+        AWS_REGION_NAME: us-east-1
+
+Resources:
+  SeoBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      CodeUri: .
+      Description: SEO Backend API - 231-check analyzer + auth + AI recommendations
+      Timeout: 300
+      MemorySize: 1024
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:ai1stseo/*"
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0859c7cfcb529b8ff
+        SubnetIds:
+          - !Ref PrivateSubnet1
+      Events:
+        ApiProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref SeoBackendApi
+        ApiRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref SeoBackendApi
+
+  SeoBackendApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'https://ai1stseo.com,https://www.ai1stseo.com,https://main.d30a3tvkvr1a51.amplifyapp.com'"
+
+  # Daily admin metrics aggregation (runs at 02:00 UTC)
+  AdminAggregationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: admin_aggregation.lambda_handler
+      CodeUri: .
+      Description: Daily admin metrics aggregation job
+      Timeout: 120
+      MemorySize: 256
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0859c7cfcb529b8ff
+        SubnetIds:
+          - !Ref PrivateSubnet1
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 2 * * ? *)
+            Description: Aggregate admin metrics daily at 02:00 UTC
+            Enabled: true
+
+Parameters:
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet in same VPC as RDS
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${SeoBackendApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  BackendFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt SeoBackendFunction.Arn

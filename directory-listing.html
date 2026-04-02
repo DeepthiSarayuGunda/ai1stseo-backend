@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Business Name — AI1stSEO Directory</title>
+    <meta name="description" id="metaDesc" content="">
+    <!-- JSON-LD Schema will be injected by JS -->
+    <script id="schemaLD" type="application/ld+json">{}</script>
+    <style>
+        :root { --bg: #0a0a0a; --text: #fff; --muted: rgba(255,255,255,0.6); --faint: rgba(255,255,255,0.3); --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --accent: #00d4ff; --green: #00ff88; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        a { color: var(--accent); text-decoration: none; }
+
+        nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+        .nav-logo { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .breadcrumb { padding: 16px 32px; font-size: 0.85rem; color: var(--faint); max-width: 1100px; margin: 0 auto; }
+        .breadcrumb a { color: var(--muted); }
+
+        .listing { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+
+        /* Hero */
+        .listing-hero { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 32px; }
+        .listing-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #00d4ff, #7b2cbf); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0; }
+        .listing-info h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+        .listing-info .category-tag { display: inline-block; padding: 4px 12px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 16px; font-size: 0.75rem; color: var(--accent); margin-right: 8px; }
+        .listing-info .rating { color: #f59e0b; font-size: 1rem; margin-top: 8px; }
+        .listing-info .rating span { color: var(--muted); font-size: 0.85rem; }
+
+        /* BLUF Summary */
+        .bluf { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; border-left: 4px solid var(--accent); }
+        .bluf p { font-size: 1rem; line-height: 1.7; color: var(--muted); }
+
+        /* Quick Facts */
+        .facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 32px; }
+        .fact-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .fact-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--faint); margin-bottom: 4px; }
+        .fact-value { font-size: 1rem; font-weight: 600; }
+
+        /* Sections */
+        .section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+        .section h2 { font-size: 1.2rem; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+        /* FAQ */
+        .faq-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--accent); }
+        .faq-a { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+        /* Comparison */
+        .compare-table { width: 100%; border-collapse: collapse; }
+        .compare-table th { text-align: left; padding: 10px 12px; font-size: 0.75rem; color: var(--faint); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .compare-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        .compare-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* CTA */
+        .cta-box { background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(123,44,191,0.1)); border: 1px solid rgba(0,212,255,0.3); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 24px; }
+        .cta-box h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .cta-box p { color: var(--muted); margin-bottom: 16px; font-size: 0.9rem; }
+        .cta-btn { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: 700; border-radius: 10px; font-size: 0.95rem; }
+
+        footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--faint); font-size: 0.8rem; }
+
+        @media (max-width: 768px) {
+            .listing-hero { flex-direction: column; }
+            nav { padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">AI1stSEO Directory</a>
+        <div style="display:flex;gap:16px;align-items:center;">
+            <a href="https://www.ai1stseo.com" style="color:var(--muted);font-size:0.9rem;">Home</a>
+            <a href="directory-category.html" style="color:var(--muted);font-size:0.9rem;">Top 10</a>
+            <a href="directory-compare.html" style="color:var(--muted);font-size:0.9rem;">Compare</a>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> / <a href="/category/ottawa">Ottawa</a> / <a href="/category/ottawa/dentists">Dentists</a> / <span style="color:var(--text);" id="breadcrumbName">Business Name</span>
+    </div>
+
+    <div class="listing">
+        <!-- Hero -->
+        <div class="listing-hero">
+            <div class="listing-icon" id="listingIcon">🦷</div>
+            <div class="listing-info">
+                <h1 id="businessName">Sample Dental Clinic</h1>
+                <div>
+                    <span class="category-tag" id="categoryTag">Dentist</span>
+                    <span class="category-tag" style="background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.3);color:#00ff88;">AI Citation Ready</span>
+                </div>
+                <div class="rating" id="ratingStars">★★★★☆ <span>4.2 / 5 (127 reviews)</span></div>
+            </div>
+        </div>
+
+        <!-- BLUF Summary (40-60 words, auto-generated by Claude API) -->
+        <div class="bluf">
+            <p id="blufSummary">Sample Dental Clinic is a family-friendly dental practice in Ottawa's Nepean area, offering general dentistry, cosmetic procedures, and emergency care. Known for their modern equipment and bilingual staff, they serve over 2,000 patients annually with a 4.2-star average rating across Google and Yelp reviews.</p>
+        </div>
+
+        <!-- Quick Facts -->
+        <div class="facts-grid">
+            <div class="fact-card"><div class="fact-label">Founded</div><div class="fact-value" id="factFounded">2018</div></div>
+            <div class="fact-card"><div class="fact-label">Category</div><div class="fact-value" id="factCategory">Dentist — General & Cosmetic</div></div>
+            <div class="fact-card"><div class="fact-label">Location</div><div class="fact-value" id="factLocation">1234 Merivale Rd, Nepean, ON</div></div>
+            <div class="fact-card"><div class="fact-label">Rating</div><div class="fact-value" id="factRating">4.2 / 5 (127 reviews)</div></div>
+            <div class="fact-card"><div class="fact-label">Hours</div><div class="fact-value" id="factHours">Mon-Fri 8am-6pm, Sat 9am-2pm</div></div>
+            <div class="fact-card"><div class="fact-label">Phone</div><div class="fact-value" id="factPhone">(613) 555-0123</div></div>
+            <div class="fact-card"><div class="fact-label">Website</div><div class="fact-value"><a id="factWebsite" href="#">sampledental.ca</a></div></div>
+            <div class="fact-card"><div class="fact-label">AI Visibility Score</div><div class="fact-value" style="color:#00ff88;" id="factAIScore">72 / 100</div></div>
+        </div>
+
+        <!-- FAQ Section (auto-generated, FAQPage schema) -->
+        <div class="section">
+            <h2>Frequently Asked Questions</h2>
+            <div id="faqContainer">
+                <div class="faq-item">
+                    <div class="faq-q">What services does Sample Dental Clinic offer?</div>
+                    <div class="faq-a">Sample Dental Clinic provides general dentistry (cleanings, fillings, extractions), cosmetic dentistry (whitening, veneers), emergency dental care, and pediatric dentistry. They also offer Invisalign and dental implant consultations.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Is Sample Dental Clinic accepting new patients?</div>
+                    <div class="faq-a">Yes, Sample Dental Clinic is currently accepting new patients. Walk-ins are welcome for emergencies, and new patient appointments can be booked online or by calling (613) 555-0123.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Does Sample Dental Clinic offer weekend hours?</div>
+                    <div class="faq-a">Yes, they are open Saturdays from 9am to 2pm. They are closed on Sundays and statutory holidays.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">What insurance plans does Sample Dental Clinic accept?</div>
+                    <div class="faq-a">They accept most major dental insurance plans including Sun Life, Manulife, Great-West Life, and Blue Cross. They also offer direct billing for eligible plans.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">How does Sample Dental Clinic compare to other dentists in Ottawa?</div>
+                    <div class="faq-a">With a 4.2-star rating from 127 reviews, Sample Dental Clinic ranks in the top 15% of Ottawa dentists. They are particularly noted for their modern equipment and bilingual (English/French) staff.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="section">
+            <h2>How Sample Dental Clinic Compares</h2>
+            <div style="overflow-x:auto;">
+                <table class="compare-table">
+                    <thead>
+                        <tr><th>Feature</th><th style="color:#00d4ff;">Sample Dental</th><th>Ottawa Smiles</th><th>Capital Dental</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Rating</td><td style="color:#00ff88;">4.2 / 5</td><td>3.8 / 5</td><td>4.5 / 5</td></tr>
+                        <tr><td>Reviews</td><td>127</td><td>89</td><td>203</td></tr>
+                        <tr><td>Weekend Hours</td><td style="color:#00ff88;">Yes</td><td>No</td><td>Yes</td></tr>
+                        <tr><td>Emergency Care</td><td style="color:#00ff88;">Yes</td><td>Yes</td><td>No</td></tr>
+                        <tr><td>Bilingual Staff</td><td style="color:#00ff88;">Yes</td><td>No</td><td>Yes</td></tr>
+                        <tr><td>Invisalign</td><td style="color:#00ff88;">Yes</td><td>Yes</td><td>No</td></tr>
+                        <tr><td>New Patients</td><td style="color:#00ff88;">Accepting</td><td>Waitlist</td><td>Accepting</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-box">
+            <h3>Is this your business?</h3>
+            <p>Claim your listing to update information, respond to reviews, and boost your AI visibility score.</p>
+            <a href="#" class="cta-btn">Claim This Listing</a>
+        </div>
+
+        <!-- AI Citation Info -->
+        <div class="section" style="border-left:4px solid #a855f7;">
+            <h2>AI Citation Status</h2>
+            <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">How AI search engines reference this business:</p>
+            <div class="facts-grid" style="margin-bottom:0;">
+                <div class="fact-card"><div class="fact-label">ChatGPT</div><div class="fact-value" style="color:#00ff88;">Cited</div></div>
+                <div class="fact-card"><div class="fact-label">Gemini</div><div class="fact-value" style="color:#f59e0b;">Partial</div></div>
+                <div class="fact-card"><div class="fact-label">Perplexity</div><div class="fact-value" style="color:#00ff88;">Cited</div></div>
+                <div class="fact-card"><div class="fact-label">Claude</div><div class="fact-value" style="color:#f44336;">Not Found</div></div>
+                <div class="fact-card"><div class="fact-label">Last Checked</div><div class="fact-value">Mar 31, 2026</div></div>
+                <div class="fact-card"><div class="fact-label">Freshness Score</div><div class="fact-value" style="color:#00ff88;">92%</div></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 AI1stSEO Directory. AI-optimized business listings for ChatGPT, Gemini, Perplexity, and Claude.
+    </footer>
+
+    <script>
+        // In production, this data comes from the API/database
+        // For now it's static demo content
+        // The page structure is what matters — each section maps to schema markup
+
+        // Generate JSON-LD schema from page data
+        var schema = {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "LocalBusiness",
+                    "name": "Sample Dental Clinic",
+                    "description": document.getElementById('blufSummary').textContent,
+                    "address": { "@type": "PostalAddress", "streetAddress": "1234 Merivale Rd", "addressLocality": "Nepean", "addressRegion": "ON", "addressCountry": "CA" },
+                    "telephone": "(613) 555-0123",
+                    "url": "https://sampledental.ca",
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.2", "reviewCount": "127" },
+                    "openingHours": ["Mo-Fr 08:00-18:00", "Sa 09:00-14:00"]
+                },
+                {
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        { "@type": "Question", "name": "What services does Sample Dental Clinic offer?", "acceptedAnswer": { "@type": "Answer", "text": "General dentistry, cosmetic dentistry, emergency dental care, pediatric dentistry, Invisalign, and dental implant consultations." } },
+                        { "@type": "Question", "name": "Is Sample Dental Clinic accepting new patients?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, currently accepting new patients. Walk-ins welcome for emergencies." } },
+                        { "@type": "Question", "name": "Does Sample Dental Clinic offer weekend hours?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, open Saturdays 9am-2pm. Closed Sundays." } }
+                    ]
+                }
+            ]
+        };
+        document.getElementById('schemaLD').textContent = JSON.stringify(schema);
+        document.title = "Sample Dental Clinic — AI1stSEO Directory | Best Dentists in Ottawa";
+        document.getElementById('metaDesc').content = "Sample Dental Clinic in Nepean, Ottawa — 4.2/5 rating, 127 reviews. General & cosmetic dentistry, emergency care, weekend hours. AI-optimized listing.";
+    </script>
+</body>
+</html>

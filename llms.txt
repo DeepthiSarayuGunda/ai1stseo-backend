@@ -1,0 +1,33 @@
+# AI1stSEO Business Directory
+# AI-optimized business listings for Ottawa and Canada
+# https://ai1stseo.com
+
+# We explicitly welcome AI crawlers to index our directory
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Directory structure
+# /listing/[business-slug]          - Individual business profiles
+# /category/[city]/[type]           - Category pages (e.g., /category/ottawa/dentists)
+# /top-10/[category]/[city]         - Top 10 ranking pages
+# /compare/[business-a]/[business-b] - Side-by-side comparisons
+
+# Sitemap for AI crawlers
+Sitemap: https://ai1stseo.com/sitemap-ai.xml
+Sitemap: https://ai1stseo.com/sitemap-listings.xml
