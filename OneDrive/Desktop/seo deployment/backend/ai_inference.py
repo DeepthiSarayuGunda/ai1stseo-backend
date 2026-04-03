@@ -96,14 +96,15 @@ def _try_ollama(prompt, max_tokens, temperature, triggered_by='scan'):
 
 
 def _log_ai_usage(provider, model, input_tokens, output_tokens, cost, success, latency_ms, triggered_by):
-    """Log AI call to ai_usage_log table. Fails silently to not break inference."""
+    """Log AI call to DynamoDB. Fails silently to not break inference."""
     try:
-        from database import execute
-        execute(
-            "INSERT INTO ai_usage_log (provider, model, input_tokens_est, output_tokens_est, "
-            "estimated_cost_usd, success, latency_ms, triggered_by) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            (provider, model, input_tokens, output_tokens, cost, success, latency_ms, triggered_by),
-        )
+        from dynamodb_helper import put_item
+        put_item('ai1stseo-api-logs', {
+            'provider': provider, 'model': model,
+            'input_tokens_est': input_tokens, 'output_tokens_est': output_tokens,
+            'estimated_cost_usd': cost, 'success': success,
+            'latency_ms': latency_ms, 'triggered_by': triggered_by,
+            'log_type': 'ai_usage',
+        })
     except Exception as e:
         print("AI usage log failed (non-fatal): {}".format(e))
