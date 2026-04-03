@@ -355,6 +355,27 @@ API request log (top endpoints, hourly volume). Query: `?hours=24`
 ### GET /api/admin/me *(auth required, not admin)*
 Current user's role — used by frontend to decide admin access.
 
+### POST /api/admin/documents *(auth required)*
+Upload a document. Multipart/form-data with `file` field + optional `title`, `description`.
+```
+Response: {"status": "success", "id": "uuid", "filename": "research.pdf"}
+```
+
+### GET /api/admin/documents *(auth required)*
+List documents. Query: `?uploader=email@example.com` to filter by developer.
+```json
+Response: {"status": "success", "documents": [...], "count": 5}
+```
+
+### GET /api/admin/documents/:id/download *(auth required)*
+Get a presigned S3 download URL (valid 15 minutes).
+```json
+Response: {"status": "success", "url": "https://s3.amazonaws.com/...", "filename": "research.pdf"}
+```
+
+### DELETE /api/admin/documents/:id *(admin only)*
+Delete a document and its S3 file.
+
 ---
 
 ## Email Lead Collection

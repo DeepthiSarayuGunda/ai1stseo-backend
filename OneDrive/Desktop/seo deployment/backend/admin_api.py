@@ -145,3 +145,112 @@ def admin_me():
         'role': user.get('role', 'member'),
         'name': user.get('name', ''),
     })
+
+
+# ===================== DOCUMENT REPOSITORY =====================
+
+import boto3 as _boto3
+import uuid as _uuid
+from datetime import datetime as _dt, timezone as _tz
+
+_s3 = _boto3.client('s3', region_name='us-east-1')
+_DOCS_BUCKET = 'ai1stseo-documents'
+_DOCS_TABLE = 'ai1stseo-documents'
+
+
+@admin_bp.route('/api/admin/documents', methods=['POST'])
+@require_auth
+def upload_document():
+    """Upload a document. Accepts multipart/form-data with 'file' + optional 'title', 'description'."""
+    if 'file' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No file provided'}), 400
+
+    f = request.files['file']
+    if not f.filename:
+        return jsonify({'status': 'error', 'message': 'Empty filename'}), 400
+
+    user = request.cognito_user
+    doc_id = str(_uuid.uuid4())
+    ext = f.filename.rsplit('.', 1)[-1].lower() if '.' in f.filename else 'bin'
+    s3_key = 'docs/{}/{}.{}'.format(user.get('email', 'unknown'), doc_id, ext)
+
+    try:
+        _s3.upload_fileobj(f, _DOCS_BUCKET, s3_key, ExtraArgs={
+            'ContentType': f.content_type or 'application/octet-stream',
+        })
+
+        from dynamodb_helper import put_item
+        put_item(_DOCS_TABLE, {
+            'id': doc_id,
+            'title': request.form.get('title', f.filename),
+            'description': request.form.get('description', ''),
+            'filename': f.filename,
+            'file_type': ext,
+            'content_type': f.content_type or 'application/octet-stream',
+            's3_key': s3_key,
+            'uploaded_by': user.get('email', ''),
+            'uploader_name': user.get('name', ''),
+            'size_bytes': f.content_length or 0,
+        })
+
+        return jsonify({'status': 'success', 'id': doc_id, 'filename': f.filename}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@admin_bp.route('/api/admin/documents', methods=['GET'])
+@require_auth
+def list_documents():
+    """List documents. Query: ?uploader=email@example.com to filter by developer."""
+    uploader = request.args.get('uploader', '')
+    limit = request.args.get('limit', 50, type=int)
+    try:
+        from dynamodb_helper import scan_table, query_index
+        if uploader:
+            items = query_index(_DOCS_TABLE, 'uploader-index', 'uploaded_by', uploader, limit)
+        else:
+            items = scan_table(_DOCS_TABLE, limit)
+        # Remove s3_key from response (internal)
+        for item in items:
+            item.pop('s3_key', None)
+        return jsonify({'status': 'success', 'documents': items, 'count': len(items)})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@admin_bp.route('/api/admin/documents/<doc_id>/download', methods=['GET'])
+@require_auth
+def download_document(doc_id):
+    """Get a presigned download URL for a document (valid 15 min)."""
+    try:
+        from dynamodb_helper import get_item
+        doc = get_item(_DOCS_TABLE, {'id': doc_id})
+        if not doc:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+
+        url = _s3.generate_presigned_url('get_object', Params={
+            'Bucket': _DOCS_BUCKET,
+            'Key': doc['s3_key'],
+            'ResponseContentDisposition': 'attachment; filename="{}"'.format(doc.get('filename', 'download')),
+        }, ExpiresIn=900)
+
+        return jsonify({'status': 'success', 'url': url, 'filename': doc.get('filename')})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@admin_bp.route('/api/admin/documents/<doc_id>', methods=['DELETE'])
+@require_admin
+def delete_document(doc_id):
+    """Delete a document (admin only)."""
+    try:
+        from dynamodb_helper import get_item, delete_item
+        doc = get_item(_DOCS_TABLE, {'id': doc_id})
+        if not doc:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+
+        _s3.delete_object(Bucket=_DOCS_BUCKET, Key=doc['s3_key'])
+        delete_item(_DOCS_TABLE, {'id': doc_id})
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
