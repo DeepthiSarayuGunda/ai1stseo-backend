@@ -90,10 +90,10 @@ except ImportError:
     print("admin_api.py not found")
 
 try:
-    from data_api import data_bp
+    from data_api_dynamo import data_bp
     app.register_blueprint(data_bp)
 except ImportError:
-    print("data_api.py not found")
+    print("data_api_dynamo.py not found")
 
 try:
     from webhook_api import webhook_bp
@@ -128,12 +128,12 @@ def _log_request(response):
             user_id = request.cognito_user.get('user_id')
         def _insert(ep, method, uid, status, ms):
             try:
-                from database import execute
-                execute(
-                    "INSERT INTO api_request_log (endpoint, method, user_id, project_id, status_code, response_time_ms) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (ep, method, uid, '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2', status, ms),
-                )
+                from dynamodb_helper import put_item
+                put_item('ai1stseo-api-logs', {
+                    'endpoint': ep, 'method': method, 'user_id': uid,
+                    'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                    'status_code': status, 'response_time_ms': ms,
+                })
             except Exception:
                 pass
         _log_threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()

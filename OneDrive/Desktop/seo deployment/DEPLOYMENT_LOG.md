@@ -6,6 +6,66 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-02 19:00 — DynamoDB Migration Complete + RDS Deleted (Troy)
+
+**Full migration from RDS PostgreSQL to DynamoDB. RDS instance deleted.**
+
+**Modules updated to DynamoDB:**
+- `app.py` — swapped `data_api` import to `data_api_dynamo`, request logging writes to DynamoDB
+- `admin_api.py` — all 9 endpoints rewritten for DynamoDB scans/queries
+- `webhook_api.py` — CRUD + dispatch rewritten for DynamoDB
+- `apikey_api.py` — key storage, validation, rate limiting rewritten for DynamoDB
+- `admin_aggregation.py` — daily metrics aggregation rewritten for DynamoDB
+- `ai_inference.py` — AI usage logging writes to DynamoDB
+- `auth.py` — role lookup checks DynamoDB first, RDS fallback removed
+
+**Data migrated (981 rows):**
+- users (8) → ai1stseo-users
+- audits (14) → ai1stseo-audits
+- geo_probes (336) → ai1stseo-geo-probes
+- content_briefs (11) → ai1stseo-content-briefs
+- admin_metrics (8) → ai1stseo-admin-metrics
+- api_request_log (570) + ai_usage_log (18) → ai1stseo-api-logs
+- monitored_sites (1) + uptime_checks (15) → ai1stseo-monitor
+
+**RDS deleted:**
+- Instance `ai1stseo-db` deleted (was already stopped since Apr 1)
+- Final snapshot preserved: `ai1stseo-final-backup-20260401`
+- Saves ~$15/month
+
+**Impact:** All backend modules now use DynamoDB exclusively. No RDS dependency remains. Lambda deployed and verified working.
+
+---
+
+## 2026-04-02 18:15 — OpenClaw Gateway Installed on seo-dev (Troy)
+
+**OpenClaw Gateway v2026.4.1 installed and running on Gurbachan's Tailscale server.**
+
+**What was done:**
+- Upgraded Node.js from v20.20.0 to v22.22.2 (OpenClaw requires Node 22+)
+- Installed OpenClaw globally via `npm install -g openclaw@latest`
+- Ran non-interactive onboarding with Ollama provider pointing to local accelerator
+- Installed as systemd user service (`openclaw-gateway.service`), enabled with lingering
+- Configured agent timeout to 120s for the 30B model
+- Customized workspace SOUL.md with site monitor identity and capabilities
+- Installed 4 ClawHub skills: `seo-geo-audit`, `site-monitor`, `seo-competitor-analysis`, `geo-seo-optimizer`
+- Tested agent — responding correctly using local Ollama qwen3:30b-a3b
+
+**Configuration:**
+| Setting | Value |
+|---------|-------|
+| Version | OpenClaw 2026.4.1 |
+| Port | 18789 (loopback) |
+| Auth | Token mode |
+| Model | ollama/qwen3:30b-a3b (local LAN) |
+| Workspace | /opt/ai1stseo/openclaw-workspace |
+| Service | systemd user service, enabled, running |
+| Skills | seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer |
+
+**Next steps:** Connect messaging channels (WhatsApp QR pairing requires phone), wire up Phase 1 integration (report delivery via /hooks/agent).
+
+---
+
 ## 2026-04-01 22:55 — Local Ollama Accelerator Integration (Troy)
 
 **Connected site monitor to Gurbachan's local Ollama accelerator on LAN (192.168.2.200:11434).**
