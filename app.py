@@ -38,6 +38,22 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# --- Load .env for local development (Lambda sets env vars natively) ---
+if not IS_LAMBDA:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        # python-dotenv not installed — load .env manually
+        _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+        if os.path.exists(_env_path):
+            with open(_env_path) as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and not _line.startswith('#') and '=' in _line:
+                        _k, _v = _line.split('=', 1)
+                        os.environ.setdefault(_k.strip(), _v.strip())
+
 # --- Blueprint registrations (auth, admin, data, webhooks, API keys) ---
 try:
     from auth import auth_bp
@@ -125,6 +141,12 @@ def handle_404(e):
 def handle_405(e):
     if request.path.startswith('/api/'):
         return jsonify({'error': 'Method not allowed', 'status': 'error'}), 405
+    return e
+
+@app.errorhandler(400)
+def handle_400(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Bad request', 'status': 'error'}), 400
     return e
 
 # ── Database initialization ────────────────────────────────────────────────────
@@ -2986,6 +3008,7 @@ def llm_citation_probe():
 # ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
 
 @app.route('/api/geo-scanner/scan', methods=['POST'])
+@app.route('/api/geo-scanner/scan', methods=['POST'])
 def geo_scanner_scan():
     """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
     from geo_scanner_agent import run_full_scan
@@ -3002,9 +3025,53 @@ def geo_scanner_scan():
             provider=data.get('provider', 'nova'),
             scanners=data.get('scanners'),
         )
+
+        # Persist full scan result to geo-scans table for history
+        try:
+            from dynamo.geo_repository import GEORepository
+            repo = GEORepository()
+            repo.save_scan(brand, {
+                'geo_score': result.get('overall_score', 0),
+                'grade': _score_to_grade(result.get('overall_score', 0)),
+                'metrics': {
+                    'scanners_run': result.get('scanners_run', []),
+                    'elapsed_seconds': result.get('elapsed_seconds', 0),
+                },
+                'suggestions': result.get('recommendations', []),
+                'missing': [],
+                'verdict': result.get('executive_summary', ''),
+            })
+        except Exception as e:
+            app.logger.warning("Failed to persist GEO scan to history: %s", e)
+
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': f'GEO scan failed: {str(e)}'}), 500
+
+
+def _score_to_grade(score):
+    if score >= 90: return 'A+'
+    if score >= 80: return 'A'
+    if score >= 70: return 'B'
+    if score >= 60: return 'C'
+    if score >= 50: return 'D'
+    return 'F'
+
+
+@app.route('/api/geo-scanner/history', methods=['GET'])
+def geo_scanner_history():
+    """GET /api/geo-scanner/history — retrieve past GEO scanner scan results."""
+    brand = request.args.get('brand', request.args.get('brand_name', ''))
+    limit = int(request.args.get('limit', 20))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    try:
+        from dynamo.geo_repository import GEORepository
+        repo = GEORepository()
+        scans = repo.get_scans(brand, limit=limit)
+        return jsonify({'brand': brand, 'scans': scans, 'count': len(scans)})
+    except Exception as e:
+        return jsonify({'brand': brand, 'scans': [], 'error': str(e)})
 
 
 @app.route('/api/geo-scanner/agents', methods=['GET'])
@@ -3167,6 +3234,23 @@ def geo_prompt_simulator_history(brand_name):
 
 # ── RDS Data Persistence Endpoints ────────────────────────────────────────────
 
+@app.route('/api/data/geo-probes', methods=['GET'])
+def data_geo_probes_get():
+    """GET /api/data/geo-probes — retrieve GEO probe history."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_probes
+    else:
+        from db import get_probes
+    brand = request.args.get('brand')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 50))
+    try:
+        probes = get_probes(limit=limit, brand=brand, ai_model=ai_model)
+        return jsonify({'probes': probes, 'count': len(probes)})
+    except Exception as e:
+        return jsonify({'probes': [], 'count': 0, 'error': str(e)})
+
+
 @app.route('/api/data/geo-probes', methods=['POST'])
 def data_geo_probes():
     """POST /api/data/geo-probes — persist GEO probe results."""
@@ -3196,6 +3280,40 @@ def data_geo_probes():
         return jsonify({'status': 'saved', 'probe_id': probe_id})
     except Exception as e:
         return jsonify({'error': f'Failed to save probe: {str(e)}'}), 500
+
+
+@app.route('/api/data/ai-visibility', methods=['GET'])
+def data_ai_visibility_get():
+    """GET /api/data/ai-visibility — retrieve visibility history."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_visibility_history
+    else:
+        from db import get_visibility_history
+    brand = request.args.get('brand')
+    limit = int(request.args.get('limit', 20))
+    try:
+        history = get_visibility_history(limit=limit, brand=brand)
+        return jsonify({'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'history': [], 'count': 0, 'error': str(e)})
+
+
+@app.route('/api/data/ai-visibility/trend', methods=['GET'])
+def data_ai_visibility_trend():
+    """GET /api/data/ai-visibility/trend — daily probe trend for a brand."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_probe_trend
+    else:
+        from db import get_probe_trend
+    brand = request.args.get('brand', '')
+    limit = int(request.args.get('limit', 30))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    try:
+        trend = get_probe_trend(brand, limit=limit)
+        return jsonify({'brand': brand, 'trend': trend, 'count': len(trend)})
+    except Exception as e:
+        return jsonify({'brand': brand, 'trend': [], 'error': str(e)})
 
 
 @app.route('/api/data/ai-visibility', methods=['POST'])
@@ -3277,6 +3395,40 @@ def serve_directory_listing():
 def serve_directory_compare():
     """AI Business Directory — compare two businesses side by side."""
     return render_template('directory_compare.html')
+
+
+# ── Root-level AI crawler files (proxy to directory module) ───────────────────
+
+@app.route('/llms.txt')
+def serve_root_llms_txt():
+    """Serve llms.txt at root level for AI crawlers."""
+    from flask import Response
+    try:
+        from directory.routes import _get_backend
+        from directory.seo_files import generate_llms_txt
+        backend = _get_backend()
+        listings = backend.get_all_listings(limit=200)
+        categories = backend.get_categories()
+        content = generate_llms_txt(listings, categories)
+        return Response(content, mimetype='text/plain; charset=utf-8')
+    except Exception as e:
+        return Response(f'# Error: {e}', mimetype='text/plain'), 500
+
+
+@app.route('/sitemap-ai.xml')
+def serve_root_sitemap_ai():
+    """Serve sitemap-ai.xml at root level for AI crawlers."""
+    from flask import Response
+    try:
+        from directory.routes import _get_backend
+        from directory.seo_files import generate_sitemap_ai_xml
+        backend = _get_backend()
+        listings = backend.get_all_listings(limit=500)
+        categories = backend.get_categories()
+        content = generate_sitemap_ai_xml(listings, categories)
+        return Response(content, mimetype='application/xml; charset=utf-8')
+    except Exception as e:
+        return Response(f'<!-- Error: {e} -->', mimetype='application/xml'), 500
 
 
 # ── Month 1 Research API ──────────────────────────────────────────────────────
