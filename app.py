@@ -88,6 +88,13 @@ try:
 except Exception:
     pass
 
+# --- Month 3 Intelligence Systems API ---
+try:
+    from month3_systems.api import m3_bp
+    app.register_blueprint(m3_bp)
+except Exception as e:
+    print(f"⚠ Month 3 systems: {e}")
+
 # --- Troy's blueprints: auth, admin, data API, webhooks, API keys ---
 try:
     from auth import auth_bp

@@ -7,16 +7,40 @@ VENV_DIR = os.path.join(tempfile.gettempdir(), "aeo-lambda-deps")
 
 # Python files to include at root of zip
 ROOT_FILES = [
-    ("web_app.py", "app.py"),  # Rename to app.py for handler=app.handler
+    ("app.py", "app.py"),
     ("database.py", "database.py"),
     ("scheduler.py", "scheduler.py"),
     ("bedrock_helper.py", "bedrock_helper.py"),
     ("openclaw_real_routes.py", "openclaw_real_routes.py"),
     ("openclaw_real.py", "openclaw_real.py"),
+    ("geo_scanner_agent.py", "geo_scanner_agent.py"),
+    ("geo_probe_service.py", "geo_probe_service.py"),
+    ("db_dynamo.py", "db_dynamo.py"),
+    ("db.py", "db.py"),
+    ("ai_provider.py", "ai_provider.py"),
+    ("ai_ranking_service.py", "ai_ranking_service.py"),
+    ("ai_chatbot.py", "ai_chatbot.py"),
+    ("aeo_optimizer.py", "aeo_optimizer.py"),
+    ("answer_fingerprint.py", "answer_fingerprint.py"),
+    ("application.py", "application.py"),
+    ("model_comparison.py", "model_comparison.py"),
+    ("share_of_voice.py", "share_of_voice.py"),
+    ("prompt_simulator.py", "prompt_simulator.py"),
+    ("multilang_probe.py", "multilang_probe.py"),
+    ("content_generator.py", "content_generator.py"),
+    ("llm_service.py", "llm_service.py"),
+    ("month1_api.py", "month1_api.py"),
+]
+
+# HTML files to include at root (served by send_from_directory)
+ROOT_HTML = [
+    "geo-scanner.html",
+    "admin.html",
+    "audit.html",
 ]
 
 # Directories to include
-SRC_DIRS = ["src", "production", "dynamo", "directory"]
+SRC_DIRS = ["src", "production", "dynamo", "directory", "month1_research", "month2_workflows", "month3_systems"]
 TEMPLATE_DIRS = ["templates"]
 
 # Pip packages needed
@@ -57,6 +81,14 @@ def build_zip():
                 print(f"  + {src} -> {dst}")
             else:
                 print(f"  SKIP: {src}")
+
+        # Add root HTML files (served by send_from_directory('.', ...))
+        for html_file in ROOT_HTML:
+            if os.path.exists(html_file):
+                zf.write(html_file, html_file)
+                print(f"  + {html_file}")
+            else:
+                print(f"  SKIP: {html_file}")
 
         # Add src/ and production/ directories
         for d in SRC_DIRS:
