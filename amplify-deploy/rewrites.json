@@ -1,0 +1,72 @@
+[
+  {
+    "source": "/ai-visibility",
+    "target": "/ai-visibility.html",
+    "status": "200"
+  },
+  {
+    "source": "/history",
+    "target": "/history.html",
+    "status": "200"
+  },
+  {
+    "source": "/benchmarks",
+    "target": "/benchmarks.html",
+    "status": "200"
+  },
+  {
+    "source": "/openclaw",
+    "target": "/openclaw.html",
+    "status": "200"
+  },
+  {
+    "source": "/automation-hub",
+    "target": "/automation-hub.html",
+    "status": "200"
+  },
+  {
+    "source": "/scheduler",
+    "target": "/scheduler.html",
+    "status": "200"
+  },
+  {
+    "source": "/compare",
+    "target": "/compare.html",
+    "status": "200"
+  },
+  {
+    "source": "/trends",
+    "target": "/trends.html",
+    "status": "200"
+  },
+  {
+    "source": "/geo",
+    "target": "/geo.html",
+    "status": "200"
+  },
+  {
+    "source": "/editor",
+    "target": "/editor.html",
+    "status": "200"
+  },
+  {
+    "source": "/directory-listing",
+    "target": "/directory-listing.html",
+    "status": "200"
+  },
+  {
+    "source": "/directory-category",
+    "target": "/directory-category.html",
+    "status": "200"
+  },
+  {
+    "source": "/directory-compare",
+    "target": "/directory-compare.html",
+    "status": "200"
+  },
+  {
+    "source": "/<*>",
+    "target": "/index.html",
+    "status": "404-200"
+  }
+]

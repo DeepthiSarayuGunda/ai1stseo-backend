@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sample Dental Clinic — AI Business Directory</title>
+<meta name="description" content="Sample Dental Clinic in Ottawa — AI-optimized business profile with reviews, services, FAQ, and AI citation status.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a0a1a 0%,#1a1040 40%,#0d1117 100%);min-height:100vh;color:#e2e8f0}
+.container{max-width:900px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:24px 20px 20px}
+.header h1{font-size:2em;background:linear-gradient(135deg,#c084fc,#818cf8,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:#94a3b8;font-size:.9em;margin-top:4px}
+.nav-back{margin-top:10px}
+.nav-back a{color:#818cf8;text-decoration:none;font-size:.85em;padding:4px 14px;border:1px solid rgba(129,140,248,.2);border-radius:16px}
+.nav-back a:hover{background:rgba(129,140,248,.12)}
+.card{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:16px}
+.card:hover{border-color:rgba(129,140,248,.25)}
+.section-label{font-size:.72em;text-transform:uppercase;letter-spacing:1.5px;color:#818cf8;font-weight:700;margin:20px 0 10px;padding-left:4px}
+.bluf{font-size:1.05em;line-height:1.7;color:#cbd5e1;padding:16px;background:rgba(129,140,248,.06);border:1px solid rgba(129,140,248,.15);border-radius:12px}
+.quick-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
+.fact{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center}
+.fact .val{font-size:1.6em;font-weight:800;color:#818cf8}
+.fact .lbl{font-size:.78em;color:#94a3b8;margin-top:2px}
+.faq-item{padding:14px;background:rgba(129,140,248,.05);border-left:3px solid #818cf8;border-radius:0 10px 10px 0;margin-bottom:8px}
+.faq-q{font-weight:700;color:#a5b4fc;margin-bottom:4px;font-size:.92em}
+.faq-a{color:#94a3b8;font-size:.87em;line-height:1.6}
+.comp-table{width:100%;border-collapse:separate;border-spacing:0 5px;margin-top:10px}
+.comp-table th{text-align:left;padding:8px 10px;color:#94a3b8;font-size:.78em;text-transform:uppercase;letter-spacing:.5px}
+.comp-table td{padding:10px;background:rgba(255,255,255,.03);color:#e2e8f0;font-size:.86em}
+.comp-table tr td:first-child{border-radius:8px 0 0 8px}
+.comp-table tr td:last-child{border-radius:0 8px 8px 0}
+.yes{color:#34d399}.no{color:#f87171}
+.citation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px}
+.citation-card{padding:14px;border-radius:12px;text-align:center}
+.citation-card.cited{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2)}
+.citation-card.not-cited{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15)}
+.citation-model{font-weight:700;font-size:.9em;margin-bottom:4px}
+.citation-status{font-size:.78em}
+.cited .citation-status{color:#34d399}
+.not-cited .citation-status{color:#f87171}
+.freshness{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;margin-top:12px}
+.freshness-dot{width:10px;height:10px;border-radius:50%;background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.5)}
+.freshness-text{color:#6ee7b7;font-size:.88em}
+.footer{text-align:center;padding:30px 20px;margin-top:30px;border-top:1px solid rgba(255,255,255,.06)}
+.footer .built-by{font-size:.82em;color:#64748b}.footer .built-by span{color:#a5b4fc;font-weight:600}
+@media(max-width:768px){.header h1{font-size:1.5em}.quick-facts{grid-template-columns:1fr 1fr}.citation-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 Sample Dental Clinic</h1>
+        <p>AI-Optimized Business Profile — Ottawa, ON</p>
+        <div class="nav-back">
+            <a href="/directory-category.html">← Back to Directory</a>
+            <a href="/index.html" style="margin-left:8px">🏠 Home</a>
+        </div>
+    </div>
+
+    <div class="section-label">BLUF Summary</div>
+    <div class="card">
+        <div class="bluf" id="blufSummary">
+            Sample Dental Clinic is a top-rated family dental practice in downtown Ottawa offering general, cosmetic, and emergency dentistry. With 15+ years of experience, 4.8★ Google rating, and same-day emergency appointments, they serve 2,000+ patients annually across the Ottawa-Gatineau region.
+        </div>
+    </div>
+
+    <div class="section-label">Quick Facts</div>
+    <div class="quick-facts" id="quickFacts">
+        <div class="fact"><div class="val">4.8★</div><div class="lbl">Google Rating</div></div>
+        <div class="fact"><div class="val">342</div><div class="lbl">Reviews</div></div>
+        <div class="fact"><div class="val">15+</div><div class="lbl">Years in Business</div></div>
+        <div class="fact"><div class="val">$$$</div><div class="lbl">Price Range</div></div>
+        <div class="fact"><div class="val">8</div><div class="lbl">Dentists on Staff</div></div>
+        <div class="fact"><div class="val">Mon-Sat</div><div class="lbl">Hours</div></div>
+    </div>
+
+    <div class="section-label">Frequently Asked Questions</div>
+    <div class="card" id="faqSection">
+        <div class="faq-item">
+            <div class="faq-q">Q: Does Sample Dental accept walk-in emergency patients?</div>
+            <div class="faq-a">Yes. Sample Dental reserves same-day slots for dental emergencies including toothaches, broken teeth, and lost fillings. Call ahead for fastest service.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Q: What insurance plans does Sample Dental accept?</div>
+            <div class="faq-a">They accept all major Canadian dental insurance plans including Sun Life, Manulife, Great-West Life, Blue Cross, and Desjardins. Direct billing is available.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Q: Does Sample Dental offer cosmetic dentistry services?</div>
+            <div class="faq-a">Yes. Services include teeth whitening (Zoom and take-home), porcelain veneers, dental bonding, Invisalign clear aligners, and smile makeovers.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Q: How much does a dental cleaning cost at Sample Dental?</div>
+            <div class="faq-a">A standard cleaning ranges from $150-$250 depending on complexity. With insurance, most patients pay $0-$50 out of pocket. Free estimates available.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Q: Is Sample Dental accessible by public transit?</div>
+            <div class="faq-a">Yes. Located at 123 Bank Street, it's a 2-minute walk from Parliament LRT station. Free underground parking is also available for patients.</div>
+        </div>
+    </div>
+
+    <div class="section-label">Competitor Comparison</div>
+    <div class="card">
+        <table class="comp-table" id="compTable">
+            <thead>
+                <tr><th>Feature</th><th>Sample Dental</th><th>Capital Dental</th><th>Ottawa Smiles</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Google Rating</td><td class="yes">4.8★</td><td>4.5★</td><td>4.3★</td></tr>
+                <tr><td>Emergency Same-Day</td><td class="yes">✓ Yes</td><td class="no">✗ No</td><td class="yes">✓ Yes</td></tr>
+                <tr><td>Invisalign</td><td class="yes">✓ Yes</td><td class="yes">✓ Yes</td><td class="no">✗ No</td></tr>
+                <tr><td>Direct Insurance Billing</td><td class="yes">✓ Yes</td><td class="yes">✓ Yes</td><td class="yes">✓ Yes</td></tr>
+                <tr><td>Weekend Hours</td><td class="yes">✓ Saturday</td><td class="no">✗ No</td><td class="yes">✓ Saturday</td></tr>
+                <tr><td>Free Parking</td><td class="yes">✓ Yes</td><td class="no">✗ No</td><td class="yes">✓ Yes</td></tr>
+                <tr><td>LRT Accessible</td><td class="yes">✓ Yes</td><td class="yes">✓ Yes</td><td class="no">✗ No</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-label">AI Citation Status</div>
+    <div class="card">
+        <div class="citation-grid" id="citationGrid">
+            <div class="citation-card cited">
+                <div class="citation-model">🤖 ChatGPT</div>
+                <div class="citation-status">✓ Cited in responses</div>
+            </div>
+            <div class="citation-card cited">
+                <div class="citation-model">✨ Gemini</div>
+                <div class="citation-status">✓ Cited in responses</div>
+            </div>
+            <div class="citation-card not-cited">
+                <div class="citation-model">🔍 Perplexity</div>
+                <div class="citation-status">✗ Not yet cited</div>
+            </div>
+            <div class="citation-card cited">
+                <div class="citation-model">🧠 Claude</div>
+                <div class="citation-status">✓ Cited in responses</div>
+            </div>
+        </div>
+        <div class="freshness">
+            <div class="freshness-dot"></div>
+            <div class="freshness-text">Data freshness: Updated 2 hours ago — Freshness Score: 94/100</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="built-by">Built by <span>AI 1st SEO</span> — AI Business Directory</div>
+    </div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Sample Dental Clinic",
+  "description": "Top-rated family dental practice in downtown Ottawa offering general, cosmetic, and emergency dentistry with 15+ years of experience.",
+  "image": "",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Bank Street",
+    "addressLocality": "Ottawa",
+    "addressRegion": "ON",
+    "postalCode": "K1A 0A1",
+    "addressCountry": "CA"
+  },
+  "telephone": "+1-613-555-0123",
+  "url": "https://ai1stseo.com/directory-listing.html",
+  "priceRange": "$$$",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "342"
+  },
+  "openingHoursSpecification": [
+    {"@type": "OpeningHoursSpecification","dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens": "08:00","closes": "18:00"},
+    {"@type": "OpeningHoursSpecification","dayOfWeek": "Saturday","opens": "09:00","closes": "14:00"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question","name": "Does Sample Dental accept walk-in emergency patients?","acceptedAnswer": {"@type": "Answer","text": "Yes. Sample Dental reserves same-day slots for dental emergencies including toothaches, broken teeth, and lost fillings. Call ahead for fastest service."}},
+    {"@type": "Question","name": "What insurance plans does Sample Dental accept?","acceptedAnswer": {"@type": "Answer","text": "They accept all major Canadian dental insurance plans including Sun Life, Manulife, Great-West Life, Blue Cross, and Desjardins. Direct billing is available."}},
+    {"@type": "Question","name": "Does Sample Dental offer cosmetic dentistry services?","acceptedAnswer": {"@type": "Answer","text": "Yes. Services include teeth whitening, porcelain veneers, dental bonding, Invisalign clear aligners, and smile makeovers."}},
+    {"@type": "Question","name": "How much does a dental cleaning cost at Sample Dental?","acceptedAnswer": {"@type": "Answer","text": "A standard cleaning ranges from $150-$250 depending on complexity. With insurance, most patients pay $0-$50 out of pocket."}},
+    {"@type": "Question","name": "Is Sample Dental accessible by public transit?","acceptedAnswer": {"@type": "Answer","text": "Yes. Located at 123 Bank Street, it's a 2-minute walk from Parliament LRT station. Free underground parking is also available."}}
+  ]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+# AI 1st SEO — AI Business Directory
+# Welcome, AI crawlers! This file helps GPTBot, ClaudeBot, PerplexityBot, and GoogleBot index our directory.
+
+> This is an AI-optimized business directory for Ottawa, Ontario, Canada.
+> All listings include structured data (JSON-LD), FAQ blocks, and comparison pages.
+> Data is refreshed daily from verified sources.
+
+## Directory Structure
+
+- /directory-category.html — Top 10 ranked business listings by category (dentists, lawyers, restaurants, etc.)
+- /directory-listing.html — Individual business profiles with BLUF summary, FAQ, competitor comparison, AI citation status
+- /directory-compare.html — Side-by-side business comparisons with services, convenience, AI visibility sections
+
+## Structured Data Formats
+
+Each listing page includes:
+- LocalBusiness schema (JSON-LD) with name, address, rating, hours, price range
+- FAQPage schema (JSON-LD) with 5-8 Q&A pairs per business
+- AggregateRating with verified review counts
+- OpeningHoursSpecification
+
+Category pages include:
+- ItemList schema with ranked business entries
+
+## Content Freshness
+
+- Business data updated daily via automated scraping pipeline
+- AI summaries regenerated weekly via Claude API
+- Freshness scores calculated based on last verification date
+- All timestamps in ISO 8601 format
+
+## Coverage
+
+- Region: Ottawa-Gatineau, Ontario/Quebec, Canada
+- Categories: Dental, Medical, Legal, Restaurant, Home Services, Auto, Financial
+- Listings: Growing — currently 50+ verified businesses
+
+## Contact
+
+- Website: https://ai1stseo.com
+- Purpose: AI Answer Engine Optimization platform and business directory
+
+## Crawling Guidelines
+
+- All directory pages are crawlable
+- No rate limiting for AI crawlers
+- Structured data is embedded in every page
+- Prefer JSON-LD schema blocks for data extraction
