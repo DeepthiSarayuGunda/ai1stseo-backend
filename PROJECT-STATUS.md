@@ -264,6 +264,9 @@ Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`,
 
 | Date | Change | Files |
 |------|--------|-------|
+| Apr 2, 2026 | Created `audit-compare.html` — before/after scan comparison page (WBS 2.3). Side-by-side overall scores, category-by-category breakdown with progress bars and delta tags (+/- points), summary with total point change. Populated from localStorage audit history. | `audit-compare.html` |
+| Apr 2, 2026 | Wired PDF email gate to POST /api/collect-email — sends email, URL, score, source, date to backend (fire-and-forget). Keeps localStorage backup. Updated from S3 latest version with correct API_BASE. | `audit.html` |
+| Apr 2, 2026 | Admin dashboard role check confirmed working — Troy set amira.robleh@gmail.com to admin in DynamoDB. No code changes needed. | — |
 | Apr 2, 2026 | Wired Documents tab to Troy's API endpoints — upload (POST /api/admin/documents multipart), list (GET /api/admin/documents with ?uploader= filter), download (GET /api/admin/documents/:id/download opens presigned S3 URL), delete (DELETE /api/admin/documents/:id with confirmation). localStorage fallback if API unavailable. | `admin.html` |
 | Apr 2, 2026 | Added 8th "Documents" tab to admin.html — upload form (drag-and-drop + file picker), title input, developer dropdown (Dev 1-5), developer filter buttons, document list table with download/delete. Stores in localStorage until Troy's backend endpoints are live. Per Gurbachan's request for research documents separated by developer. | `admin.html` |
 | Apr 2, 2026 | Fixed login "Method not allowed" error — added missing blueprint registrations (auth_bp, admin_bp, data_bp, webhook_bp, apikey_bp) to teammate repo app.py with try/except wrappers. Redeployed ai1stseo-backend Lambda from lambda-deploy-final.zip. Login now returns proper Cognito responses. | `teammate-repo/app.py`, AWS Lambda |
