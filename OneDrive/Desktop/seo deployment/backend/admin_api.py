@@ -157,6 +157,34 @@ _s3 = _boto3.client('s3', region_name='us-east-1')
 _DOCS_BUCKET = 'ai1stseo-documents'
 _DOCS_TABLE = 'ai1stseo-documents'
 
+# Email to developer label mapping (matches Amira's frontend filter buttons)
+_DEV_MAP = {
+    'gundadeepthisarayu@gmail.com': 'dev1',
+    'toorsamar24@gmail.com': 'dev2',
+    'saur0024@algonquinlive.com': 'dev3',
+    'tj_sauriol@hotmail.com': 'dev3',
+    'tabasumshrma1010@gmail.com': 'dev4',
+    'amira.robleh@gmail.com': 'dev5',
+    'amirarobleh@gmail.com': 'dev5',
+}
+
+def _email_to_dev(email):
+    return _DEV_MAP.get(email, 'unknown')
+
+def _format_doc(item):
+    """Format a DynamoDB document item to match Amira's frontend schema."""
+    return {
+        'id': item.get('id'),
+        'title': item.get('title', ''),
+        'developer': item.get('developer') or _email_to_dev(item.get('uploaded_by', '')),
+        'fileName': item.get('filename', ''),
+        'fileSize': item.get('size_bytes', 0),
+        'fileType': item.get('content_type', 'application/octet-stream'),
+        'uploadDate': item.get('created_at', ''),
+        'description': item.get('description', ''),
+        'uploaderName': item.get('uploader_name', ''),
+    }
+
 
 @admin_bp.route('/api/admin/documents', methods=['POST'])
 @require_auth
@@ -180,6 +208,7 @@ def upload_document():
         })
 
         from dynamodb_helper import put_item
+        developer = request.form.get('developer') or _email_to_dev(user.get('email', ''))
         put_item(_DOCS_TABLE, {
             'id': doc_id,
             'title': request.form.get('title', f.filename),
@@ -190,10 +219,11 @@ def upload_document():
             's3_key': s3_key,
             'uploaded_by': user.get('email', ''),
             'uploader_name': user.get('name', ''),
+            'developer': developer,
             'size_bytes': f.content_length or 0,
         })
 
-        return jsonify({'status': 'success', 'id': doc_id, 'filename': f.filename}), 201
+        return jsonify({'status': 'success', 'id': doc_id, 'fileName': f.filename, 'developer': developer}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -201,7 +231,8 @@ def upload_document():
 @admin_bp.route('/api/admin/documents', methods=['GET'])
 @require_auth
 def list_documents():
-    """List documents. Query: ?uploader=email@example.com to filter by developer."""
+    """List documents. Query: ?developer=dev1 or ?uploader=email to filter."""
+    developer = request.args.get('developer', '')
     uploader = request.args.get('uploader', '')
     limit = request.args.get('limit', 50, type=int)
     try:
@@ -210,10 +241,10 @@ def list_documents():
             items = query_index(_DOCS_TABLE, 'uploader-index', 'uploaded_by', uploader, limit)
         else:
             items = scan_table(_DOCS_TABLE, limit)
-        # Remove s3_key from response (internal)
-        for item in items:
-            item.pop('s3_key', None)
-        return jsonify({'status': 'success', 'documents': items, 'count': len(items)})
+        docs = [_format_doc(item) for item in items]
+        if developer:
+            docs = [d for d in docs if d['developer'] == developer]
+        return jsonify({'status': 'success', 'documents': docs, 'count': len(docs)})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
