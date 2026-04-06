@@ -264,6 +264,7 @@ Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`,
 
 | Date | Change | Files |
 |------|--------|-------|
+| Apr 6, 2026 | Flipped MX record from ImprovMX to SES — `ai1stseo.com` MX now points to `inbound-smtp.us-east-1.amazonaws.com`. SES two-way email system fully live: marketing@ forwards to Tabasum's Gmail, all other @ai1stseo.com emails stored in S3. Task complete. | Route53 DNS |
 | Apr 6, 2026 | Created email forwarding Lambda (`ai1stseo-email-forwarder`) — forwards marketing@ai1stseo.com to Tabasum's Gmail via SES. Added receipt rule `forward-marketing-email` (S3 store + Lambda forward) before catch-all rule. Reordered rules so marketing@ matches first. SES receiving fully ready — only MX record switch remaining. | AWS Lambda, SES |
 | Apr 6, 2026 | Set up SES email receiving infrastructure — created S3 bucket `ai1stseo-incoming-email` with SES write policy, receipt rule set `ai1stseo-email-rules` (activated), rule `store-all-emails` catches all @ai1stseo.com emails and stores in `s3://ai1stseo-incoming-email/inbox/`. MX record NOT changed yet — still on ImprovMX, pending confirmation from Troy/Paul. | AWS SES, S3 |
 | Apr 6, 2026 | Fixed CloudFront `/directory*` cache behavior — was routing to App Runner instead of S3, causing all directory pages to show homepage. Changed TargetOriginId from `sgnmqxb2sw.us-east-1.awsapprunner.com` to `S3-ai1stseo-website`. Root cause of directory pages not loading. | CloudFront config |
