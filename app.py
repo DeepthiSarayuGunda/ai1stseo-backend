@@ -3454,6 +3454,13 @@ def social_delete_post(post_id):
     return jsonify({'status': 'success'})
 
 
+# --- Growth plan Blueprint (isolated in growth/ directory) ---
+try:
+    from growth import growth_bp
+    app.register_blueprint(growth_bp)
+except Exception as e:
+    print(f"⚠ growth Blueprint: {e}")
+
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('assets/'):
