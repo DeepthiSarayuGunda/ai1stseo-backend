@@ -1,12 +1,13 @@
 """
 geo_probe_service.py
-GEO / AEO Monitoring Engine — Multi-Provider with RDS Persistence
+GEO / AEO Monitoring Engine — Multi-Provider with DB Persistence
 
 All AI calls go direct — no EC2:
   - nova   → Bedrock Nova Lite (boto3)
   - ollama → Ollama API (https://ollama.sageaios.com)
 
-All results persisted to RDS (geo_probes + ai_visibility_history).
+All results persisted to DynamoDB (default) or RDS (geo_probes + ai_visibility_history).
+Respects USE_DYNAMODB / USE_RDS env flags set in app.py.
 """
 
 import logging
@@ -16,6 +17,25 @@ import re
 logger = logging.getLogger(__name__)
 
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3:30b-a3b")
+
+# Match the same flag logic as app.py
+_USE_DYNAMODB = not bool(os.environ.get("USE_RDS"))
+
+
+def _get_insert_probe():
+    if _USE_DYNAMODB:
+        from db_dynamo import insert_probe
+    else:
+        from db import insert_probe
+    return insert_probe
+
+
+def _get_insert_visibility_batch():
+    if _USE_DYNAMODB:
+        from db_dynamo import insert_visibility_batch
+    else:
+        from db import insert_visibility_batch
+    return insert_visibility_batch
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -115,9 +135,9 @@ def available_models() -> list[dict]:
 # ── single probe (direct AI call + RDS persist) ──────────────────────────────
 
 def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
-    """Probe a keyword for brand mentions. Calls AI directly, persists to RDS."""
+    """Probe a keyword for brand mentions. Calls AI directly, persists to DB."""
     from ai_provider import generate
-    from db import insert_probe
+    insert_probe = _get_insert_probe()
 
     prompt = _build_prompt(keyword, brand_name)
     logger.info("GEO probe: brand=%s keyword=%s provider=%s", brand_name, keyword, ai_model)
@@ -153,8 +173,8 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
 # ── batch probe ───────────────────────────────────────────────────────────────
 
 def geo_probe_batch(brand_name: str, keywords: list[str], ai_model: str = "nova") -> dict:
-    """Probe multiple keywords, compute geo_score, persist batch to RDS."""
-    from db import insert_visibility_batch
+    """Probe multiple keywords, compute geo_score, persist batch to DB."""
+    insert_visibility_batch = _get_insert_visibility_batch()
 
     results = []
     for kw in keywords:
@@ -193,11 +213,17 @@ def geo_probe_batch(brand_name: str, keywords: list[str], ai_model: str = "nova"
 # ── history (from RDS) ────────────────────────────────────────────────────────
 
 def get_history() -> list[dict]:
-    from db import get_visibility_history
+    if _USE_DYNAMODB:
+        from db_dynamo import get_visibility_history
+    else:
+        from db import get_visibility_history
     return get_visibility_history(limit=20)
 
 def get_stored_history(limit=50, brand=None, ai_model=None) -> list[dict]:
-    from db import get_probes
+    if _USE_DYNAMODB:
+        from db_dynamo import get_probes
+    else:
+        from db import get_probes
     return get_probes(limit=limit, brand=brand, ai_model=ai_model)
 
 
@@ -270,7 +296,7 @@ def geo_probe_site(site_url: str, keyword: str, ai_model: str = "nova") -> dict:
     """Detect if a website URL is mentioned in AI output."""
     from urllib.parse import urlparse
     from ai_provider import generate
-    from db import insert_probe
+    insert_probe = _get_insert_probe()
 
     domain = urlparse(site_url).netloc or site_url
     domain_clean = domain.replace("www.", "")
@@ -319,7 +345,10 @@ def geo_probe_site(site_url: str, keyword: str, ai_model: str = "nova") -> dict:
 # ── visibility trend ─────────────────────────────────────────────────────────
 
 def get_visibility_trend(brand: str, limit: int = 30) -> dict:
-    from db import get_probe_trend
+    if _USE_DYNAMODB:
+        from db_dynamo import get_probe_trend
+    else:
+        from db import get_probe_trend
     try:
         trend = get_probe_trend(brand, limit=limit)
         return {"brand": brand, "trend": trend,

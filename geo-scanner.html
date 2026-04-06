@@ -523,6 +523,25 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <div id="h-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
 
+<!-- GEO Scan History (Full Scans with Executive Summaries) -->
+<div class="card" style="grid-column:1/-1">
+  <span style="display:inline-block;padding:2px 8px;background:#238636;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">NEW</span>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">GEO Scan History</h2>
+  <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Past full AI Visibility scans with scores, executive summaries, and recommendations — stored in DynamoDB</p>
+  <div class="row2">
+    <div><label>Brand</label><input id="sh-brand" class="sync-brand" placeholder="Auto-filled from above"></div>
+    <div><label>Limit</label>
+      <select id="sh-limit">
+        <option value="5">Last 5 scans</option>
+        <option value="10" selected>Last 10 scans</option>
+        <option value="20">Last 20 scans</option>
+      </select>
+    </div>
+  </div>
+  <button style="background:#238636" onclick="loadScanHistory()">Load Scan History</button>
+  <div id="sh-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:500px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
+</div>
+
 <!-- Available Providers -->
 <div class="card">
   <span style="display:inline-block;padding:2px 8px;background:#0891b2;color:#fff;border-radius:4px;font-size:.7rem;font-weight:600;margin-bottom:8px">INFO</span>
@@ -1239,6 +1258,44 @@ async function loadHistory() {
     html += `</div>`;
     showFriendly('h-out', html);
   } catch (e) { showFriendly('h-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
+}
+
+async function loadScanHistory() {
+  const brand = document.getElementById('sh-brand').value.trim();
+  if (!brand) { showFriendly('sh-out', '<div style="color:#f85149">Enter a brand name to load scan history.</div>'); return; }
+  const limit = document.getElementById('sh-limit').value || 10;
+  showFriendly('sh-out', '<div style="color:#8b949e">🔄 Loading scan history…</div>');
+  try {
+    const d = await api('GET', '/api/geo-scanner/history?brand=' + encodeURIComponent(brand) + '&limit=' + limit);
+    if (d.error) { showFriendly('sh-out', `<div style="color:#f85149">Error: ${esc(d.error)}</div>`); return; }
+    const scans = d.scans || [];
+    if (!scans.length) {
+      showFriendly('sh-out', '<div style="color:#8b949e">No scan history yet for this brand. Run a full AI Visibility Scan above to start building history.</div>');
+      return;
+    }
+    let html = `<div class="friendly-result"><div style="font-size:.92rem;font-weight:600;color:#58a6ff;margin-bottom:12px">📊 Scan History — ${esc(brand)} (${scans.length} scans)</div>`;
+    scans.forEach((s, i) => {
+      const score = Math.round(s.geo_score || 0);
+      const cls = score >= 70 ? '#3fb950' : score >= 40 ? '#d29922' : '#f85149';
+      const grade = s.grade || '—';
+      const date = s.created_at ? new Date(s.created_at).toLocaleString() : '—';
+      const verdict = s.verdict || '';
+      const shortVerdict = verdict.length > 200 ? verdict.substring(0, 200) + '…' : verdict;
+      html += `<div style="padding:12px;background:#161b22;border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-bottom:10px;border-left:3px solid ${cls}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;color:#e1e4e8">Scan #${scans.length - i}</span>
+          <span style="font-size:.75rem;color:#484f58">${esc(date)}</span>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:8px">
+          <span style="font-size:1.2rem;font-weight:800;color:${cls}">${score}</span>
+          <span style="font-size:.82rem;color:#8b949e;align-self:center">/ 100 · Grade: <strong style="color:${cls}">${esc(grade)}</strong></span>
+        </div>
+        ${shortVerdict ? `<div style="font-size:.78rem;color:#8b949e;line-height:1.5">${esc(shortVerdict)}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+    showFriendly('sh-out', html);
+  } catch (e) { showFriendly('sh-out', `<div style="color:#f85149">Network error: ${esc(e.message)}</div>`); }
 }
 
 // ── AI SEO Chatbot ───────────────────────────────────────────────────────────

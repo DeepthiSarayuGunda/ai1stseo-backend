@@ -167,3 +167,84 @@ def insert_visibility_batch(brand, ai_model, keyword,
     }
     table.put_item(Item=_serialize(item))
     return row_id
+
+
+# ── geo_probes READ functions (match db.py signatures) ────────────────────────
+
+def get_probes(limit: int = 50, brand: str = None, ai_model: str = None,
+               project_id: str = None) -> list:
+    """Retrieve probe results, optionally filtered by brand/model."""
+    table = _get_table(GEO_PROBES_TABLE)
+    filter_parts = []
+    expr_vals = {}
+
+    if brand:
+        filter_parts.append(Attr('brand_name').eq(brand))
+    if ai_model:
+        filter_parts.append(Attr('ai_model').eq(ai_model))
+
+    scan_kwargs = {'Limit': min(limit * 3, 200)}  # over-fetch then sort/trim
+    if filter_parts:
+        combined = filter_parts[0]
+        for fp in filter_parts[1:]:
+            combined = combined & fp
+        scan_kwargs['FilterExpression'] = combined
+
+    resp = table.scan(**scan_kwargs)
+    rows = [_deserialize(i) for i in resp.get('Items', [])]
+    rows.sort(key=lambda r: r.get('probe_timestamp', ''), reverse=True)
+    return rows[:limit]
+
+
+def get_visibility_history(limit: int = 20, brand: str = None,
+                           project_id: str = None) -> list:
+    """Retrieve visibility batch results (rows that have batch_results)."""
+    table = _get_table(GEO_PROBES_TABLE)
+    scan_kwargs = {'Limit': min(limit * 3, 200)}
+
+    filter_expr = Attr('batch_results').exists()
+    if brand:
+        filter_expr = filter_expr & Attr('brand_name').eq(brand)
+    scan_kwargs['FilterExpression'] = filter_expr
+
+    resp = table.scan(**scan_kwargs)
+    rows = [_deserialize(i) for i in resp.get('Items', [])]
+    rows.sort(key=lambda r: r.get('probe_timestamp', ''), reverse=True)
+    return rows[:limit]
+
+
+def get_probe_trend(brand: str, limit: int = 30, project_id: str = None) -> list:
+    """Get daily probe trend for a brand (aggregated by date).
+
+    Returns list of dicts: [{date, total, cited, geo_score}, ...]
+    """
+    table = _get_table(GEO_PROBES_TABLE)
+    scan_kwargs = {
+        'FilterExpression': Attr('brand_name').eq(brand),
+        'Limit': 500,
+    }
+    resp = table.scan(**scan_kwargs)
+    rows = [_deserialize(i) for i in resp.get('Items', [])]
+
+    # Aggregate by date
+    from collections import defaultdict
+    daily = defaultdict(lambda: {'total': 0, 'cited': 0})
+    for r in rows:
+        ts = r.get('probe_timestamp', '')
+        date_str = ts[:10] if len(ts) >= 10 else 'unknown'
+        daily[date_str]['total'] += 1
+        if r.get('cited'):
+            daily[date_str]['cited'] += 1
+
+    trend = []
+    for date_str in sorted(daily.keys(), reverse=True)[:limit]:
+        d = daily[date_str]
+        geo_score = round(d['cited'] / d['total'], 2) if d['total'] else 0
+        trend.append({
+            'date': date_str,
+            'total': d['total'],
+            'cited': d['cited'],
+            'geo_score': geo_score,
+        })
+
+    return trend
