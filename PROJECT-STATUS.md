@@ -264,6 +264,7 @@ Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`,
 
 | Date | Change | Files |
 |------|--------|-------|
+| Apr 6, 2026 | Created `directory-home.html` — directory browse/home page with search bar, 8 category cards (Dentists, Lawyers, Contractors, Restaurants, Accountants, Healthcare, Real Estate, Auto Services), featured AI-ready businesses, "Claim Your Free Listing" CTA, stats bar, WebSite+SearchAction schema. Updated homepage Directory link to point to this page. Added Before/After Compare link to dashboard Tools dropdown. | `directory-home.html`, `index-new.html`, `frontend/src/components/Navbar.tsx` |
 | Apr 2, 2026 | Created `audit-compare.html` — before/after scan comparison page (WBS 2.3). Side-by-side overall scores, category-by-category breakdown with progress bars and delta tags (+/- points), summary with total point change. Populated from localStorage audit history. | `audit-compare.html` |
 | Apr 2, 2026 | Wired PDF email gate to POST /api/collect-email — sends email, URL, score, source, date to backend (fire-and-forget). Keeps localStorage backup. Updated from S3 latest version with correct API_BASE. | `audit.html` |
 | Apr 2, 2026 | Admin dashboard role check confirmed working — Troy set amira.robleh@gmail.com to admin in DynamoDB. No code changes needed. | — |
