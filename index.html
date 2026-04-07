@@ -124,5 +124,99 @@
         setTimeout(function(){ observer.disconnect(); clearInterval(interval); }, 30000);
       })();
     </script>
+    <script>
+      // Email capture — injected inside #root after React renders
+      (function() {
+        var done = false;
+        function inject() {
+          if (done) return;
+          if (document.getElementById('growth-email-capture')) { done = true; return; }
+          var root = document.getElementById('root');
+          if (!root || root.children.length === 0) return;
+          var fc = root.children[0];
+          if (!fc || fc.offsetHeight < 50) return;
+          done = true;
+
+          var el = document.createElement('div');
+          el.id = 'growth-email-capture';
+          el.style.cssText = 'width:100%;padding:48px 24px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;border-top:1px solid rgba(255,255,255,0.06);';
+
+          el.innerHTML =
+            '<div style="max-width:480px;margin:0 auto">'
+            + '<p style="color:#00d4ff;font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px">Free Resource</p>'
+            + '<h3 style="color:#e6edf3;font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get the AI SEO Starter Kit</h3>'
+            + '<p style="color:#8b949e;font-size:.85rem;margin:0 0 20px;line-height:1.5">AI visibility tips, GEO strategies, and early access to new tools.</p>'
+            + '<form id="growth-email-form" style="display:flex;gap:8px;max-width:400px;margin:0 auto;flex-wrap:wrap">'
+            + '<input id="growth-email-input" type="email" placeholder="you@company.com" required '
+            + 'style="flex:1;min-width:180px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e6edf3;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" '
+            + 'onfocus="this.style.borderColor=\'#00d4ff\'" onblur="this.style.borderColor=\'rgba(255,255,255,0.1)\'">'
+            + '<button type="submit" id="growth-email-btn" '
+            + 'style="padding:10px 20px;border:none;border-radius:8px;background:#00d4ff;color:#0d1117;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s;" '
+            + 'onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'">Subscribe</button>'
+            + '</form>'
+            + '<div id="growth-email-msg" style="margin-top:10px;font-size:.8rem;min-height:18px"></div>'
+            + '<p style="color:#484f58;font-size:.68rem;margin:12px 0 0">No spam, ever. Unsubscribe anytime.</p>'
+            + '</div>';
+
+          // Insert after the stats row (236/10/PDF/24-7) if found, otherwise append to root
+          var statNums = root.querySelectorAll('*');
+          var target = null;
+          for (var i = 0; i < statNums.length; i++) {
+            if (statNums[i].children.length === 0 && statNums[i].textContent.trim() === '236') {
+              // Walk up to the stats row container
+              var p = statNums[i];
+              for (var j = 0; j < 8; j++) {
+                if (!p.parentElement || p.parentElement === root) break;
+                p = p.parentElement;
+                // Stats row typically has 4+ children (the stat items)
+                if (p.children.length >= 4) { target = p; break; }
+              }
+              break;
+            }
+          }
+          if (target && target.nextSibling) {
+            target.parentElement.insertBefore(el, target.nextSibling);
+          } else {
+            root.appendChild(el);
+          }
+
+          // Wire up form
+          var apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? '' : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+          document.getElementById('growth-email-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('growth-email-btn');
+            var msg = document.getElementById('growth-email-msg');
+            var inp = document.getElementById('growth-email-input');
+            var email = inp.value.trim();
+            if (!email) return;
+            btn.disabled = true; btn.textContent = 'Subscribing...'; btn.style.opacity = '0.6';
+            msg.innerHTML = '';
+            fetch(apiBase + '/api/growth/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email, source: 'website_main', platform: 'landing_page' })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (res.data.success) {
+                msg.innerHTML = '<span style="color:#3fb950">\u2713 You\u2019re in! Check your inbox soon.</span>';
+                inp.value = '';
+              } else if (res.data.duplicate) {
+                msg.innerHTML = '<span style="color:#d29922">You\u2019re already subscribed \u2014 thanks!</span>';
+              } else {
+                msg.innerHTML = '<span style="color:#f85149">' + (res.data.error || 'Something went wrong.') + '</span>';
+              }
+            })
+            .catch(function() { msg.innerHTML = '<span style="color:#f85149">Network error. Please try again.</span>'; })
+            .finally(function() { btn.disabled = false; btn.textContent = 'Subscribe'; btn.style.opacity = '1'; });
+          });
+        }
+        var obs = new MutationObserver(inject);
+        obs.observe(document.body, { childList: true, subtree: true });
+        var iv = setInterval(function() { inject(); if (done) { clearInterval(iv); obs.disconnect(); } }, 400);
+        setTimeout(function() { obs.disconnect(); clearInterval(iv); }, 30000);
+      })();
+    </script>
   </body>
 </html>

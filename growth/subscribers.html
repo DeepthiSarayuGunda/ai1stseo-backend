@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Subscribers - AI1stSEO Growth</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4e8;padding:24px;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto}
+h1{font-size:1.5rem;margin-bottom:4px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#8b949e;font-size:.85rem;margin-bottom:24px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:24px}
+.card h2{font-size:1.05rem;color:#58a6ff;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #21262d}
+label{display:block;font-size:.8rem;color:#8b949e;margin:10px 0 4px;font-weight:600}
+input,select{width:100%;padding:9px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e1e4e8;font-size:.9rem}
+input:focus,select:focus{outline:none;border-color:#58a6ff}
+.btn{margin-top:14px;padding:10px 20px;border:none;border-radius:8px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;width:100%;transition:opacity .2s}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn-sm{width:auto;padding:7px 16px;font-size:.8rem;margin-top:0}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Email Subscribers</h1>
+<p class="sub">Growth plan subscriber capture — <a href="/">Back to Dashboard</a></p>
+<div id="flash"></div>
+
+<!-- Subscribe form -->
+<div class="card">
+  <h2>Add Subscriber</h2>
+  <form id="subForm">
+    <label for="email">Email *</label>
+    <input type="email" id="email" placeholder="user@example.com" required>
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Jane Doe">
+    <label for="source">Source</label>
+    <select id="source">
+      <option value="website">website</option>
+      <option value="landing_page">landing_page</option>
+      <option value="social_campaign">social_campaign</option>
+      <option value="referral">referral</option>
+      <option value="other">other</option>
+    </select>
+    <label for="platform">Platform</label>
+    <input type="text" id="platform" placeholder="homepage_footer">
+    <label for="campaign">Campaign</label>
+    <input type="text" id="campaign" placeholder="launch_2026">
+    <button type="submit" class="btn" id="subBtn">Subscribe</button>
+  </form>
+</div>
+
+<!-- Subscriber list -->
+<div class="card">
+  <h2>Subscribers</h2>
+  <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px">
+    <div style="flex:1;min-width:140px">
+      <label for="filterSrc" style="margin:0 0 4px">Filter by source</label>
+      <select id="filterSrc" style="width:100%">
+        <option value="">All</option>
+        <option value="website">website</option>
+        <option value="landing_page">landing_page</option>
+        <option value="social_campaign">social_campaign</option>
+        <option value="referral">referral</option>
+        <option value="other">other</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" onclick="loadSubs()">Refresh</button>
+    <button class="btn btn-sm" onclick="exportCSV()" style="background:#238636">Export CSV</button>
+  </div>
+  <div id="subsList"></div>
+  <div id="pager" style="margin-top:10px;text-align:center;font-size:.8rem;color:#8b949e"></div>
+</div>
+</div>
+
+<style>
+.flash-msg{padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:.85rem}
+.flash-ok{background:rgba(35,134,54,.15);border:1px solid #238636;color:#3fb950}
+.flash-err{background:rgba(248,81,73,.1);border:1px solid #f85149;color:#f85149}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{text-align:left;color:#8b949e;font-weight:600;padding:8px 10px;border-bottom:1px solid #30363d;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 10px;border-bottom:1px solid #21262d}
+tr:hover{background:rgba(88,166,255,.04)}
+.empty{text-align:center;padding:24px;color:#8b949e;font-size:.85rem}
+.src-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:600;background:#1f6feb;color:#fff}
+</style>
+
+<script>
+const API = '/api/growth';
+let curPage = 1;
+
+document.getElementById('subForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('subBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const body = {
+      email: document.getElementById('email').value.trim(),
+      name: document.getElementById('name').value.trim() || undefined,
+      source: document.getElementById('source').value,
+      platform: document.getElementById('platform').value.trim() || undefined,
+      campaign: document.getElementById('campaign').value.trim() || undefined,
+    };
+    const r = await fetch(`${API}/subscribe`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const d = await r.json();
+    if (d.success) { flash('Subscribed: ' + d.subscriber.email, 'ok'); document.getElementById('email').value=''; loadSubs(); }
+    else flash(d.error || 'Failed', 'err');
+  } catch(err) { flash('Network error', 'err'); }
+  btn.disabled = false; btn.textContent = 'Subscribe';
+});
+
+async function loadSubs(page) {
+  curPage = page || 1;
+  const src = document.getElementById('filterSrc').value;
+  let url = `${API}/subscribers?page=${curPage}&per_page=15`;
+  if (src) url += `&source=${encodeURIComponent(src)}`;
+  const el = document.getElementById('subsList');
+  try {
+    const r = await fetch(url);
+    if (r.status === 401) { el.innerHTML = '<div class="empty">Auth required for listing. Log in first.</div>'; return; }
+    const d = await r.json();
+    if (!d.success || !d.subscribers.length) { el.innerHTML = '<div class="empty">No subscribers yet.</div>'; document.getElementById('pager').innerHTML=''; return; }
+    let h = '<table><thead><tr><th>Email</th><th>Name</th><th>Source</th><th>Platform</th><th>Campaign</th><th>Date</th></tr></thead><tbody>';
+    for (const s of d.subscribers) {
+      const dt = s.subscribed_at ? new Date(s.subscribed_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      h += `<tr><td>${esc(s.email)}</td><td>${esc(s.name||'')}</td><td><span class="src-tag">${esc(s.source||'')}</span></td><td>${esc(s.platform||'')}</td><td>${esc(s.campaign||'')}</td><td>${dt}</td></tr>`;
+    }
+    h += '</tbody></table>';
+    el.innerHTML = h;
+    const pg = document.getElementById('pager');
+    pg.innerHTML = `Page ${d.page} of ${d.pages} (${d.total} total)`;
+    if (d.page > 1) pg.innerHTML = `<a href="#" onclick="loadSubs(${d.page-1});return false">← Prev</a> ` + pg.innerHTML;
+    if (d.page < d.pages) pg.innerHTML += ` <a href="#" onclick="loadSubs(${d.page+1});return false">Next →</a>`;
+  } catch(err) { el.innerHTML = '<div class="empty">Failed to load.</div>'; }
+}
+
+function exportCSV() {
+  const src = document.getElementById('filterSrc').value;
+  let url = `${API}/subscribers/export?format=csv`;
+  if (src) url += `&source=${encodeURIComponent(src)}`;
+  window.open(url, '_blank');
+}
+
+function flash(msg, type) {
+  const el = document.getElementById('flash');
+  el.innerHTML = `<div class="flash-msg flash-${type}">${esc(msg)}</div>`;
+  setTimeout(() => el.innerHTML = '', 4000);
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+document.getElementById('filterSrc').addEventListener('change', () => loadSubs(1));
+loadSubs();
+</script>
+</body>
+</html>

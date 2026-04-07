@@ -1477,8 +1477,11 @@ def analyze_citation_gap(url, soup, response, load_time):
 # ============== API ROUTES ==============
 @app.route('/')
 def serve_index():
-    """Redirect to the production frontend — this backend is API-only infrastructure.
+    """Serve index.html locally for development, redirect to production otherwise.
     The real homepage lives on S3/CloudFront at www.ai1stseo.com."""
+    host = request.host.split(':')[0]
+    if host in ('localhost', '127.0.0.1'):
+        return send_from_directory('.', 'index.html')
     return redirect('https://www.ai1stseo.com')
 
 @app.route('/analyze')

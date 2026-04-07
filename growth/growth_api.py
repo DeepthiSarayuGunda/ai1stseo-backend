@@ -12,13 +12,27 @@ before_app_request, NOT from app.py.
 """
 
 import logging
+import os
 from datetime import datetime
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, jsonify, request, send_from_directory
 
 logger = logging.getLogger(__name__)
 
+_GROWTH_DIR = os.path.dirname(os.path.abspath(__file__))
+
 growth_bp = Blueprint("growth", __name__, url_prefix="/api/growth")
+
+
+# ---------------------------------------------------------------------------
+# UI page — serves growth/subscribers.html
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/ui", methods=["GET"])
+def subscribers_ui():
+    """Serve the subscriber capture UI page."""
+    return send_from_directory(_GROWTH_DIR, "subscribers.html")
+
 
 # ---------------------------------------------------------------------------
 # Lazy table initialisation (runs once, not in app.py)
@@ -128,6 +142,10 @@ def subscribe():
         platform=data.get("platform"),
         campaign=data.get("campaign"),
         opted_in=data.get("opted_in", True),
+        utm_source=data.get("utm_source"),
+        utm_medium=data.get("utm_medium"),
+        utm_campaign=data.get("utm_campaign"),
+        utm_content=data.get("utm_content"),
     )
 
     if result.get("success"):

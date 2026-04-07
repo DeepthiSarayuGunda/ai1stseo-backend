@@ -26,7 +26,8 @@ EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
 CSV_HEADERS = [
     "id", "email", "name", "source", "platform",
-    "campaign", "opted_in", "status", "subscribed_at",
+    "campaign", "utm_source", "utm_medium", "utm_campaign", "utm_content",
+    "opted_in", "status", "subscribed_at",
 ]
 
 
@@ -65,6 +66,19 @@ def init_subscriber_table() -> None:
                 cur.execute(idx)
             except Exception:
                 pass
+
+        # UTM columns — safe migration for existing tables
+        for col, coldef in [
+            ("utm_source", "VARCHAR(255)"),
+            ("utm_medium", "VARCHAR(255)"),
+            ("utm_campaign", "VARCHAR(255)"),
+            ("utm_content", "VARCHAR(255)"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE email_subscribers ADD COLUMN IF NOT EXISTS {col} {coldef}")
+            except Exception:
+                pass
+
         conn.commit()
         logger.info("email_subscribers table verified")
 
@@ -109,6 +123,10 @@ def add_subscriber(
     platform=None,
     campaign=None,
     opted_in: bool = True,
+    utm_source=None,
+    utm_medium=None,
+    utm_campaign=None,
+    utm_content=None,
 ) -> dict:
     """Validate, sanitise, and insert a subscriber. Returns result dict."""
     if not validate_email(email):
@@ -123,6 +141,10 @@ def add_subscriber(
     clean_campaign = sanitize_input(campaign)
     if clean_campaign:
         clean_campaign = clean_campaign.lower()
+    clean_utm_source = sanitize_input(utm_source)
+    clean_utm_medium = sanitize_input(utm_medium)
+    clean_utm_campaign = sanitize_input(utm_campaign)
+    clean_utm_content = sanitize_input(utm_content)
 
     from db import get_conn
 
@@ -131,12 +153,15 @@ def add_subscriber(
             cur = conn.cursor()
             cur.execute(
                 """INSERT INTO email_subscribers
-                       (email, name, source, platform, campaign, opted_in)
-                   VALUES (%s, %s, %s, %s, %s, %s)
+                       (email, name, source, platform, campaign, opted_in,
+                        utm_source, utm_medium, utm_campaign, utm_content)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                    ON CONFLICT (email) DO NOTHING
                    RETURNING id, email, subscribed_at""",
                 (clean_email, clean_name, clean_source,
-                 clean_platform, clean_campaign, opted_in),
+                 clean_platform, clean_campaign, opted_in,
+                 clean_utm_source, clean_utm_medium,
+                 clean_utm_campaign, clean_utm_content),
             )
             row = cur.fetchone()
             conn.commit()
@@ -146,12 +171,31 @@ def add_subscriber(
                     "error": "Email already subscribed",
                     "duplicate": True,
                 }
+
+            subscriber_id = str(row[0])
+            subscribed_at = row[2].isoformat() if row[2] else None
+
+            # Integration hook — sync to external email platform (no-op until configured)
+            try:
+                from growth.email_platform_sync import sync_subscriber_to_email_platform
+                sync_subscriber_to_email_platform({
+                    "email": row[1],
+                    "name": clean_name,
+                    "source": clean_source,
+                    "platform": clean_platform,
+                    "campaign": clean_campaign,
+                    "subscriber_id": subscriber_id,
+                    "subscribed_at": subscribed_at,
+                })
+            except Exception as sync_err:
+                logger.warning("email platform sync failed (non-blocking): %s", sync_err)
+
             return {
                 "success": True,
                 "subscriber": {
-                    "id": str(row[0]),
+                    "id": subscriber_id,
                     "email": row[1],
-                    "subscribed_at": row[2].isoformat() if row[2] else None,
+                    "subscribed_at": subscribed_at,
                 },
             }
     except Exception as e:
@@ -248,6 +292,7 @@ def export_subscribers(
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(
             f"SELECT id, email, name, source, platform, campaign, "
+            f"utm_source, utm_medium, utm_campaign, utm_content, "
             f"opted_in, status, subscribed_at "
             f"FROM email_subscribers {where} ORDER BY subscribed_at DESC",
             params,
