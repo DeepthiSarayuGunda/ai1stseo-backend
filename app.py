@@ -2631,7 +2631,10 @@ def geo_probe_trend():
     limit = int(request.args.get('limit', 30))
     if not brand:
         return jsonify({'error': 'brand query param is required'}), 400
-    return jsonify(get_visibility_trend(brand, limit=limit))
+    try:
+        return jsonify(get_visibility_trend(brand, limit=limit))
+    except Exception as e:
+        return jsonify({'error': f'Trend failed: {str(e)}', 'brand': brand, 'trend': []}), 500
 
 
 @app.route('/api/brand/resolve', methods=['POST'])
