@@ -90,10 +90,10 @@ except ImportError:
     print("admin_api.py not found")
 
 try:
-    from data_api_dynamo import data_bp
+    from data_api import data_bp
     app.register_blueprint(data_bp)
 except ImportError:
-    print("data_api_dynamo.py not found")
+    print("data_api.py not found")
 
 try:
     from webhook_api import webhook_bp
@@ -128,12 +128,12 @@ def _log_request(response):
             user_id = request.cognito_user.get('user_id')
         def _insert(ep, method, uid, status, ms):
             try:
-                from dynamodb_helper import put_item
-                put_item('ai1stseo-api-logs', {
-                    'endpoint': ep, 'method': method, 'user_id': uid,
-                    'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
-                    'status_code': status, 'response_time_ms': ms,
-                })
+                from database import execute
+                execute(
+                    "INSERT INTO api_request_log (endpoint, method, user_id, project_id, status_code, response_time_ms) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (ep, method, uid, '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2', status, ms),
+                )
             except Exception:
                 pass
         _log_threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()
@@ -5566,32 +5566,6 @@ def content_score():
         return jsonify({'error': str(e)}), 500
 
 
-
-
-# === Email Lead Collection (PDF downloads) ===
-@app.route('/api/collect-email', methods=['POST'])
-def collect_email():
-    """Store email from PDF download gate. No auth required — public lead capture."""
-    data = request.get_json() or {}
-    email = data.get('email', '').strip().lower()
-    if not email or '@' not in email:
-        return jsonify({'status': 'error', 'message': 'Valid email required'}), 400
-    try:
-        import boto3, uuid
-        from datetime import datetime
-        ddb = boto3.resource('dynamodb', region_name='us-east-1')
-        table = ddb.Table('ai1stseo-email-leads')
-        table.put_item(Item={
-            'id': str(uuid.uuid4()),
-            'email': email,
-            'source': data.get('source', 'pdf_download'),
-            'page_url': data.get('page_url', ''),
-            'report_type': data.get('report_type', ''),
-            'created_at': datetime.utcnow().isoformat(),
-        })
-        return jsonify({'status': 'success', 'message': 'Email collected'})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # === Contact Form Endpoint ===

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Audit Results - AISEO Master</title>
+    <title>SEO Audit Results - AI1STSEO Master</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,13 +12,57 @@
             min-height: 100vh;
             color: #fff;
         }
-        .tools-tab { position: fixed; top: 16px; right: 16px; z-index: 10000; }
-        .tools-tab-btn { background: rgba(20,25,40,0.95); border: 1px solid rgba(0,212,255,0.4); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: inherit; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
-        .tools-tab-btn:hover { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.6); }
-        .tools-dropdown { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(20,25,40,0.98); border: 1px solid rgba(0,212,255,0.3); border-radius: 10px; min-width: 210px; padding: 6px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.5); backdrop-filter: blur(12px); }
+        .tools-tab {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10000;
+        }
+        .tools-tab-btn {
+            background: rgba(20,25,40,0.95);
+            border: 1px solid rgba(0,212,255,0.4);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        .tools-tab-btn:hover {
+            background: rgba(0,212,255,0.15);
+            border-color: rgba(0,212,255,0.6);
+        }
+        .tools-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: rgba(20,25,40,0.98);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 10px;
+            min-width: 210px;
+            padding: 6px 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+        }
         .tools-dropdown.open { display: block; }
-        .tools-dropdown a { display: block; padding: 10px 16px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; transition: background 0.15s; white-space: nowrap; }
-        .tools-dropdown a:hover { background: rgba(0,212,255,0.1); color: #fff; }
+        .tools-dropdown a {
+            display: block;
+            padding: 10px 16px;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .tools-dropdown a:hover {
+            background: rgba(0,212,255,0.1);
+            color: #fff;
+        }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         header {
             text-align: center;
@@ -97,49 +141,6 @@
             border-color: #00d4ff;
             background: rgba(0, 212, 255, 0.1);
         }
-        .category-card .expand-icon {
-            transition: transform 0.3s ease;
-            display: inline-block;
-            font-size: 0.8rem;
-            margin-left: 6px;
-            opacity: 0.6;
-        }
-        .category-card.active .expand-icon {
-            transform: rotate(180deg);
-        }
-        .category-detail-wrapper {
-            grid-column: 1 / -1;
-            overflow: hidden;
-            display: none;
-        }
-        .category-detail-wrapper.open {
-            display: block;
-        }
-        .category-detail-inner {
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 5px;
-            border: 1px solid rgba(0, 212, 255, 0.15);
-        }
-        .category-detail-inner .detail-filter-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-        }
-        .category-detail-inner .detail-filter-btn {
-            padding: 6px 14px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 16px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-        .category-detail-inner .detail-filter-btn:hover { background: rgba(255,255,255,0.15); }
-        .category-detail-inner .detail-filter-btn.active { background: linear-gradient(90deg, #00d4ff, #7b2cbf); border-color: transparent; }
         .category-header {
             display: flex;
             justify-content: space-between;
@@ -406,47 +407,51 @@
     </style>
 </head>
 <body>
-    <div class="tools-tab" id="toolsTab">
-        <button class="tools-tab-btn" onclick="document.getElementById('toolsDD').classList.toggle('open')">🛠 Tools ▾</button>
-        <div class="tools-dropdown" id="toolsDD">
-            <a href="https://www.ai1stseo.com">🏠 Home</a>
-            <a href="https://monitor.ai1stseo.com">📊 Website Monitoring</a>
-            <a href="https://seoaudit.ai1stseo.com">🔍 SEO Audit</a>
-            <a href="https://seoanalysis.ai1stseo.com">📈 SEO Analysis</a>
-            <a href="https://docsummarizer.ai1stseo.com">📄 Doc Summarizer</a>
-            <a href="https://automationhub.ai1stseo.com">⚙️ Automation Hub</a>
-        </div>
-    </div>
-
     <div class="container">
         <header>
             <div class="logo">🔍 AISEO Master</div>
-            <p style="margin-top: 10px; color: rgba(255,255,255,0.7);">236 Comprehensive SEO & AI Optimization Checks</p>
+            <p style="margin-top: 10px; color: rgba(255,255,255,0.7);">200 Comprehensive SEO & AI Optimization Checks</p>
             <div class="url-display" id="urlDisplay">Loading...</div>
         </header>
+
+        <div class="tools-tab" id="toolsTab">
+            <button class="tools-tab-btn" onclick="document.getElementById('toolsDD').classList.toggle('open')">🛠 Tools ▾</button>
+            <div class="tools-dropdown" id="toolsDD">
+                <a href="https://www.ai1stseo.com">🏠 Home</a>
+                <a href="https://monitor.ai1stseo.com">📊 Website Monitoring</a>
+                <a href="https://seoaudit.ai1stseo.com">🔍 SEO Audit</a>
+                <a href="https://seoanalysis.ai1stseo.com">📈 SEO Analysis</a>
+                <a href="https://docsummarizer.ai1stseo.com">📄 Doc Summarizer</a>
+                <a href="https://automationhub.ai1stseo.com">⚙️ Automation Hub</a>
+            </div>
+        </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Analyzing website with 236 SEO checks across 10 categories...</p>
+                <p>Analyzing website with 200 SEO checks across 10 categories...</p>
                 <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">This may take 15-30 seconds</p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
     <script>
-        const API_BASE = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+        // Close tools dropdown on outside click
+        document.addEventListener('click', function(e) {
+            var tab = document.getElementById('toolsTab');
+            var dd = document.getElementById('toolsDD');
+            if (dd && tab && !tab.contains(e.target)) dd.classList.remove('open');
+        });
 
         const categoryMeta = {
-            'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 30 },
-            'onpage': { name: '📄 On-Page SEO', desc: 'Title, Meta, Headings, Images, Content Structure', checks: 24 },
-            'content': { name: '📝 Content SEO', desc: 'Content Quality, E-E-A-T, Linking', checks: 18 },
+            'technical': { name: '⚙️ Technical SEO', desc: 'Crawlability, Indexing, URL Structure, Structured Data', checks: 35 },
+            'onpage': { name: '📄 On-Page SEO', desc: 'Title, Meta, Headings, Images, Content Structure', checks: 25 },
+            'content': { name: '📝 Content SEO', desc: 'Content Quality, E-E-A-T, Linking', checks: 20 },
             'mobile': { name: '📱 Mobile SEO', desc: 'Viewport, Responsiveness, Touch UX', checks: 15 },
-            'performance': { name: '⚡ Performance', desc: 'Core Web Vitals, Compression, Caching', checks: 17 },
-            'security': { name: '🔒 Security', desc: 'HTTPS, Security Headers, Forms', checks: 13 },
-            'social': { name: '📣 Social SEO', desc: 'Open Graph, Twitter Cards, Social Integration', checks: 24 },
-            'local': { name: '📍 Local SEO', desc: 'NAP, Local Schema, Maps, Reviews', checks: 30 },
-            'geo': { name: '🤖 GEO/AEO', desc: 'AI Search Optimization, LLM Interpretability, AI Crawlability, Knowledge Graph', checks: 45 },
+            'performance': { name: '⚡ Performance', desc: 'Core Web Vitals, Compression, Caching', checks: 18 },
+            'security': { name: '🔒 Security', desc: 'HTTPS, Security Headers, Forms', checks: 12 },
+            'social': { name: '📣 Social SEO', desc: 'Open Graph, Twitter Cards, Social Integration', checks: 10 },
+            'local': { name: '📍 Local SEO', desc: 'NAP, Local Schema, Maps, Reviews', checks: 15 },
+            'geo': { name: '🤖 GEO/AEO', desc: 'AI Search Optimization, LLM Interpretability, Snippets', checks: 30 },
             'citationgap': { name: '🔀 Citation Gap', desc: 'Google vs AI Visibility, Bridge Strategy, Keyword Alignment', checks: 20 }
         };
 
@@ -520,33 +525,37 @@
                 <div class="category-overview">
             `;
 
-            // Add category cards with inline expandable detail wrappers
+            // Add category cards
             for (const [catKey, catData] of Object.entries(data.categories)) {
                 const meta = categoryMeta[catKey] || { name: catKey, desc: '', checks: catData.total };
                 const scoreColor = getScoreColor(catData.score);
-                const failCount = catData.checks.filter(c => c.status === 'fail').length;
-                const warnCount = catData.checks.filter(c => c.status === 'warning').length;
-                let statusSummary = '';
-                if (failCount > 0) statusSummary += `<span style="color:#f44336;margin-left:8px;">${failCount} failed</span>`;
-                if (warnCount > 0) statusSummary += `<span style="color:#ff9800;margin-left:8px;">${warnCount} warnings</span>`;
                 html += `
                     <div class="category-card" data-category="${catKey}">
                         <div class="category-header">
-                            <span class="category-name">${meta.name} <span class="expand-icon">▼</span></span>
+                            <span class="category-name">${meta.name}</span>
                             <span class="category-score" style="color: ${scoreColor}">${Math.round(catData.score)}%</span>
                         </div>
                         <div class="category-bar">
                             <div class="category-bar-fill" style="width: ${catData.score}%; background: ${scoreColor}"></div>
                         </div>
-                        <div class="category-stats">${catData.passed}/${catData.total} passed • ${meta.desc}${statusSummary}</div>
-                    </div>
-                    <div class="category-detail-wrapper" id="detail-${catKey}">
-                        <div class="category-detail-inner" id="detail-inner-${catKey}"></div>
+                        <div class="category-stats">${catData.passed}/${catData.total} passed • ${meta.desc}</div>
                     </div>
                 `;
             }
 
             html += `</div>
+                
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All Checks</button>
+                    <button class="filter-btn" data-filter="fail">❌ Failed</button>
+                    <button class="filter-btn" data-filter="warning">⚠️ Warnings</button>
+                    <button class="filter-btn" data-filter="pass">✓ Passed</button>
+                    <button class="filter-btn" data-filter="info">ℹ️ Info</button>
+                </div>
+
+                <!-- Detailed Results -->
+                <div id="detailedResults"></div>
 
                 <!-- AI Recommendations Section -->
                 <div class="ai-section" id="aiSection">
@@ -554,7 +563,7 @@
                         <span class="ai-icon">🤖</span>
                         <div>
                             <div class="ai-title">AI-Powered Recommendations</div>
-                            <div class="ai-subtitle">Get comprehensive analysis across all 9 SEO categories with personalized fixes, code snippets, and a 90-day action plan (Powered by Llama 3.1 + P40 GPU Accelerator)</div>
+                            <div class="ai-subtitle">Get personalized fixes and code snippets from our AI assistant (Llama 3.1)</div>
                         </div>
                     </div>
                     <button class="ai-btn" id="aiBtn" onclick="getAIRecommendations()">
@@ -569,17 +578,17 @@
                         <span class="ai-icon">📝</span>
                         <div>
                             <div class="ai-title">AI Content Brief Generator</div>
-                            <div class="ai-subtitle">Auto-generates a structured content brief by analyzing top Google competitors for your page's primary keyword — headings, word count targets, questions to answer, and AI citation tips</div>
+                            <div class="ai-subtitle">Auto-generates a structured content brief by analyzing top Google competitors for your page's primary keyword</div>
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-                        <select id="briefContentType" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
-                            <option value="blog" style="background:#1a1a2e;color:#fff;">Blog Post</option>
-                            <option value="faq" style="background:#1a1a2e;color:#fff;">FAQ Page</option>
-                            <option value="landing_page" style="background:#1a1a2e;color:#fff;">Landing Page</option>
-                            <option value="how_to" style="background:#1a1a2e;color:#fff;">How-To Guide</option>
-                            <option value="comparison" style="background:#1a1a2e;color:#fff;">Comparison Article</option>
-                            <option value="listicle" style="background:#1a1a2e;color:#fff;">Listicle</option>
+                        <select id="briefContentType" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;">
+                            <option value="blog">Blog Post</option>
+                            <option value="faq">FAQ Page</option>
+                            <option value="landing_page">Landing Page</option>
+                            <option value="how_to">How-To Guide</option>
+                            <option value="comparison">Comparison Article</option>
+                            <option value="listicle">Listicle</option>
                         </select>
                     </div>
                     <button class="ai-btn" id="briefBtn" onclick="generateContentBrief()">
@@ -588,40 +597,8 @@
                     <div id="briefContent"></div>
                 </div>
 
-                <!-- Keyword Clustering & TF-IDF Section -->
-                <div class="ai-section" id="keywordClusterSection">
-                    <div class="ai-header">
-                        <span class="ai-icon">🔑</span>
-                        <div>
-                            <div class="ai-title">Keyword Clustering & TF-IDF Analysis</div>
-                            <div class="ai-subtitle">Extracts keywords from your page, groups them by search intent (informational, commercial, transactional, local), and shows TF-IDF scores with bigram/trigram phrases</div>
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-                        <input type="text" id="clusterKeywordInput" placeholder="Or enter a seed keyword..." style="flex:1;min-width:200px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;" />
-                    </div>
-                    <button class="ai-btn" id="clusterBtn" onclick="runKeywordClustering()">
-                        <span>🔍</span> Analyze Keywords
-                    </button>
-                    <div id="clusterContent"></div>
-                </div>
-
                 <div style="text-align: center; padding: 30px;">
-                    <button class="back-btn" onclick="showEmailGate()" style="background: linear-gradient(90deg, #00c853, #00e676); margin-right: 12px;">📄 Download PDF Report</button>
                     <a href="/" class="back-btn">← Analyze Another URL</a>
-                </div>
-
-                <!-- Email Gate Modal -->
-                <div id="emailGateModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;">
-                    <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(0,212,255,0.3);border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-                        <div style="font-size:2.5rem;margin-bottom:12px;">📄</div>
-                        <h3 style="font-size:1.2rem;margin-bottom:8px;color:#fff;">Get Your Free PDF Report</h3>
-                        <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:20px;">Enter your email to download the full SEO audit report with scores, recommendations, and action items.</p>
-                        <input type="email" id="pdfEmailInput" placeholder="your@email.com" style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-size:1rem;outline:none;margin-bottom:12px;" />
-                        <div id="emailError" style="color:#f44336;font-size:0.8rem;margin-bottom:12px;display:none;">Please enter a valid email address.</div>
-                        <button onclick="submitEmailAndDownload()" style="width:100%;padding:14px;background:linear-gradient(90deg,#00c853,#00e676);color:#000;font-weight:700;font-size:1rem;border:none;border-radius:10px;cursor:pointer;margin-bottom:10px;">Download PDF Report</button>
-                        <button onclick="closeEmailGate()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:0.85rem;padding:8px;">Cancel</button>
-                    </div>
                 </div>
             `;
 
@@ -629,66 +606,55 @@
             
             // Store data globally
             window.auditData = data;
+            window.currentFilter = 'all';
+            window.currentCategory = null;
 
-            // Add category card click handlers - accordion expand/collapse
+            // Add category card click handlers
             document.querySelectorAll('.category-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    const catKey = card.dataset.category;
-                    const wrapper = document.getElementById('detail-' + catKey);
-                    const isOpen = card.classList.contains('active');
-                    
-                    if (isOpen) {
-                        // Collapse this category
-                        card.classList.remove('active');
-                        wrapper.classList.remove('open');
-                    } else {
-                        // Expand this category
-                        card.classList.add('active');
-                        wrapper.classList.add('open');
-                        renderCategoryDetail(catKey, 'all');
-                    }
+                    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    window.currentCategory = card.dataset.category;
+                    renderDetailedResults();
                 });
             });
+
+            // Add filter button handlers
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    window.currentFilter = btn.dataset.filter;
+                    renderDetailedResults();
+                });
+            });
+
+            // Show all categories by default
+            renderDetailedResults();
         }
 
-        function renderCategoryDetail(catKey, filter) {
-            const container = document.getElementById('detail-inner-' + catKey);
-            const catData = window.auditData.categories[catKey];
-            const meta = categoryMeta[catKey] || { name: catKey, desc: '' };
+        function renderDetailedResults() {
+            const container = document.getElementById('detailedResults');
+            const filter = window.currentFilter;
+            const selectedCategory = window.currentCategory;
             
-            // Filter checks
-            let checks = catData.checks;
-            if (filter !== 'all') {
-                checks = checks.filter(c => c.status === filter);
-            }
+            let html = '';
+            
+            const categoriesToShow = selectedCategory 
+                ? { [selectedCategory]: window.auditData.categories[selectedCategory] }
+                : window.auditData.categories;
 
-            // Count by status for filter badges
-            const counts = { all: catData.checks.length, pass: 0, fail: 0, warning: 0, info: 0 };
-            catData.checks.forEach(c => { if (counts[c.status] !== undefined) counts[c.status]++; });
+            for (const [catKey, catData] of Object.entries(categoriesToShow)) {
+                const meta = categoryMeta[catKey] || { name: catKey, desc: '' };
+                
+                // Filter checks
+                let checks = catData.checks;
+                if (filter !== 'all') {
+                    checks = checks.filter(c => c.status === filter);
+                }
+                
+                if (checks.length === 0) continue;
 
-            let html = `
-                <div class="section-header">
-                    <div>
-                        <div class="section-title">${meta.name}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">${meta.desc}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="section-score" style="color: ${getScoreColor(catData.score)}">${Math.round(catData.score)}%</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${catData.passed}/${catData.total} passed</div>
-                    </div>
-                </div>
-                <div class="detail-filter-bar">
-                    <button class="detail-filter-btn ${filter === 'all' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','all')">All (${counts.all})</button>
-                    <button class="detail-filter-btn ${filter === 'fail' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','fail')">❌ Failed (${counts.fail})</button>
-                    <button class="detail-filter-btn ${filter === 'warning' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','warning')">⚠️ Warnings (${counts.warning})</button>
-                    <button class="detail-filter-btn ${filter === 'pass' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','pass')">✓ Passed (${counts.pass})</button>
-                    <button class="detail-filter-btn ${filter === 'info' ? 'active' : ''}" onclick="renderCategoryDetail('${catKey}','info')">ℹ️ Info (${counts.info})</button>
-                </div>
-            `;
-
-            if (checks.length === 0) {
-                html += `<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">No checks match this filter.</div>`;
-            } else {
                 // Group by subcategory
                 const grouped = {};
                 checks.forEach(check => {
@@ -696,6 +662,20 @@
                     if (!grouped[subcat]) grouped[subcat] = [];
                     grouped[subcat].push(check);
                 });
+
+                html += `
+                    <div class="results-section">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">${meta.name}</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">${meta.desc}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="section-score" style="color: ${getScoreColor(catData.score)}">${Math.round(catData.score)}%</div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${catData.passed}/${catData.total} passed</div>
+                            </div>
+                        </div>
+                `;
 
                 for (const [subcat, subcatChecks] of Object.entries(grouped)) {
                     const subcatPassed = subcatChecks.filter(c => c.status === 'pass').length;
@@ -724,6 +704,14 @@
 
                     html += `</div>`;
                 }
+
+                html += `</div>`;
+            }
+
+            if (!html) {
+                html = `<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+                    No checks match the current filter.
+                </div>`;
             }
 
             container.innerHTML = html;
@@ -745,17 +733,17 @@
             const contentDiv = document.getElementById('aiContent');
             
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Generating comprehensive analysis...';
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Generating recommendations...';
             
             contentDiv.innerHTML = `
                 <div class="ai-loading">
                     <div class="spinner"></div>
-                    <span>AI is performing deep analysis of all 9 SEO categories (${window.auditData?.totalChecks || 205}+ checks) and generating personalized recommendations with code snippets for each area... This comprehensive analysis may take 3-5 minutes.</span>
+                    <span>AI is analyzing your results and generating personalized recommendations... This may take up to 2 minutes.</span>
                 </div>
             `;
 
             try {
-                const response = await fetch(API_BASE + '/api/ai-recommendations', {
+                const response = await fetch('/api/ai-recommendations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -764,7 +752,15 @@
                     })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error (status ' + response.status + ')');
+                }
 
                 if (data.status === 'success') {
                     // Format the AI response with basic markdown-like styling
@@ -805,13 +801,6 @@
             }
         }
 
-        // Close tools dropdown on outside click
-        document.addEventListener('click', function(e) {
-            var tab = document.getElementById('toolsTab');
-            var dd = document.getElementById('toolsDD');
-            if (dd && tab && !tab.contains(e.target)) dd.classList.remove('open');
-        });
-
         async function generateContentBrief() {
             const btn = document.getElementById('briefBtn');
             const contentDiv = document.getElementById('briefContent');
@@ -835,364 +824,38 @@
             }
             if (!keyword) keyword = auditUrl.replace(/https?:\/\//, '').replace(/\/$/, '');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Analyzing top competitors & generating brief...';
-            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Scraping top 5 Google results for "<strong>' + keyword + '</strong>", extracting headings, word counts, and People Also Ask questions... This may take 30-60 seconds.</span></div>';
+            btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;margin:0;display:inline-block;vertical-align:middle;"></span> Analyzing competitors...';
+            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Scraping top 5 Google results for "<strong>' + keyword + '</strong>"...</span></div>';
             try {
-                const response = await fetch(API_BASE + '/api/content-brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keyword, content_type: contentType }) });
-                const data = await response.json();
+                const response = await fetch('/api/content-brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword, content_type: contentType }) });
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error (status ' + response.status + ')');
+                }
                 if (data.status === 'success' && data.brief) {
                     const b = data.brief; const serp = data.serp_analysis || {};
                     let html = '<div class="ai-content"><h2>📋 ' + (b.recommended_title || keyword) + '</h2>';
-                    html += '<p style="color:rgba(255,255,255,0.6);margin-bottom:15px;">Target word count: <strong style="color:#00d4ff;">' + (b.target_word_count || 'N/A') + ' words</strong>';
-                    if (data.ai_generated === false) html += ' &nbsp;⚠️ <em>Generated from SERP data (LLM unavailable)</em>';
-                    html += '</p>';
-                    if (serp.competitors && serp.competitors.length > 0) {
-                        html += '<h3>🏆 Top Competitors Analyzed</h3><div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:0.85rem;">';
-                        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.15);"><th style="text-align:left;padding:8px;color:#00d4ff;">URL</th><th style="padding:8px;color:#00d4ff;">Words</th><th style="padding:8px;color:#00d4ff;">Headings</th><th style="padding:8px;color:#00d4ff;">Schema</th></tr>';
-                        serp.competitors.forEach(function(c) { var domain = c.url.replace(/https?:\/\//, '').split('/')[0]; html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:8px;"><a href="' + c.url + '" target="_blank" style="color:#7b9fff;text-decoration:none;">' + domain + '</a></td><td style="padding:8px;text-align:center;">' + c.word_count + '</td><td style="padding:8px;text-align:center;">' + c.headings_count + '</td><td style="padding:8px;text-align:center;">' + (c.schema_types.join(', ') || 'None') + '</td></tr>'; });
-                        html += '</table></div>';
-                    }
-                    if (b.headings && b.headings.length > 0) {
-                        html += '<h3>📑 Recommended Heading Structure</h3><div style="margin-bottom:20px;">';
-                        b.headings.forEach(function(h) { var indent = h.level === 'h3' ? '30px' : '0'; html += '<div style="padding:8px 12px;margin-left:' + indent + ';border-left:2px solid rgba(0,212,255,0.3);margin-bottom:6px;"><span style="background:rgba(0,212,255,0.2);padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-right:8px;">' + h.level.toUpperCase() + '</span><strong>' + h.text + '</strong>' + (h.word_budget ? ' <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">~' + h.word_budget + ' words</span>' : '') + (h.purpose ? '<br><span style="color:rgba(255,255,255,0.5);font-size:0.8rem;">' + h.purpose + '</span>' : '') + '</div>'; });
-                        html += '</div>';
-                    }
-                    if (b.questions_to_answer && b.questions_to_answer.length > 0) {
-                        html += '<h3>❓ Questions to Answer</h3><div style="margin-bottom:20px;">';
-                        b.questions_to_answer.forEach(function(q) { var badge = q.source === 'paa' ? '🔍 PAA' : q.source === 'competitor' ? '🏆 Competitor' : '🤖 AI'; html += '<div style="padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;">' + q.question + ' <span style="font-size:0.75rem;background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:10px;margin-left:8px;">' + badge + '</span></div>'; });
-                        html += '</div>';
-                    }
-                    if (b.keywords && b.keywords.length > 0) {
-                        html += '<h3>🔑 Keyword Map</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">';
-                        b.keywords.forEach(function(k) { var bg = k.type === 'primary' ? 'rgba(0,212,255,0.2)' : 'rgba(255,255,255,0.1)'; html += '<span style="background:' + bg + ';padding:6px 12px;border-radius:16px;font-size:0.8rem;">' + k.term + ' <span style="color:rgba(255,255,255,0.4);">→ ' + (k.placement || '') + '</span></span>'; });
-                        html += '</div>';
-                    }
-                    if (b.schema_recommendations && b.schema_recommendations.length > 0) {
-                        html += '<h3>🏷️ Schema Markup</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">';
-                        b.schema_recommendations.forEach(function(s) { html += '<span style="background:rgba(0,200,83,0.15);padding:6px 12px;border-radius:16px;font-size:0.8rem;border:1px solid rgba(0,200,83,0.3);">' + s + '</span>'; });
-                        html += '</div>';
-                    }
-                    if (b.content_guidelines) {
-                        var g = b.content_guidelines;
-                        html += '<h3>📐 Content Guidelines</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:20px;">';
-                        if (g.tone) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Tone:</strong> ' + g.tone + '</div>';
-                        if (g.target_audience) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Audience:</strong> ' + g.target_audience + '</div>';
-                        if (g.unique_angle) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">Unique Angle:</strong> ' + g.unique_angle + '</div>';
-                        if (g.ai_citation_tips) html += '<div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;"><strong style="color:#00d4ff;">AI Citation Tips:</strong> ' + g.ai_citation_tips + '</div>';
-                        html += '</div>';
-                    }
+                    html += '<p style="color:rgba(255,255,255,0.6);">Target: <strong style="color:#00d4ff;">' + (b.target_word_count || 'N/A') + ' words</strong></p>';
+                    if (b.headings && b.headings.length) { html += '<h3>📑 Headings</h3>'; b.headings.forEach(function(h) { html += '<div style="padding:6px 12px;margin-left:' + (h.level==='h3'?'30px':'0') + ';border-left:2px solid rgba(0,212,255,0.3);margin-bottom:4px;"><span style="background:rgba(0,212,255,0.2);padding:2px 6px;border-radius:4px;font-size:0.75rem;margin-right:6px;">' + h.level.toUpperCase() + '</span><strong>' + h.text + '</strong></div>'; }); }
+                    if (b.questions_to_answer && b.questions_to_answer.length) { html += '<h3>❓ Questions</h3>'; b.questions_to_answer.forEach(function(q) { html += '<div style="padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">' + q.question + '</div>'; }); }
+                    if (b.keywords && b.keywords.length) { html += '<h3>🔑 Keywords</h3><div style="display:flex;flex-wrap:wrap;gap:6px;">'; b.keywords.forEach(function(k) { html += '<span style="background:rgba(0,212,255,0.15);padding:4px 10px;border-radius:12px;font-size:0.8rem;">' + k.term + '</span>'; }); html += '</div>'; }
                     html += '</div>';
                     contentDiv.innerHTML = html;
-                    btn.innerHTML = '✅ Content Brief Generated';
+                    btn.innerHTML = '✅ Brief Generated';
                     btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
                 } else {
-                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Brief Generation Failed</strong><br>' + (data.error || 'Unknown error') + '</div>';
-                    btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;">' + (data.error || 'Failed') + '</div>';
+                    btn.innerHTML = '🔄 Retry'; btn.disabled = false;
                 }
-            } catch (error) {
-                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
-                btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+            } catch (e) {
+                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;">' + e.message + '</div>';
+                btn.innerHTML = '🔄 Retry'; btn.disabled = false;
             }
-        }
-
-        async function runKeywordClustering() {
-            const btn = document.getElementById('clusterBtn');
-            const contentDiv = document.getElementById('clusterContent');
-            const seedInput = document.getElementById('clusterKeywordInput').value.trim();
-            const analyzedUrl = window.auditData ? window.auditData.url : '';
-            
-            btn.disabled = true;
-            btn.innerHTML = '<div class="spinner" style="display:inline-block;width:16px;height:16px;margin-right:8px;"></div> Analyzing keywords...';
-            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Extracting keywords and clustering by search intent...</span></div>';
-            
-            try {
-                const body = {};
-                if (seedInput) body.keyword = seedInput;
-                else if (analyzedUrl) body.url = analyzedUrl;
-                else { contentDiv.innerHTML = '<div style="padding:15px;background:rgba(244,67,54,0.1);border-radius:8px;">Enter a seed keyword or run an audit first.</div>'; btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Keywords'; return; }
-                
-                const response = await fetch(API_BASE + '/api/keyword-cluster', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    let html = '<div style="margin-top:15px;">';
-                    
-                    // Source info
-                    if (data.url) html += '<div style="padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;margin-bottom:15px;font-size:0.85rem;">Analyzed: <strong>' + data.page_title + '</strong> — ' + data.total_keywords + ' keywords extracted</div>';
-                    else if (data.seed_keyword) html += '<div style="padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;margin-bottom:15px;font-size:0.85rem;">Seed keyword: <strong>' + data.seed_keyword + '</strong> — ' + data.total_keywords + ' related keywords generated</div>';
-                    
-                    // Intent clusters
-                    const intentColors = { informational: '#00d4ff', commercial: '#ff9800', transactional: '#4caf50', navigational: '#9c27b0', local: '#f44336' };
-                    const intentIcons = { informational: 'ℹ️', commercial: '🛒', transactional: '💰', navigational: '🧭', local: '📍' };
-                    
-                    if (data.clusters && Object.keys(data.clusters).length > 0) {
-                        html += '<div style="font-weight:600;color:#00d4ff;margin-bottom:10px;font-size:1rem;">Search Intent Clusters</div>';
-                        for (const [intent, cluster] of Object.entries(data.clusters)) {
-                            const color = intentColors[intent] || '#00d4ff';
-                            const icon = intentIcons[intent] || '🔑';
-                            html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:15px;margin-bottom:12px;">';
-                            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span>' + icon + '</span><strong style="color:' + color + ';text-transform:capitalize;">' + intent + '</strong><span style="font-size:0.75rem;color:rgba(255,255,255,0.5);">(' + cluster.keywords.length + ' keywords)</span></div>';
-                            html += '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:10px;">' + (cluster.description || '') + '</div>';
-                            html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-                            cluster.keywords.forEach(function(kw) {
-                                const term = kw.term || kw;
-                                const freq = kw.frequency ? ' (' + kw.frequency + ')' : '';
-                                html += '<span style="background:rgba(255,255,255,0.06);border:1px solid ' + color + '33;padding:4px 10px;border-radius:20px;font-size:0.8rem;color:rgba(255,255,255,0.85);">' + term + freq + '</span>';
-                            });
-                            html += '</div></div>';
-                        }
-                    }
-                    
-                    // TF-IDF top keywords
-                    if (data.tfidf_keywords && data.tfidf_keywords.length > 0) {
-                        html += '<div style="font-weight:600;color:#00d4ff;margin:15px 0 10px;font-size:1rem;">TF-IDF Top Keywords</div>';
-                        html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.8rem;">';
-                        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.6);">Keyword</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.6);">Frequency</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.6);">TF Score</th></tr>';
-                        data.tfidf_keywords.slice(0, 15).forEach(function(kw) {
-                            html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:6px 8px;">' + kw.term + '</td><td style="text-align:right;padding:6px 8px;">' + kw.frequency + '</td><td style="text-align:right;padding:6px 8px;color:#00d4ff;">' + kw.tf_score + '</td></tr>';
-                        });
-                        html += '</table></div>';
-                    }
-                    
-                    // Bigrams & Trigrams
-                    if ((data.bigrams && data.bigrams.length > 0) || (data.trigrams && data.trigrams.length > 0)) {
-                        html += '<div style="font-weight:600;color:#00d4ff;margin:15px 0 10px;font-size:1rem;">Key Phrases</div>';
-                        html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-                        (data.bigrams || []).slice(0, 10).forEach(function(b) {
-                            html += '<span style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);padding:4px 10px;border-radius:20px;font-size:0.8rem;">' + b.phrase + ' <span style="color:rgba(255,255,255,0.4);">(' + b.frequency + ')</span></span>';
-                        });
-                        (data.trigrams || []).slice(0, 8).forEach(function(t) {
-                            html += '<span style="background:rgba(123,44,191,0.08);border:1px solid rgba(123,44,191,0.2);padding:4px 10px;border-radius:20px;font-size:0.8rem;">' + t.phrase + ' <span style="color:rgba(255,255,255,0.4);">(' + t.frequency + ')</span></span>';
-                        });
-                        html += '</div>';
-                    }
-                    
-                    html += '</div>';
-                    contentDiv.innerHTML = html;
-                    btn.innerHTML = '✅ Keywords Analyzed';
-                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
-                    setTimeout(function() { btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Keywords'; btn.style.background = ''; }, 2000);
-                } else {
-                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Analysis Failed</strong><br>' + (data.error || 'Unknown error') + '</div>';
-                    btn.innerHTML = '🔄 Retry Analysis'; btn.disabled = false;
-                }
-            } catch (error) {
-                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
-                btn.innerHTML = '🔄 Retry Analysis'; btn.disabled = false;
-            }
-        }
-
-        function showEmailGate() {
-            if (!window.auditData) { alert('No audit data available.'); return; }
-            // Skip gate if user already provided email this session
-            if (window._pdfEmailProvided) { downloadPDFReport(); return; }
-            var modal = document.getElementById('emailGateModal');
-            modal.style.display = 'flex';
-            document.getElementById('pdfEmailInput').focus();
-            document.getElementById('emailError').style.display = 'none';
-        }
-
-        function closeEmailGate() {
-            document.getElementById('emailGateModal').style.display = 'none';
-        }
-
-        function submitEmailAndDownload() {
-            var email = document.getElementById('pdfEmailInput').value.trim();
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email)) {
-                document.getElementById('emailError').style.display = 'block';
-                return;
-            }
-            // Store collected email
-            try {
-                var emails = JSON.parse(localStorage.getItem('ai1stseo_pdf_emails') || '[]');
-                emails.push({ email: email, url: window.auditData.url || '', score: window.auditData.overallScore || 0, date: new Date().toISOString() });
-                localStorage.setItem('ai1stseo_pdf_emails', JSON.stringify(emails));
-            } catch(e) {}
-            window._pdfEmailProvided = true;
-            closeEmailGate();
-            downloadPDFReport();
-        }
-
-        // Close email modal on Escape or backdrop click
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeEmailGate(); });
-        document.addEventListener('click', function(e) { var modal = document.getElementById('emailGateModal'); if (modal && e.target === modal) closeEmailGate(); });
-
-        function downloadPDFReport() {
-            var data = window.auditData;
-            if (!data) { alert('No audit data available.'); return; }
-            if (!window.jspdf) { alert('PDF library still loading. Please wait a moment and try again.'); return; }
-
-            var jsPDF = window.jspdf.jsPDF;
-            var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            var pageW = doc.internal.pageSize.getWidth();
-            var pageH = doc.internal.pageSize.getHeight();
-            var margin = 18;
-            var y = 20;
-            var maxW = pageW - margin * 2;
-
-            // Strip emoji and non-ASCII characters for PDF compatibility
-            function clean(str) {
-                if (!str) return '';
-                return String(str).replace(/[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{200D}\u{20E3}\u{FE0F}]|[\u{E000}-\u{F8FF}]|[\u2700-\u27BF]|[\u2600-\u26FF]|[\u2300-\u23FF]|[\u2B50]|[\u2934\u2935]|[\u25A0-\u25FF]|[\u2190-\u21FF]|[\u2000-\u200F]|[\u2028\u2029]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '').replace(/[^\x20-\x7E\xA0-\xFF]/g, '').trim();
-            }
-
-            function checkPage(needed) {
-                if (y + needed > pageH - 20) {
-                    doc.addPage();
-                    y = 20;
-                }
-            }
-
-            function addText(text, size, color, bold, maxWidth) {
-                doc.setFontSize(size);
-                doc.setTextColor(color[0], color[1], color[2]);
-                if (bold) doc.setFont('helvetica', 'bold');
-                else doc.setFont('helvetica', 'normal');
-                var lines = doc.splitTextToSize(clean(text), maxWidth || maxW);
-                checkPage(lines.length * size * 0.45 + 2);
-                doc.text(lines, margin, y);
-                y += lines.length * size * 0.45 + 2;
-            }
-
-            // Header
-            doc.setFillColor(10, 10, 10);
-            doc.rect(0, 0, pageW, 45, 'F');
-            doc.setFontSize(22);
-            doc.setTextColor(0, 212, 255);
-            doc.setFont('helvetica', 'bold');
-            doc.text('AI1stSEO Audit Report', margin, 18);
-            doc.setFontSize(10);
-            doc.setTextColor(180, 180, 180);
-            doc.setFont('helvetica', 'normal');
-            doc.text(clean(data.url || 'Unknown URL'), margin, 26);
-            doc.text('Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), margin, 32);
-            doc.text('236 checks across 10 categories', margin, 38);
-            y = 55;
-
-            // Overall Score
-            var scoreColor = data.overallScore >= 80 ? [0, 200, 83] : data.overallScore >= 60 ? [139, 195, 74] : data.overallScore >= 40 ? [255, 152, 0] : [244, 67, 54];
-            doc.setFillColor(245, 245, 245);
-            doc.roundedRect(margin, y, maxW, 28, 3, 3, 'F');
-            doc.setFontSize(28);
-            doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-            doc.setFont('helvetica', 'bold');
-            doc.text(Math.round(data.overallScore) + '%', margin + 8, y + 18);
-            doc.setFontSize(11);
-            doc.setTextColor(80, 80, 80);
-            doc.text('Overall Score', margin + 38, y + 12);
-            doc.setFontSize(9);
-            doc.setTextColor(120, 120, 120);
-            doc.setFont('helvetica', 'normal');
-            doc.text(data.totalPassed + ' / ' + data.totalChecks + ' checks passed', margin + 38, y + 20);
-            y += 36;
-
-            // Category Breakdown
-            addText('Category Breakdown', 14, [0, 0, 0], true);
-            y += 2;
-
-            var catEntries = Object.entries(data.categories);
-            for (var ci = 0; ci < catEntries.length; ci++) {
-                var catKey = catEntries[ci][0];
-                var catData = catEntries[ci][1];
-                var meta = categoryMeta[catKey] || { name: catKey, desc: '' };
-                var catName = clean(meta.name);
-                var sc = Math.round(catData.score);
-                var scCol = sc >= 80 ? [0, 200, 83] : sc >= 60 ? [139, 195, 74] : sc >= 40 ? [255, 152, 0] : [244, 67, 54];
-
-                checkPage(14);
-                doc.setFillColor(250, 250, 250);
-                doc.roundedRect(margin, y, maxW, 10, 2, 2, 'F');
-
-                // Progress bar background
-                doc.setFillColor(230, 230, 230);
-                doc.roundedRect(margin + 55, y + 3.5, 70, 3, 1.5, 1.5, 'F');
-                // Progress bar fill
-                doc.setFillColor(scCol[0], scCol[1], scCol[2]);
-                var barW = Math.max(sc * 0.7, 1);
-                doc.roundedRect(margin + 55, y + 3.5, barW, 3, 1.5, 1.5, 'F');
-
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(40, 40, 40);
-                doc.text(clean(catName), margin + 3, y + 6.5);
-
-                doc.setFontSize(9);
-                doc.setTextColor(scCol[0], scCol[1], scCol[2]);
-                doc.text(sc + '%', margin + 128, y + 6.5);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(120, 120, 120);
-                doc.setFontSize(8);
-                doc.text(catData.passed + '/' + catData.total + ' passed', margin + 140, y + 6.5);
-
-                y += 12;
-            }
-            y += 6;
-
-            // Issues Found
-            addText('Issues & Recommendations', 14, [0, 0, 0], true);
-            y += 2;
-
-            for (var ci2 = 0; ci2 < catEntries.length; ci2++) {
-                var catKey2 = catEntries[ci2][0];
-                var catData2 = catEntries[ci2][1];
-                var meta2 = categoryMeta[catKey2] || { name: catKey2 };
-                var catName2 = clean(meta2.name);
-                var issues = catData2.checks.filter(function(c) { return c.status === 'fail' || c.status === 'warning'; });
-
-                if (issues.length === 0) continue;
-
-                checkPage(12);
-                addText(catName2 + ' (' + issues.length + ' issues)', 11, [0, 100, 180], true);
-
-                for (var ii = 0; ii < issues.length; ii++) {
-                    var check = issues[ii];
-                    var statusIcon = check.status === 'fail' ? 'X FAIL' : '! WARN';
-                    var statusCol = check.status === 'fail' ? [244, 67, 54] : [255, 152, 0];
-
-                    checkPage(18);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(statusCol[0], statusCol[1], statusCol[2]);
-                    doc.text(statusIcon, margin + 2, y);
-                    doc.setTextColor(40, 40, 40);
-                    var nameLines = doc.splitTextToSize(clean(check.name), maxW - 25);
-                    doc.text(nameLines, margin + 18, y);
-                    y += nameLines.length * 4 + 1;
-
-                    if (check.description && check.value) {
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(8);
-                        doc.setTextColor(100, 100, 100);
-                        var valLines = doc.splitTextToSize(clean(check.description + ': ' + check.value), maxW - 20);
-                        checkPage(valLines.length * 3.5);
-                        doc.text(valLines, margin + 18, y);
-                        y += valLines.length * 3.5 + 1;
-                    }
-
-                    if (check.recommendation) {
-                        doc.setFontSize(8);
-                        doc.setTextColor(80, 80, 80);
-                        var recLines = doc.splitTextToSize('> ' + clean(check.recommendation), maxW - 20);
-                        checkPage(recLines.length * 3.5);
-                        doc.text(recLines, margin + 18, y);
-                        y += recLines.length * 3.5 + 2;
-                    }
-                    y += 2;
-                }
-                y += 4;
-            }
-
-            // Footer on last page
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.setFont('helvetica', 'normal');
-            doc.text('Generated by AI1stSEO — www.ai1stseo.com', margin, pageH - 10);
-
-            // Save
-            var filename = 'AI1stSEO-Audit-' + (data.url || 'report').replace(/https?:\/\//, '').replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 40) + '.pdf';
-            doc.save(filename);
         }
 
         async function runAnalysis() {
@@ -1211,17 +874,22 @@
                     <div class="loading">
                         <div class="spinner"></div>
                         <p>Analyzing ${targetUrl}...</p>
-                        <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">Running 236 checks across ${categories.length} categories...</p>
+                        <p style="color: rgba(255,255,255,0.5); margin-top: 10px;">Running 200 checks across ${categories.length} categories...</p>
                     </div>
                 `;
                 
-                const response = await fetch(API_BASE + '/api/analyze', {
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: targetUrl, categories: categories })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('Server returned an invalid response (status ' + response.status + '). Please try again.');
+                }
 
                 if (!response.ok) {
                     renderError(data.error || 'Failed to analyze URL');
@@ -1229,25 +897,6 @@
                 }
 
                 renderResults(data);
-
-                // Save to localStorage for dashboard
-                try {
-                    var audits = JSON.parse(localStorage.getItem('ai1stseo_audits') || '[]');
-                    audits.unshift({
-                        url: data.url || targetUrl,
-                        overallScore: data.overallScore,
-                        totalChecks: data.totalChecks,
-                        totalPassed: data.totalPassed,
-                        categories: Object.fromEntries(
-                            Object.entries(data.categories).map(function(e) {
-                                return [e[0], { score: e[1].score, passed: e[1].passed, total: e[1].total }];
-                            })
-                        ),
-                        date: new Date().toISOString()
-                    });
-                    if (audits.length > 20) audits = audits.slice(0, 20);
-                    localStorage.setItem('ai1stseo_audits', JSON.stringify(audits));
-                } catch(e) { console.warn('Could not save audit to history:', e); }
             } catch (error) {
                 console.error('Error:', error);
                 renderError('Network error: ' + error.message);

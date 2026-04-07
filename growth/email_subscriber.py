@@ -177,11 +177,13 @@ def add_subscriber(
 
     try:
         table = _get_table()
+        logger.info("add_subscriber: putting email=%s table=%s region=%s", clean_email, TABLE_NAME, AWS_REGION)
         # Conditional put — fails if email already exists (duplicate protection)
         table.put_item(
             Item=item,
             ConditionExpression=Attr("email").not_exists(),
         )
+        logger.info("add_subscriber: success id=%s", subscriber_id)
 
         # Integration hook
         try:
@@ -206,10 +208,12 @@ def add_subscriber(
                 "subscribed_at": now,
             },
         }
-    except _get_table().meta.client.exceptions.ConditionalCheckFailedException:
-        return {"success": False, "error": "Email already subscribed", "duplicate": True}
     except Exception as e:
-        logger.error("add_subscriber error: %s", e)
+        err_name = type(e).__name__
+        if "ConditionalCheckFailedException" in err_name:
+            logger.info("add_subscriber: duplicate email=%s", clean_email)
+            return {"success": False, "error": "Email already subscribed", "duplicate": True}
+        logger.error("add_subscriber error (%s): %s", err_name, e)
         return {"success": False, "error": f"Database error: {e}"}
 
 
@@ -226,6 +230,7 @@ def list_subscribers(
 
     try:
         table = _get_table()
+        logger.info("list_subscribers: scanning table=%s page=%d per_page=%d", TABLE_NAME, page, per_page)
 
         # Build filter expression
         filters = []
