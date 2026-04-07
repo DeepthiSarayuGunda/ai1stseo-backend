@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Compare Dentists — AI1stSEO Directory</title>
+    <meta name="description" id="metaDesc" content="Compare Ottawa dental clinics side-by-side — ratings, services, hours, pricing, and AI visibility scores.">
+    <script id="schemaLD" type="application/ld+json">{}</script>
+    <style>
+        :root{--bg:#0a0a0a;--text:#fff;--muted:rgba(255,255,255,0.6);--faint:rgba(255,255,255,0.3);--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#00d4ff;--green:#00ff88}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        a{color:var(--accent);text-decoration:none}
+        nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+        .nav-logo{font-size:1.3rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .breadcrumb{padding:16px 32px;font-size:.85rem;color:var(--faint);max-width:1100px;margin:0 auto}
+        .breadcrumb a{color:var(--muted)}
+        .page{max-width:1100px;margin:0 auto;padding:0 24px 60px}
+        .page h1{font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:6px}
+        .sub{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:24px}
+        .vs-header{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:32px}
+        .vs-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+        .vs-card h2{font-size:1.2rem;margin-bottom:6px}
+        .vs-card .rating{color:#f59e0b;font-size:1rem;margin-bottom:4px}
+        .vs-card .meta{font-size:.8rem;color:var(--muted)}
+        .vs-badge{font-size:1.5rem;font-weight:800;color:var(--accent);text-align:center}
+        .section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+        .section h3{font-size:1.1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+        .compare-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+        .compare-row:last-child{border-bottom:none}
+        .compare-row .label{color:var(--faint);font-size:.8rem}
+        .winner{color:var(--green)}
+        .verdict{background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(123,44,191,.08));border:1px solid rgba(0,212,255,.2);border-radius:16px;padding:24px;margin-top:20px}
+        .verdict h3{font-size:1.1rem;margin-bottom:10px;color:var(--accent)}
+        .verdict p{color:var(--muted);line-height:1.7;font-size:.95rem}
+        .loading{text-align:center;padding:60px 20px;color:var(--muted)}
+        .loading h2{color:var(--accent);margin-bottom:8px}
+        .pick-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+        .pick-form select{padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem}
+        .pick-form button{padding:10px 20px;background:linear-gradient(135deg,#7b2cbf,#00d4ff);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+        footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--faint);font-size:.8rem}
+        @media(max-width:768px){.vs-header{grid-template-columns:1fr}.compare-row{grid-template-columns:1fr}nav{padding:12px 16px}}
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">AI1stSEO Directory</a>
+        <div style="display:flex;gap:16px;align-items:center;">
+            <a href="https://www.ai1stseo.com" style="color:var(--muted);font-size:.9rem;">Homepage</a>
+            <a href="directory-home.html" style="color:var(--muted);font-size:.9rem;">Home</a>
+            <a href="/directory" style="color:var(--muted);font-size:.9rem;">Top 10</a>
+        </div>
+    </nav>
+    <div class="breadcrumb"><a href="https://www.ai1stseo.com">Home</a> / <a href="/directory">Directory</a> / <span style="color:var(--text);" id="breadcrumbText">Compare</span></div>
+    <div class="page">
+        <h1 id="title">Compare Ottawa Dentists</h1>
+        <p class="sub">Side-by-side comparison of top-rated Ottawa dental clinics</p>
+        <div class="pick-form">
+            <select id="selA"><option value="">Loading...</option></select>
+            <span style="color:var(--accent);font-weight:700;align-self:center;">VS</span>
+            <select id="selB"><option value="">Loading...</option></select>
+            <button onclick="compare()">Compare</button>
+        </div>
+        <div id="content"><div class="loading"><h2>Select two businesses to compare</h2></div></div>
+    </div>
+    <footer>&copy; 2026 AI1stSEO Directory. AI-optimized business listings for ChatGPT, Gemini, Perplexity, and Claude.</footer>
+
+<script>
+const API = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+let allBiz = [];
+
+function stars(r){return '★'.repeat(Math.floor(r))+(r%1>=.5?'½':'')+'☆'.repeat(5-Math.ceil(r))}
+function ci(v){return v?'<span class="winner">Cited</span>':'Not Found'}
+function w(a,b){return a>b?'winner':''}
+
+async function init(){
+  const r=await fetch(`${API}/api/directory/listings?category=dentist&limit=10`);
+  const d=await r.json();
+  allBiz=d.listings||[];
+  const selA=document.getElementById('selA'),selB=document.getElementById('selB');
+  selA.innerHTML=allBiz.map(b=>`<option value="${b.slug}">${b.name}</option>`).join('');
+  selB.innerHTML=allBiz.map(b=>`<option value="${b.slug}">${b.name}</option>`).join('');
+  // Default: pick top 2 or from URL params
+  const p=new URLSearchParams(window.location.search);
+  const pa=p.get('a'), pb=p.get('b');
+  if(pa)selA.value=pa;
+  if(pb)selB.value=pb;
+  else if(allBiz.length>1)selB.value=allBiz[1].slug;
+  compare();
+}
+
+async function compare(){
+  const sa=document.getElementById('selA').value, sb=document.getElementById('selB').value;
+  if(!sa||!sb||sa===sb){document.getElementById('content').innerHTML='<div class="loading"><h2>Pick two different businesses</h2></div>';return;}
+  document.getElementById('content').innerHTML='<div class="loading"><h2>Loading comparison...</h2></div>';
+  const [ra,rb]=await Promise.all([fetch(`${API}/api/directory/listings/${sa}`),fetch(`${API}/api/directory/listings/${sb}`)]);
+  if(!ra.ok||!rb.ok){document.getElementById('content').innerHTML='<div class="loading"><h2>Could not load one or both listings</h2></div>';return;}
+  const a=await ra.json(), b=await rb.json();
+  const catsA=(Array.isArray(a.subcategories)?a.subcategories:[]).map(c=>c.charAt(0).toUpperCase()+c.slice(1)).join(', ');
+  const catsB=(Array.isArray(b.subcategories)?b.subcategories:[]).map(c=>c.charAt(0).toUpperCase()+c.slice(1)).join(', ');
+  const hA=typeof a.hours_json==='object'?Object.entries(a.hours_json).map(([k,v])=>`${k} ${v}`).join(', '):'N/A';
+  const hB=typeof b.hours_json==='object'?Object.entries(b.hours_json).map(([k,v])=>`${k} ${v}`).join(', '):'N/A';
+
+  document.getElementById('title').textContent=`${a.name} vs ${b.name}`;
+  document.getElementById('breadcrumbText').textContent=`${a.name} vs ${b.name}`;
+  document.title=`${a.name} vs ${b.name} — AI1stSEO Directory`;
+
+  const winner=(a.ai_score||0)+(a.rating||0)*10>=(b.ai_score||0)+(b.rating||0)*10?a.name:b.name;
+
+  document.getElementById('content').innerHTML=`
+    <div class="vs-header">
+      <div class="vs-card"><h2>${a.name}</h2><div class="rating">${stars(a.rating||0)} ${a.rating||0}</div><div class="meta">${a.review_count||0} reviews | ${a.city||'Ottawa'}</div></div>
+      <div class="vs-badge">VS</div>
+      <div class="vs-card" style="border-color:rgba(0,255,136,.3)"><h2>${b.name}</h2><div class="rating">${stars(b.rating||0)} ${b.rating||0}</div><div class="meta">${b.review_count||0} reviews | ${b.city||'Ottawa'}</div></div>
+    </div>
+    <div class="section"><h3>Services & Details</h3>
+      <div class="compare-row"><div class="label">Categories</div><div>${catsA}</div><div>${catsB}</div></div>
+      <div class="compare-row"><div class="label">Rating</div><div class="${w(a.rating,b.rating)}">${a.rating||0}/5 (${a.review_count||0})</div><div class="${w(b.rating,a.rating)}">${b.rating||0}/5 (${b.review_count||0})</div></div>
+      <div class="compare-row"><div class="label">Address</div><div>${a.address||'N/A'}</div><div>${b.address||'N/A'}</div></div>
+      <div class="compare-row"><div class="label">Phone</div><div>${a.phone||'N/A'}</div><div>${b.phone||'N/A'}</div></div>
+      <div class="compare-row"><div class="label">Hours</div><div>${hA}</div><div>${hB}</div></div>
+    </div>
+    <div class="section"><h3>AI Visibility</h3>
+      <div class="compare-row"><div class="label">AI Score</div><div class="${w(a.ai_score,b.ai_score)}">${a.ai_score||0}/100</div><div class="${w(b.ai_score,a.ai_score)}">${b.ai_score||0}/100</div></div>
+      <div class="compare-row"><div class="label">ChatGPT</div><div>${ci(a.citation_chatgpt)}</div><div>${ci(b.citation_chatgpt)}</div></div>
+      <div class="compare-row"><div class="label">Gemini</div><div>${ci(a.citation_gemini)}</div><div>${ci(b.citation_gemini)}</div></div>
+      <div class="compare-row"><div class="label">Perplexity</div><div>${ci(a.citation_perplexity)}</div><div>${ci(b.citation_perplexity)}</div></div>
+      <div class="compare-row"><div class="label">Claude</div><div>${ci(a.citation_claude)}</div><div>${ci(b.citation_claude)}</div></div>
+    </div>
+    <div class="verdict"><h3>Verdict</h3><p>${winner} leads overall with a combined score of ${Math.round((winner===a.name?a.ai_score:b.ai_score)||0 + ((winner===a.name?a.rating:b.rating)||0)*10)}. ${a.name} has ${a.review_count||0} reviews with a ${a.rating||0}-star rating, while ${b.name} has ${b.review_count||0} reviews at ${b.rating||0} stars. Both serve the Ottawa area — choose based on location, specialty, and AI citation readiness.</p></div>`;
+
+  document.getElementById('schemaLD').textContent=JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":`${a.name} vs ${b.name}`,"about":[
+    {"@type":"LocalBusiness","name":a.name,"aggregateRating":{"@type":"AggregateRating","ratingValue":String(a.rating||0),"reviewCount":String(a.review_count||0)}},
+    {"@type":"LocalBusiness","name":b.name,"aggregateRating":{"@type":"AggregateRating","ratingValue":String(b.rating||0),"reviewCount":String(b.review_count||0)}}
+  ]});
+}
+init();
+</script>
+</body>
+</html>
