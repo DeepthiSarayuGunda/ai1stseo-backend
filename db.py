@@ -35,16 +35,20 @@ DEFAULT_PROJECT_ID = os.environ.get("DEFAULT_PROJECT_ID", "00000000-0000-0000-00
 def _get_pool():
     global _pool
     if _pool is None:
-        _pool = psycopg2.pool.ThreadedConnectionPool(
-            minconn=1,
-            maxconn=10,
-            host=os.environ.get("DB_HOST", "localhost"),
-            port=int(os.environ.get("DB_PORT", "5432")),
-            dbname=os.environ.get("DB_NAME", "ai1stseo"),
-            user=os.environ.get("DB_USER", "postgres"),
-            password=os.environ.get("DB_PASSWORD", ""),
-        )
-        logger.info("RDS pool created: %s/%s", os.environ.get("DB_HOST"), os.environ.get("DB_NAME"))
+        try:
+            _pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=1,
+                maxconn=10,
+                host=os.environ.get("DB_HOST", "localhost"),
+                port=int(os.environ.get("DB_PORT", "5432")),
+                dbname=os.environ.get("DB_NAME", "ai1stseo"),
+                user=os.environ.get("DB_USER", "postgres"),
+                password=os.environ.get("DB_PASSWORD", ""),
+            )
+            logger.info("RDS pool created: %s/%s", os.environ.get("DB_HOST"), os.environ.get("DB_NAME"))
+        except Exception as e:
+            logger.error("Failed to create RDS pool: %s", e)
+            raise RuntimeError(f"Database connection failed: {e}")
     return _pool
 
 
@@ -54,6 +58,17 @@ def get_conn():
     p = _get_pool()
     conn = p.getconn()
     try:
+        # Test if connection is still alive
+        try:
+            conn.cursor().execute("SELECT 1")
+        except Exception:
+            # Connection is stale — close and get a fresh one
+            try:
+                conn.close()
+            except Exception:
+                pass
+            p.putconn(conn, close=True)
+            conn = p.getconn()
         yield conn
         conn.commit()
     except Exception:
@@ -248,7 +263,7 @@ def get_probe_trend(brand: str, limit: int = 30, project_id: str = None) -> list
                    COUNT(*) AS total,
                    SUM(CASE WHEN cited THEN 1 ELSE 0 END) AS cited,
                    ROUND(SUM(CASE WHEN cited THEN 1 ELSE 0 END)::numeric
-                         / NULLIF(COUNT(*), 0) * 100) AS visibility_score,
+                         / NULLIF(COUNT(*), 0), 2) AS geo_score,
                    ARRAY_AGG(DISTINCT ai_model) AS providers
             FROM geo_probes
             WHERE project_id = %s AND brand_name = %s
@@ -260,6 +275,9 @@ def get_probe_trend(brand: str, limit: int = 30, project_id: str = None) -> list
         for r in rows:
             r["date"] = r["date"].isoformat() if r.get("date") else None
             r["providers"] = list(r["providers"]) if r.get("providers") else []
+            # Ensure geo_score is a float for JSON serialization
+            if r.get("geo_score") is not None:
+                r["geo_score"] = float(r["geo_score"])
         return rows
 
 

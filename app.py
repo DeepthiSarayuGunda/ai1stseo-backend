@@ -5,6 +5,7 @@ Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
 from flask import Flask, jsonify, request, send_from_directory, redirect, render_template
+from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -14,7 +15,8 @@ import time
 import json
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
+from decimal import Decimal
 from collections import Counter
 import json
 import os
@@ -26,12 +28,26 @@ import base64
 # Detect Lambda environment
 IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
+
+# ── Custom JSON provider to handle Decimal, date, UUID from PostgreSQL ────────
+class SafeJSONProvider(DefaultJSONProvider):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return float(o)
+        if isinstance(o, (datetime, date)):
+            return o.isoformat()
+        return super().default(o)
+
+
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
+app.json_provider_class = SafeJSONProvider
+app.json = SafeJSONProvider(app)
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
     'https://automationhub.ai1stseo.com',
     'https://d6ugqfyp4h9y3.cloudfront.net',
+    'https://sgnmqxb2sw.us-east-1.awsapprunner.com',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
     'http://localhost:5001',
@@ -2878,6 +2894,31 @@ def geo_probe_schedule_list():
     return jsonify({'jobs': get_scheduled_jobs()})
 
 
+@app.route('/api/scheduler/register', methods=['POST'])
+def scheduler_register_brand():
+    """Register a brand for continuous background GEO monitoring."""
+    from scheduler import register_brand
+    data = request.get_json() or {}
+    brand = (data.get('brand_name') or data.get('brand') or '').strip()
+    keywords = data.get('keywords', [])
+    provider = data.get('provider', 'nova')
+    if not brand or not keywords:
+        return jsonify({'error': 'brand_name and keywords are required'}), 400
+    register_brand(brand, keywords, provider)
+    return jsonify({'status': 'registered', 'brand': brand, 'keywords_count': len(keywords)})
+
+
+@app.route('/api/scheduler/status', methods=['GET'])
+def scheduler_status():
+    """Check scheduler status and registered brands."""
+    from scheduler import get_monitored_brands, _scheduler_started
+    return jsonify({
+        'scheduler_running': _scheduler_started,
+        'monitored_brands': get_monitored_brands(),
+        'schedule': {'scraper': 'every 24h', 'geo_probes': 'every 6h'},
+    })
+
+
 @app.route('/api/geo-probe/compare', methods=['POST'])
 def geo_probe_compare():
     """Compare brand visibility across ALL available AI providers simultaneously."""
@@ -3916,6 +3957,14 @@ def catch_all(path):
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
     app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
+else:
+    # Running under gunicorn/App Runner — start background scheduler
+    try:
+        from scheduler import start_scheduler
+        start_scheduler()
+        print("✓ Background scheduler started (scraper 24h, GEO probes 6h)")
+    except Exception as e:
+        print(f"⚠ Scheduler start failed: {e}")
 
 # === Lambda handler (Mangum) ===
 if IS_LAMBDA:

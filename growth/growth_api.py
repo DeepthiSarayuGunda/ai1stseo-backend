@@ -54,6 +54,20 @@ def _ensure_table():
     except Exception as e:
         logger.warning("email_subscribers table init deferred: %s", e)
 
+    try:
+        from growth.analytics_tracker import init_analytics_table
+
+        init_analytics_table()
+    except Exception as e:
+        logger.warning("analytics table init deferred: %s", e)
+
+    try:
+        from growth.utm_manager import init_utm_table
+
+        init_utm_table()
+    except Exception as e:
+        logger.warning("utm table init deferred: %s", e)
+
 
 # ---------------------------------------------------------------------------
 # Auth helper — late-import to avoid circular dependency
@@ -232,3 +246,164 @@ def export():
         )
 
     return jsonify(data), 200
+
+
+# ---------------------------------------------------------------------------
+# POST /api/growth/track — Public (analytics event tracking)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/track", methods=["POST"])
+def track():
+    """Log an analytics event. Public endpoint.
+
+    Accepts: {"event_type": "subscribe", "event_data": {...}, "source": "...", "session_id": "..."}
+    Only event_type is required.
+    """
+    data = request.get_json(silent=True) or {}
+    event_type = data.get("event_type")
+    if not event_type:
+        return jsonify({"success": False, "error": "event_type is required"}), 400
+
+    from growth.analytics_tracker import track_event
+
+    result = track_event(
+        event_type=event_type,
+        event_data=data.get("event_data"),
+        source=data.get("source"),
+        session_id=data.get("session_id"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify(result), 500
+
+
+# ---------------------------------------------------------------------------
+# GET /api/growth/analytics/events — INTERNAL / ADMIN (auth required)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/analytics/events", methods=["GET"])
+@require_auth
+def analytics_events():
+    """Get recent events by type.
+
+    INTERNAL/ADMIN — requires Authorization: Bearer <cognito_token>.
+    Query params: event_type (required), limit (default 50).
+    """
+    event_type = request.args.get("event_type")
+    if not event_type:
+        return jsonify({"success": False, "error": "event_type query param is required"}), 400
+
+    try:
+        limit = int(request.args.get("limit", 50))
+    except (ValueError, TypeError):
+        limit = 50
+
+    from growth.analytics_tracker import get_events
+
+    result = get_events(event_type=event_type, limit=limit)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 500
+
+
+# ---------------------------------------------------------------------------
+# GET /api/growth/analytics/summary — INTERNAL / ADMIN (auth required)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/analytics/summary", methods=["GET"])
+@require_auth
+def analytics_summary():
+    """Get event count summary grouped by type.
+
+    INTERNAL/ADMIN — requires Authorization: Bearer <cognito_token>.
+    Query params: days (default 7, max 90).
+    """
+    try:
+        days = int(request.args.get("days", 7))
+    except (ValueError, TypeError):
+        days = 7
+
+    from growth.analytics_tracker import get_summary
+
+    result = get_summary(days=days)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 500
+
+
+# ---------------------------------------------------------------------------
+# POST /api/growth/utm/generate — Public (UTM link generation)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/generate", methods=["POST"])
+def utm_generate():
+    """Generate a UTM-tagged URL. Public endpoint.
+
+    Accepts: {"base_url": "...", "source": "...", "medium": "...", "campaign": "...", "content": "...", "term": "..."}
+    Required: base_url, source, medium, campaign.
+    """
+    data = request.get_json(silent=True) or {}
+
+    from growth.utm_manager import generate_utm_url
+
+    result = generate_utm_url(
+        base_url=data.get("base_url", ""),
+        source=data.get("source", ""),
+        medium=data.get("medium", ""),
+        campaign=data.get("campaign", ""),
+        content=data.get("content"),
+        term=data.get("term"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 400
+
+
+# ---------------------------------------------------------------------------
+# POST /api/growth/utm/campaigns — INTERNAL / ADMIN (save campaign)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/campaigns", methods=["POST"])
+@require_auth
+def utm_save_campaign():
+    """Save a campaign definition. INTERNAL/ADMIN."""
+    data = request.get_json(silent=True) or {}
+
+    from growth.utm_manager import save_campaign
+
+    result = save_campaign(
+        name=data.get("name", ""),
+        source=data.get("source", ""),
+        medium=data.get("medium", ""),
+        base_url=data.get("base_url", "https://ai1stseo.com"),
+        content=data.get("content"),
+        term=data.get("term"),
+        notes=data.get("notes"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify(result), 400
+
+
+# ---------------------------------------------------------------------------
+# GET /api/growth/utm/campaigns — INTERNAL / ADMIN (list campaigns)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/campaigns", methods=["GET"])
+@require_auth
+def utm_list_campaigns():
+    """List saved campaigns. INTERNAL/ADMIN."""
+    try:
+        limit = int(request.args.get("limit", 50))
+    except (ValueError, TypeError):
+        limit = 50
+
+    from growth.utm_manager import list_campaigns
+
+    result = list_campaigns(limit=limit)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 500

@@ -561,19 +561,14 @@ class GEOScannerOrchestrator:
     def _persist_to_rds(
         self, brand: str, context: dict, scanner_results: dict, overall_score: int
     ) -> dict:
-        """Persist scan results to DB (DynamoDB or RDS) via db functions."""
-        import os
-        _use_dynamo = not bool(os.environ.get("USE_RDS"))
+        """Persist scan results to RDS via db.py functions."""
         status = {"geo_probes": "not_attempted", "ai_visibility": "not_attempted"}
 
         # Persist individual probe results (geo_probes table)
         bv = scanner_results.get("brand_visibility", {})
         if bv.get("results"):
             try:
-                if _use_dynamo:
-                    from db_dynamo import insert_probe
-                else:
-                    from db import insert_probe
+                from db import insert_probe
                 for r in bv["results"]:
                     insert_probe(
                         keyword=r.get("keyword", ""),
@@ -593,11 +588,7 @@ class GEOScannerOrchestrator:
         # Persist batch visibility (ai_visibility_history table)
         if bv.get("geo_score") is not None:
             try:
-                if _use_dynamo:
-                    from db_dynamo import insert_visibility_batch
-                else:
-                    from db import insert_visibility_batch
-                import json
+                from db import insert_visibility_batch
                 insert_visibility_batch(
                     brand=brand,
                     ai_model=context.get("provider", "nova"),
@@ -605,7 +596,7 @@ class GEOScannerOrchestrator:
                     geo_score=bv.get("geo_score", 0),
                     cited_count=bv.get("cited_count", 0),
                     total_prompts=bv.get("total_prompts", 0),
-                    batch_results=json.dumps(bv.get("results", [])),
+                    batch_results=bv.get("results", []),
                 )
                 status["ai_visibility"] = "saved"
             except Exception as e:

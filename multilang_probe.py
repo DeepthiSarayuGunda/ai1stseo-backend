@@ -136,23 +136,26 @@ def probe_multilang(brand_name, keyword, languages=None, provider="nova", projec
             r["visibility_score"] = 0
 
     # Save each result to geo_probes with language column
-    from db import get_conn
-    with get_conn() as conn:
-        cur = conn.cursor()
-        for r in results:
-            if r["status"] == "ok":
-                try:
-                    cur.execute("""
-                        INSERT INTO geo_probes
-                            (project_id, brand_name, keyword, ai_model, cited,
-                             citation_context, response_snippet, confidence, sentiment, language)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (pid, brand_name, keyword, provider, r["cited"],
-                          r["citation_context"][:1000], r["response_snippet"][:2000],
-                          r["confidence"], r["sentiment"], r["language"]))
-                except Exception as e:
-                    logger.warning("Failed to save multilang probe for %s: %s", r["language"], e)
-        conn.commit()
+    try:
+        from db import get_conn
+        with get_conn() as conn:
+            cur = conn.cursor()
+            for r in results:
+                if r["status"] == "ok":
+                    try:
+                        cur.execute("""
+                            INSERT INTO geo_probes
+                                (project_id, brand_name, keyword, ai_model, cited,
+                                 citation_context, response_snippet, confidence, sentiment, language)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (pid, brand_name, keyword, provider, r["cited"],
+                              r["citation_context"][:1000], r["response_snippet"][:2000],
+                              r["confidence"], r["sentiment"], r["language"]))
+                    except Exception as e:
+                        logger.warning("Failed to save multilang probe for %s: %s", r["language"], e)
+            conn.commit()
+    except Exception as e:
+        logger.warning("Failed to persist multilang probes to RDS: %s", e)
 
     elapsed = round(time.time() - t0, 2)
     cited_count = sum(1 for r in results if r.get("cited"))

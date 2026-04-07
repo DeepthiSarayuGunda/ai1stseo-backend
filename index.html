@@ -144,8 +144,8 @@
           el.innerHTML =
             '<div style="max-width:480px;margin:0 auto">'
             + '<p style="color:#00d4ff;font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px">Free Resource</p>'
-            + '<h3 style="color:#e6edf3;font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get the AI SEO Starter Kit</h3>'
-            + '<p style="color:#8b949e;font-size:.85rem;margin:0 0 20px;line-height:1.5">AI visibility tips, GEO strategies, and early access to new tools.</p>'
+            + '<h3 style="color:#e6edf3;font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get the Free AEO/GEO SEO Analysis</h3>'
+            + '<p style="color:#8b949e;font-size:.85rem;margin:0 0 20px;line-height:1.5">Free AI visibility analysis, GEO strategies, and early access to new tools.</p>'
             + '<form id="growth-email-form" style="display:flex;gap:8px;max-width:400px;margin:0 auto;flex-wrap:wrap">'
             + '<input id="growth-email-input" type="email" placeholder="you@company.com" required '
             + 'style="flex:1;min-width:180px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e6edf3;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" '
@@ -218,5 +218,7 @@
         setTimeout(function() { obs.disconnect(); clearInterval(iv); }, 30000);
       })();
     </script>
+    <!-- Standalone email capture fallback — loads if injection didn't work -->
+    <script src="/assets/growth-email-capture.js"></script>
   </body>
 </html>

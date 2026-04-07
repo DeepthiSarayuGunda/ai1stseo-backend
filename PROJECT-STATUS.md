@@ -1,6 +1,6 @@
 # AI1STSEO Project Status
 
-> **Last Updated:** April 6, 2026
+> **Last Updated:** March 29, 2026
 > **Updated By:** Dev 5 (Frontend & UX) — Amira
 > **Purpose:** This file is the single source of truth for project context. Read this FIRST before making any changes.
 
@@ -15,14 +15,13 @@
 | App Runner (Dev/Test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` | Flask Python backend |
 | SEO Analyzer Backend | App Runner | Flask — 236 checks across 10 categories |
 | Cognito User Pool | `us-east-1_DVvth47zH` | Client ID: `7scsae79o2g9idc92eputcrvrg` |
-| SES Email | `no-reply@ai1stseo.com` | Production access, 50k/day, domain verified. Two-way: send via SES, receive via SES → S3 (`ai1stseo-incoming-email`). MX switched from ImprovMX Apr 6. |
-| Database | DynamoDB (11 tables) | Migrated from RDS PostgreSQL Apr 1. RDS stopped. |
+| SES Email | `no-reply@ai1stseo.com` | Production access, 50k/day, domain verified |
 | GitHub (User) | `robinnic/seo-deployment` | Frontend + deployment configs |
 | GitHub (Teammate) | `DeepthiSarayuGunda/ai1stseo-backend` | App Runner auto-deploys from main |
 
 ## Auth System
 
-- **Production auth** runs on Lambda + API Gateway at `api.ai1stseo.com`
+- **Production auth** runs on Troy's EC2 at `api.ai1stseo.com`
 - **Troy's `auth.js`** handles all auth modals (login/signup/verify/forgot-password/profile) — loaded from S3 at `/assets/auth.js`
 - **localStorage keys:** `ai1stseo_access_token`, `ai1stseo_id_token`, `ai1stseo_refresh_token`, `ai1stseo_user`
 - **Cognito email config:** DEVELOPER mode using SES — verification codes and password resets come from `no-reply@ai1stseo.com`
@@ -37,7 +36,7 @@
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
 | `assets/index-DW5KlJL7.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
-| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints, role-based auth via `GET /api/admin/me` + 7th Resources tab (Platform Tools, 15 Mermaid diagrams, Lambda routing table) + 8th Documents tab (upload/share research files per developer) |
+| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints, role-based auth via `GET /api/admin/me` + 7th Resources tab (Platform Tools, 15 Mermaid diagrams, Lambda routing table) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard, PDF report download (jsPDF), AI recommendations, content brief generator |
 | `login.html` | Standalone login page (points to `api.ai1stseo.com`) |
@@ -265,21 +264,6 @@ Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`,
 
 | Date | Change | Files |
 |------|--------|-------|
-| Apr 6, 2026 | Deployed `contact.html` to S3 (from Troy's repo) and updated homepage nav + footer Contact links to point to `/contact.html`. | `contact.html`, `index-new.html` (S3) |
-| Apr 6, 2026 | Flipped MX record from ImprovMX to SES — `ai1stseo.com` MX now points to `inbound-smtp.us-east-1.amazonaws.com`. SES two-way email system fully live: marketing@ forwards to Tabasum's Gmail, all other @ai1stseo.com emails stored in S3. Task complete. | Route53 DNS |
-| Apr 6, 2026 | Created email forwarding Lambda (`ai1stseo-email-forwarder`) — forwards marketing@ai1stseo.com to Tabasum's Gmail via SES. Added receipt rule `forward-marketing-email` (S3 store + Lambda forward) before catch-all rule. Reordered rules so marketing@ matches first. SES receiving fully ready — only MX record switch remaining. | AWS Lambda, SES |
-| Apr 6, 2026 | Set up SES email receiving infrastructure — created S3 bucket `ai1stseo-incoming-email` with SES write policy, receipt rule set `ai1stseo-email-rules` (activated), rule `store-all-emails` catches all @ai1stseo.com emails and stores in `s3://ai1stseo-incoming-email/inbox/`. MX record NOT changed yet — still on ImprovMX, pending confirmation from Troy/Paul. | AWS SES, S3 |
-| Apr 6, 2026 | Fixed CloudFront `/directory*` cache behavior — was routing to App Runner instead of S3, causing all directory pages to show homepage. Changed TargetOriginId from `sgnmqxb2sw.us-east-1.awsapprunner.com` to `S3-ai1stseo-website`. Root cause of directory pages not loading. | CloudFront config |
-| Apr 6, 2026 | Created `directory-home.html` — directory browse/home page with search bar, 8 category cards (Dentists, Lawyers, Contractors, Restaurants, Accountants, Healthcare, Real Estate, Auto Services), featured AI-ready businesses, "Claim Your Free Listing" CTA, stats bar, WebSite+SearchAction schema. Updated homepage Directory link to point to this page. Added Before/After Compare link to dashboard Tools dropdown. | `directory-home.html`, `index-new.html`, `frontend/src/components/Navbar.tsx` |
-| Apr 2, 2026 | Created `audit-compare.html` — before/after scan comparison page (WBS 2.3). Side-by-side overall scores, category-by-category breakdown with progress bars and delta tags (+/- points), summary with total point change. Populated from localStorage audit history. | `audit-compare.html` |
-| Apr 2, 2026 | Wired PDF email gate to POST /api/collect-email — sends email, URL, score, source, date to backend (fire-and-forget). Keeps localStorage backup. Updated from S3 latest version with correct API_BASE. | `audit.html` |
-| Apr 2, 2026 | Admin dashboard role check confirmed working — Troy set amira.robleh@gmail.com to admin in DynamoDB. No code changes needed. | — |
-| Apr 2, 2026 | Wired Documents tab to Troy's API endpoints — upload (POST /api/admin/documents multipart), list (GET /api/admin/documents with ?uploader= filter), download (GET /api/admin/documents/:id/download opens presigned S3 URL), delete (DELETE /api/admin/documents/:id with confirmation). localStorage fallback if API unavailable. | `admin.html` |
-| Apr 2, 2026 | Added 8th "Documents" tab to admin.html — upload form (drag-and-drop + file picker), title input, developer dropdown (Dev 1-5), developer filter buttons, document list table with download/delete. Stores in localStorage until Troy's backend endpoints are live. Per Gurbachan's request for research documents separated by developer. | `admin.html` |
-| Apr 2, 2026 | Fixed login "Method not allowed" error — added missing blueprint registrations (auth_bp, admin_bp, data_bp, webhook_bp, apikey_bp) to teammate repo app.py with try/except wrappers. Redeployed ai1stseo-backend Lambda from lambda-deploy-final.zip. Login now returns proper Cognito responses. | `teammate-repo/app.py`, AWS Lambda |
-| Mar 31, 2026 | Added category page (`directory-category.html` — Top 10 Dentists in Ottawa with ranking cards, AI scores, filter buttons, ItemList schema), comparison page (`directory-compare.html` — side-by-side with services/convenience/AI visibility sections, verdict), and `llms.txt` (AI crawler welcome file for GPTBot, ClaudeBot, PerplexityBot, Google-Extended) to `ai-business-directory` branch on teammate repo. All 4 key page types from Gurbachan's doc now prototyped. | branch: ai-business-directory |
-| Mar 31, 2026 | Created `ai-business-directory` branch on teammate repo with listing prototype (`directory-listing.html`) and full project spec (`AI-BUSINESS-DIRECTORY.md`) converted from Gurbachan's Word doc. Separate from main — for Amira + Deepthi to collaborate on AI Business Directory project. | `directory-listing.html`, `AI-BUSINESS-DIRECTORY.md` (branch: ai-business-directory) |
-| Mar 31, 2026 | Created `directory-listing.html` — prototype listing page template for AI Business Directory project (per Gurbachan's doc). Includes BLUF summary, quick facts grid, FAQ section, competitor comparison table, AI citation status, JSON-LD schema (LocalBusiness + FAQPage), breadcrumb nav, "Claim This Listing" CTA. Static demo with sample dentist data — production version will pull from Postgres API. | `directory-listing.html` |
 | Mar 31, 2026 | Added email gate to PDF report download in `audit.html` — modal popup requires email before generating PDF (per Gurbachan's request to collect emails for marketing). Validates email format, stores email + audit URL + score + timestamp in localStorage (`ai1stseo_pdf_emails`). Skips gate on subsequent downloads in same session. Escape/backdrop to close. | `audit.html` |
 | Mar 31, 2026 | Shut down Lightsail to prevent ongoing costs — created snapshot `OpenClaw-1-final-backup-mar31` (no data loss), deleted instance `OpenClaw-1` (medium tier, 2 CPU, 4GB RAM, 80GB disk), released static IP `StaticIp-1` (98.88.198.5). Lightsail now at zero resources. | AWS Lightsail |
 | Mar 29, 2026 | Deployed seo-audit-tool to Linux server (seo-dev) — PM2 process manager, port 8080, Tailscale access at 100.108.196.117:8080. Deployment instructions added to PROJECT-STATUS.md. | Linux server, `PROJECT-STATUS.md` |

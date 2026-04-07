@@ -4,6 +4,7 @@ runtime: python311
 build:
   commands:
     build:
+      - pip3 install -r requirements.txt
       - pip3 install --target /app/.local -r requirements.txt
 
 run:
