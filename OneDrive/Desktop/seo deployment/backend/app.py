@@ -5594,6 +5594,39 @@ def contact_form():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
+# === Investor Inquiry Endpoint ===
+@app.route('/api/invest', methods=['POST'])
+def investor_inquiry():
+    """Send an investor inquiry email via SES to Gurbachan."""
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    message = data.get('message', '').strip()
+    org = data.get('organization', '').strip()
+    interest = data.get('interest', 'general')
+    if not name or not email or not message:
+        return jsonify({'status': 'error', 'message': 'name, email, and message required'}), 400
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        subject = 'Investor Inquiry: {} ({})'.format(name, org or email)
+        body = 'From: {} <{}>\nOrganization: {}\nInterest: {}\n\n{}'.format(
+            name, email, org or 'N/A', interest, message)
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': ['gurbachan@ai1stseo.com']},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': body}}
+            },
+            ReplyToAddresses=[email],
+        )
+        return jsonify({'status': 'success', 'message': 'Inquiry sent'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 # === Lambda handler (Mangum) ===
 import os as _os
 _IS_LAMBDA = bool(_os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))

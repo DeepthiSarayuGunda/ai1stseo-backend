@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investor Inquiries - AI 1st SEO</title>
+<meta name="description" content="Interested in investing in AI 1st SEO? Get in touch with our team to learn about partnership and investment opportunities.">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#090014;color:#E0E0E0;font-family:'Share Tech Mono',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:600px;width:90%;padding:40px}
+h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:2em;background:linear-gradient(90deg,#FF9900,#FF00FF,#00FFFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:8px}
+.sub{text-align:center;color:#00FFFF;font-size:.85em;margin-bottom:30px;opacity:.8}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:.8em;color:#FF00FF;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase}
+input,textarea,select{width:100%;background:rgba(0,0,0,.6);border:none;border-bottom:2px solid #FF00FF;color:#00FFFF;padding:12px;font-family:'Share Tech Mono',monospace;font-size:.9em;outline:none;transition:all .2s}
+input:focus,textarea:focus,select:focus{border-color:#00FFFF;box-shadow:0 0 15px rgba(0,255,255,.2)}
+select option{background:#090014;color:#00FFFF}
+textarea{min-height:120px;resize:vertical}
+button{width:100%;padding:14px;font-family:'Orbitron',sans-serif;font-size:.9em;border:2px solid #00FFFF;background:transparent;color:#00FFFF;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all .2s;margin-top:8px}
+button:hover{background:#00FFFF;color:#000;box-shadow:0 0 20px rgba(0,255,255,.3)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.msg{text-align:center;margin-top:12px;font-size:.85em;min-height:1.2em}
+.msg.ok{color:#0f0}.msg.err{color:#f44}
+.back{display:block;text-align:center;margin-top:20px;color:#FF00FF;font-size:.8em;text-decoration:none}
+.back:hover{color:#00FFFF}
+.info{text-align:center;margin-top:24px;font-size:.75em;color:rgba(255,255,255,.4);line-height:1.6}
+.info a{color:#00FFFF;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>INVESTOR INQUIRIES</h1>
+<p class="sub">Partnership and investment opportunities in AI-first SEO</p>
+<form id="investForm" onsubmit="sendForm(event)">
+<div class="form-group">
+<label>Name</label>
+<input type="text" id="name" required placeholder="Your name">
+</div>
+<div class="form-group">
+<label>Organization</label>
+<input type="text" id="org" placeholder="Company or fund name">
+</div>
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="email" required placeholder="your@email.com">
+</div>
+<div class="form-group">
+<label>Interest Area</label>
+<select id="interest">
+<option value="general">General Investment Inquiry</option>
+<option value="seed">Seed / Pre-Seed Funding</option>
+<option value="partnership">Strategic Partnership</option>
+<option value="advisory">Advisory Role</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label>Message</label>
+<textarea id="message" required placeholder="Tell us about your interest in AI 1st SEO..."></textarea>
+</div>
+<button type="submit" id="btn">SUBMIT INQUIRY</button>
+</form>
+<div class="msg" id="msg"></div>
+<a href="https://www.ai1stseo.com" class="back">&larr; Back to AI 1st SEO</a>
+<div class="info">
+<p>Or email us directly: <a href="mailto:gurbachan@ai1stseo.com">gurbachan@ai1stseo.com</a></p>
+<p>AI 1st SEO &middot; Ottawa, Canada</p>
+</div>
+</div>
+<script>
+async function sendForm(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btn');
+  var msg = document.getElementById('msg');
+  btn.disabled = true; btn.textContent = 'SENDING...';
+  msg.className = 'msg'; msg.textContent = '';
+  try {
+    var r = await fetch('https://api.ai1stseo.com/api/invest', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('name').value,
+        organization: document.getElementById('org').value,
+        email: document.getElementById('email').value,
+        interest: document.getElementById('interest').value,
+        message: document.getElementById('message').value
+      })
+    });
+    var d = await r.json();
+    if (d.status === 'success') {
+      msg.className = 'msg ok';
+      msg.textContent = 'Inquiry sent! Our team will be in touch shortly.';
+      document.getElementById('investForm').reset();
+    } else {
+      msg.className = 'msg err';
+      msg.textContent = d.message || 'Failed to send. Try emailing us directly.';
+    }
+  } catch(err) {
+    msg.className = 'msg err';
+    msg.textContent = 'Connection error. Try emailing gurbachan@ai1stseo.com';
+  }
+  btn.disabled = false; btn.textContent = 'SUBMIT INQUIRY';
+}
+</script>
+</body>
+</html>
