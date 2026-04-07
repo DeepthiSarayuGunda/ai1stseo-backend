@@ -3739,8 +3739,8 @@ def month1_results_by_type(deliverable):
 # ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
 import sqlite3
 
-SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+SOCIAL_DB = os.path.join('/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
+UPLOAD_DIR = os.path.join('/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png'}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
