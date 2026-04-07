@@ -589,7 +589,6 @@ class GEOScannerOrchestrator:
         if bv.get("geo_score") is not None:
             try:
                 from db import insert_visibility_batch
-                import json
                 insert_visibility_batch(
                     brand=brand,
                     ai_model=context.get("provider", "nova"),
@@ -597,7 +596,7 @@ class GEOScannerOrchestrator:
                     geo_score=bv.get("geo_score", 0),
                     cited_count=bv.get("cited_count", 0),
                     total_prompts=bv.get("total_prompts", 0),
-                    batch_results=json.dumps(bv.get("results", [])),
+                    batch_results=bv.get("results", []),
                 )
                 status["ai_visibility"] = "saved"
             except Exception as e:

@@ -5,6 +5,7 @@ Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
 from flask import Flask, jsonify, request, send_from_directory, redirect, render_template
+from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -14,7 +15,8 @@ import time
 import json
 import secrets
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
+from decimal import Decimal
 from collections import Counter
 import json
 import os
@@ -26,12 +28,26 @@ import base64
 # Detect Lambda environment
 IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
+
+# ── Custom JSON provider to handle Decimal, date, UUID from PostgreSQL ────────
+class SafeJSONProvider(DefaultJSONProvider):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return float(o)
+        if isinstance(o, (datetime, date)):
+            return o.isoformat()
+        return super().default(o)
+
+
 app = Flask(__name__, static_folder='assets', static_url_path='/assets')
+app.json_provider_class = SafeJSONProvider
+app.json = SafeJSONProvider(app)
 CORS(app, origins=[
     'https://ai1stseo.com',
     'https://www.ai1stseo.com',
     'https://automationhub.ai1stseo.com',
     'https://d6ugqfyp4h9y3.cloudfront.net',
+    'https://sgnmqxb2sw.us-east-1.awsapprunner.com',
     'http://localhost:5000',
     'http://127.0.0.1:5000',
     'http://localhost:5001',
