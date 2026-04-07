@@ -155,18 +155,22 @@ def calculate_sov(brand, competitors, keywords, provider="nova", project_id=None
     elapsed = round(time.time() - t0, 2)
 
     # Save to DB
-    from db import get_conn
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO share_of_voice
-                (project_id, brand, competitors, keywords, results, sov_summary, total_probes)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (pid, brand, json.dumps(competitors), json.dumps(keywords),
-              json.dumps(keyword_results), json.dumps(sov_summary), total_probes))
-        sov_id = str(cur.fetchone()[0])
-        conn.commit()
+    sov_id = None
+    try:
+        from db import get_conn
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO share_of_voice
+                    (project_id, brand, competitors, keywords, results, sov_summary, total_probes)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (pid, brand, json.dumps(competitors), json.dumps(keywords),
+                  json.dumps(keyword_results), json.dumps(sov_summary), total_probes))
+            sov_id = str(cur.fetchone()[0])
+            conn.commit()
+    except Exception as e:
+        logger.warning("Failed to persist SOV to RDS: %s", e)
 
     return {
         "sov_id": sov_id,
@@ -185,20 +189,24 @@ def calculate_sov(brand, competitors, keywords, provider="nova", project_id=None
 
 def get_sov_latest(brand, project_id=None):
     """Get the latest SOV scan for a brand."""
-    from db import get_conn
-    pid = project_id or DEFAULT_PROJECT_ID
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
-            SELECT id, brand, competitors, keywords, sov_summary, total_probes, scanned_at
-            FROM share_of_voice
-            WHERE brand = %s AND project_id = %s
-            ORDER BY scanned_at DESC LIMIT 1
-        """, (brand, pid))
-        row = cur.fetchone()
-        if not row:
-            return None
-        row["id"] = str(row["id"])
-        if row.get("scanned_at"):
-            row["scanned_at"] = row["scanned_at"].isoformat()
-        return row
+    try:
+        from db import get_conn
+        pid = project_id or DEFAULT_PROJECT_ID
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute("""
+                SELECT id, brand, competitors, keywords, sov_summary, total_probes, scanned_at
+                FROM share_of_voice
+                WHERE brand = %s AND project_id = %s
+                ORDER BY scanned_at DESC LIMIT 1
+            """, (brand, pid))
+            row = cur.fetchone()
+            if not row:
+                return None
+            row["id"] = str(row["id"])
+            if row.get("scanned_at"):
+                row["scanned_at"] = row["scanned_at"].isoformat()
+            return row
+    except Exception as e:
+        logger.warning("Failed to fetch SOV latest: %s", e)
+        return None

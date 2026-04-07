@@ -133,25 +133,29 @@ def probe_all_models(brand_name, keyword, project_id=None):
     elapsed = round(time.time() - t0, 2)
 
     # Save to DB
-    from db import get_conn
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO model_comparisons
-                (project_id, brand_name, keyword, models_queried, raw_responses,
-                 comparison_result, models_mentioning, disagreements)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (
-            pid, brand_name, keyword,
-            json.dumps(models),
-            json.dumps({r["model"]: r["response"][:2000] if r["status"] == "ok" else r.get("error", "failed") for r in responses}),
-            json.dumps(comparison),
-            json.dumps(comparison.get("brand_mentioned_by", [])),
-            json.dumps(comparison.get("disagreements", [])),
-        ))
-        comp_id = str(cur.fetchone()[0])
-        conn.commit()
+    comp_id = None
+    try:
+        from db import get_conn
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO model_comparisons
+                    (project_id, brand_name, keyword, models_queried, raw_responses,
+                     comparison_result, models_mentioning, disagreements)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (
+                pid, brand_name, keyword,
+                json.dumps(models),
+                json.dumps({r["model"]: r["response"][:2000] if r["status"] == "ok" else r.get("error", "failed") for r in responses}),
+                json.dumps(comparison),
+                json.dumps(comparison.get("brand_mentioned_by", [])),
+                json.dumps(comparison.get("disagreements", [])),
+            ))
+            comp_id = str(cur.fetchone()[0])
+            conn.commit()
+    except Exception as e:
+        logger.warning("Failed to persist model comparison to RDS: %s", e)
 
     return {
         "comparison_id": comp_id,
@@ -168,29 +172,33 @@ def probe_all_models(brand_name, keyword, project_id=None):
 
 def get_comparison_history(brand_name=None, limit=10, project_id=None):
     """Get past model comparisons."""
-    from db import get_conn
-    pid = project_id or DEFAULT_PROJECT_ID
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        if brand_name:
-            cur.execute("""
-                SELECT id, brand_name, keyword, models_queried, comparison_result,
-                       models_mentioning, disagreements, created_at
-                FROM model_comparisons
-                WHERE project_id = %s AND brand_name = %s
-                ORDER BY created_at DESC LIMIT %s
-            """, (pid, brand_name, limit))
-        else:
-            cur.execute("""
-                SELECT id, brand_name, keyword, models_queried, comparison_result,
-                       models_mentioning, disagreements, created_at
-                FROM model_comparisons
-                WHERE project_id = %s
-                ORDER BY created_at DESC LIMIT %s
-            """, (pid, limit))
-        rows = cur.fetchall()
-        for r in rows:
-            r["id"] = str(r["id"])
-            if r.get("created_at"):
-                r["created_at"] = r["created_at"].isoformat()
-        return rows
+    try:
+        from db import get_conn
+        pid = project_id or DEFAULT_PROJECT_ID
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            if brand_name:
+                cur.execute("""
+                    SELECT id, brand_name, keyword, models_queried, comparison_result,
+                           models_mentioning, disagreements, created_at
+                    FROM model_comparisons
+                    WHERE project_id = %s AND brand_name = %s
+                    ORDER BY created_at DESC LIMIT %s
+                """, (pid, brand_name, limit))
+            else:
+                cur.execute("""
+                    SELECT id, brand_name, keyword, models_queried, comparison_result,
+                           models_mentioning, disagreements, created_at
+                    FROM model_comparisons
+                    WHERE project_id = %s
+                    ORDER BY created_at DESC LIMIT %s
+                """, (pid, limit))
+            rows = cur.fetchall()
+            for r in rows:
+                r["id"] = str(r["id"])
+                if r.get("created_at"):
+                    r["created_at"] = r["created_at"].isoformat()
+            return rows
+    except Exception as e:
+        logger.warning("Failed to fetch comparison history: %s", e)
+        return []
