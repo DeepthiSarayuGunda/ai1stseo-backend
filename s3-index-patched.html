@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI1stSEO — AI-First SEO & Answer Engine Optimization Platform</title>
+    <meta name="description" content="AI1stSEO helps businesses get found by ChatGPT, Gemini, and AI search engines. 236 SEO checks, AEO optimization, GEO visibility scanning, and PDF audit reports.">
+    <style>
+        :root { --bg: #0a0a0a; --text: #fff; --muted: rgba(255,255,255,0.6); --faint: rgba(255,255,255,0.3); --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --accent: #00d4ff; --green: #00ff88; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { opacity: 0.8; }
+
+        /* Nav */
+        nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+        .nav-logo { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-links { display: flex; align-items: center; gap: 24px; }
+        .nav-links a { color: var(--muted); font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta { padding: 8px 20px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: 600; font-size: 0.9rem; border-radius: 8px; border: none; cursor: pointer; }
+        .nav-cta:hover { opacity: 0.9; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 24px 60px; max-width: 800px; margin: 0 auto; }
+        .hero-badge { display: inline-block; padding: 6px 16px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 20px; font-size: 0.8rem; color: var(--accent); margin-bottom: 24px; }
+        .hero h1 { font-size: 3rem; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+        .hero h1 span { background: linear-gradient(90deg, #00ff88, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.15rem; color: var(--muted); line-height: 1.6; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+        /* Analyze Bar */
+        .hero-analyze { display: flex; gap: 12px; max-width: 560px; margin: 0 auto 16px; }
+        .hero-analyze input { flex: 1; padding: 14px 18px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; }
+        .hero-analyze input:focus { border-color: var(--accent); }
+        .hero-analyze input::placeholder { color: var(--faint); }
+        .hero-analyze button { padding: 14px 28px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+        .hero-analyze button:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,0.3); }
+        .hero-sub { font-size: 0.82rem; color: var(--faint); }
+
+        /* Stats Bar */
+        .stats-bar { display: flex; justify-content: center; gap: 48px; padding: 40px 24px; border-bottom: 1px solid var(--border); }
+        .stat { text-align: center; }
+        .stat-num { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #00ff88, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+        /* Features */
+        .features { max-width: 1100px; margin: 0 auto; padding: 60px 24px; }
+        .features h2 { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+        .features .sub { text-align: center; color: var(--muted); margin-bottom: 48px; font-size: 1rem; }
+        .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .feat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: all 0.2s; }
+        .feat-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
+        .feat-icon { font-size: 2rem; margin-bottom: 12px; }
+        .feat-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .feat-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+        .feat-tag { display: inline-block; margin-top: 12px; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+
+        /* PDF Section */
+        .pdf-section { max-width: 900px; margin: 0 auto; padding: 60px 24px; text-align: center; }
+        .pdf-section h2 { font-size: 2rem; margin-bottom: 12px; }
+        .pdf-section p { color: var(--muted); margin-bottom: 32px; font-size: 1rem; }
+        .pdf-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; }
+        .pdf-box h3 { font-size: 1.3rem; margin-bottom: 8px; }
+        .pdf-features { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 20px; }
+        .pdf-feat { padding: 8px 16px; background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2); border-radius: 10px; font-size: 0.85rem; color: var(--green); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 48px 24px 32px; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+        .footer-brand { }
+        .footer-brand .logo { font-size: 1.2rem; font-weight: 700; background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px; }
+        .footer-brand p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; max-width: 280px; }
+        .footer-col h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--faint); margin-bottom: 14px; }
+        .footer-col a { display: block; color: var(--muted); font-size: 0.88rem; margin-bottom: 10px; }
+        .footer-col a:hover { color: var(--text); }
+        .footer-bottom { max-width: 1100px; margin: 24px auto 0; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--faint); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-analyze { flex-direction: column; }
+            .stats-bar { flex-wrap: wrap; gap: 24px; }
+            .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px; }
+            nav { padding: 12px 16px; }
+            .nav-links a:not(.nav-cta) { display: none; }
+        }
+        @media (max-width: 480px) { .footer-inner { grid-template-columns: 1fr; } .feat-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="nav-logo">🔍 AI1stSEO</span>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#reports">Reports</a>
+            <a href="/directory-listing.html">Directory</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <button class="nav-cta" id="loginBtn">Login</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">🤖 AI-First SEO Platform</div>
+        <h1>Get Found by <span>AI Search Engines</span></h1>
+        <p>Optimize for ChatGPT, Gemini, Perplexity, and traditional search. 236 checks across 10 categories with instant PDF reports.</p>
+        <div class="hero-analyze">
+            <input type="text" id="heroUrl" placeholder="Enter your website URL — e.g. example.com" />
+            <button onclick="runAnalyze()">ANALYZE</button>
+        </div>
+        <div class="hero-sub">Free analysis with downloadable PDF report — no account required</div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat"><div class="stat-num">236</div><div class="stat-label">SEO Checks</div></div>
+        <div class="stat"><div class="stat-num">10</div><div class="stat-label">Categories</div></div>
+        <div class="stat"><div class="stat-num">PDF</div><div class="stat-label">Instant Reports</div></div>
+        <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Monitoring</div></div>
+    </div>
+
+    <!-- Email Capture -->
+    <section id="growth-email-capture" style="width:100%;padding:48px 24px;text-align:center;border-bottom:1px solid var(--border);">
+      <div style="max-width:480px;margin:0 auto">
+        <p style="color:var(--accent);font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px">Free Resource</p>
+        <h3 style="color:var(--text);font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get the AI SEO Starter Kit</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin:0 0 20px;line-height:1.5">AI visibility tips, GEO strategies, and early access to new tools.</p>
+        <form id="growth-email-form" style="display:flex;gap:8px;max-width:400px;margin:0 auto;flex-wrap:wrap">
+          <input id="growth-email-input" type="email" placeholder="you@company.com" required style="flex:1;min-width:180px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          <button type="submit" id="growth-email-btn" style="padding:10px 20px;border:none;border-radius:8px;background:var(--accent);color:#0a0a0a;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Subscribe</button>
+        </form>
+        <div id="growth-email-msg" style="margin-top:10px;font-size:.8rem;min-height:18px"></div>
+        <p style="color:var(--faint);font-size:.68rem;margin:12px 0 0">No spam, ever. Unsubscribe anytime.</p>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <h2>Everything You Need for AI Visibility</h2>
+        <p class="sub">From traditional SEO to answer engine optimization — one platform covers it all.</p>
+        <div class="feat-grid">
+            <div class="feat-card">
+                <div class="feat-icon">🌐</div>
+                <h3>GEO Visibility Scanner</h3>
+                <p>Track how your brand appears in ChatGPT, Gemini, and Perplexity. See citation frequency and AI ranking signals.</p>
+                <span class="feat-tag" style="background:rgba(168,85,247,0.15);color:#a855f7;">GEO</span>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon">💡</div>
+                <h3>AEO Optimizer</h3>
+                <p>Optimize for answer engines. Analyze FAQ schema, featured snippets, and People Also Ask targeting.</p>
+                <span class="feat-tag" style="background:rgba(0,212,255,0.15);color:#00d4ff;">AEO</span>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon">📚</div>
+                <h3>Citation Gap Analysis</h3>
+                <p>Find where competitors are cited by AI but you're not. Discover content gaps that block AI visibility.</p>
+                <span class="feat-tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">Gap</span>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon">⚡</div>
+                <h3>Full SEO Audit</h3>
+                <p>236 checks across 10 categories — technical, on-page, content, mobile, performance, security, social, local, GEO, and citation gap.</p>
+                <span class="feat-tag" style="background:rgba(0,255,136,0.15);color:#00ff88;">SEO</span>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon">📝</div>
+                <h3>Content Brief Generator</h3>
+                <p>AI-powered briefs with SERP analysis, keyword clustering, heading structure, and AI citation signals.</p>
+                <span class="feat-tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">Content</span>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon">📊</div>
+                <h3>Website Monitoring</h3>
+                <p>Monitor uptime, content changes, AI visibility, and get daily reports for your sites.</p>
+                <span class="feat-tag" style="background:rgba(123,44,191,0.15);color:#7b2cbf;">Monitor</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- PDF Reports -->
+    <section class="pdf-section" id="reports">
+        <h2>Instant PDF Audit Reports</h2>
+        <p>Run a free analysis and download a comprehensive SEO audit report you can share with your team or clients.</p>
+        <div class="pdf-box">
+            <h3>📄 What's in the Report</h3>
+            <div class="pdf-features">
+                <span class="pdf-feat">Overall Score</span>
+                <span class="pdf-feat">10 Category Breakdown</span>
+                <span class="pdf-feat">236 Individual Checks</span>
+                <span class="pdf-feat">Pass/Fail Details</span>
+                <span class="pdf-feat">Actionable Recommendations</span>
+                <span class="pdf-feat">Competitor Insights</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="features" id="about" style="border-top:1px solid var(--border);">
+        <h2>About AI1stSEO</h2>
+        <p class="sub">Built by a team of developers passionate about making AI search optimization accessible to everyone.</p>
+        <div class="feat-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feat-card">
+                <h3>Our Mission</h3>
+                <p>AI search engines are changing how people find information. We're building the tools businesses need to stay visible — whether someone searches on Google, asks ChatGPT, or queries Perplexity. Our platform combines traditional SEO with answer engine optimization so you don't have to choose between them.</p>
+            </div>
+            <div class="feat-card">
+                <h3>The Team</h3>
+                <p>AI1stSEO is built by a team of five developers specializing in AI/ML, NLP, data infrastructure, integrations, and frontend engineering. We're focused on making SEO analysis smarter, faster, and more actionable through AI-powered automation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="logo">🔍 AI1stSEO</div>
+                <p>AI-first SEO and answer engine optimization platform. Get found by ChatGPT, Gemini, Perplexity, and traditional search engines.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="/analyze.html">SEO Analysis</a>
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="https://monitor.ai1stseo.com" target="_blank">Website Monitoring</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact</a>
+                <a href="#privacy">Privacy Policy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <a href="mailto:contact@ai1stseo.com">contact@ai1stseo.com</a>
+                <a href="https://www.ai1stseo.com">www.ai1stseo.com</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 AI1stSEO. All rights reserved.</span>
+            <span><a href="#privacy" id="privacyLink">Privacy Policy</a> · <a href="#about">About</a></span>
+        </div>
+    </footer>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);overflow-y:auto;">
+        <div style="max-width:700px;margin:60px auto;background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;color:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2>Privacy Policy</h2>
+                <button onclick="document.getElementById('privacyModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <div style="color:rgba(255,255,255,0.7);font-size:0.9rem;line-height:1.8;">
+                <p style="margin-bottom:16px;">Last updated: March 2026</p>
+                <p style="margin-bottom:16px;">AI1stSEO ("we", "our", "us") respects your privacy. This policy explains how we collect, use, and protect your information when you use our platform at www.ai1stseo.com.</p>
+                <h3 style="color:#fff;margin:20px 0 8px;">Information We Collect</h3>
+                <p style="margin-bottom:16px;">We collect the URLs you submit for analysis, your email address if you create an account, and basic usage data to improve our service. We do not sell your data to third parties.</p>
+                <h3 style="color:#fff;margin:20px 0 8px;">How We Use Your Information</h3>
+                <p style="margin-bottom:16px;">We use your information to provide SEO analysis results, send verification emails, and improve our platform. Audit results are stored to provide you with historical tracking on your dashboard.</p>
+                <h3 style="color:#fff;margin:20px 0 8px;">Data Security</h3>
+                <p style="margin-bottom:16px;">We use industry-standard security measures including HTTPS encryption, AWS infrastructure, and secure authentication via Amazon Cognito.</p>
+                <h3 style="color:#fff;margin:20px 0 8px;">Contact</h3>
+                <p>For privacy-related questions, contact us at contact@ai1stseo.com.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/auth.js"></script>
+    <script>
+        // Redirect logged-in users to dashboard
+        if (localStorage.getItem('ai1stseo_access_token')) {
+            window.location.replace('/dashboard.html');
+        }
+        // Watch for login completing
+        var _origSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            _origSetItem.apply(this, arguments);
+            if (key === 'ai1stseo_access_token' && value) {
+                window.location.replace('/dashboard.html');
+            }
+        };
+
+        // Analyze button
+        function runAnalyze() {
+            var url = document.getElementById('heroUrl').value.trim();
+            if (!url) return;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+            var cats = 'technical,onpage,content,mobile,performance,security,social,local,geo,citationgap';
+            window.location.href = '/audit/' + encodeURIComponent(url) + '?cats=' + cats;
+        }
+        document.getElementById('heroUrl').addEventListener('keydown', function(e) { if (e.key === 'Enter') runAnalyze(); });
+
+        // Login button
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            if (window.AI1STSEO_AUTH && window.AI1STSEO_AUTH.isLoggedIn()) {
+                window.location.href = '/dashboard.html';
+            }
+        });
+
+        // Privacy modal
+        document.querySelectorAll('a[href="#privacy"]').forEach(function(a) {
+            a.addEventListener('click', function(e) { e.preventDefault(); document.getElementById('privacyModal').style.display = 'block'; });
+        });
+    </script>
+    <script>
+        // Email capture form with UTM attribution
+        (function() {
+          var API = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+          var form = document.getElementById('growth-email-form');
+          if (!form) return;
+
+          // Read UTM params from current page URL
+          var params = new URLSearchParams(window.location.search);
+          var utmData = {};
+          ['utm_source','utm_medium','utm_campaign','utm_content'].forEach(function(k) {
+            var v = params.get(k);
+            if (v) utmData[k] = v;
+          });
+
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('growth-email-btn');
+            var msg = document.getElementById('growth-email-msg');
+            var inp = document.getElementById('growth-email-input');
+            var email = inp.value.trim();
+            if (!email) return;
+            btn.disabled = true; btn.textContent = 'Subscribing...'; btn.style.opacity = '0.6';
+            msg.innerHTML = '';
+            var payload = { email: email, source: 'website_main', platform: 'landing_page' };
+            if (utmData.utm_source) payload.utm_source = utmData.utm_source;
+            if (utmData.utm_medium) payload.utm_medium = utmData.utm_medium;
+            if (utmData.utm_campaign) payload.utm_campaign = utmData.utm_campaign;
+            if (utmData.utm_content) payload.utm_content = utmData.utm_content;
+            fetch(API + '/api/growth/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (res.data.success) {
+                msg.innerHTML = '<span style="color:var(--green)">\u2713 You\u2019re in! Check your inbox soon.</span>';
+                inp.value = '';
+              } else if (res.data.duplicate) {
+                msg.innerHTML = '<span style="color:#f59e0b">You\u2019re already subscribed \u2014 thanks!</span>';
+              } else {
+                msg.innerHTML = '<span style="color:#f87171">' + (res.data.error || 'Something went wrong.') + '</span>';
+              }
+            })
+            .catch(function() { msg.innerHTML = '<span style="color:#f87171">Network error. Please try again.</span>'; })
+            .finally(function() { btn.disabled = false; btn.textContent = 'Subscribe'; btn.style.opacity = '1'; });
+          });
+        })();
+    </script>
+</body>
+</html>
