@@ -971,6 +971,7 @@
                     contentDiv.innerHTML = html;
                     btn.innerHTML = '✅ Keywords Analyzed';
                     btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                    setTimeout(function() { btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Keywords'; btn.style.background = ''; }, 2000);
                 } else {
                     contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Analysis Failed</strong><br>' + (data.error || 'Unknown error') + '</div>';
                     btn.innerHTML = '🔄 Retry Analysis'; btn.disabled = false;
