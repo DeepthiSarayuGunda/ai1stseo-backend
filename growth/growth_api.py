@@ -68,6 +68,13 @@ def _ensure_table():
     except Exception as e:
         logger.warning("utm table init deferred: %s", e)
 
+    try:
+        from growth.social_scheduler_dynamo import init_social_table
+
+        init_social_table()
+    except Exception as e:
+        logger.warning("social table init deferred: %s", e)
+
 
 # ---------------------------------------------------------------------------
 # Auth helper — late-import to avoid circular dependency
@@ -407,3 +414,77 @@ def utm_list_campaigns():
     if result.get("success"):
         return jsonify(result), 200
     return jsonify(result), 500
+
+
+# ---------------------------------------------------------------------------
+# Social Scheduler (DynamoDB) — mirrors /api/social/posts but on DynamoDB
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/social/posts", methods=["GET"])
+def social_list():
+    """GET /api/growth/social/posts — List all scheduled posts (DynamoDB)."""
+    from growth.social_scheduler_dynamo import get_posts
+    result = get_posts()
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 500
+
+
+@growth_bp.route("/social/posts", methods=["POST"])
+def social_create():
+    """POST /api/growth/social/posts — Create a scheduled post (DynamoDB).
+
+    Accepts JSON: {"content": "...", "platforms": ["LinkedIn", "X"], "scheduled_date": "2026-04-10", "scheduled_time": "14:30"}
+    """
+    data = request.get_json(silent=True) or {}
+
+    from growth.social_scheduler_dynamo import create_post
+
+    platforms = data.get("platforms", [])
+    if isinstance(platforms, str):
+        platforms = [p.strip() for p in platforms.split(",")]
+
+    result = create_post(
+        content=data.get("content", ""),
+        platforms=platforms,
+        scheduled_date=data.get("scheduled_date", ""),
+        scheduled_time=data.get("scheduled_time", ""),
+        image_path=data.get("image_path"),
+        status=data.get("status", "scheduled"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify(result), 400
+
+
+@growth_bp.route("/social/posts/<post_id>", methods=["PUT"])
+def social_update(post_id):
+    """PUT /api/growth/social/posts/<id> — Update a post (DynamoDB)."""
+    data = request.get_json(silent=True) or {}
+
+    from growth.social_scheduler_dynamo import update_post
+
+    updates = {}
+    for field in ["content", "platforms", "scheduled_datetime", "status", "image_path"]:
+        if field in data:
+            val = data[field]
+            if field == "platforms" and isinstance(val, list):
+                val = ", ".join(val)
+            updates[field] = val
+
+    result = update_post(post_id, updates)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 400 if "not found" in result.get("error", "").lower() else 500
+
+
+@growth_bp.route("/social/posts/<post_id>", methods=["DELETE"])
+def social_delete(post_id):
+    """DELETE /api/growth/social/posts/<id> — Delete a post (DynamoDB)."""
+    from growth.social_scheduler_dynamo import delete_post
+
+    result = delete_post(post_id)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 404 if "not found" in result.get("error", "").lower() else 500
