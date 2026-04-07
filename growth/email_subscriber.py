@@ -200,6 +200,21 @@ def add_subscriber(
         except Exception as sync_err:
             logger.warning("email platform sync failed (non-blocking): %s", sync_err)
 
+        # Analytics tracking (non-blocking)
+        try:
+            from growth.analytics_tracker import track_event
+            track_event(
+                event_type="subscribe",
+                source=clean_source,
+                event_data={
+                    "email": clean_email,
+                    "platform": clean_platform or "",
+                    "campaign": clean_campaign or "",
+                },
+            )
+        except Exception as track_err:
+            logger.warning("analytics track failed (non-blocking): %s", track_err)
+
         return {
             "success": True,
             "subscriber": {
