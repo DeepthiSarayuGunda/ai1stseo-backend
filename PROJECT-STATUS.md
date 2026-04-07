@@ -1,6 +1,6 @@
 # AI1STSEO Project Status
 
-> **Last Updated:** March 29, 2026
+> **Last Updated:** April 6, 2026
 > **Updated By:** Dev 5 (Frontend & UX) — Amira
 > **Purpose:** This file is the single source of truth for project context. Read this FIRST before making any changes.
 
@@ -15,13 +15,14 @@
 | App Runner (Dev/Test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` | Flask Python backend |
 | SEO Analyzer Backend | App Runner | Flask — 236 checks across 10 categories |
 | Cognito User Pool | `us-east-1_DVvth47zH` | Client ID: `7scsae79o2g9idc92eputcrvrg` |
-| SES Email | `no-reply@ai1stseo.com` | Production access, 50k/day, domain verified |
+| SES Email | `no-reply@ai1stseo.com` | Production access, 50k/day, domain verified. Two-way: send via SES, receive via SES → S3 (`ai1stseo-incoming-email`). MX switched from ImprovMX Apr 6. |
+| Database | DynamoDB (11 tables) | Migrated from RDS PostgreSQL Apr 1. RDS stopped. |
 | GitHub (User) | `robinnic/seo-deployment` | Frontend + deployment configs |
 | GitHub (Teammate) | `DeepthiSarayuGunda/ai1stseo-backend` | App Runner auto-deploys from main |
 
 ## Auth System
 
-- **Production auth** runs on Troy's EC2 at `api.ai1stseo.com`
+- **Production auth** runs on Lambda + API Gateway at `api.ai1stseo.com`
 - **Troy's `auth.js`** handles all auth modals (login/signup/verify/forgot-password/profile) — loaded from S3 at `/assets/auth.js`
 - **localStorage keys:** `ai1stseo_access_token`, `ai1stseo_id_token`, `ai1stseo_refresh_token`, `ai1stseo_user`
 - **Cognito email config:** DEVELOPER mode using SES — verification codes and password resets come from `no-reply@ai1stseo.com`
@@ -36,7 +37,7 @@
 | `dashboard.html` | Logged-in user dashboard (React + Vite build) — tool cards, live API analyze, score widgets, category breakdown, audit history. Source: `frontend/src/` |
 | `assets/index-DW5KlJL7.js` | React dashboard JS bundle (Vite build output) |
 | `assets/index-5EfaFiA8.css` | React dashboard Tailwind CSS (Vite build output) |
-| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints, role-based auth via `GET /api/admin/me` + 7th Resources tab (Platform Tools, 15 Mermaid diagrams, Lambda routing table) |
+| `admin.html` | Admin dashboard — Troy's version with 6 tabs (Overview, Users, Usage, AI Costs, Errors, Health) wired to live API endpoints, role-based auth via `GET /api/admin/me` + 7th Resources tab (Platform Tools, 15 Mermaid diagrams, Lambda routing table) + 8th Documents tab (upload/share research files per developer) |
 | `analyze.html` | SEO analyzer input page |
 | `audit.html` | SEO audit results page — saves results to localStorage for dashboard, PDF report download (jsPDF), AI recommendations, content brief generator |
 | `login.html` | Standalone login page (points to `api.ai1stseo.com`) |
