@@ -61,6 +61,13 @@ def _ensure_table():
     except Exception as e:
         logger.warning("analytics table init deferred: %s", e)
 
+    try:
+        from growth.utm_manager import init_utm_table
+
+        init_utm_table()
+    except Exception as e:
+        logger.warning("utm table init deferred: %s", e)
+
 
 # ---------------------------------------------------------------------------
 # Auth helper — late-import to avoid circular dependency
@@ -320,6 +327,83 @@ def analytics_summary():
     from growth.analytics_tracker import get_summary
 
     result = get_summary(days=days)
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 500
+
+
+# ---------------------------------------------------------------------------
+# POST /api/growth/utm/generate — Public (UTM link generation)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/generate", methods=["POST"])
+def utm_generate():
+    """Generate a UTM-tagged URL. Public endpoint.
+
+    Accepts: {"base_url": "...", "source": "...", "medium": "...", "campaign": "...", "content": "...", "term": "..."}
+    Required: base_url, source, medium, campaign.
+    """
+    data = request.get_json(silent=True) or {}
+
+    from growth.utm_manager import generate_utm_url
+
+    result = generate_utm_url(
+        base_url=data.get("base_url", ""),
+        source=data.get("source", ""),
+        medium=data.get("medium", ""),
+        campaign=data.get("campaign", ""),
+        content=data.get("content"),
+        term=data.get("term"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 200
+    return jsonify(result), 400
+
+
+# ---------------------------------------------------------------------------
+# POST /api/growth/utm/campaigns — INTERNAL / ADMIN (save campaign)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/campaigns", methods=["POST"])
+@require_auth
+def utm_save_campaign():
+    """Save a campaign definition. INTERNAL/ADMIN."""
+    data = request.get_json(silent=True) or {}
+
+    from growth.utm_manager import save_campaign
+
+    result = save_campaign(
+        name=data.get("name", ""),
+        source=data.get("source", ""),
+        medium=data.get("medium", ""),
+        base_url=data.get("base_url", "https://ai1stseo.com"),
+        content=data.get("content"),
+        term=data.get("term"),
+        notes=data.get("notes"),
+    )
+
+    if result.get("success"):
+        return jsonify(result), 201
+    return jsonify(result), 400
+
+
+# ---------------------------------------------------------------------------
+# GET /api/growth/utm/campaigns — INTERNAL / ADMIN (list campaigns)
+# ---------------------------------------------------------------------------
+
+@growth_bp.route("/utm/campaigns", methods=["GET"])
+@require_auth
+def utm_list_campaigns():
+    """List saved campaigns. INTERNAL/ADMIN."""
+    try:
+        limit = int(request.args.get("limit", 50))
+    except (ValueError, TypeError):
+        limit = 50
+
+    from growth.utm_manager import list_campaigns
+
+    result = list_campaigns(limit=limit)
     if result.get("success"):
         return jsonify(result), 200
     return jsonify(result), 500
