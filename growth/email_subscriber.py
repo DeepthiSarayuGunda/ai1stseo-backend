@@ -3,7 +3,7 @@ growth/email_subscriber.py
 Email Subscriber Capture — core module.
 
 Handles validation, sanitization, CRUD, export, and table initialization
-for the email_subscribers table. Zero Flask dependencies.
+for the email_subscribers DynamoDB table. Zero Flask dependencies.
 
 This module is part of the ai1stseo.com 5-month growth plan.
 It does NOT modify any existing tables or shared logic.
@@ -12,9 +12,14 @@ It does NOT modify any existing tables or shared logic.
 import csv
 import io
 import logging
+import os
 import re
+import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
 
-import psycopg2.extras
+import boto3
+from boto3.dynamodb.conditions import Attr, Key
 
 logger = logging.getLogger(__name__)
 
@@ -24,63 +29,67 @@ logger = logging.getLogger(__name__)
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
+TABLE_NAME = os.environ.get("GROWTH_SUBSCRIBERS_TABLE", "ai1stseo-email-subscribers")
+AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+
 CSV_HEADERS = [
     "id", "email", "name", "source", "platform",
     "campaign", "utm_source", "utm_medium", "utm_campaign", "utm_content",
     "opted_in", "status", "subscribed_at",
 ]
 
+_dynamodb = None
+_table = None
+
+
+def _get_table():
+    """Get the DynamoDB table resource (cached)."""
+    global _dynamodb, _table
+    if _table is None:
+        _dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+        _table = _dynamodb.Table(TABLE_NAME)
+    return _table
+
 
 # ---------------------------------------------------------------------------
-# Table initialisation (called via lazy-init, NOT from app.py)
+# Table initialisation — creates DynamoDB table if it doesn't exist
 # ---------------------------------------------------------------------------
 
 def init_subscriber_table() -> None:
-    """Create email_subscribers table and indexes. Idempotent."""
-    from db import get_conn
-
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS email_subscribers (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                email VARCHAR(255) NOT NULL UNIQUE,
-                name VARCHAR(255),
-                source VARCHAR(100) DEFAULT 'unknown',
-                platform VARCHAR(100),
-                campaign VARCHAR(255),
-                opted_in BOOLEAN DEFAULT TRUE,
-                status VARCHAR(50) DEFAULT 'active',
-                subscribed_at TIMESTAMP DEFAULT NOW(),
-                updated_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
-        for idx in [
-            "CREATE INDEX IF NOT EXISTS idx_es_email ON email_subscribers(email)",
-            "CREATE INDEX IF NOT EXISTS idx_es_source ON email_subscribers(source)",
-            "CREATE INDEX IF NOT EXISTS idx_es_platform ON email_subscribers(platform)",
-            "CREATE INDEX IF NOT EXISTS idx_es_campaign ON email_subscribers(campaign)",
-            "CREATE INDEX IF NOT EXISTS idx_es_subscribed ON email_subscribers(subscribed_at DESC)",
-        ]:
-            try:
-                cur.execute(idx)
-            except Exception:
-                pass
-
-        # UTM columns — safe migration for existing tables
-        for col, coldef in [
-            ("utm_source", "VARCHAR(255)"),
-            ("utm_medium", "VARCHAR(255)"),
-            ("utm_campaign", "VARCHAR(255)"),
-            ("utm_content", "VARCHAR(255)"),
-        ]:
-            try:
-                cur.execute(f"ALTER TABLE email_subscribers ADD COLUMN IF NOT EXISTS {col} {coldef}")
-            except Exception:
-                pass
-
-        conn.commit()
-        logger.info("email_subscribers table verified")
+    """Create the DynamoDB table if it doesn't exist. Idempotent."""
+    global _dynamodb
+    if _dynamodb is None:
+        _dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+    try:
+        table = _dynamodb.Table(TABLE_NAME)
+        table.load()
+        logger.info("DynamoDB table %s exists (status=%s)", TABLE_NAME, table.table_status)
+    except _dynamodb.meta.client.exceptions.ResourceNotFoundException:
+        logger.info("Creating DynamoDB table %s ...", TABLE_NAME)
+        table = _dynamodb.create_table(
+            TableName=TABLE_NAME,
+            KeySchema=[{"AttributeName": "email", "KeyType": "HASH"}],
+            AttributeDefinitions=[
+                {"AttributeName": "email", "AttributeType": "S"},
+                {"AttributeName": "source", "AttributeType": "S"},
+                {"AttributeName": "subscribed_at", "AttributeType": "S"},
+            ],
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": "source-subscribed_at-index",
+                    "KeySchema": [
+                        {"AttributeName": "source", "KeyType": "HASH"},
+                        {"AttributeName": "subscribed_at", "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                },
+            ],
+            BillingMode="PAY_PER_REQUEST",
+        )
+        table.wait_until_exists()
+        logger.info("DynamoDB table %s created", TABLE_NAME)
+    except Exception as e:
+        logger.warning("DynamoDB table init check: %s", e)
 
 
 # ---------------------------------------------------------------------------
@@ -88,14 +97,12 @@ def init_subscriber_table() -> None:
 # ---------------------------------------------------------------------------
 
 def validate_email(email: str) -> bool:
-    """Return True if *email* looks like a valid address."""
     if not email or not isinstance(email, str):
         return False
     return bool(EMAIL_REGEX.match(email.strip()))
 
 
 def sanitize_input(value, max_length: int = 255):
-    """Strip whitespace and truncate. Returns None if empty."""
     if value is None:
         return None
     cleaned = str(value).strip()
@@ -105,7 +112,6 @@ def sanitize_input(value, max_length: int = 255):
 
 
 def normalize_filter(value):
-    """Lowercase + strip a filter value to match stored format."""
     if value is None:
         return None
     cleaned = str(value).strip().lower()
@@ -141,63 +147,67 @@ def add_subscriber(
     clean_campaign = sanitize_input(campaign)
     if clean_campaign:
         clean_campaign = clean_campaign.lower()
-    clean_utm_source = sanitize_input(utm_source)
-    clean_utm_medium = sanitize_input(utm_medium)
-    clean_utm_campaign = sanitize_input(utm_campaign)
-    clean_utm_content = sanitize_input(utm_content)
 
-    from db import get_conn
+    now = datetime.now(timezone.utc).isoformat()
+    subscriber_id = str(uuid.uuid4())
+
+    item = {
+        "email": clean_email,
+        "id": subscriber_id,
+        "source": clean_source,
+        "opted_in": opted_in,
+        "status": "active",
+        "subscribed_at": now,
+        "updated_at": now,
+    }
+    if clean_name:
+        item["name"] = clean_name
+    if clean_platform:
+        item["platform"] = clean_platform
+    if clean_campaign:
+        item["campaign"] = clean_campaign
+    if sanitize_input(utm_source):
+        item["utm_source"] = sanitize_input(utm_source)
+    if sanitize_input(utm_medium):
+        item["utm_medium"] = sanitize_input(utm_medium)
+    if sanitize_input(utm_campaign):
+        item["utm_campaign"] = sanitize_input(utm_campaign)
+    if sanitize_input(utm_content):
+        item["utm_content"] = sanitize_input(utm_content)
 
     try:
-        with get_conn() as conn:
-            cur = conn.cursor()
-            cur.execute(
-                """INSERT INTO email_subscribers
-                       (email, name, source, platform, campaign, opted_in,
-                        utm_source, utm_medium, utm_campaign, utm_content)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                   ON CONFLICT (email) DO NOTHING
-                   RETURNING id, email, subscribed_at""",
-                (clean_email, clean_name, clean_source,
-                 clean_platform, clean_campaign, opted_in,
-                 clean_utm_source, clean_utm_medium,
-                 clean_utm_campaign, clean_utm_content),
-            )
-            row = cur.fetchone()
-            conn.commit()
-            if row is None:
-                return {
-                    "success": False,
-                    "error": "Email already subscribed",
-                    "duplicate": True,
-                }
+        table = _get_table()
+        # Conditional put — fails if email already exists (duplicate protection)
+        table.put_item(
+            Item=item,
+            ConditionExpression=Attr("email").not_exists(),
+        )
 
-            subscriber_id = str(row[0])
-            subscribed_at = row[2].isoformat() if row[2] else None
+        # Integration hook
+        try:
+            from growth.email_platform_sync import sync_subscriber_to_email_platform
+            sync_subscriber_to_email_platform({
+                "email": clean_email,
+                "name": clean_name,
+                "source": clean_source,
+                "platform": clean_platform,
+                "campaign": clean_campaign,
+                "subscriber_id": subscriber_id,
+                "subscribed_at": now,
+            })
+        except Exception as sync_err:
+            logger.warning("email platform sync failed (non-blocking): %s", sync_err)
 
-            # Integration hook — sync to external email platform (no-op until configured)
-            try:
-                from growth.email_platform_sync import sync_subscriber_to_email_platform
-                sync_subscriber_to_email_platform({
-                    "email": row[1],
-                    "name": clean_name,
-                    "source": clean_source,
-                    "platform": clean_platform,
-                    "campaign": clean_campaign,
-                    "subscriber_id": subscriber_id,
-                    "subscribed_at": subscribed_at,
-                })
-            except Exception as sync_err:
-                logger.warning("email platform sync failed (non-blocking): %s", sync_err)
-
-            return {
-                "success": True,
-                "subscriber": {
-                    "id": subscriber_id,
-                    "email": row[1],
-                    "subscribed_at": subscribed_at,
-                },
-            }
+        return {
+            "success": True,
+            "subscriber": {
+                "id": subscriber_id,
+                "email": clean_email,
+                "subscribed_at": now,
+            },
+        }
+    except _get_table().meta.client.exceptions.ConditionalCheckFailedException:
+        return {"success": False, "error": "Email already subscribed", "duplicate": True}
     except Exception as e:
         logger.error("add_subscriber error: %s", e)
         return {"success": False, "error": f"Database error: {e}"}
@@ -213,52 +223,66 @@ def list_subscribers(
     """Paginated subscriber list with optional filters."""
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
-
-    clauses, params = [], []
-    for val, col in [
-        (normalize_filter(source), "source"),
-        (normalize_filter(platform), "platform"),
-        (normalize_filter(campaign), "campaign"),
-    ]:
-        if val:
-            clauses.append(f"{col} = %s")
-            params.append(val)
-
-    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
-
-    from db import get_conn
 
     try:
-        with get_conn() as conn:
-            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        table = _get_table()
 
-            cur.execute(
-                f"SELECT COUNT(*) AS cnt FROM email_subscribers {where}", params
-            )
-            total = cur.fetchone()["cnt"]
+        # Build filter expression
+        filters = []
+        expr_values = {}
+        expr_names = {}
+        idx = 0
+        for val, col in [
+            (normalize_filter(source), "source"),
+            (normalize_filter(platform), "platform"),
+            (normalize_filter(campaign), "campaign"),
+        ]:
+            if val:
+                placeholder = f":fv{idx}"
+                name_ph = f"#fn{idx}"
+                filters.append(f"{name_ph} = {placeholder}")
+                expr_values[placeholder] = val
+                expr_names[name_ph] = col
+                idx += 1
 
-            cur.execute(
-                f"SELECT * FROM email_subscribers {where} "
-                f"ORDER BY subscribed_at DESC LIMIT %s OFFSET %s",
-                params + [per_page, offset],
-            )
-            rows = cur.fetchall()
-            for r in rows:
-                r["id"] = str(r["id"])
-                if r.get("subscribed_at"):
-                    r["subscribed_at"] = r["subscribed_at"].isoformat()
-                if r.get("updated_at"):
-                    r["updated_at"] = r["updated_at"].isoformat()
+        scan_params = {}
+        if filters:
+            scan_params["FilterExpression"] = " AND ".join(filters)
+            scan_params["ExpressionAttributeValues"] = expr_values
+            scan_params["ExpressionAttributeNames"] = expr_names
 
-            return {
-                "success": True,
-                "subscribers": rows,
-                "total": total,
-                "page": page,
-                "per_page": per_page,
-                "pages": max(1, (total + per_page - 1) // per_page),
-            }
+        # Scan all matching items (DynamoDB doesn't support SQL-style OFFSET)
+        all_items = []
+        last_key = None
+        while True:
+            if last_key:
+                scan_params["ExclusiveStartKey"] = last_key
+            resp = table.scan(**scan_params)
+            all_items.extend(resp.get("Items", []))
+            last_key = resp.get("LastEvaluatedKey")
+            if not last_key:
+                break
+
+        # Sort by subscribed_at descending
+        all_items.sort(key=lambda x: x.get("subscribed_at", ""), reverse=True)
+
+        total = len(all_items)
+        start = (page - 1) * per_page
+        page_items = all_items[start : start + per_page]
+
+        # Serialize
+        for r in page_items:
+            if isinstance(r.get("opted_in"), Decimal):
+                r["opted_in"] = bool(r["opted_in"])
+
+        return {
+            "success": True,
+            "subscribers": page_items,
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "pages": max(1, (total + per_page - 1) // per_page),
+        }
     except Exception as e:
         logger.error("list_subscribers error: %s", e)
         return {"success": False, "error": f"Database error: {e}", "subscribers": []}
@@ -270,42 +294,22 @@ def export_subscribers(
     platform=None,
     campaign=None,
 ):
-    """Export ALL matching subscribers (no pagination).
+    """Export ALL matching subscribers. Returns CSV string or list of dicts."""
+    result = list_subscribers(page=1, per_page=10000, source=source,
+                              platform=platform, campaign=campaign)
+    rows = result.get("subscribers", [])
 
-    Returns a CSV string (fmt='csv') or a list of dicts (fmt='json').
-    """
-    clauses, params = [], []
-    for val, col in [
-        (normalize_filter(source), "source"),
-        (normalize_filter(platform), "platform"),
-        (normalize_filter(campaign), "campaign"),
-    ]:
-        if val:
-            clauses.append(f"{col} = %s")
-            params.append(val)
-
-    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
-
-    from db import get_conn
-
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute(
-            f"SELECT id, email, name, source, platform, campaign, "
-            f"utm_source, utm_medium, utm_campaign, utm_content, "
-            f"opted_in, status, subscribed_at "
-            f"FROM email_subscribers {where} ORDER BY subscribed_at DESC",
-            params,
-        )
-        rows = cur.fetchall()
-        for r in rows:
-            r["id"] = str(r["id"])
-            if r.get("subscribed_at"):
-                r["subscribed_at"] = r["subscribed_at"].isoformat()
+    # Normalize for CSV — ensure all headers present
+    for r in rows:
+        for h in CSV_HEADERS:
+            if h not in r:
+                r[h] = ""
+        if isinstance(r.get("opted_in"), (Decimal, bool)):
+            r["opted_in"] = str(r["opted_in"])
 
     if fmt == "csv":
         output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=CSV_HEADERS)
+        writer = csv.DictWriter(output, fieldnames=CSV_HEADERS, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
         return output.getvalue()
