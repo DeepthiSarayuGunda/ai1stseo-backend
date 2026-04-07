@@ -588,6 +588,24 @@
                     <div id="briefContent"></div>
                 </div>
 
+                <!-- Keyword Clustering & TF-IDF Section -->
+                <div class="ai-section" id="keywordClusterSection">
+                    <div class="ai-header">
+                        <span class="ai-icon">🔑</span>
+                        <div>
+                            <div class="ai-title">Keyword Clustering & TF-IDF Analysis</div>
+                            <div class="ai-subtitle">Extracts keywords from your page, groups them by search intent (informational, commercial, transactional, local), and shows TF-IDF scores with bigram/trigram phrases</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+                        <input type="text" id="clusterKeywordInput" placeholder="Or enter a seed keyword..." style="flex:1;min-width:200px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.85rem;" />
+                    </div>
+                    <button class="ai-btn" id="clusterBtn" onclick="runKeywordClustering()">
+                        <span>🔍</span> Analyze Keywords
+                    </button>
+                    <div id="clusterContent"></div>
+                </div>
+
                 <div style="text-align: center; padding: 30px;">
                     <button class="back-btn" onclick="showEmailGate()" style="background: linear-gradient(90deg, #00c853, #00e676); margin-right: 12px;">📄 Download PDF Report</button>
                     <a href="/" class="back-btn">← Analyze Another URL</a>
@@ -874,6 +892,92 @@
             } catch (error) {
                 contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
                 btn.innerHTML = '🔄 Retry Content Brief'; btn.disabled = false;
+            }
+        }
+
+        async function runKeywordClustering() {
+            const btn = document.getElementById('clusterBtn');
+            const contentDiv = document.getElementById('clusterContent');
+            const seedInput = document.getElementById('clusterKeywordInput').value.trim();
+            const analyzedUrl = window.auditData ? window.auditData.url : '';
+            
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="display:inline-block;width:16px;height:16px;margin-right:8px;"></div> Analyzing keywords...';
+            contentDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div><span>Extracting keywords and clustering by search intent...</span></div>';
+            
+            try {
+                const body = {};
+                if (seedInput) body.keyword = seedInput;
+                else if (analyzedUrl) body.url = analyzedUrl;
+                else { contentDiv.innerHTML = '<div style="padding:15px;background:rgba(244,67,54,0.1);border-radius:8px;">Enter a seed keyword or run an audit first.</div>'; btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Keywords'; return; }
+                
+                const response = await fetch(API_BASE + '/api/keyword-cluster', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    let html = '<div style="margin-top:15px;">';
+                    
+                    // Source info
+                    if (data.url) html += '<div style="padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;margin-bottom:15px;font-size:0.85rem;">Analyzed: <strong>' + data.page_title + '</strong> — ' + data.total_keywords + ' keywords extracted</div>';
+                    else if (data.seed_keyword) html += '<div style="padding:10px;background:rgba(0,212,255,0.08);border-radius:8px;margin-bottom:15px;font-size:0.85rem;">Seed keyword: <strong>' + data.seed_keyword + '</strong> — ' + data.total_keywords + ' related keywords generated</div>';
+                    
+                    // Intent clusters
+                    const intentColors = { informational: '#00d4ff', commercial: '#ff9800', transactional: '#4caf50', navigational: '#9c27b0', local: '#f44336' };
+                    const intentIcons = { informational: 'ℹ️', commercial: '🛒', transactional: '💰', navigational: '🧭', local: '📍' };
+                    
+                    if (data.clusters && Object.keys(data.clusters).length > 0) {
+                        html += '<div style="font-weight:600;color:#00d4ff;margin-bottom:10px;font-size:1rem;">Search Intent Clusters</div>';
+                        for (const [intent, cluster] of Object.entries(data.clusters)) {
+                            const color = intentColors[intent] || '#00d4ff';
+                            const icon = intentIcons[intent] || '🔑';
+                            html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:15px;margin-bottom:12px;">';
+                            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span>' + icon + '</span><strong style="color:' + color + ';text-transform:capitalize;">' + intent + '</strong><span style="font-size:0.75rem;color:rgba(255,255,255,0.5);">(' + cluster.keywords.length + ' keywords)</span></div>';
+                            html += '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:10px;">' + (cluster.description || '') + '</div>';
+                            html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                            cluster.keywords.forEach(function(kw) {
+                                const term = kw.term || kw;
+                                const freq = kw.frequency ? ' (' + kw.frequency + ')' : '';
+                                html += '<span style="background:rgba(255,255,255,0.06);border:1px solid ' + color + '33;padding:4px 10px;border-radius:20px;font-size:0.8rem;color:rgba(255,255,255,0.85);">' + term + freq + '</span>';
+                            });
+                            html += '</div></div>';
+                        }
+                    }
+                    
+                    // TF-IDF top keywords
+                    if (data.tfidf_keywords && data.tfidf_keywords.length > 0) {
+                        html += '<div style="font-weight:600;color:#00d4ff;margin:15px 0 10px;font-size:1rem;">TF-IDF Top Keywords</div>';
+                        html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.8rem;">';
+                        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.6);">Keyword</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.6);">Frequency</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.6);">TF Score</th></tr>';
+                        data.tfidf_keywords.slice(0, 15).forEach(function(kw) {
+                            html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:6px 8px;">' + kw.term + '</td><td style="text-align:right;padding:6px 8px;">' + kw.frequency + '</td><td style="text-align:right;padding:6px 8px;color:#00d4ff;">' + kw.tf_score + '</td></tr>';
+                        });
+                        html += '</table></div>';
+                    }
+                    
+                    // Bigrams & Trigrams
+                    if ((data.bigrams && data.bigrams.length > 0) || (data.trigrams && data.trigrams.length > 0)) {
+                        html += '<div style="font-weight:600;color:#00d4ff;margin:15px 0 10px;font-size:1rem;">Key Phrases</div>';
+                        html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                        (data.bigrams || []).slice(0, 10).forEach(function(b) {
+                            html += '<span style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);padding:4px 10px;border-radius:20px;font-size:0.8rem;">' + b.phrase + ' <span style="color:rgba(255,255,255,0.4);">(' + b.frequency + ')</span></span>';
+                        });
+                        (data.trigrams || []).slice(0, 8).forEach(function(t) {
+                            html += '<span style="background:rgba(123,44,191,0.08);border:1px solid rgba(123,44,191,0.2);padding:4px 10px;border-radius:20px;font-size:0.8rem;">' + t.phrase + ' <span style="color:rgba(255,255,255,0.4);">(' + t.frequency + ')</span></span>';
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    contentDiv.innerHTML = html;
+                    btn.innerHTML = '✅ Keywords Analyzed';
+                    btn.style.background = 'linear-gradient(90deg, #00c853, #00e676)';
+                } else {
+                    contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Analysis Failed</strong><br>' + (data.error || 'Unknown error') + '</div>';
+                    btn.innerHTML = '🔄 Retry Analysis'; btn.disabled = false;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:8px;margin-top:15px;"><strong>⚠️ Connection Error</strong><br>' + error.message + '</div>';
+                btn.innerHTML = '🔄 Retry Analysis'; btn.disabled = false;
             }
         }
 

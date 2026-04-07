@@ -95,42 +95,6 @@ try:
 except Exception as e:
     print(f"⚠ Month 3 systems: {e}")
 
-# --- Troy's blueprints: auth, admin, data API, webhooks, API keys ---
-try:
-    from auth import auth_bp
-    app.register_blueprint(auth_bp)
-    print("✓ auth blueprint registered")
-except Exception as e:
-    print(f"⚠ auth blueprint: {e}")
-
-try:
-    from admin_api import admin_bp
-    app.register_blueprint(admin_bp)
-    print("✓ admin_api blueprint registered")
-except Exception as e:
-    print(f"⚠ admin_api blueprint: {e}")
-
-try:
-    from data_api import data_bp
-    app.register_blueprint(data_bp)
-    print("✓ data_api blueprint registered")
-except Exception as e:
-    print(f"⚠ data_api blueprint: {e}")
-
-try:
-    from webhook_api import webhook_bp
-    app.register_blueprint(webhook_bp)
-    print("✓ webhook_api blueprint registered")
-except Exception as e:
-    print(f"⚠ webhook_api blueprint: {e}")
-
-try:
-    from apikey_api import apikey_bp
-    app.register_blueprint(apikey_bp)
-    print("✓ apikey_api blueprint registered")
-except Exception as e:
-    print(f"⚠ apikey_api blueprint: {e}")
-
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
@@ -2001,7 +1965,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health', '/api/status']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/ai-recommendations', '/api/health', '/api/status']
     })
 
 @app.route('/api/status')
@@ -2580,6 +2544,240 @@ def content_score():
         })
     except Exception as e:
         return jsonify({'error': f'Scoring failed: {str(e)}'}), 500
+
+
+# ============== KEYWORD CLUSTERING & TF-IDF ENGINE (Dev 2) ==============
+
+def extract_keywords_from_text(text, top_n=50):
+    """Extract keywords using TF-IDF-like frequency analysis."""
+    import math
+    # Common stop words to filter out
+    stop_words = set('the a an is are was were be been being have has had do does did will would shall should may might can could and but or nor for yet so at by from in into on onto to with as of it its this that these those i me my we our you your he him his she her they them their what which who whom how when where why all each every both few more most other some such no not only own same than too very just because about between through during before after above below up down out off over under again further then once here there'.split())
+    
+    words = re.findall(r'\b[a-z]{3,}\b', text.lower())
+    words = [w for w in words if w not in stop_words]
+    
+    # Term frequency
+    word_count = len(words)
+    tf = Counter(words)
+    
+    # Normalize and get top keywords
+    keywords = []
+    for word, count in tf.most_common(top_n):
+        keywords.append({
+            'term': word,
+            'frequency': count,
+            'tf_score': round(count / max(word_count, 1), 4)
+        })
+    return keywords
+
+
+def extract_ngrams(text, n=2, top_n=30):
+    """Extract n-grams (bigrams/trigrams) from text."""
+    stop_words = set('the a an is are was were be been being have has had do does did will would shall should may might can could and but or nor for yet so at by from in into on onto to with as of it its this that these those i me my we our you your he him his she her they them their what which who whom how when where why all each every both few more most other some such no not only own same than too very just because about between through during before after above below up down out off over under again further then once here there'.split())
+    
+    words = re.findall(r'\b[a-z]{3,}\b', text.lower())
+    words = [w for w in words if w not in stop_words]
+    
+    ngrams = []
+    for i in range(len(words) - n + 1):
+        ngram = ' '.join(words[i:i+n])
+        ngrams.append(ngram)
+    
+    ngram_counts = Counter(ngrams)
+    return [{'phrase': phrase, 'frequency': count} for phrase, count in ngram_counts.most_common(top_n)]
+
+
+def cluster_keywords_by_intent(keywords, seed_keyword=''):
+    """Group keywords into semantic clusters based on intent patterns."""
+    clusters = {
+        'informational': {'keywords': [], 'description': 'Users seeking information or answers'},
+        'commercial': {'keywords': [], 'description': 'Users researching before a purchase'},
+        'transactional': {'keywords': [], 'description': 'Users ready to take action or buy'},
+        'navigational': {'keywords': [], 'description': 'Users looking for a specific site or page'},
+        'local': {'keywords': [], 'description': 'Users searching for nearby services'}
+    }
+    
+    informational_signals = ['how', 'what', 'why', 'when', 'where', 'who', 'guide', 'tutorial', 'tips', 'learn', 'example', 'definition', 'meaning', 'explain', 'difference', 'vs']
+    commercial_signals = ['best', 'top', 'review', 'compare', 'comparison', 'alternative', 'vs', 'versus', 'pros', 'cons', 'worth', 'recommend']
+    transactional_signals = ['buy', 'price', 'cost', 'cheap', 'deal', 'discount', 'order', 'purchase', 'subscribe', 'download', 'free', 'trial', 'coupon', 'hire', 'book']
+    navigational_signals = ['login', 'sign', 'website', 'official', 'app', 'dashboard', 'account', 'portal']
+    local_signals = ['near', 'nearby', 'local', 'city', 'town', 'area', 'region', 'ottawa', 'toronto', 'canada', 'usa']
+    
+    for kw in keywords:
+        term = kw['term'].lower() if isinstance(kw, dict) else kw.lower()
+        assigned = False
+        
+        for signal in local_signals:
+            if signal in term:
+                clusters['local']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in transactional_signals:
+            if signal in term:
+                clusters['transactional']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in commercial_signals:
+            if signal in term:
+                clusters['commercial']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in navigational_signals:
+            if signal in term:
+                clusters['navigational']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in informational_signals:
+            if signal in term:
+                clusters['informational']['keywords'].append(kw)
+                assigned = True
+                break
+        
+        if not assigned:
+            clusters['informational']['keywords'].append(kw)
+    
+    # Remove empty clusters
+    return {k: v for k, v in clusters.items() if v['keywords']}
+
+
+@app.route('/api/keyword-cluster', methods=['POST'])
+def keyword_cluster():
+    """Keyword Clustering & TF-IDF Engine — analyzes a URL or seed keyword,
+    extracts keywords, groups them by search intent, and provides TF-IDF scores."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        
+        url = (data.get('url') or '').strip()
+        seed_keyword = (data.get('keyword') or '').strip()
+        
+        if not url and not seed_keyword:
+            return jsonify({'error': 'Provide a url or keyword'}), 400
+        
+        text = ''
+        page_title = ''
+        headings = []
+        
+        if url:
+            # Scrape the URL for content
+            try:
+                resp, soup, load_time = fetch_website(url)
+                text = soup.get_text(separator=' ', strip=True)
+                title_tag = soup.find('title')
+                page_title = title_tag.string.strip() if title_tag and title_tag.string else ''
+                headings = [h.get_text(strip=True) for h in soup.find_all(['h1', 'h2', 'h3'])]
+            except Exception as e:
+                return jsonify({'error': f'Failed to fetch URL: {str(e)}'}), 400
+        
+        if seed_keyword and not url:
+            # Use LLM to generate related keywords for the seed
+            prompt = f"""Generate a comprehensive list of 30 related keywords and phrases for the topic: "{seed_keyword}"
+
+Group them into these categories:
+1. INFORMATIONAL — questions and how-to queries people search
+2. COMMERCIAL — comparison and review queries  
+3. TRANSACTIONAL — purchase-intent queries
+4. LOCAL — location-based queries
+
+Return ONLY a JSON object with this exact structure, no other text:
+{{"informational": ["keyword1", "keyword2"], "commercial": ["keyword1"], "transactional": ["keyword1"], "local": ["keyword1"]}}"""
+            
+            try:
+                llm_response = call_llm(prompt, timeout=15)
+                if llm_response:
+                    # Try to parse JSON from LLM response
+                    json_match = re.search(r'\{[^{}]*\}', llm_response, re.DOTALL)
+                    if json_match:
+                        llm_clusters = json.loads(json_match.group())
+                        clusters = {}
+                        intent_descriptions = {
+                            'informational': 'Users seeking information or answers',
+                            'commercial': 'Users researching before a purchase',
+                            'transactional': 'Users ready to take action or buy',
+                            'local': 'Users searching for nearby services'
+                        }
+                        for intent, kws in llm_clusters.items():
+                            if kws and isinstance(kws, list):
+                                clusters[intent] = {
+                                    'description': intent_descriptions.get(intent, ''),
+                                    'keywords': [{'term': kw, 'frequency': 0, 'tf_score': 0, 'source': 'ai_generated'} for kw in kws]
+                                }
+                        
+                        return jsonify({
+                            'status': 'success',
+                            'seed_keyword': seed_keyword,
+                            'source': 'ai_generated',
+                            'clusters': clusters,
+                            'total_keywords': sum(len(c['keywords']) for c in clusters.values()),
+                            'tfidf_keywords': [],
+                            'bigrams': [],
+                            'trigrams': [],
+                            'generated_at': datetime.utcnow().isoformat()
+                        })
+            except Exception:
+                pass
+            
+            # Fallback: return basic cluster structure
+            return jsonify({
+                'status': 'success',
+                'seed_keyword': seed_keyword,
+                'source': 'fallback',
+                'clusters': {
+                    'informational': {
+                        'description': 'Users seeking information or answers',
+                        'keywords': [{'term': f'what is {seed_keyword}', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'how to {seed_keyword}', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} guide', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} tips', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} examples', 'frequency': 0, 'tf_score': 0}]
+                    }
+                },
+                'total_keywords': 5,
+                'tfidf_keywords': [],
+                'bigrams': [],
+                'trigrams': [],
+                'generated_at': datetime.utcnow().isoformat()
+            })
+        
+        # URL-based analysis: extract TF-IDF keywords and cluster them
+        tfidf_keywords = extract_keywords_from_text(text, top_n=40)
+        bigrams = extract_ngrams(text, n=2, top_n=20)
+        trigrams = extract_ngrams(text, n=3, top_n=15)
+        
+        # Combine single keywords + bigrams for clustering
+        all_terms = tfidf_keywords + [{'term': b['phrase'], 'frequency': b['frequency'], 'tf_score': 0} for b in bigrams[:15]]
+        clusters = cluster_keywords_by_intent(all_terms, seed_keyword)
+        
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'page_title': page_title,
+            'headings': headings[:15],
+            'source': 'url_analysis',
+            'clusters': clusters,
+            'total_keywords': len(tfidf_keywords),
+            'tfidf_keywords': tfidf_keywords[:25],
+            'bigrams': bigrams[:15],
+            'trigrams': trigrams[:10],
+            'generated_at': datetime.utcnow().isoformat()
+        })
+    
+    except Exception as e:
+        return jsonify({'error': f'Keyword clustering failed: {str(e)}'}), 500
 
 
 @app.route('/api/geo-probe', methods=['POST'])

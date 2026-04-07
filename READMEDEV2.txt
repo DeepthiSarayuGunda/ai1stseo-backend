@@ -180,8 +180,24 @@ POST /api/analyze            — 200-check SEO audit (10 categories incl citatio
 POST /api/content-brief      — AI content brief generator
 GET  /api/content-briefs     — List saved briefs (?keyword= filter)
 POST /api/content-score      — Content scoring engine (SEO+AEO+readability)
+POST /api/keyword-cluster    — Keyword clustering & TF-IDF analysis
 POST /api/ai-recommendations — AI-powered SEO recommendations
 GET  /api/health             — Health check with category counts
+
+14. KEYWORD CLUSTERING & TF-IDF ENGINE — April 6
+---------------------------------------------------
+- POST /api/keyword-cluster endpoint
+  - Accepts URL (scrapes page, extracts keywords) or seed keyword (LLM generates related terms)
+  - TF-IDF scoring: term frequency analysis on page content
+  - Bigram/trigram extraction for multi-word phrases
+  - Search intent clustering: informational, commercial, transactional, navigational, local
+  - LLM fallback: if seed keyword only, uses Nova Lite to generate 30 related keywords grouped by intent
+- Frontend: "Keyword Clustering & TF-IDF Analysis" section added to audit.html
+  - Seed keyword input or auto-uses audited URL
+  - Color-coded intent clusters with keyword pills
+  - TF-IDF table with frequency and score columns
+  - Key phrases section showing bigrams (cyan) and trigrams (purple)
+- Removed duplicate blueprint registrations in app.py (were registered twice after merge)
 
 ========================================================================
 BRANCH INFO
