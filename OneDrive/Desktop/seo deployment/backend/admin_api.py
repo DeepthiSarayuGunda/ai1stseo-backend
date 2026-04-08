@@ -322,3 +322,56 @@ def admin_me():
         'role': user.get('role', 'member'),
         'name': user.get('name', ''),
     })
+
+
+# ===================== API KEY USAGE ANALYTICS =====================
+
+@admin_bp.route('/api/admin/api-usage', methods=['GET'])
+@require_admin
+def api_key_usage():
+    """Rate limiting dashboard — usage stats per API key."""
+    try:
+        from dynamodb_helper import scan_table
+        keys = scan_table('ai1stseo-api-keys', 100)
+        usage = []
+        for k in keys:
+            usage.append({
+                'prefix': k.get('key_prefix', ''),
+                'label': k.get('label', 'Untitled'),
+                'scopes': k.get('scopes', []),
+                'is_active': k.get('is_active', True),
+                'rate_limit_per_hour': k.get('rate_limit_per_hour', 100),
+                'requests_this_hour': k.get('requests_this_hour', 0),
+                'last_used_at': k.get('last_used_at', ''),
+                'created_at': k.get('created_at', ''),
+            })
+        return jsonify({'status': 'success', 'keys': usage, 'count': len(usage)})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@admin_bp.route('/api/admin/api-usage/logs', methods=['GET'])
+@require_admin
+def api_usage_logs():
+    """Recent API request logs with filtering."""
+    endpoint_filter = request.args.get('endpoint', '')
+    limit = request.args.get('limit', 100, type=int)
+    try:
+        from dynamodb_helper import scan_table
+        logs = scan_table('ai1stseo-api-logs', limit)
+        if endpoint_filter:
+            logs = [l for l in logs if endpoint_filter in l.get('endpoint', '')]
+        # Sort by created_at descending
+        logs.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        # Aggregate top endpoints
+        from collections import Counter
+        endpoint_counts = Counter(l.get('endpoint', '') for l in logs)
+        top_endpoints = [{'endpoint': ep, 'count': c} for ep, c in endpoint_counts.most_common(20)]
+        return jsonify({
+            'status': 'success',
+            'logs': logs[:limit],
+            'top_endpoints': top_endpoints,
+            'total': len(logs),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500

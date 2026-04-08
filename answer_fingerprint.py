@@ -74,57 +74,66 @@ def _compute_diff(old_text, new_text):
 
 def save_fingerprint(brand_name, keyword, ai_model, full_response, probe_id=None, project_id=None):
     """Save a response fingerprint and diff against the previous one."""
-    from db import get_conn
+    try:
+        from db import get_conn
+    except Exception:
+        logger.warning("DB module unavailable, skipping fingerprint save")
+        return {"fingerprint_id": None, "change_detected": False, "diff_summary": None, "response_hash": None}
+
     pid = project_id or DEFAULT_PROJECT_ID
     response_hash = hashlib.sha256(full_response.encode()).hexdigest()
 
-    # Get the last fingerprint for this brand/keyword/model
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
-            SELECT full_response, response_hash FROM answer_fingerprints
-            WHERE brand_name = %s AND keyword = %s AND ai_model = %s AND project_id = %s
-            ORDER BY created_at DESC LIMIT 1
-        """, (brand_name, keyword, ai_model, pid))
-        prev = cur.fetchone()
+    try:
+        # Get the last fingerprint for this brand/keyword/model
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute("""
+                SELECT full_response, response_hash FROM answer_fingerprints
+                WHERE brand_name = %s AND keyword = %s AND ai_model = %s AND project_id = %s
+                ORDER BY created_at DESC LIMIT 1
+            """, (brand_name, keyword, ai_model, pid))
+            prev = cur.fetchone()
 
-    diff_summary = None
-    change_detected = False
-    if prev:
-        if prev["response_hash"] != response_hash:
-            diff_summary = _compute_diff(prev["full_response"], full_response)
-            change_detected = diff_summary["changed"]
-        else:
-            diff_summary = {"added": [], "removed": [], "added_count": 0, "removed_count": 0, "changed": False}
+        diff_summary = None
+        change_detected = False
+        if prev:
+            if prev["response_hash"] != response_hash:
+                diff_summary = _compute_diff(prev["full_response"], full_response)
+                change_detected = diff_summary["changed"]
+            else:
+                diff_summary = {"added": [], "removed": [], "added_count": 0, "removed_count": 0, "changed": False}
 
-    # Insert new fingerprint
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO answer_fingerprints
-                (project_id, brand_name, keyword, ai_model, full_response, response_hash,
-                 diff_summary, change_detected, probe_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (pid, brand_name, keyword, ai_model, full_response, response_hash,
-              json.dumps(diff_summary) if diff_summary else None,
-              change_detected, probe_id))
-        fp_id = str(cur.fetchone()[0])
-        conn.commit()
+        # Insert new fingerprint
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO answer_fingerprints
+                    (project_id, brand_name, keyword, ai_model, full_response, response_hash,
+                     diff_summary, change_detected, probe_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (pid, brand_name, keyword, ai_model, full_response, response_hash,
+                  json.dumps(diff_summary) if diff_summary else None,
+                  change_detected, probe_id))
+            fp_id = str(cur.fetchone()[0])
+            conn.commit()
 
-    # Publish change event to Redis if answer changed
-    if change_detected:
-        try:
-            _publish_change_event(pid, brand_name, keyword, ai_model, diff_summary)
-        except Exception as e:
-            logger.warning("Redis publish failed: %s", e)
+        # Publish change event to Redis if answer changed
+        if change_detected:
+            try:
+                _publish_change_event(pid, brand_name, keyword, ai_model, diff_summary)
+            except Exception as e:
+                logger.warning("Redis publish failed: %s", e)
 
-    return {
-        "fingerprint_id": fp_id,
-        "change_detected": change_detected,
-        "diff_summary": diff_summary,
-        "response_hash": response_hash,
-    }
+        return {
+            "fingerprint_id": fp_id,
+            "change_detected": change_detected,
+            "diff_summary": diff_summary,
+            "response_hash": response_hash,
+        }
+    except Exception as e:
+        logger.warning("Failed to save fingerprint to RDS: %s", e)
+        return {"fingerprint_id": None, "change_detected": False, "diff_summary": None, "response_hash": response_hash}
 
 
 def _publish_change_event(account_id, brand_name, keyword, ai_model, diff_summary):
@@ -150,29 +159,33 @@ def _publish_change_event(account_id, brand_name, keyword, ai_model, diff_summar
 
 def get_fingerprint_history(brand_name, keyword=None, ai_model=None, limit=10, project_id=None):
     """Get the last N fingerprints for a brand, with diff summaries."""
-    from db import get_conn
-    pid = project_id or DEFAULT_PROJECT_ID
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        query = """
-            SELECT id, brand_name, keyword, ai_model, response_hash,
-                   diff_summary, change_detected, created_at
-            FROM answer_fingerprints
-            WHERE brand_name = %s AND project_id = %s
-        """
-        params = [brand_name, pid]
-        if keyword:
-            query += " AND keyword = %s"
-            params.append(keyword)
-        if ai_model:
-            query += " AND ai_model = %s"
-            params.append(ai_model)
-        query += " ORDER BY created_at DESC LIMIT %s"
-        params.append(limit)
-        cur.execute(query, params)
-        rows = cur.fetchall()
-        for r in rows:
-            r["id"] = str(r["id"])
-            if r.get("created_at"):
-                r["created_at"] = r["created_at"].isoformat()
-        return rows
+    try:
+        from db import get_conn
+        pid = project_id or DEFAULT_PROJECT_ID
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            query = """
+                SELECT id, brand_name, keyword, ai_model, response_hash,
+                       diff_summary, change_detected, created_at
+                FROM answer_fingerprints
+                WHERE brand_name = %s AND project_id = %s
+            """
+            params = [brand_name, pid]
+            if keyword:
+                query += " AND keyword = %s"
+                params.append(keyword)
+            if ai_model:
+                query += " AND ai_model = %s"
+                params.append(ai_model)
+            query += " ORDER BY created_at DESC LIMIT %s"
+            params.append(limit)
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            for r in rows:
+                r["id"] = str(r["id"])
+                if r.get("created_at"):
+                    r["created_at"] = r["created_at"].isoformat()
+            return rows
+    except Exception as e:
+        logger.warning("Failed to fetch fingerprint history: %s", e)
+        return []

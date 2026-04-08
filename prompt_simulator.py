@@ -210,21 +210,25 @@ def run_simulation(brand, keyword, provider="nova", project_id=None):
     elapsed = round(time.time() - t0, 2)
 
     # Save to DB
-    from db import get_conn
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO prompt_simulations
-                (project_id, brand, keyword, hit_count, miss_count, hit_rate,
-                 prompt_results, competitors_cited, gap_analysis)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (pid, brand, keyword, hits, misses, hit_rate,
-              json.dumps(results),
-              json.dumps([{"brand": b, "mentions": c} for b, c in top_competitors]),
-              gap_analysis))
-        sim_id = str(cur.fetchone()[0])
-        conn.commit()
+    sim_id = None
+    try:
+        from db import get_conn
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO prompt_simulations
+                    (project_id, brand, keyword, hit_count, miss_count, hit_rate,
+                     prompt_results, competitors_cited, gap_analysis)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (pid, brand, keyword, hits, misses, hit_rate,
+                  json.dumps(results),
+                  json.dumps([{"brand": b, "mentions": c} for b, c in top_competitors]),
+                  gap_analysis))
+            sim_id = str(cur.fetchone()[0])
+            conn.commit()
+    except Exception as e:
+        logger.warning("Failed to persist prompt simulation to RDS: %s", e)
 
     return {
         "simulation_id": sim_id,
@@ -262,20 +266,24 @@ def _generate_gap_analysis(brand, keyword, hit_rate, top_competitors):
 
 def get_simulation_history(brand, limit=5, project_id=None):
     """Get past simulation results."""
-    from db import get_conn
-    pid = project_id or DEFAULT_PROJECT_ID
-    with get_conn() as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
-            SELECT id, brand, keyword, hit_count, miss_count, hit_rate,
-                   competitors_cited, gap_analysis, created_at
-            FROM prompt_simulations
-            WHERE brand = %s AND project_id = %s
-            ORDER BY created_at DESC LIMIT %s
-        """, (brand, pid, limit))
-        rows = cur.fetchall()
-        for r in rows:
-            r["id"] = str(r["id"])
-            if r.get("created_at"):
-                r["created_at"] = r["created_at"].isoformat()
-        return rows
+    try:
+        from db import get_conn
+        pid = project_id or DEFAULT_PROJECT_ID
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute("""
+                SELECT id, brand, keyword, hit_count, miss_count, hit_rate,
+                       competitors_cited, gap_analysis, created_at
+                FROM prompt_simulations
+                WHERE brand = %s AND project_id = %s
+                ORDER BY created_at DESC LIMIT %s
+            """, (brand, pid, limit))
+            rows = cur.fetchall()
+            for r in rows:
+                r["id"] = str(r["id"])
+                if r.get("created_at"):
+                    r["created_at"] = r["created_at"].isoformat()
+            return rows
+    except Exception as e:
+        logger.warning("Failed to fetch simulation history: %s", e)
+        return []

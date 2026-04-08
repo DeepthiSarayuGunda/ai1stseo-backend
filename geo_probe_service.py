@@ -147,6 +147,7 @@ def geo_probe(brand_name: str, keyword: str, ai_model: str = "nova") -> dict:
         "keyword": keyword, "brand_name": brand_name, "ai_model": model_label,
         "brand_present": cited, "citation_context": context,
         "confidence": confidence, "cited_sources": [], "timestamp": _now_iso(),
+        "response_snippet": response_text[:2000] if response_text else "",
     }
 
 

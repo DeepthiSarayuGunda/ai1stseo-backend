@@ -28,7 +28,7 @@
           "HTTPPort": 80, "HTTPSPort": 443,
           "OriginProtocolPolicy": "https-only",
           "OriginSslProtocols": {"Quantity": 1, "Items": ["TLSv1.2"]},
-          "OriginReadTimeout": 30, "OriginKeepaliveTimeout": 5
+          "OriginReadTimeout": 60, "OriginKeepaliveTimeout": 5
         },
         "ConnectionAttempts": 3, "ConnectionTimeout": 10,
         "OriginShield": {"Enabled": false}, "OriginAccessControlId": ""
@@ -64,11 +64,11 @@
     "MinTTL": 0, "DefaultTTL": 0, "MaxTTL": 0
   },
   "CacheBehaviors": {
-    "Quantity": 3,
+    "Quantity": 4,
     "Items": [
       {
         "PathPattern": "/api/*",
-        "TargetOriginId": "lambda-backend",
+        "TargetOriginId": "sgnmqxb2sw.us-east-1.awsapprunner.com",
         "TrustedSigners": {"Enabled": false, "Quantity": 0},
         "TrustedKeyGroups": {"Enabled": false, "Quantity": 0},
         "ViewerProtocolPolicy": "https-only",
@@ -81,8 +81,22 @@
         "MinTTL": 0, "DefaultTTL": 0, "MaxTTL": 0
       },
       {
+        "PathPattern": "/geo-scanner*",
+        "TargetOriginId": "sgnmqxb2sw.us-east-1.awsapprunner.com",
+        "TrustedSigners": {"Enabled": false, "Quantity": 0},
+        "TrustedKeyGroups": {"Enabled": false, "Quantity": 0},
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {"Quantity": 2, "Items": ["HEAD","GET"], "CachedMethods": {"Quantity": 2, "Items": ["HEAD","GET"]}},
+        "SmoothStreaming": false, "Compress": true,
+        "LambdaFunctionAssociations": {"Quantity": 0},
+        "FunctionAssociations": {"Quantity": 0},
+        "FieldLevelEncryptionId": "", "GrpcConfig": {"Enabled": false},
+        "ForwardedValues": {"QueryString": false, "Cookies": {"Forward": "none"}, "Headers": {"Quantity": 1, "Items": ["Host"]}, "QueryStringCacheKeys": {"Quantity": 0}},
+        "MinTTL": 0, "DefaultTTL": 0, "MaxTTL": 0
+      },
+      {
         "PathPattern": "/dev1-dashboard*",
-        "TargetOriginId": "lambda-backend",
+        "TargetOriginId": "sgnmqxb2sw.us-east-1.awsapprunner.com",
         "TrustedSigners": {"Enabled": false, "Quantity": 0},
         "TrustedKeyGroups": {"Enabled": false, "Quantity": 0},
         "ViewerProtocolPolicy": "redirect-to-https",
@@ -96,7 +110,7 @@
       },
       {
         "PathPattern": "/geo-test*",
-        "TargetOriginId": "lambda-backend",
+        "TargetOriginId": "sgnmqxb2sw.us-east-1.awsapprunner.com",
         "TrustedSigners": {"Enabled": false, "Quantity": 0},
         "TrustedKeyGroups": {"Enabled": false, "Quantity": 0},
         "ViewerProtocolPolicy": "redirect-to-https",
