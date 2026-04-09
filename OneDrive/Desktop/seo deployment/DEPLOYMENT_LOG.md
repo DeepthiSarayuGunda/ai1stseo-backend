@@ -6,6 +6,36 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-09 17:00 — Admin API Fix + Rate Limiting + Investor Endpoint (Troy)
+
+**Issue:** `admin_api.py` was reverted to the old RDS version by a team merge, causing all admin dashboard endpoints to fail (they tried to query the stopped RDS database).
+
+**Fix:** Restored the DynamoDB version of `admin_api.py` with all endpoints working against DynamoDB. Redeployed Lambda.
+
+**New endpoints deployed in this cycle:**
+- `GET /api/admin/api-usage` — API key rate limiting dashboard (per-key stats)
+- `GET /api/admin/api-usage/logs` — request log analytics with endpoint filtering
+- `POST /api/invest` — investor inquiry form, sends via SES to gurbachan@ai1stseo.com
+- `POST /api/admin/documents` — document upload (S3 + DynamoDB)
+- `GET /api/admin/documents` — list documents, filter by `?developer=dev1`
+- `GET /api/admin/documents/:id/download` — presigned S3 download URL
+- `DELETE /api/admin/documents/:id` — delete document (admin only)
+- `POST /api/collect-email` — email lead collection for PDF downloads
+- `invest.html` + `contact.html` — restyled to match main site design, live on S3
+
+**Infrastructure changes this week:**
+- DynamoDB migration complete — all 6 backend modules rewritten, 981 rows migrated, RDS deleted ($15/mo saved)
+- OpenClaw Gateway v2026.4.1 installed on seo-dev server (port 18789)
+- Local Ollama accelerator connected with tiered models (8B/30B/235B + embeddings)
+- 4 ClawHub skills installed (seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer)
+- OpenShell CLI + Podman installed — blocked on LXC seccomp restriction for sandbox creation
+- Node.js upgraded to v22 on seo-dev
+- Investor link added to homepage footer
+
+**Reminder to all devs:** When merging branches to main, check the diff for `backend/*.py` files. If you see hundreds of deleted lines you didn't write, your merge is overwriting someone else's work. Always `git pull origin main` before pushing.
+
+---
+
 ## 2026-04-01 02:40 — RDS Shutdown + Data Export (Troy)
 
 **Per Gurbachan's directive:** Moving away from RDS PostgreSQL to individual DynamoDB tables per app.
