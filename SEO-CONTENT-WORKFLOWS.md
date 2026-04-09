@@ -1,8 +1,40 @@
 # SEO & Content Analysis Workflows — Process Documentation
 
 > **Author:** Dev 1 (Deepthi)  
-> **Last Updated:** March 26, 2026  
+> **Last Updated:** April 8, 2026  
 > **Purpose:** Document the end-to-end SEO and content analysis workflows, capturing the process, value-add steps, and data flow for the AI1STSEO platform.
+
+---
+
+## Quick-Start Guide — Which Workflow Do I Use?
+
+| I want to… | Use this workflow | API endpoint |
+|------------|-------------------|-------------|
+| Check if AI mentions my brand | Workflow 1 — GEO Probe | `POST /api/geo-probe` |
+| Get a visibility score across many keywords | Workflow 2 — Batch Probe | `POST /api/geo-probe/batch` |
+| See which AI engines miss my brand | Workflow 3 — Cross-Model Compare | `POST /api/geo-probe/compare` |
+| Fix my page for AI readability | Workflow 4 — AEO Analysis | `POST /api/aeo/analyze` |
+| Get a prioritized improvement plan | Workflow 5 — AI Ranking | `POST /api/ai/ranking-recommendations` |
+| Run a full one-click audit | Workflow 6 — GEO Scanner Agent | `POST /api/geo-scanner/scan` |
+| Generate AI-optimized content | Workflow 7 — Content Generation | `POST /api/content/generate` |
+| Plan content based on SERP data | Workflow 8 — Content Brief | `POST /api/content-brief` |
+| Run a full 236-check SEO audit | Workflow 9 — SEO Analysis | `POST /api/analyze` |
+
+## End-to-End Flow (Recommended Order)
+
+```
+Step 1: Run GEO Scanner Agent (Workflow 6) — get overall AI visibility score
+   ↓
+Step 2: Review recommendations — identify gaps
+   ↓
+Step 3: Fix content structure issues (Workflow 4 — AEO)
+   ↓
+Step 4: Generate optimized content (Workflow 7 — FAQ, comparisons)
+   ↓
+Step 5: Re-scan to measure improvement (Workflow 6 again)
+   ↓
+Step 6: Set up monitoring (Workflow 2 — Batch Probe on schedule)
+```
 
 ---
 

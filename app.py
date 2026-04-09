@@ -3257,7 +3257,6 @@ def llm_citation_probe():
 # ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
 
 @app.route('/api/geo-scanner/scan', methods=['POST'])
-@app.route('/api/geo-scanner/scan', methods=['POST'])
 def geo_scanner_scan():
     """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
     from geo_scanner_agent import run_full_scan
