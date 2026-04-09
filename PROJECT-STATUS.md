@@ -264,6 +264,7 @@ Files deployed to S3 this session: `index.html`, `dashboard.html`, `admin.html`,
 
 | Date | Change | Files |
 |------|--------|-------|
+| Apr 7, 2026 | Created `score-trend.html` — historical audit score trend chart with bar visualization, stats cards (latest, change, best, average, total audits), per-URL breakdown for sites with multiple scans. Added to Tools dropdown. Fixed homepage encoding using HTML entities. Updated before/after comparison to sort categories by biggest change first per Gurbachan. | `score-trend.html`, `audit-compare.html`, `index-new.html`, `frontend/src/components/Navbar.tsx` |
 | Mar 31, 2026 | Added email gate to PDF report download in `audit.html` — modal popup requires email before generating PDF (per Gurbachan's request to collect emails for marketing). Validates email format, stores email + audit URL + score + timestamp in localStorage (`ai1stseo_pdf_emails`). Skips gate on subsequent downloads in same session. Escape/backdrop to close. | `audit.html` |
 | Mar 31, 2026 | Shut down Lightsail to prevent ongoing costs — created snapshot `OpenClaw-1-final-backup-mar31` (no data loss), deleted instance `OpenClaw-1` (medium tier, 2 CPU, 4GB RAM, 80GB disk), released static IP `StaticIp-1` (98.88.198.5). Lightsail now at zero resources. | AWS Lightsail |
 | Mar 29, 2026 | Deployed seo-audit-tool to Linux server (seo-dev) — PM2 process manager, port 8080, Tailscale access at 100.108.196.117:8080. Deployment instructions added to PROJECT-STATUS.md. | Linux server, `PROJECT-STATUS.md` |

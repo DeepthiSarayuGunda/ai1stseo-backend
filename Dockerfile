@@ -2,16 +2,25 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
+# Install system deps for psycopg2 (in case binary wheel fails)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
-COPY application.py .
-COPY bedrock_helper.py .
-COPY index.html .
-COPY analyze.html .
-COPY audit.html .
+# Copy all Python modules
+COPY *.py ./
+
+# Copy HTML dashboards
+COPY *.html ./
+
+# Copy static assets
 COPY assets/ ./assets/
+
+# Copy config files
+COPY apprunner.yaml .
 
 EXPOSE 8080
 
