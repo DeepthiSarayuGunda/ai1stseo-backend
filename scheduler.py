@@ -142,7 +142,7 @@ def _run_scraper():
 
 
 def _run_geo_probes():
-    """Run GEO probes for all registered brands."""
+    """Run GEO probes for all registered brands, then transform to Month 3 tables."""
     brands = get_monitored_brands()
     if not brands:
         logger.info("No brands registered for monitoring, skipping GEO probes")
@@ -168,6 +168,17 @@ def _run_geo_probes():
                 logger.error("GEO probe failed for %s: %s", entry.get("brand"), e)
     except Exception as e:
         logger.error("Scheduled GEO probes failed: %s", e)
+
+    # Transform raw probes → Month 3 intelligence tables
+    try:
+        from probe_to_intelligence import transform_probes_to_intelligence
+        for entry in brands:
+            brand = entry.get("brand", "")
+            if brand:
+                result = transform_probes_to_intelligence(brand)
+                logger.info("Probe→Intelligence transform [%s]: %s", brand, result.get("status"))
+    except Exception as e:
+        logger.error("Probe→Intelligence transform failed: %s", e)
 
 
 def _scheduler_loop():
