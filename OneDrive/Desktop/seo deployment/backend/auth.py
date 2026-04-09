@@ -144,35 +144,62 @@ def require_admin(f):
 
 
 def _get_user_role(email):
-    """Look up user role from RDS. Returns 'member' if not found."""
+    """Look up user role from DynamoDB. Returns 'admin' if any record for this email is admin."""
     try:
-        from database import query_one
-        row = query_one("SELECT role FROM users WHERE email = %s", (email,))
-        return row['role'] if row else 'member'
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+        )
+        items = resp.get('Items', [])
+        for item in items:
+            if item.get('role') == 'admin':
+                return 'admin'
+        return 'member' if not items else items[0].get('role', 'member')
     except Exception:
         return 'member'
 
 
 def _sync_user_to_db(email, cognito_sub, name=''):
-    """Upsert user to RDS on login — syncs Cognito data to local users table."""
+    """Upsert user to DynamoDB on login."""
     try:
-        from database import execute, query_one
-        existing = query_one("SELECT id, role FROM users WHERE email = %s", (email,))
-        if existing:
-            execute(
-                "UPDATE users SET last_login = NOW(), cognito_sub = %s, name = %s WHERE email = %s",
-                (cognito_sub, name, email),
+        import boto3, uuid
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        now = datetime.now(timezone.utc).isoformat()
+        if items:
+            table.update_item(
+                Key={'userId': items[0]['userId']},
+                UpdateExpression='SET last_login = :ll, cognito_sub = :cs, #n = :nm',
+                ExpressionAttributeNames={'#n': 'name'},
+                ExpressionAttributeValues={':ll': now, ':cs': cognito_sub, ':nm': name},
             )
-            return existing['role']
+            # Return admin if any record is admin
+            for item in items:
+                if item.get('role') == 'admin':
+                    return 'admin'
+            return items[0].get('role', 'member')
         else:
-            # Default project
-            project_id = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
-            execute(
-                "INSERT INTO users (cognito_sub, email, name, role, project_id, last_login) "
-                "VALUES (%s, %s, %s, 'member', %s, NOW())",
-                (cognito_sub, email, name, project_id),
-            )
+            table.put_item(Item={
+                'userId': str(uuid.uuid4()),
+                'email': email, 'cognito_sub': cognito_sub, 'name': name,
+                'role': 'member', 'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                'created_at': now, 'last_login': now,
+            })
             return 'member'
+    except Exception:
+        return 'member'
     except Exception as e:
         print("User sync failed: {}".format(e))
         return 'member'
