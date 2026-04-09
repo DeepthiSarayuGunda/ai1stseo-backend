@@ -199,6 +199,39 @@ GET  /api/health             — Health check with category counts
   - Key phrases section showing bigrams (cyan) and trigrams (purple)
 - Removed duplicate blueprint registrations in app.py (were registered twice after merge)
 
+15. TEMPLATE BENCHMARK ENGINE — April 7
+------------------------------------------
+- POST /api/template-benchmark endpoint
+  - Compares any URL against the perfect AEO/GEO/SEO template for its business type
+  - 4 business types: service, manufacturing, ecommerce, saas
+  - Each template defines: ideal title/meta format, required schema types, heading structure,
+    min word count, required AEO elements (FAQs, definitions, lists, tables, citations),
+    and required content sections with word budgets
+  - Returns gap analysis: what's missing, current vs ideal, points lost per gap
+  - AI recommendations via LLM for top gaps
+- GET /api/template-types — lists available business types
+- Standalone frontend: template-benchmark.html
+  - URL input + business type dropdown
+  - Score rings: Overall, AEO (first per client feedback), SEO, Content
+  - Gap breakdown by category with point deductions
+  - Content section checklist (found vs missing)
+  - AI fix recommendations panel
+- Per Gurbachan's directive: create perfect templates for different business types
+  that score 100% and serve as benchmarks for AEO/GEO/SEO scoring
+
+========================================================================
+API ENDPOINTS (Dev 2 owned)
+========================================================================
+POST /api/analyze            — 200-check SEO audit (10 categories incl citationgap)
+POST /api/content-brief      — AI content brief generator
+GET  /api/content-briefs     — List saved briefs (?keyword= filter)
+POST /api/content-score      — Content scoring engine (SEO+AEO+readability)
+POST /api/keyword-cluster    — Keyword clustering & TF-IDF analysis
+POST /api/template-benchmark — Template benchmark (URL vs perfect business template)
+GET  /api/template-types     — List available business template types
+POST /api/ai-recommendations — AI-powered SEO recommendations
+GET  /api/health             — Health check with category counts
+
 ========================================================================
 BRANCH INFO
 ========================================================================

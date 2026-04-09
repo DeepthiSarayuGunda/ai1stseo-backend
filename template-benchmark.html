@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Benchmark — AI1stSEO</title>
+    <style>
+        :root { --bg: #0a0a0a; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --text: #fff; --muted: rgba(255,255,255,0.6); --accent: #00d4ff; --green: #00ff88; --purple: #a855f7; --orange: #ff9800; --red: #f44336; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        nav { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo { color: var(--accent); font-weight: 700; font-size: 1.1rem; text-decoration: none; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; margin-left: 20px; }
+        .container { max-width: 960px; margin: 0 auto; padding: 30px 20px; }
+        h1 { font-size: 1.6rem; margin-bottom: 6px; }
+        .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .input-row input { flex: 1; min-width: 250px; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 0.95rem; outline: none; }
+        .input-row input:focus { border-color: var(--accent); }
+        .input-row select { padding: 12px 16px; background: #1a1a2e; border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 10px; font-size: 0.9rem; cursor: pointer; }
+        .input-row select option { background: #1a1a2e; color: #fff; }
+        .btn { padding: 12px 28px; background: linear-gradient(90deg, var(--accent), var(--purple)); border: none; border-radius: 10px; color: #fff; font-weight: 600; font-size: 0.95rem; cursor: pointer; white-space: nowrap; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+    <nav>
+        <a href="https://www.ai1stseo.com" class="nav-logo">🔍 AI1stSEO</a>
+        <div class="nav-links">
+            <a href="https://www.ai1stseo.com">Home</a>
+            <a href="https://www.ai1stseo.com/dashboard.html">Dashboard</a>
+            <a href="https://www.ai1stseo.com/audit.html">Audit</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>📊 Template Benchmark Engine</h1>
+        <div class="subtitle">Compare any URL against the perfect AEO/GEO/SEO template for its business type. See exactly what's missing and get AI-powered fix recommendations.</div>
+
+        <div class="input-row">
+            <input type="text" id="benchUrl" placeholder="Enter URL to benchmark..." />
+            <select id="benchType">
+                <option value="" style="background:#1a1a2e;color:#fff;">Select business type...</option>
+                <option value="service" style="background:#1a1a2e;color:#fff;">Service (Dentist, Plumber, Lawyer)</option>
+                <option value="manufacturing" style="background:#1a1a2e;color:#fff;">Manufacturing (Factory, Supplier)</option>
+                <option value="ecommerce" style="background:#1a1a2e;color:#fff;">E-Commerce / Retail</option>
+                <option value="saas" style="background:#1a1a2e;color:#fff;">SaaS / Technology</option>
+            </select>
+            <button class="btn" id="benchBtn" onclick="runBenchmark()">🎯 Benchmark</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+
+        async function runBenchmark() {
+            const url = document.getElementById('benchUrl').value.trim();
+            const type = document.getElementById('benchType').value;
+            const btn = document.getElementById('benchBtn');
+            const results = document.getElementById('results');
+
+            if (!url) { alert('Enter a URL'); return; }
+            if (!type) { alert('Select a business type'); return; }
+
+            btn.disabled = true; btn.textContent = '⏳ Analyzing...';
+            results.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Fetching page, running benchmark against perfect template, generating AI recommendations...</div>';
+
+            try {
+                const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+                const resp = await fetch(API_BASE + '/api/template-benchmark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: fullUrl, business_type: type })
+                });
+                const data = await resp.json();
+
+                if (data.status === 'success') {
+                    const b = data.benchmark;
+                    let html = '';
+
+                    // Score rings
+                    html += '<div style="display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin:30px 0;">';
+                    html += scoreRing(b.overall_score, 'Overall', '#10b981');
+                    html += scoreRing(b.aeo_score, 'AEO', '#a855f7');
+                    html += scoreRing(b.seo_score, 'SEO', '#3b82f6');
+                    html += scoreRing(b.content_score, 'Content', '#ff9800');
+                    html += '</div>';
+
+                    // Template info
+                    html += '<div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:12px;padding:16px;margin-bottom:20px;">';
+                    html += '<div style="font-size:0.8rem;color:var(--muted);">Benchmarked against</div>';
+                    html += '<div style="font-size:1.1rem;font-weight:600;color:var(--accent);">' + data.template + ' Perfect Template</div>';
+                    html += '<div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">' + b.total_gaps + ' gaps found — ' + (100 - b.overall_score) + ' points to perfect score</div>';
+                    html += '</div>';
+
+                    // Gap sections
+                    const gapColors = { aeo: { color: '#a855f7', icon: '🤖', label: 'AEO Gaps (AI Engine Optimization)' }, seo: { color: '#3b82f6', icon: '🔍', label: 'SEO Gaps' }, content: { color: '#ff9800', icon: '📝', label: 'Content Structure Gaps' } };
+                    for (const [cat, meta] of Object.entries(gapColors)) {
+                        const gaps = b.gaps[cat] || [];
+                        if (gaps.length === 0) continue;
+                        html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">';
+                        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span>' + meta.icon + '</span><strong style="color:' + meta.color + ';">' + meta.label + '</strong><span style="font-size:0.75rem;color:var(--muted);">(' + gaps.length + ' issues)</span></div>';
+                        gaps.forEach(function(g) {
+                            html += '<div style="display:flex;justify-content:space-between;align-items:start;padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:6px;font-size:0.85rem;">';
+                            html += '<div style="flex:1;"><div style="font-weight:600;margin-bottom:3px;">' + g.check + '</div>';
+                            html += '<div style="color:var(--red);font-size:0.8rem;">Current: ' + g.current + '</div>';
+                            html += '<div style="color:var(--green);font-size:0.8rem;">Ideal: ' + g.ideal + '</div></div>';
+                            html += '<div style="background:rgba(244,67,54,0.15);color:var(--red);padding:3px 10px;border-radius:20px;font-size:0.75rem;white-space:nowrap;">-' + g.points + ' pts</div>';
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                    }
+
+                    // Required content sections
+                    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">';
+                    html += '<div style="font-weight:600;color:var(--accent);margin-bottom:12px;">📋 Required Content Sections for ' + data.template + '</div>';
+                    b.content_sections.forEach(function(s) {
+                        const found = !b.gaps.content.some(function(g) { return g.check === s.heading; });
+                        html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.85rem;">';
+                        html += '<span style="color:' + (found ? 'var(--green)' : 'var(--red)') + ';">' + (found ? '✓' : '✗') + '</span>';
+                        html += '<span>' + s.heading + '</span>';
+                        html += '<span style="color:var(--muted);font-size:0.75rem;">— ' + s.purpose + ' (' + s.min_words + '+ words)</span>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+
+                    // AI recommendations
+                    if (data.ai_recommendations) {
+                        html += '<div style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(0,212,255,0.08));border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:16px;margin-bottom:14px;">';
+                        html += '<div style="font-weight:600;color:var(--purple);margin-bottom:10px;">🤖 AI Fix Recommendations</div>';
+                        html += '<div style="white-space:pre-wrap;font-size:0.85rem;color:var(--muted);line-height:1.7;">' + data.ai_recommendations + '</div>';
+                        html += '</div>';
+                    }
+
+                    results.innerHTML = html;
+                } else {
+                    results.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:10px;color:var(--red);">' + (data.error || 'Unknown error') + '</div>';
+                }
+            } catch (err) {
+                results.innerHTML = '<div style="padding:20px;background:rgba(244,67,54,0.1);border-radius:10px;color:var(--red);">Connection error: ' + err.message + '</div>';
+            }
+            btn.disabled = false; btn.textContent = '🎯 Benchmark';
+        }
+
+        function scoreRing(score, label, color) {
+            const size = 100, r = 42, circ = 2 * Math.PI * r;
+            const offset = circ - (score / 100) * circ;
+            return '<div style="text-align:center;">' +
+                '<svg width="' + size + '" height="' + size + '" style="transform:rotate(-90deg);">' +
+                '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>' +
+                '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="6" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" stroke-linecap="round"/>' +
+                '</svg>' +
+                '<div style="margin-top:-70px;font-size:1.4rem;font-weight:700;">' + score + '</div>' +
+                '<div style="font-size:0.7rem;color:var(--muted);margin-top:24px;">' + label + '</div></div>';
+        }
+    </script>
+</body>
+</html>
