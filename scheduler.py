@@ -6,8 +6,12 @@ Starts as a daemon thread inside the Flask app so it runs continuously on App Ru
 Schedules:
   - Business directory scraper: every 24 hours
   - GEO brand monitoring probes: every 6 hours (for registered brands)
+
+Monitored brands are persisted to DynamoDB so they survive restarts
+and are shared across all gunicorn workers.
 """
 
+import json
 import logging
 import threading
 import time
@@ -18,27 +22,108 @@ logger = logging.getLogger(__name__)
 _scheduler_started = False
 _lock = threading.Lock()
 
-# In-memory registry of brands to monitor (populated via API or on startup)
-_monitored_brands = []
+# DynamoDB table for persisting monitored brands
+# Uses the existing geo-probes table with a special record type prefix
+MONITOR_TABLE = 'ai1stseo-geo-probes'
+MONITOR_PREFIX = 'MONITOR#'
+
+
+def _get_dynamo_table():
+    """Get the DynamoDB table for monitored brands."""
+    try:
+        import boto3
+        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+        return dynamodb.Table(MONITOR_TABLE)
+    except Exception as e:
+        logger.warning("DynamoDB monitor table unavailable: %s", e)
+        return None
 
 
 def register_brand(brand_name: str, keywords: list, provider: str = "nova"):
-    """Register a brand for continuous GEO monitoring."""
-    for b in _monitored_brands:
+    """Register a brand for continuous GEO monitoring. Persists to DynamoDB."""
+    table = _get_dynamo_table()
+    if table:
+        try:
+            table.put_item(Item={
+                'id': MONITOR_PREFIX + brand_name,
+                'keyword': '__monitor__',
+                'brand_name': brand_name,
+                'keywords': keywords,
+                'provider': provider,
+                'registered_at': datetime.now(timezone.utc).isoformat(),
+                'active': True,
+                'record_type': 'monitor',
+            })
+            logger.info("Registered brand for monitoring (DynamoDB): %s (%d keywords)",
+                        brand_name, len(keywords))
+            return
+        except Exception as e:
+            logger.warning("DynamoDB save failed, using in-memory: %s", e)
+
+    # Fallback: in-memory only
+    _monitored_brands_mem = _load_from_memory()
+    for b in _monitored_brands_mem:
         if b["brand"] == brand_name:
             b["keywords"] = keywords
             b["provider"] = provider
             return
-    _monitored_brands.append({
+    _monitored_brands_mem.append({
         "brand": brand_name,
         "keywords": keywords,
         "provider": provider,
     })
-    logger.info("Registered brand for monitoring: %s (%d keywords)", brand_name, len(keywords))
+    logger.info("Registered brand for monitoring (in-memory): %s (%d keywords)",
+                brand_name, len(keywords))
+
+
+# In-memory fallback
+_monitored_brands_mem_store = []
+
+
+def _load_from_memory():
+    return _monitored_brands_mem_store
 
 
 def get_monitored_brands():
-    return list(_monitored_brands)
+    """Get all monitored brands — from DynamoDB first, fallback to in-memory."""
+    table = _get_dynamo_table()
+    if table:
+        try:
+            from boto3.dynamodb.conditions import Attr
+            resp = table.scan(
+                FilterExpression=Attr('record_type').eq('monitor') & Attr('active').eq(True),
+                Limit=50,
+            )
+            items = resp.get('Items', [])
+            brands = []
+            for item in items:
+                brands.append({
+                    'brand': item.get('brand_name', ''),
+                    'keywords': item.get('keywords', []),
+                    'provider': item.get('provider', 'nova'),
+                    'registered_at': item.get('registered_at', ''),
+                })
+            return brands
+        except Exception as e:
+            logger.warning("DynamoDB read failed, using in-memory: %s", e)
+    return list(_monitored_brands_mem_store)
+
+
+def unregister_brand(brand_name: str):
+    """Remove a brand from continuous monitoring."""
+    table = _get_dynamo_table()
+    if table:
+        try:
+            table.update_item(
+                Key={'id': MONITOR_PREFIX + brand_name},
+                UpdateExpression='SET active = :val',
+                ExpressionAttributeValues={':val': False},
+            )
+            logger.info("Unregistered brand: %s", brand_name)
+            return True
+        except Exception as e:
+            logger.warning("DynamoDB unregister failed: %s", e)
+    return False
 
 
 def _run_scraper():
@@ -50,30 +135,37 @@ def _run_scraper():
         scraper = BusinessScraper(db=db)
         result = scraper.scrape_all()
         logger.info("Scraper complete: found=%s added=%s errors=%s",
-                     result["found"], result["added"], len(result["errors"]))
+                     result.get("found", 0), result.get("added", 0),
+                     len(result.get("errors", [])))
     except Exception as e:
         logger.error("Scheduled scraper failed: %s", e)
 
 
 def _run_geo_probes():
     """Run GEO probes for all registered brands."""
-    if not _monitored_brands:
+    brands = get_monitored_brands()
+    if not brands:
         logger.info("No brands registered for monitoring, skipping GEO probes")
         return
+
+    logger.info("Running GEO probes for %d registered brands", len(brands))
     try:
         from geo_probe_service import geo_probe_batch
-        for entry in _monitored_brands:
+        for entry in brands:
             try:
-                result = geo_probe_batch(
-                    entry["brand"], entry["keywords"], ai_model=entry["provider"]
-                )
+                brand = entry.get("brand", "")
+                keywords = entry.get("keywords", [])
+                provider = entry.get("provider", "nova")
+                if not brand or not keywords:
+                    continue
+                result = geo_probe_batch(brand, keywords, ai_model=provider)
                 score = result.get("geo_score", 0)
                 cited = result.get("cited_count", 0)
                 total = result.get("total_prompts", 0)
                 logger.info("GEO probe [%s]: score=%.2f cited=%d/%d",
-                            entry["brand"], score, cited, total)
+                            brand, score, cited, total)
             except Exception as e:
-                logger.error("GEO probe failed for %s: %s", entry["brand"], e)
+                logger.error("GEO probe failed for %s: %s", entry.get("brand"), e)
     except Exception as e:
         logger.error("Scheduled GEO probes failed: %s", e)
 
