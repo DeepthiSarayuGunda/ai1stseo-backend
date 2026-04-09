@@ -340,7 +340,7 @@ def login():
         # Decode the ID token to get user info
         id_payload = _decode_jwt_payload(auth_result['IdToken'])
 
-        # Sync user to RDS and get role
+        # Sync user to DynamoDB and get role
         user_email = id_payload.get('email', email)
         user_sub = id_payload.get('sub', '')
         user_name = id_payload.get('name', '')
