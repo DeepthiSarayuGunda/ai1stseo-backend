@@ -5627,6 +5627,44 @@ def investor_inquiry():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+# === Content Freshness API ===
+@app.route('/api/content-freshness', methods=['POST'])
+def update_content_freshness():
+    """Record a content update timestamp for AI ranking freshness signals."""
+    data = request.get_json() or {}
+    url = data.get('url', '').strip()
+    if not url:
+        return jsonify({'status': 'error', 'message': 'url required'}), 400
+    try:
+        from dynamodb_helper import put_item
+        from datetime import datetime, timezone
+        record_id = put_item('ai1stseo-audits', {
+            'url': url,
+            'content_type': data.get('content_type', 'page_update'),
+            'update_type': data.get('update_type', 'content_refresh'),
+            'updated_sections': data.get('sections', []),
+            'freshness_timestamp': datetime.now(timezone.utc).isoformat(),
+            'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+        })
+        return jsonify({'status': 'success', 'id': record_id, 'timestamp': datetime.now(timezone.utc).isoformat()})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/content-freshness', methods=['GET'])
+def get_content_freshness():
+    """Get content freshness history for a URL."""
+    url = request.args.get('url', '')
+    try:
+        from dynamodb_helper import scan_table
+        items = scan_table('ai1stseo-audits', 100)
+        fresh = [i for i in items if i.get('update_type') == 'content_refresh' and (not url or i.get('url') == url)]
+        fresh.sort(key=lambda x: x.get('freshness_timestamp', ''), reverse=True)
+        return jsonify({'status': 'success', 'updates': fresh[:20]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 # === Lambda handler (Mangum) ===
 import os as _os
 _IS_LAMBDA = bool(_os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
