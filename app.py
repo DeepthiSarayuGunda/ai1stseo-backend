@@ -142,6 +142,12 @@ try:
 except Exception as e:
     print(f"⚠ Scanner Intelligence API: {e}")
 
+try:
+    from deepthi_intelligence.month3_completion import month3_bp
+    app.register_blueprint(month3_bp)
+except Exception as e:
+    print(f"⚠ Month 3 Completion API: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
