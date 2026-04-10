@@ -71,6 +71,34 @@ td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
   <a href="/">Home</a>
 </nav>
 
+<!-- Live Probe Input -->
+<div class="card" style="margin-bottom:24px;border-color:rgba(99,102,241,.2)">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <span style="font-size:1.1rem">🔍</span>
+    <h2 style="font-size:1rem;color:#e1e4e8;font-weight:700">Run a Live AI Visibility Probe</h2>
+  </div>
+  <p style="font-size:.78rem;color:#7d8590;margin-bottom:16px">Enter any brand name and keywords to check AI visibility in real-time. Results are saved and appear in the dashboard below.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div>
+      <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Brand Name</label>
+      <input id="probe-brand" placeholder="e.g. Ahrefs, Shopify, your brand" style="width:100%;height:40px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem">
+    </div>
+    <div>
+      <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">AI Provider</label>
+      <select id="probe-provider" style="width:100%;height:40px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem">
+        <option value="nova">Nova Lite (Bedrock) — fast</option>
+        <option value="ollama">Ollama (qwen3:30b) — slower</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-top:12px">
+    <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Keywords — one per line</label>
+    <textarea id="probe-keywords" rows="3" placeholder="best seo tool&#10;ai seo optimization&#10;keyword research tool" style="width:100%;padding:10px 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem;font-family:inherit;resize:vertical"></textarea>
+  </div>
+  <button id="probe-btn" onclick="runLiveProbe()" style="margin-top:14px;height:44px;width:100%;border:none;border-radius:8px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#6366f1,#818cf8);transition:all .15s">🔬 Run Live AI Probe</button>
+  <div id="probe-status" style="display:none;margin-top:12px;padding:12px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:8px;font-size:.82rem"></div>
+</div>
+
 <div id="loading" class="loading"><div class="spinner"></div><br>Loading intelligence data...</div>
 <div id="dashboard" style="display:none">
 
@@ -327,4 +355,56 @@ function renderRecs(sl){
 }
 
 load();
+
+async function runLiveProbe(){
+  const brand = document.getElementById('probe-brand').value.trim();
+  const kw = document.getElementById('probe-keywords').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  const provider = document.getElementById('probe-provider').value;
+  const btn = document.getElementById('probe-btn');
+  const status = document.getElementById('probe-status');
+
+  if(!brand){ status.style.display='block'; status.innerHTML='<span style="color:#f85149">Please enter a brand name.</span>'; return; }
+  if(!kw.length){ status.style.display='block'; status.innerHTML='<span style="color:#f85149">Please enter at least one keyword.</span>'; return; }
+
+  btn.disabled=true;
+  btn.textContent='🔄 Probing AI engines… this may take 30-60 seconds';
+  status.style.display='block';
+  status.innerHTML='<span style="color:#8b949e">Running batch probe for <strong>'+esc(brand)+'</strong> across '+kw.length+' keywords on '+esc(provider)+'…</span>';
+
+  try{
+    const r = await fetch(BASE+'/api/geo-probe/batch',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({brand_name:brand, keywords:kw, provider:provider})
+    });
+    const d = await r.json();
+    if(d.error){ status.innerHTML='<span style="color:#f85149">Error: '+esc(d.error)+'</span>'; return; }
+
+    const geoScore = Math.round((d.geo_score||0)*100);
+    const cited = d.cited_count||0;
+    const total = d.total_prompts||0;
+    const cls = geoScore>=60?'up':geoScore>=30?'stable':'down';
+
+    let html = '<div style="margin-bottom:12px"><span style="font-size:1.2rem;font-weight:800" class="'+cls+'">'+geoScore+'%</span> <span style="color:#7d8590">GEO Score for <strong style="color:#e1e4e8">'+esc(brand)+'</strong> — '+cited+'/'+total+' keywords cited</span></div>';
+
+    const results = d.results||[];
+    results.forEach(r=>{
+      const icon = (r.brand_present||r.cited)?'✅':'❌';
+      const conf = Math.round((r.confidence||0)*100);
+      html+='<div style="font-size:.78rem;padding:4px 0;color:#c9d1d9">'+icon+' <strong>'+esc(r.keyword||'')+'</strong>';
+      if(r.citation_context) html+=' — <span style="color:#7d8590">'+esc(r.citation_context.substring(0,120))+'</span>';
+      html+=' <span style="color:#484f58">('+conf+'% confidence)</span></div>';
+    });
+
+    html+='<div style="margin-top:12px;font-size:.78rem;color:#3fb950">✅ Results saved to database. Refresh the dashboard below to see updated scores.</div>';
+    html+='<button onclick="load();this.textContent=\'Refreshed!\';this.disabled=true" style="margin-top:8px;height:34px;padding:0 16px;border:none;border-radius:6px;background:#238636;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer">🔄 Refresh Dashboard</button>';
+
+    status.innerHTML=html;
+  }catch(e){
+    status.innerHTML='<span style="color:#f85149">Network error: '+esc(e.message)+'</span>';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='🔬 Run Live AI Probe';
+  }
+}
 </script>
