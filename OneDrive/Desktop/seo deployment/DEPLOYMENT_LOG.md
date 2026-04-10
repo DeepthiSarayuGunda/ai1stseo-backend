@@ -6,6 +6,31 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-22 — Slack/Email Notifications + Content Freshness API (Troy)
+
+**New features deployed to Lambda:**
+
+**Slack + Email Notification Channels (WBS 6.3):**
+- `POST /api/notifications/subscribe` — subscribe to events via Slack webhook URL or email address
+  - Body: `{"channel": "slack", "target": "https://hooks.slack.com/...", "events": ["audit.created", "*"]}`
+  - Or: `{"channel": "email", "target": "user@example.com", "events": ["uptime.down"]}`
+- `GET /api/notifications` — list notification subscriptions
+- All `dispatch_event()` calls now trigger both webhook URLs AND Slack/email notifications
+- Slack messages include emoji per event type and formatted payload
+- Email notifications sent via SES from no-reply@ai1stseo.com
+
+**Content Freshness API (for AI ranking maintenance):**
+- `POST /api/content-freshness` — record a content update timestamp
+  - Body: `{"url": "https://ai1stseo.com/page", "update_type": "content_refresh", "sections": ["faq", "pricing"]}`
+- `GET /api/content-freshness?url=...` — get freshness history for a URL
+- Gurbachan emphasized that AI algorithms require regular timestamped updates to maintain rankings
+
+**Files changed:** `backend/webhook_api.py`, `backend/app.py`
+
+**Reminder:** Read `IMPORTANT_READ_BEFORE_PUSHING.md` before merging to main. Do NOT revert backend files to RDS imports.
+
+---
+
 ## 2026-04-09 17:00 — Admin API Fix + Rate Limiting + Investor Endpoint (Troy)
 
 **Issue:** `admin_api.py` was reverted to the old RDS version by a team merge, causing all admin dashboard endpoints to fail (they tried to query the stopped RDS database).
