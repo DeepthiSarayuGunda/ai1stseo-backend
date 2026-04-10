@@ -42,6 +42,8 @@ DEEPTHI_TABLES = {
     f'{PREFIX}deepthi-template-recommendations': {'pk': 'rec_id'},
     # Automated action register (PK: action_id)
     f'{PREFIX}deepthi-auto-actions': {'pk': 'action_id'},
+    # Month 4: External citation building log (PK: citation_id)
+    f'{PREFIX}deepthi-external-citations': {'pk': 'citation_id'},
 }
 
 
