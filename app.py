@@ -4004,6 +4004,12 @@ def serve_geo_scanner():
     return send_from_directory('.', 'geo-scanner.html')
 
 
+@app.route('/geo-scanner-intelligence')
+def serve_geo_scanner_intelligence():
+    """Serve the Deepthi GEO Intelligence Dashboard (post-scan)."""
+    return send_from_directory('.', 'geo-scanner-intelligence.html')
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
