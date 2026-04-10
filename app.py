@@ -111,6 +111,31 @@ try:
 except Exception as e:
     print(f"⚠ Month 3 systems: {e}")
 
+# --- Deepthi Intelligence Layer API ---
+try:
+    from deepthi_intelligence.api import deepthi_bp
+    app.register_blueprint(deepthi_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Intelligence: {e}")
+
+try:
+    from deepthi_intelligence.benchmark_api import benchmark_bp
+    app.register_blueprint(benchmark_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Benchmark API: {e}")
+
+try:
+    from deepthi_intelligence.deepthi_prod_api import deepthi_prod_bp
+    app.register_blueprint(deepthi_prod_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Production API: {e}")
+
+try:
+    from deepthi_intelligence.public_stats_api import public_stats_bp
+    app.register_blueprint(public_stats_bp)
+except Exception as e:
+    print(f"⚠ Public Stats API: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
