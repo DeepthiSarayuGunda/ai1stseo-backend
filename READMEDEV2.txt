@@ -199,8 +199,8 @@ GET  /api/health             — Health check with category counts
   - Key phrases section showing bigrams (cyan) and trigrams (purple)
 - Removed duplicate blueprint registrations in app.py (were registered twice after merge)
 
-15. TEMPLATE BENCHMARK ENGINE — April 7
-------------------------------------------
+15. TEMPLATE BENCHMARK ENGINE — April 7-13
+---------------------------------------------
 - POST /api/template-benchmark endpoint
   - Compares any URL against the perfect AEO/GEO/SEO template for its business type
   - 4 business types: service, manufacturing, ecommerce, saas
@@ -210,14 +210,21 @@ GET  /api/health             — Health check with category counts
   - Returns gap analysis: what's missing, current vs ideal, points lost per gap
   - AI recommendations via LLM for top gaps
 - GET /api/template-types — lists available business types
-- Standalone frontend: template-benchmark.html
-  - URL input + business type dropdown
-  - Score rings: Overall, AEO (first per client feedback), SEO, Content
-  - Gap breakdown by category with point deductions
-  - Content section checklist (found vs missing)
-  - AI fix recommendations panel
+- GET /api/template-perfect/<type> — returns full template definition for frontend
+- GET /api/template-preview/<type> — renders perfect HTML page for business type (live preview)
+- POST /api/ai-brand-check — checks brand/domain visibility across AI platforms
+  (ChatGPT, Gemini, Claude, Perplexity, Copilot) with likelihood ratings
+- Unified frontend: template-benchmark.html (5 tabs, one page)
+  - Compare: side-by-side your page vs perfect template (pass/fail checks)
+  - Gap Analysis: gaps sorted by point impact, grouped by AEO/SEO/Content
+  - Perfect Page Preview: live iframe showing what a 100% page looks like
+  - Blueprint: full template spec with all requirements
+  - AI Visibility: checks if your brand is mentioned across AI platforms
+- Modern UI: animated gradient background, glassmorphism cards, SVG score rings
+  with letter grades, Inter font, fade animations, responsive grid
 - Per Gurbachan's directive: create perfect templates for different business types
   that score 100% and serve as benchmarks for AEO/GEO/SEO scoring
+- Per meeting task: investigate where "AI First SEO" ranks in AI platforms
 
 ========================================================================
 API ENDPOINTS (Dev 2 owned)
@@ -229,6 +236,9 @@ POST /api/content-score      — Content scoring engine (SEO+AEO+readability)
 POST /api/keyword-cluster    — Keyword clustering & TF-IDF analysis
 POST /api/template-benchmark — Template benchmark (URL vs perfect business template)
 GET  /api/template-types     — List available business template types
+GET  /api/template-perfect/<type> — Full template definition
+GET  /api/template-preview/<type> — Rendered perfect HTML page
+POST /api/ai-brand-check     — AI platform visibility check
 POST /api/ai-recommendations — AI-powered SEO recommendations
 GET  /api/health             — Health check with category counts
 
