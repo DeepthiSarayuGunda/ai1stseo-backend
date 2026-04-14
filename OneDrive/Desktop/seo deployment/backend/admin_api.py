@@ -293,3 +293,127 @@ def update_white_label():
         return jsonify({'status': 'success', 'config': existing})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== SYSTEM STATUS PAGE =====================
+
+@admin_bp.route('/api/admin/system-status', methods=['GET'])
+@require_auth
+def system_status():
+    """Real-time health check of all platform services."""
+    import time
+    services = {}
+
+    # DynamoDB
+    try:
+        t0 = time.time()
+        scan_table('ai1stseo-users', 1)
+        services['dynamodb'] = {'status': 'healthy', 'latency_ms': int((time.time() - t0) * 1000)}
+    except Exception as e:
+        services['dynamodb'] = {'status': 'error', 'message': str(e)[:100]}
+
+    # Cognito
+    try:
+        import boto3
+        t0 = time.time()
+        cog = boto3.client('cognito-idp', region_name='us-east-1')
+        cog.describe_user_pool(UserPoolId='us-east-1_DVvth47zH')
+        services['cognito'] = {'status': 'healthy', 'latency_ms': int((time.time() - t0) * 1000)}
+    except Exception as e:
+        services['cognito'] = {'status': 'error', 'message': str(e)[:100]}
+
+    # SES
+    try:
+        import boto3
+        t0 = time.time()
+        ses = boto3.client('ses', region_name='us-east-1')
+        quota = ses.get_send_quota()
+        services['ses'] = {
+            'status': 'healthy', 'latency_ms': int((time.time() - t0) * 1000),
+            'daily_limit': int(quota.get('Max24HourSend', 0)),
+            'sent_today': int(quota.get('SentLast24Hours', 0)),
+        }
+    except Exception as e:
+        services['ses'] = {'status': 'error', 'message': str(e)[:100]}
+
+    # S3 (documents bucket)
+    try:
+        t0 = time.time()
+        _s3.head_bucket(Bucket='ai1stseo-documents')
+        services['s3_documents'] = {'status': 'healthy', 'latency_ms': int((time.time() - t0) * 1000)}
+    except Exception as e:
+        services['s3_documents'] = {'status': 'error', 'message': str(e)[:100]}
+
+    # DynamoDB table counts
+    try:
+        tables = ['ai1stseo-users', 'ai1stseo-audits', 'ai1stseo-geo-probes', 'ai1stseo-content-briefs',
+                  'ai1stseo-social-posts', 'ai1stseo-api-keys', 'ai1stseo-webhooks', 'ai1stseo-email-leads',
+                  'ai1stseo-admin-metrics', 'ai1stseo-api-logs', 'ai1stseo-competitors', 'ai1stseo-documents', 'ai1stseo-monitor']
+        services['dynamodb_tables'] = {'count': len(tables), 'tables': tables}
+    except Exception:
+        pass
+
+    healthy = sum(1 for s in services.values() if isinstance(s, dict) and s.get('status') == 'healthy')
+    total = sum(1 for s in services.values() if isinstance(s, dict) and 'status' in s)
+
+    return jsonify({
+        'status': 'success',
+        'overall': 'healthy' if healthy == total else 'degraded',
+        'healthy_count': healthy,
+        'total_count': total,
+        'services': services,
+    })
+
+
+# ===================== AUDIT HISTORY BROWSER =====================
+
+@admin_bp.route('/api/admin/audit-history', methods=['GET'])
+@require_auth
+def audit_history():
+    """Browse all SEO audits with search/filter by URL, score range, date."""
+    url_filter = request.args.get('url', '')
+    min_score = request.args.get('min_score', 0, type=int)
+    max_score = request.args.get('max_score', 100, type=int)
+    limit = request.args.get('limit', 50, type=int)
+    try:
+        items = scan_table('ai1stseo-audits', 200)
+
+        # Filter by URL
+        if url_filter:
+            items = [i for i in items if url_filter.lower() in (i.get('url', '') or '').lower()]
+
+        # Filter by score range
+        items = [i for i in items if min_score <= (i.get('overall_score') or 0) <= max_score]
+
+        # Filter out content-freshness records
+        items = [i for i in items if not i.get('update_type')]
+
+        # Sort by created_at descending
+        items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+
+        # Format for frontend
+        audits = []
+        for item in items[:limit]:
+            audits.append({
+                'id': item.get('id'),
+                'url': item.get('url', ''),
+                'overall_score': item.get('overall_score'),
+                'technical_score': item.get('technical_score'),
+                'onpage_score': item.get('onpage_score'),
+                'content_score': item.get('content_score'),
+                'total_checks': item.get('total_checks', 0),
+                'passed_checks': item.get('passed_checks', 0),
+                'failed_checks': item.get('failed_checks', 0),
+                'load_time_ms': item.get('load_time_ms'),
+                'created_at': item.get('created_at', ''),
+                'created_by': item.get('created_by', ''),
+            })
+
+        return jsonify({
+            'status': 'success',
+            'audits': audits,
+            'total': len(audits),
+            'filters': {'url': url_filter, 'min_score': min_score, 'max_score': max_score},
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
