@@ -247,3 +247,49 @@ def api_usage_logs():
         return jsonify({'status': 'success', 'logs': logs[:limit], 'top_endpoints': top_endpoints, 'total': len(logs)})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== WHITE-LABEL CONFIGURATION (WBS 6.4) =====================
+
+@admin_bp.route('/api/admin/white-label', methods=['GET'])
+@require_auth
+def get_white_label():
+    """Get current white-label configuration."""
+    try:
+        from dynamodb_helper import get_item
+        config = get_item('ai1stseo-admin-metrics', {'metric_date': 'white_label_config'})
+        if not config:
+            config = {
+                'brand_name': 'AI 1st SEO',
+                'logo_url': '',
+                'primary_color': '#00d4ff',
+                'accent_color': '#7b2cbf',
+                'support_email': 'support@ai1stseo.com',
+                'footer_text': 'AI 1st SEO \u2014 AI-Powered Search Engine Optimization',
+                'custom_domain': '',
+                'powered_by_visible': True,
+            }
+        return jsonify({'status': 'success', 'config': config})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@admin_bp.route('/api/admin/white-label', methods=['PUT'])
+@require_admin
+def update_white_label():
+    """Update white-label configuration (admin only)."""
+    data = request.get_json() or {}
+    allowed_fields = ['brand_name', 'logo_url', 'primary_color', 'accent_color',
+                      'support_email', 'footer_text', 'custom_domain', 'powered_by_visible']
+    updates = {k: v for k, v in data.items() if k in allowed_fields}
+    if not updates:
+        return jsonify({'status': 'error', 'message': 'No valid fields to update'}), 400
+    try:
+        from dynamodb_helper import put_item, get_item
+        existing = get_item('ai1stseo-admin-metrics', {'metric_date': 'white_label_config'}) or {}
+        existing.update(updates)
+        existing['metric_date'] = 'white_label_config'
+        put_item('ai1stseo-admin-metrics', existing)
+        return jsonify({'status': 'success', 'config': existing})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
