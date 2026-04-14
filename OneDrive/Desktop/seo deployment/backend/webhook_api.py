@@ -1,8 +1,6 @@
 """
-Webhook API — Register URLs to receive event notifications.
-Events: audit.created, geo_probe.created, content_brief.created,
-        social_post.created, social_post.updated, competitor.created,
-        benchmark.created, report.created, uptime.down, content.changed
+Webhook API ΓÇö Register URLs to receive event notifications (DynamoDB version).
+Events: audit.created, geo_probe.created, content_brief.created, etc.
 
 Usage from other services:
     from webhook_api import dispatch_event
@@ -10,7 +8,7 @@ Usage from other services:
 """
 from flask import Blueprint, jsonify, request
 from auth import require_auth
-from database import query, query_one, execute, insert_returning
+from dynamodb_helper import put_item, get_item, scan_table, update_item, delete_item, query_index
 import json
 import hmac
 import hashlib
@@ -20,7 +18,6 @@ import requests as http_requests
 webhook_bp = Blueprint('webhooks', __name__)
 DEFAULT_PROJECT_ID = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
 
-# Valid event types
 VALID_EVENTS = {
     'audit.created', 'geo_probe.created', 'ai_visibility.created',
     'content_brief.created', 'social_post.created', 'social_post.updated',
@@ -38,26 +35,23 @@ def _get_user_id():
 @webhook_bp.route('/api/webhooks', methods=['POST'])
 @require_auth
 def create_webhook():
-    """Register a webhook URL for specific events."""
     d = request.get_json() or {}
     url = d.get('url', '').strip()
     events = d.get('events', [])
     if not url:
         return jsonify({'status': 'error', 'message': 'url required'}), 400
     if not events:
-        return jsonify({'status': 'error', 'message': 'events array required (e.g. ["audit.created", "*"])'}), 400
+        return jsonify({'status': 'error', 'message': 'events array required'}), 400
     invalid = [e for e in events if e not in VALID_EVENTS]
     if invalid:
-        return jsonify({'status': 'error', 'message': 'Invalid events: ' + ', '.join(invalid),
-                        'valid_events': sorted(VALID_EVENTS)}), 400
+        return jsonify({'status': 'error', 'message': 'Invalid events: ' + ', '.join(invalid)}), 400
     try:
-        events_pg = '{' + ','.join(events) + '}'
-        wh_id = insert_returning(
-            "INSERT INTO webhooks (project_id, url, events, secret, created_by) "
-            "VALUES (%s, %s, %s, %s, %s) RETURNING id",
-            (DEFAULT_PROJECT_ID, url, events_pg, d.get('secret'), _get_user_id()),
-        )
-        return jsonify({'status': 'success', 'id': str(wh_id), 'events': events}), 201
+        wh_id = put_item('ai1stseo-webhooks', {
+            'project_id': DEFAULT_PROJECT_ID, 'url': url,
+            'events': events, 'secret': d.get('secret'),
+            'is_active': True, 'created_by': _get_user_id(),
+        })
+        return jsonify({'status': 'success', 'id': wh_id, 'events': events}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -65,14 +59,9 @@ def create_webhook():
 @webhook_bp.route('/api/webhooks', methods=['GET'])
 @require_auth
 def list_webhooks():
-    """List registered webhooks."""
     try:
-        rows = query(
-            "SELECT id, url, events, is_active, created_at FROM webhooks "
-            "WHERE project_id = %s ORDER BY created_at DESC",
-            (DEFAULT_PROJECT_ID,),
-        )
-        return jsonify({'status': 'success', 'webhooks': [dict(r) for r in rows]})
+        items = scan_table('ai1stseo-webhooks', 50)
+        return jsonify({'status': 'success', 'webhooks': items})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -80,14 +69,8 @@ def list_webhooks():
 @webhook_bp.route('/api/webhooks/<wh_id>', methods=['DELETE'])
 @require_auth
 def delete_webhook(wh_id):
-    """Remove a webhook registration."""
     try:
-        deleted = execute(
-            "DELETE FROM webhooks WHERE id = %s AND project_id = %s",
-            (wh_id, DEFAULT_PROJECT_ID),
-        )
-        if deleted == 0:
-            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+        delete_item('ai1stseo-webhooks', {'id': wh_id})
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -96,52 +79,48 @@ def delete_webhook(wh_id):
 @webhook_bp.route('/api/webhooks/<wh_id>/toggle', methods=['POST'])
 @require_auth
 def toggle_webhook(wh_id):
-    """Enable or disable a webhook."""
     try:
-        execute(
-            "UPDATE webhooks SET is_active = NOT is_active WHERE id = %s AND project_id = %s",
-            (wh_id, DEFAULT_PROJECT_ID),
-        )
-        row = query_one("SELECT is_active FROM webhooks WHERE id = %s", (wh_id,))
-        return jsonify({'status': 'success', 'is_active': row['is_active'] if row else False})
+        item = get_item('ai1stseo-webhooks', {'id': wh_id})
+        if not item:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+        new_state = not item.get('is_active', True)
+        update_item('ai1stseo-webhooks', {'id': wh_id}, {'is_active': new_state})
+        return jsonify({'status': 'success', 'is_active': new_state})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 @webhook_bp.route('/api/webhooks/events', methods=['GET'])
 def list_event_types():
-    """List all valid event types (no auth required — documentation endpoint)."""
     return jsonify({'status': 'success', 'events': sorted(VALID_EVENTS)})
 
 
-# === Event Dispatch (called by other modules) ===
-
 def dispatch_event(event_type, payload):
-    """
-    Fire all registered webhooks for this event type.
-    Runs in background threads to not block the caller.
-    """
+    """Fire all registered webhooks + Slack/email notifications for this event type."""
     def _dispatch():
         try:
-            rows = query(
-                "SELECT id, url, secret, events FROM webhooks "
-                "WHERE project_id = %s AND is_active = true",
-                (DEFAULT_PROJECT_ID,),
-            )
-            for wh in rows:
+            items = scan_table('ai1stseo-webhooks', 100)
+            for wh in items:
+                if not wh.get('is_active', True):
+                    continue
                 events = wh.get('events', [])
                 if '*' not in events and event_type not in events:
                     continue
-                _deliver(wh['id'], wh['url'], wh.get('secret'), event_type, payload)
+                # Skip notification subscriptions (handled separately)
+                if wh.get('notification'):
+                    continue
+                if wh.get('url'):
+                    _deliver(wh['id'], wh['url'], wh.get('secret'), event_type, payload)
         except Exception:
             pass
-
     threading.Thread(target=_dispatch, daemon=True).start()
+    # Also dispatch to Slack/email notification subscribers
+    _dispatch_notifications(event_type, payload)
 
 
 def _deliver(webhook_id, url, secret, event_type, payload):
-    """Send a single webhook delivery."""
-    body = json.dumps({'event': event_type, 'data': payload, 'timestamp': __import__('datetime').datetime.utcnow().isoformat()})
+    body = json.dumps({'event': event_type, 'data': payload,
+                       'timestamp': __import__('datetime').datetime.utcnow().isoformat()})
     headers = {'Content-Type': 'application/json', 'X-Webhook-Event': event_type}
     if secret:
         sig = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
@@ -154,13 +133,121 @@ def _deliver(webhook_id, url, secret, event_type, payload):
 
 
 def _log_delivery(webhook_id, event_type, payload, status_code, response_body, success):
-    """Log webhook delivery attempt."""
     try:
-        execute(
-            "INSERT INTO webhook_deliveries (webhook_id, event_type, payload, status_code, response_body, success) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            (webhook_id, event_type, json.dumps(payload) if payload else None,
-             status_code, response_body, success),
-        )
+        put_item('ai1stseo-webhooks', {
+            'id': 'delivery_' + __import__('uuid').uuid4().hex[:12],
+            'webhook_id': webhook_id, 'event_type': event_type,
+            'payload': json.dumps(payload) if payload else None,
+            'status_code': status_code, 'response_body': response_body,
+            'success': success, 'delivery': True,
+        })
     except Exception:
         pass
+
+
+# ===================== NOTIFICATION CHANNELS (Slack + Email) =====================
+
+import os as _os
+import boto3 as _boto3
+
+_ses = _boto3.client('ses', region_name='us-east-1')
+_SES_SENDER = 'no-reply@ai1stseo.com'
+
+
+def send_slack_notification(webhook_url, event_type, payload):
+    """Send a formatted Slack message via incoming webhook."""
+    try:
+        emoji = {'audit.created': ':mag:', 'uptime.down': ':rotating_light:',
+                 'content.changed': ':pencil2:', 'geo_probe.created': ':robot_face:',
+                 'content_brief.created': ':page_facing_up:', 'competitor.created': ':chart_with_upwards_trend:'
+                 }.get(event_type, ':bell:')
+        text = '{} *{}*\n'.format(emoji, event_type)
+        if isinstance(payload, dict):
+            for k, v in list(payload.items())[:6]:
+                text += '> *{}:* {}\n'.format(k, v)
+        blocks = [{'type': 'section', 'text': {'type': 'mrkdwn', 'text': text}},
+                  {'type': 'context', 'elements': [{'type': 'mrkdwn', 'text': 'AI 1st SEO | {}'.format(
+                      __import__('datetime').datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC'))}]}]
+        http_requests.post(webhook_url, json={'blocks': blocks, 'text': text}, timeout=10)
+    except Exception as e:
+        print('Slack notification failed: {}'.format(e))
+
+
+def send_email_notification(to_email, event_type, payload):
+    """Send an email notification via SES."""
+    try:
+        subject = 'AI1stSEO Alert: {}'.format(event_type)
+        body_lines = ['Event: {}'.format(event_type), '']
+        if isinstance(payload, dict):
+            for k, v in payload.items():
+                body_lines.append('{}: {}'.format(k, v))
+        body_lines.extend(['', '---', 'AI 1st SEO Notifications', 'https://ai1stseo.com'])
+        _ses.send_email(
+            Source=_SES_SENDER,
+            Destination={'ToAddresses': [to_email]},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': '\n'.join(body_lines)}}
+            },
+        )
+    except Exception as e:
+        print('Email notification failed: {}'.format(e))
+
+
+@webhook_bp.route('/api/notifications/subscribe', methods=['POST'])
+@require_auth
+def subscribe_notifications():
+    """Subscribe to event notifications via Slack or email."""
+    d = request.get_json() or {}
+    channel = d.get('channel', '').strip()  # 'slack' or 'email'
+    target = d.get('target', '').strip()    # slack webhook URL or email address
+    events = d.get('events', ['*'])
+    if channel not in ('slack', 'email'):
+        return jsonify({'status': 'error', 'message': 'channel must be slack or email'}), 400
+    if not target:
+        return jsonify({'status': 'error', 'message': 'target required (webhook URL or email)'}), 400
+    try:
+        sub_id = put_item('ai1stseo-webhooks', {
+            'project_id': DEFAULT_PROJECT_ID,
+            'channel': channel, 'target': target,
+            'events': events, 'is_active': True,
+            'created_by': _get_user_id(),
+            'notification': True,
+        })
+        return jsonify({'status': 'success', 'id': sub_id, 'channel': channel}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@webhook_bp.route('/api/notifications', methods=['GET'])
+@require_auth
+def list_notifications():
+    """List notification subscriptions."""
+    try:
+        items = scan_table('ai1stseo-webhooks', 100)
+        notifs = [i for i in items if i.get('notification')]
+        return jsonify({'status': 'success', 'notifications': notifs})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _dispatch_notifications(event_type, payload):
+    """Send notifications to all Slack/email subscribers for this event."""
+    def _do():
+        try:
+            items = scan_table('ai1stseo-webhooks', 100)
+            for sub in items:
+                if not sub.get('notification') or not sub.get('is_active', True):
+                    continue
+                events = sub.get('events', [])
+                if '*' not in events and event_type not in events:
+                    continue
+                ch = sub.get('channel')
+                target = sub.get('target', '')
+                if ch == 'slack' and target:
+                    send_slack_notification(target, event_type, payload)
+                elif ch == 'email' and target:
+                    send_email_notification(target, event_type, payload)
+        except Exception:
+            pass
+    threading.Thread(target=_do, daemon=True).start()

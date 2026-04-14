@@ -128,12 +128,12 @@ def _log_request(response):
             user_id = request.cognito_user.get('user_id')
         def _insert(ep, method, uid, status, ms):
             try:
-                from database import execute
-                execute(
-                    "INSERT INTO api_request_log (endpoint, method, user_id, project_id, status_code, response_time_ms) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (ep, method, uid, '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2', status, ms),
-                )
+                from dynamodb_helper import put_item
+                put_item('ai1stseo-api-logs', {
+                    'endpoint': ep, 'method': method, 'user_id': uid,
+                    'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                    'status_code': status, 'response_time_ms': ms,
+                })
             except Exception:
                 pass
         _log_threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()
@@ -5623,6 +5623,44 @@ def investor_inquiry():
             ReplyToAddresses=[email],
         )
         return jsonify({'status': 'success', 'message': 'Inquiry sent'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# === Content Freshness API ===
+@app.route('/api/content-freshness', methods=['POST'])
+def update_content_freshness():
+    """Record a content update timestamp for AI ranking freshness signals."""
+    data = request.get_json() or {}
+    url = data.get('url', '').strip()
+    if not url:
+        return jsonify({'status': 'error', 'message': 'url required'}), 400
+    try:
+        from dynamodb_helper import put_item
+        from datetime import datetime, timezone
+        record_id = put_item('ai1stseo-audits', {
+            'url': url,
+            'content_type': data.get('content_type', 'page_update'),
+            'update_type': data.get('update_type', 'content_refresh'),
+            'updated_sections': data.get('sections', []),
+            'freshness_timestamp': datetime.now(timezone.utc).isoformat(),
+            'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+        })
+        return jsonify({'status': 'success', 'id': record_id, 'timestamp': datetime.now(timezone.utc).isoformat()})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/content-freshness', methods=['GET'])
+def get_content_freshness():
+    """Get content freshness history for a URL."""
+    url = request.args.get('url', '')
+    try:
+        from dynamodb_helper import scan_table
+        items = scan_table('ai1stseo-audits', 100)
+        fresh = [i for i in items if i.get('update_type') == 'content_refresh' and (not url or i.get('url') == url)]
+        fresh.sort(key=lambda x: x.get('freshness_timestamp', ''), reverse=True)
+        return jsonify({'status': 'success', 'updates': fresh[:20]})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 

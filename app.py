@@ -111,6 +111,49 @@ try:
 except Exception as e:
     print(f"⚠ Month 3 systems: {e}")
 
+# --- Deepthi Intelligence Layer API ---
+try:
+    from deepthi_intelligence.api import deepthi_bp
+    app.register_blueprint(deepthi_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Intelligence: {e}")
+
+try:
+    from deepthi_intelligence.benchmark_api import benchmark_bp
+    app.register_blueprint(benchmark_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Benchmark API: {e}")
+
+try:
+    from deepthi_intelligence.deepthi_prod_api import deepthi_prod_bp
+    app.register_blueprint(deepthi_prod_bp)
+except Exception as e:
+    print(f"⚠ Deepthi Production API: {e}")
+
+try:
+    from deepthi_intelligence.public_stats_api import public_stats_bp
+    app.register_blueprint(public_stats_bp)
+except Exception as e:
+    print(f"⚠ Public Stats API: {e}")
+
+try:
+    from deepthi_intelligence.intelligence_summary_api import scanner_intel_bp
+    app.register_blueprint(scanner_intel_bp)
+except Exception as e:
+    print(f"⚠ Scanner Intelligence API: {e}")
+
+try:
+    from deepthi_intelligence.month3_completion import month3_bp
+    app.register_blueprint(month3_bp)
+except Exception as e:
+    print(f"⚠ Month 3 Completion API: {e}")
+
+try:
+    from deepthi_intelligence.month4_systems import month4_bp
+    app.register_blueprint(month4_bp)
+except Exception as e:
+    print(f"⚠ Month 4 Systems API: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
@@ -1981,7 +2024,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/ai-recommendations', '/api/health', '/api/status']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/template-benchmark', '/api/template-types', '/api/ai-recommendations', '/api/health', '/api/status']
     })
 
 @app.route('/api/status')
@@ -2796,6 +2839,494 @@ Return ONLY a JSON object with this exact structure, no other text:
         return jsonify({'error': f'Keyword clustering failed: {str(e)}'}), 500
 
 
+# ============== TEMPLATE BENCHMARK ENGINE (Dev 2) ==============
+
+# Perfect templates for different business types — these define what a 100% AEO/GEO/SEO page looks like
+BUSINESS_TEMPLATES = {
+    'service': {
+        'name': 'Service Business',
+        'examples': 'Dentist, Plumber, Lawyer, Accountant, Salon',
+        'seo': {
+            'title_format': '[Service] in [City] — [Business Name] | Trusted [Industry] Services',
+            'meta_desc_format': '[Business Name] offers professional [service] in [City]. [Unique value prop]. Book your appointment today. ★ [Rating]/5 from [Count] reviews.',
+            'required_headings': ['h1:1', 'h2:4-8', 'h3:6-12'],
+            'min_word_count': 1500,
+            'required_schema': ['LocalBusiness', 'FAQPage', 'Service', 'AggregateRating', 'BreadcrumbList'],
+            'internal_links_min': 5,
+            'external_links_min': 2,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'statistics', 'source_citations', 'freshness_signals'],
+            'min_faq_count': 5,
+            'min_definitions': 3,
+            'min_lists': 4,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'nap_required': True,
+            'service_area': True,
+            'reviews_section': True,
+            'competitor_comparison': True,
+            'local_keywords': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Business Name]', 'purpose': 'BLUF summary with key differentiators', 'min_words': 150},
+            {'heading': 'Our [Service] Services', 'purpose': 'Detailed service list with descriptions', 'min_words': 300},
+            {'heading': 'Why Choose [Business Name]', 'purpose': 'Trust signals, credentials, experience', 'min_words': 200},
+            {'heading': 'Service Area', 'purpose': 'Geographic coverage with local keywords', 'min_words': 100},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ section for AI extraction', 'min_words': 400},
+            {'heading': 'Customer Reviews', 'purpose': 'Social proof with structured data', 'min_words': 150},
+            {'heading': 'Contact Us', 'purpose': 'NAP data, hours, booking CTA', 'min_words': 100},
+        ]
+    },
+    'manufacturing': {
+        'name': 'Manufacturing Business',
+        'examples': 'Factory, Supplier, Industrial Equipment, Parts Manufacturer',
+        'seo': {
+            'title_format': '[Product] Manufacturer — [Business Name] | [Industry] Solutions',
+            'meta_desc_format': '[Business Name] manufactures high-quality [products]. [Capacity/certifications]. Request a quote for custom [product] solutions.',
+            'required_headings': ['h1:1', 'h2:5-10', 'h3:8-15'],
+            'min_word_count': 2000,
+            'required_schema': ['Organization', 'Product', 'FAQPage', 'BreadcrumbList', 'HowTo'],
+            'internal_links_min': 8,
+            'external_links_min': 3,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'statistics', 'source_citations', 'technical_specs'],
+            'min_faq_count': 8,
+            'min_definitions': 5,
+            'min_lists': 6,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'nap_required': True,
+            'service_area': True,
+            'certifications': True,
+            'supply_chain_info': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Business Name]', 'purpose': 'Company overview, history, mission', 'min_words': 200},
+            {'heading': 'Our Products', 'purpose': 'Product catalog with specs and use cases', 'min_words': 500},
+            {'heading': 'Manufacturing Process', 'purpose': 'How products are made — builds trust with AI', 'min_words': 300},
+            {'heading': 'Quality & Certifications', 'purpose': 'ISO, industry standards, testing', 'min_words': 200},
+            {'heading': 'Industries We Serve', 'purpose': 'Target markets with specific examples', 'min_words': 200},
+            {'heading': 'Technical Specifications', 'purpose': 'Data tables for AI extraction', 'min_words': 300},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI citation', 'min_words': 500},
+            {'heading': 'Request a Quote', 'purpose': 'CTA with contact info', 'min_words': 100},
+        ]
+    },
+    'ecommerce': {
+        'name': 'E-Commerce / Retail',
+        'examples': 'Online Store, Boutique, Marketplace, D2C Brand',
+        'seo': {
+            'title_format': 'Buy [Product] Online — [Business Name] | [Value Prop]',
+            'meta_desc_format': 'Shop [products] at [Business Name]. [Free shipping/discount]. ★ [Rating]/5 from [Count] reviews. [Unique selling point].',
+            'required_headings': ['h1:1', 'h2:4-8', 'h3:6-10'],
+            'min_word_count': 1200,
+            'required_schema': ['Product', 'Organization', 'FAQPage', 'BreadcrumbList', 'AggregateRating', 'Offer'],
+            'internal_links_min': 6,
+            'external_links_min': 2,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'comparison_tables', 'statistics', 'reviews'],
+            'min_faq_count': 6,
+            'min_definitions': 2,
+            'min_lists': 5,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'shipping_info': True,
+            'return_policy': True,
+            'product_comparisons': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Product/Brand]', 'purpose': 'Brand story and product overview', 'min_words': 200},
+            {'heading': 'Product Features', 'purpose': 'Detailed feature list with benefits', 'min_words': 300},
+            {'heading': 'How It Works', 'purpose': 'Step-by-step usage guide', 'min_words': 200},
+            {'heading': 'Customer Reviews', 'purpose': 'Social proof with ratings', 'min_words': 150},
+            {'heading': 'Shipping & Returns', 'purpose': 'Policy details for trust', 'min_words': 150},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI extraction', 'min_words': 400},
+        ]
+    },
+    'saas': {
+        'name': 'SaaS / Technology',
+        'examples': 'Software Platform, API Service, Cloud Tool, Tech Startup',
+        'seo': {
+            'title_format': '[Product Name] — [One-line Value Prop] | [Company]',
+            'meta_desc_format': '[Product] helps [audience] [benefit]. [Social proof]. Start free today.',
+            'required_headings': ['h1:1', 'h2:5-10', 'h3:8-15'],
+            'min_word_count': 2000,
+            'required_schema': ['SoftwareApplication', 'Organization', 'FAQPage', 'HowTo', 'BreadcrumbList'],
+            'internal_links_min': 8,
+            'external_links_min': 3,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'comparison_tables', 'statistics', 'source_citations', 'use_cases', 'technical_docs'],
+            'min_faq_count': 8,
+            'min_definitions': 5,
+            'min_lists': 6,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'pricing_transparency': True,
+            'integration_list': True,
+            'api_documentation': True,
+        },
+        'content_sections': [
+            {'heading': 'What is [Product]', 'purpose': 'Clear definition for AI extraction', 'min_words': 200},
+            {'heading': 'Key Features', 'purpose': 'Feature list with descriptions', 'min_words': 400},
+            {'heading': 'How It Works', 'purpose': 'Step-by-step workflow', 'min_words': 300},
+            {'heading': 'Use Cases', 'purpose': 'Industry-specific examples', 'min_words': 300},
+            {'heading': 'Pricing', 'purpose': 'Transparent pricing for AI answers', 'min_words': 150},
+            {'heading': 'Integrations', 'purpose': 'Compatible tools and platforms', 'min_words': 200},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI citation', 'min_words': 500},
+            {'heading': 'Getting Started', 'purpose': 'Onboarding CTA', 'min_words': 150},
+        ]
+    }
+}
+
+
+def benchmark_against_template(url, business_type, soup, text):
+    """Compare a page against the perfect template and return gap analysis."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return None
+    
+    gaps = {'seo': [], 'aeo': [], 'content': []}
+    scores = {'seo': 0, 'aeo': 0, 'content': 0}
+    max_scores = {'seo': 0, 'aeo': 0, 'content': 0}
+    
+    # SEO checks against template
+    t_seo = template['seo']
+    
+    # Title
+    max_scores['seo'] += 10
+    title = soup.find('title')
+    title_text = title.string.strip() if title and title.string else ''
+    if title_text and 30 <= len(title_text) <= 60:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Title Tag', 'current': title_text[:60] or 'Missing', 'ideal': t_seo['title_format'], 'points': 10})
+    
+    # Meta description
+    max_scores['seo'] += 10
+    meta = soup.find('meta', attrs={'name': 'description'})
+    desc = meta.get('content', '').strip() if meta else ''
+    if desc and 120 <= len(desc) <= 160:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Meta Description', 'current': f'{len(desc)} chars' if desc else 'Missing', 'ideal': t_seo['meta_desc_format'], 'points': 10})
+    
+    # Word count
+    max_scores['seo'] += 10
+    word_count = len(text.split())
+    if word_count >= t_seo['min_word_count']:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Word Count', 'current': f'{word_count} words', 'ideal': f'{t_seo["min_word_count"]}+ words', 'points': 10})
+    
+    # Headings
+    max_scores['seo'] += 10
+    h1s = soup.find_all('h1')
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    heading_ok = len(h1s) == 1 and len(h2s) >= 4 and len(h3s) >= 3
+    if heading_ok:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Heading Structure', 'current': f'H1:{len(h1s)} H2:{len(h2s)} H3:{len(h3s)}', 'ideal': ', '.join(t_seo['required_headings']), 'points': 10})
+    
+    # Schema markup
+    max_scores['seo'] += 15
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_text = ' '.join(s.string or '' for s in json_ld).lower()
+    found_schemas = [s for s in t_seo['required_schema'] if s.lower() in schema_text]
+    schema_score = round(15 * len(found_schemas) / max(len(t_seo['required_schema']), 1))
+    scores['seo'] += schema_score
+    if schema_score < 15:
+        missing = [s for s in t_seo['required_schema'] if s.lower() not in schema_text]
+        gaps['seo'].append({'check': 'Schema Markup', 'current': f'{len(found_schemas)}/{len(t_seo["required_schema"])} types', 'ideal': ', '.join(missing) + ' missing', 'points': 15 - schema_score})
+    
+    # Internal links
+    max_scores['seo'] += 5
+    parsed = urlparse(url)
+    all_links = soup.find_all('a', href=True)
+    internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
+    if len(internal) >= t_seo['internal_links_min']:
+        scores['seo'] += 5
+    else:
+        gaps['seo'].append({'check': 'Internal Links', 'current': f'{len(internal)} links', 'ideal': f'{t_seo["internal_links_min"]}+ links', 'points': 5})
+    
+    # AEO checks against template
+    t_aeo = template['aeo']
+    
+    # FAQ section
+    max_scores['aeo'] += 15
+    faq_indicators = text.lower().count('?')
+    faq_schema = 'faqpage' in schema_text
+    if faq_indicators >= t_aeo['min_faq_count'] and faq_schema:
+        scores['aeo'] += 15
+    elif faq_indicators >= t_aeo['min_faq_count']:
+        scores['aeo'] += 8
+        gaps['aeo'].append({'check': 'FAQ Schema', 'current': f'{faq_indicators} questions found but no FAQPage schema', 'ideal': f'FAQPage schema with {t_aeo["min_faq_count"]}+ Q&As', 'points': 7})
+    else:
+        gaps['aeo'].append({'check': 'FAQ Section', 'current': f'{faq_indicators} questions', 'ideal': f'{t_aeo["min_faq_count"]}+ questions with FAQPage schema', 'points': 15})
+    
+    # Direct definitions
+    max_scores['aeo'] += 10
+    definition_patterns = len(re.findall(r'\b(is a|refers to|defined as|means|is the)\b', text.lower()))
+    if definition_patterns >= t_aeo['min_definitions']:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Direct Definitions', 'current': f'{definition_patterns} found', 'ideal': f'{t_aeo["min_definitions"]}+ clear definitions', 'points': 10})
+    
+    # Structured lists
+    max_scores['aeo'] += 10
+    lists = soup.find_all(['ul', 'ol'])
+    if len(lists) >= t_aeo['min_lists']:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Structured Lists', 'current': f'{len(lists)} lists', 'ideal': f'{t_aeo["min_lists"]}+ lists', 'points': 10})
+    
+    # Data tables
+    max_scores['aeo'] += 10
+    tables = soup.find_all('table')
+    if tables:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Data Tables', 'current': 'None', 'ideal': 'At least 1 comparison/data table', 'points': 10})
+    
+    # Statistics/data points
+    max_scores['aeo'] += 10
+    numbers = re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?%?\b', text)
+    if len(numbers) >= 5:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Statistics & Data', 'current': f'{len(numbers)} data points', 'ideal': '5+ statistics for credibility', 'points': 10})
+    
+    # Source citations
+    max_scores['aeo'] += 5
+    citation_signals = len(re.findall(r'(according to|source:|study|research|survey|report)', text.lower()))
+    if citation_signals >= 2:
+        scores['aeo'] += 5
+    else:
+        gaps['aeo'].append({'check': 'Source Citations', 'current': f'{citation_signals} found', 'ideal': '2+ source citations', 'points': 5})
+    
+    # Content section coverage
+    for section in template['content_sections']:
+        max_scores['content'] += 10
+        heading_text = section['heading'].lower().replace('[business name]', '').replace('[product]', '').replace('[service]', '').strip()
+        heading_words = heading_text.split()
+        found = any(any(w in h.get_text().lower() for w in heading_words if len(w) > 3) for h in soup.find_all(['h2', 'h3']))
+        if found:
+            scores['content'] += 10
+        else:
+            gaps['content'].append({'check': section['heading'], 'current': 'Missing', 'ideal': section['purpose'], 'points': 10})
+    
+    # Calculate percentages
+    seo_pct = round(scores['seo'] / max(max_scores['seo'], 1) * 100)
+    aeo_pct = round(scores['aeo'] / max(max_scores['aeo'], 1) * 100)
+    content_pct = round(scores['content'] / max(max_scores['content'], 1) * 100)
+    overall = round(aeo_pct * 0.4 + seo_pct * 0.3 + content_pct * 0.3)
+    
+    return {
+        'overall_score': overall,
+        'aeo_score': aeo_pct,
+        'seo_score': seo_pct,
+        'content_score': content_pct,
+        'gaps': gaps,
+        'total_gaps': sum(len(g) for g in gaps.values()),
+        'template_name': template['name'],
+        'content_sections': template['content_sections'],
+    }
+
+
+@app.route('/api/template-benchmark', methods=['POST'])
+def template_benchmark():
+    """Template Benchmark Engine — compares a URL against the perfect template for a business type."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        
+        url = (data.get('url') or '').strip()
+        business_type = (data.get('business_type') or '').strip().lower()
+        
+        if not url:
+            return jsonify({'error': 'url is required'}), 400
+        if business_type not in BUSINESS_TEMPLATES:
+            return jsonify({
+                'error': f'Invalid business_type. Choose from: {", ".join(BUSINESS_TEMPLATES.keys())}',
+                'available_types': {k: {'name': v['name'], 'examples': v['examples']} for k, v in BUSINESS_TEMPLATES.items()}
+            }), 400
+        
+        if not url.startswith('http'):
+            url = 'https://' + url
+        
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        
+        result = benchmark_against_template(url, business_type, soup, text)
+        
+        # Generate AI recommendations for top gaps
+        top_gaps = []
+        for cat in ['aeo', 'seo', 'content']:
+            top_gaps.extend(result['gaps'][cat][:3])
+        
+        ai_recommendations = None
+        if top_gaps:
+            gap_text = '\n'.join(f"- {g['check']}: Current={g['current']}, Ideal={g['ideal']}" for g in top_gaps[:8])
+            prompt = f"""You are an AEO/SEO expert. A {BUSINESS_TEMPLATES[business_type]['name']} website scored {result['overall_score']}% against the perfect template.
+
+Top gaps:
+{gap_text}
+
+Give 5 specific, actionable fixes. Be concise. Focus on AEO (AI Engine Optimization) first, then SEO. Format as a numbered list."""
+            
+            try:
+                ai_recommendations = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+        
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'business_type': business_type,
+            'template': BUSINESS_TEMPLATES[business_type]['name'],
+            'benchmark': result,
+            'ai_recommendations': ai_recommendations,
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    
+    except Exception as e:
+        return jsonify({'error': f'Benchmark failed: {str(e)}'}), 500
+
+
+@app.route('/api/template-types', methods=['GET'])
+def template_types():
+    """List available business template types."""
+    return jsonify({
+        'types': {k: {'name': v['name'], 'examples': v['examples'], 'sections': len(v['content_sections'])} for k, v in BUSINESS_TEMPLATES.items()}
+    })
+
+
+@app.route('/api/template-perfect/<business_type>', methods=['GET'])
+def template_perfect_example(business_type):
+    """Return the perfect template definition for a business type — used by frontend to render the ideal page."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return jsonify({'error': f'Unknown type. Choose from: {", ".join(BUSINESS_TEMPLATES.keys())}'}), 400
+    return jsonify({
+        'status': 'success',
+        'business_type': business_type,
+        'template': template
+    })
+
+
+@app.route('/api/template-preview/<business_type>', methods=['GET'])
+def template_preview_html(business_type):
+    """Generate a perfect example HTML preview for a business type — renders what a 100% page looks like."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return jsonify({'error': 'Unknown business type'}), 400
+
+    name = template['name']
+    sections_html = ''
+    for s in template['content_sections']:
+        sections_html += f'<section><h2>{s["heading"].replace("[Business Name]", "Example Co").replace("[Service]", "Professional").replace("[Product]", "Product")}</h2><p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">{s["purpose"]} — {s["min_words"]}+ words recommended</p></section>'
+
+    schema_tags = ', '.join(template['seo']['required_schema'])
+    aeo_elements = ', '.join(template['aeo']['required_elements'])
+
+    html = f'''<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{template["seo"]["title_format"].replace("[Service]","Professional Services").replace("[City]","Ottawa").replace("[Business Name]","Example Co").replace("[Industry]","Industry").replace("[Product]","Product").replace("[One-line Value Prop]","AI-Powered Solution").replace("[Company]","Example Co").replace("[Value Prop]","Best Quality")}</title>
+    <meta name="description" content="{template["seo"]["meta_desc_format"][:160]}">
+    <link rel="canonical" href="https://example.com">
+    <script type="application/ld+json">{{"@context":"https://schema.org","@type":"{template["seo"]["required_schema"][0]}","name":"Example Co","description":"Perfect {name} template"}}</script>
+    </head><body style="font-family:Inter,sans-serif;background:#0a0a0a;color:#e2e8f0;padding:40px;max-width:800px;margin:0 auto;">
+    <header style="margin-bottom:30px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:20px;">
+    <h1 style="font-size:1.8rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Perfect {name} Page</h1>
+    <p style="color:rgba(255,255,255,0.4);font-size:0.9rem;">This page demonstrates every element needed for a 100% AEO/GEO/SEO score</p>
+    </header>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);border-radius:12px;padding:14px;">
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">Schema Types</div>
+    <div style="font-size:0.85rem;color:#a78bfa;margin-top:4px;">{schema_tags}</div></div>
+    <div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);border-radius:12px;padding:14px;">
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">AEO Elements</div>
+    <div style="font-size:0.85rem;color:#67e8f9;margin-top:4px;">{aeo_elements}</div></div>
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:14px;">
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">Min Word Count</div>
+    <div style="font-size:0.85rem;color:#34d399;margin-top:4px;">{template["seo"]["min_word_count"]}+ words</div></div>
+    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15);border-radius:12px;padding:14px;">
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">FAQ Count</div>
+    <div style="font-size:0.85rem;color:#fbbf24;margin-top:4px;">{template["aeo"]["min_faq_count"]}+ questions</div></div>
+    </div>
+    {sections_html}
+    <footer style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);font-size:0.75rem;color:rgba(255,255,255,0.3);">
+    Perfect {name} Template — AI1stSEO Benchmark Engine</footer>
+    </body></html>'''
+    return html, 200, {'Content-Type': 'text/html'}
+
+
+@app.route('/api/ai-brand-check', methods=['POST'])
+def ai_brand_check():
+    """Check where a brand/keyword is mentioned across AI platforms using LLM."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        query = (data.get('query') or data.get('keyword') or '').strip()
+        if not query:
+            return jsonify({'error': 'query is required'}), 400
+
+        prompt = f"""You are an AI search analyst. Check if "{query}" would be mentioned, recommended, or cited by major AI platforms.
+
+For each platform below, rate the likelihood (High/Medium/Low/None) that it would mention "{query}" in response to a relevant user query, and explain why in one sentence:
+
+1. ChatGPT (OpenAI)
+2. Gemini (Google)
+3. Claude (Anthropic)
+4. Perplexity
+5. Microsoft Copilot
+
+Also provide:
+- Overall AI visibility score (0-100)
+- Top 3 queries where "{query}" would most likely be cited
+- Top 3 improvements to increase AI citation likelihood
+
+Return as JSON with this structure:
+{{"platforms":[{{"name":"ChatGPT","likelihood":"Medium","reason":"..."}},...],"visibility_score":45,"top_queries":["..."],"improvements":["..."]}}"""
+
+        llm_response = call_llm(prompt, timeout=15)
+        if llm_response:
+            json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
+            if json_match:
+                try:
+                    result = json.loads(json_match.group())
+                    return jsonify({'status': 'success', 'query': query, 'result': result, 'source': 'ai_analysis'})
+                except json.JSONDecodeError:
+                    pass
+
+        return jsonify({
+            'status': 'success', 'query': query, 'source': 'fallback',
+            'result': {
+                'platforms': [
+                    {'name': 'ChatGPT', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable — try again'},
+                    {'name': 'Gemini', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Claude', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Perplexity', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Copilot', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                ],
+                'visibility_score': 0, 'top_queries': [], 'improvements': []
+            }
+        })
+    except Exception as e:
+        return jsonify({'error': f'Brand check failed: {str(e)}'}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine — multi-provider, direct AI calls."""
@@ -3257,7 +3788,6 @@ def llm_citation_probe():
 # ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
 
 @app.route('/api/geo-scanner/scan', methods=['POST'])
-@app.route('/api/geo-scanner/scan', methods=['POST'])
 def geo_scanner_scan():
     """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
     from geo_scanner_agent import run_full_scan
@@ -3602,6 +4132,12 @@ def serve_geo_scanner():
     return send_from_directory('.', 'geo-scanner.html')
 
 
+@app.route('/geo-scanner-intelligence')
+def serve_geo_scanner_intelligence():
+    """Serve the Deepthi GEO Intelligence Dashboard (post-scan)."""
+    return send_from_directory('.', 'geo-scanner-intelligence.html')
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):
@@ -3624,6 +4160,12 @@ def serve_dashboard_redirect():
 def serve_admin():
     """Admin dashboard — overview, users, usage, AI costs, errors, health."""
     return send_from_directory('.', 'admin.html')
+
+
+@app.route('/template-benchmark')
+def serve_template_benchmark():
+    """Template Benchmark Engine — compare URL against perfect business templates."""
+    return send_from_directory('.', 'template-benchmark.html')
 
 
 @app.route('/directory')

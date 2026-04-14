@@ -1,6 +1,6 @@
 # AI1STSEO Shared Backend — Architecture & API Reference
 
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 8, 2026
 > **Maintainer:** Dev 1 (Deepthi) — AI/ML, GEO Engine, AEO, LLM Integrations
 > **Purpose:** Single reference for the shared Lambda/App Runner backend — modules, endpoints, deployment path, and recent changes.
 
@@ -12,7 +12,7 @@
 |-------|--------|
 | Runtime | Python 3.11, Flask, deployed as AWS Lambda (via `handler()` in `app.py`) |
 | App Runner (dev/test) | `https://sgnmqxb2sw.us-east-1.awsapprunner.com` — auto-deploys from `DeepthiSarayuGunda/ai1stseo-backend` `main` branch |
-| Database | RDS PostgreSQL (`ai1stseo`) — connection pool in `db.py` |
+| Database | RDS PostgreSQL (`ai1stseo`) — connection pool in `db.py`; DynamoDB fallback in `db_dynamo.py` (default when RDS is stopped) |
 | AI Providers | Bedrock Nova Lite (primary, IAM role), Ollama homelab (fallback) — routed via `ai_provider.py` |
 | Auth | Cognito `us-east-1_DVvth47zH` — production auth on Troy's EC2 (`api.ai1stseo.com`) |
 | Frontend | S3 `ai1stseo-website` + CloudFront `E16GYTIVXY9IOU` → `www.ai1stseo.com` |
@@ -33,6 +33,7 @@
 | `app.py` | Shared | Flask app, all route definitions, Lambda handler, SEO analysis (236 checks / 10 categories) |
 | `application.py` | Shared | WSGI entry point for App Runner / gunicorn |
 | `db.py` | Dev 1 | RDS PostgreSQL pool, schema init, CRUD for `geo_probes`, `ai_visibility_history`, `content_briefs` |
+| `db_dynamo.py` | Dev 1 | DynamoDB replacement for `db.py` — same function signatures, used when `USE_RDS` is not set |
 | `ai_provider.py` | Dev 1 | Unified AI abstraction — Bedrock Nova + Ollama, `generate()` and `get_available_providers()` |
 | `geo_probe_service.py` | Dev 1 | GEO/AEO monitoring engine — single probe, batch, compare, site detection, trend, history |
 | `geo_engine.py` | Dev 1 | GEO engine utilities |
@@ -192,7 +193,17 @@ Extended routing: `llm_service.py` → `citation_probe()` / `geo_monitor()` — 
 
 ---
 
-## Recent Changes (March 2026)
+## Recent Changes (March–April 2026)
+
+### Apr 8 — Dev 1 Task Completion: DynamoDB Wiring, Deployment, Documentation
+- Fixed GEO Scanner orchestrator `_persist_to_rds()` to auto-detect DynamoDB vs RDS mode (matches `app.py` behavior)
+- Fixed `geo_probe_service.py` — all DB calls now route through DynamoDB when `USE_RDS` is not set
+- Removed duplicate route decorator on `/api/geo-scanner/scan`
+- Updated `DEPLOYMENT-LINUX.md` with psycopg2 troubleshooting, DynamoDB mode docs, and team setup guide
+- Updated `SEO-CONTENT-WORKFLOWS.md` with quick-start guide and recommended end-to-end flow
+- GEO Scanner link already present in admin dashboard (tab bar + quick access card)
+- Parameter reference already built into both `geo-scanner.html` and `dev1-dashboard.html`
+- All `/api/data/*` endpoints (geo-probes, ai-visibility) fully wired with DynamoDB support
 
 ### Mar 26 — GEO Scanner Agent Enhancements & Workflow Documentation
 - Fixed parameter mismatch in `_persist_to_rds()` — `context_snippet` → `citation_context` to match `db.insert_probe()` signature
