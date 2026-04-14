@@ -4052,6 +4052,12 @@ def serve_template_benchmark():
     return send_from_directory('.', 'template-benchmark.html')
 
 
+@app.route('/template-compare')
+def serve_template_compare():
+    """Template Compare — side-by-side visual comparison of your page vs perfect template."""
+    return send_from_directory('.', 'template-compare.html')
+
+
 @app.route('/directory')
 def serve_directory():
     """AI Business Directory — Top 10 dentists in Ottawa."""
