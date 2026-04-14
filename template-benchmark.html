@@ -117,8 +117,9 @@ function show(v){
     h+='<div class="tabs"><div class="tab '+(v==='compare'?'on':'')+'" onclick="show(\'compare\')">Compare</div><div class="tab '+(v==='gaps'?'on':'')+'" onclick="show(\'gaps\')">Gap Analysis</div><div class="tab '+(v==='preview'?'on':'')+'" onclick="show(\'preview\')">Perfect Page Preview</div><div class="tab '+(v==='blueprint'?'on':'')+'" onclick="show(\'blueprint\')">Blueprint</div><div class="tab '+(v==='aicheck'?'on':'')+'" onclick="show(\'aicheck\')">AI Visibility</div></div>';
     h+='<div class="scores">'+ring(b.overall_score,'Overall','#10b981')+ring(b.aeo_score,'AEO','#8b5cf6')+ring(b.seo_score,'SEO','#3b82f6')+ring(b.content_score,'Content','#f59e0b')+'</div>';
     h+='<div class="info-bar"><span class="info-pill">'+d.template+' — <strong>'+b.total_gaps+' gaps</strong> — '+(100-b.overall_score)+' pts to perfect</span></div>';
-    if(v==='compare')h+=vCompare(b,d);else if(v==='gaps')h+=vGaps(b,d);else if(v==='preview')h+=vPreview();else if(v==='blueprint')h+=vBlueprint(t,d);else if(v==='aicheck')h+=vAI();
+    if(v==='compare')h+=vCompare(b,d);else if(v==='gaps')h+=vGaps(b,d);else if(v==='preview')h+=vPreview();else if(v==='blueprint')h+=vBlueprint(t,d);else if(v==='aicheck')h+=vAIShell();
     h+='</div>';o.innerHTML=h;
+    if(v==='aicheck')loadAICheck();
 }
 
 function vCompare(b,d){
@@ -169,32 +170,32 @@ function vBlueprint(t,d){
     h+='</div></div>';return h;
 }
 
-async function vAI(){
-    const o=document.getElementById('out');
+function vAIShell(){
     const url=document.getElementById('url').value.trim();
-    const query=url?new URL(url.startsWith('http')?url:'https://'+url).hostname:'AI First SEO';
-    // Inject loading then fetch
-    setTimeout(async()=>{
-        const box=document.getElementById('ai-results');
-        if(!box)return;
-        box.innerHTML='<div class="loading"><span class="spinner"></span>Checking AI platform visibility for "'+query+'"...</div>';
-        try{
-            const r=await fetch(API+'/api/ai-brand-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query})});
-            const d=await r.json();
-            if(d.status==='success'){
-                const res=d.result;let h='';
-                h+='<div style="text-align:center;margin-bottom:16px;"><div class="sc-num" style="font-size:2.2rem;color:#8b5cf6;">'+res.visibility_score+'</div><div class="sc-label" style="font-size:0.75rem;">AI Visibility Score</div></div>';
-                (res.platforms||[]).forEach(p=>{
-                    const lc=p.likelihood==='High'?'like-high':p.likelihood==='Medium'?'like-med':p.likelihood==='Low'?'like-low':'like-none';
-                    h+='<div class="brand-card"><div><div class="brand-name">'+p.name+'</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:2px;">'+p.reason+'</div></div><span class="brand-like '+lc+'">'+p.likelihood+'</span></div>';
-                });
-                if(res.top_queries&&res.top_queries.length){h+='<div class="card" style="margin-top:12px;"><div class="card-t"><span class="dot" style="background:#06b6d4;"></span>Top queries where you\'d be cited</div>';res.top_queries.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#67e8f9;">→</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
-                if(res.improvements&&res.improvements.length){h+='<div class="card"><div class="card-t"><span class="dot" style="background:#34d399;"></span>How to improve AI visibility</div>';res.improvements.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#34d399;">+</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
-                box.innerHTML=h;
-            }else{box.innerHTML='<div style="color:#f87171;">'+d.error+'</div>'}
-        }catch(e){box.innerHTML='<div style="color:#f87171;">'+e.message+'</div>'}
-    },100);
-    return '<div class="card"><div class="card-t"><span class="dot" style="background:#8b5cf6;"></span>AI Platform Visibility Check</div><p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-bottom:12px;">Checking if "'+query+'" is mentioned or recommended by ChatGPT, Gemini, Claude, Perplexity, and Copilot.</p><div id="ai-results"><div class="loading"><span class="spinner"></span>Analyzing...</div></div></div>';
+    const query=url?(() => { try { return new URL(url.startsWith('http')?url:'https://'+url).hostname } catch(e) { return url } })():'AI First SEO';
+    return '<div class="card"><div class="card-t"><span class="dot" style="background:#8b5cf6;"></span>AI Platform Visibility Check</div><p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-bottom:12px;">Checking if "'+query+'" is mentioned or recommended by ChatGPT, Gemini, Claude, Perplexity, and Copilot.</p><div id="ai-results"><div class="loading"><span class="spinner"></span>Analyzing AI visibility for "'+query+'"...</div></div></div>';
+}
+
+async function loadAICheck(){
+    const box=document.getElementById('ai-results');
+    if(!box)return;
+    const url=document.getElementById('url').value.trim();
+    const query=url?(() => { try { return new URL(url.startsWith('http')?url:'https://'+url).hostname } catch(e) { return url } })():'AI First SEO';
+    try{
+        const r=await fetch(API+'/api/ai-brand-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query})});
+        const d=await r.json();
+        if(d.status==='success'){
+            const res=d.result;let h='';
+            h+='<div style="text-align:center;margin-bottom:16px;"><div class="sc-num" style="font-size:2.2rem;color:#8b5cf6;">'+res.visibility_score+'</div><div class="sc-label" style="font-size:0.75rem;">AI Visibility Score</div></div>';
+            (res.platforms||[]).forEach(p=>{
+                const lc=p.likelihood==='High'?'like-high':p.likelihood==='Medium'?'like-med':p.likelihood==='Low'?'like-low':'like-none';
+                h+='<div class="brand-card"><div><div class="brand-name">'+p.name+'</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:2px;">'+p.reason+'</div></div><span class="brand-like '+lc+'">'+p.likelihood+'</span></div>';
+            });
+            if(res.top_queries&&res.top_queries.length){h+='<div class="card" style="margin-top:12px;"><div class="card-t"><span class="dot" style="background:#06b6d4;"></span>Top queries where you\'d be cited</div>';res.top_queries.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#67e8f9;">→</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
+            if(res.improvements&&res.improvements.length){h+='<div class="card"><div class="card-t"><span class="dot" style="background:#34d399;"></span>How to improve AI visibility</div>';res.improvements.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#34d399;">+</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
+            box.innerHTML=h;
+        }else{box.innerHTML='<div style="color:#f87171;padding:20px;">'+(d.error||'Analysis failed')+'</div>'}
+    }catch(e){box.innerHTML='<div style="color:#f87171;padding:20px;">Connection error: '+e.message+'</div>'}
 }
 
 function ring(s,l,c){const r=44,ci=2*Math.PI*r,of=ci-(s/100)*ci,g=s>=90?'A+':s>=80?'A':s>=70?'B':s>=60?'C':s>=50?'D':'F',gc=s>=80?'rgba(16,185,129,0.15)':s>=60?'rgba(251,191,36,0.15)':'rgba(239,68,68,0.15)',gt=s>=80?'#34d399':s>=60?'#fbbf24':'#f87171';return '<div class="sc"><svg width="110" height="110"><circle cx="55" cy="55" r="'+r+'" class="sc-track"/><circle cx="55" cy="55" r="'+r+'" class="sc-fill" stroke="'+c+'" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'"/></svg><div class="sc-inner"><div class="sc-num" style="color:'+c+';">'+s+'</div><div class="sc-label">'+l+'</div><div class="sc-grade" style="background:'+gc+';color:'+gt+';">'+g+'</div></div></div>'}
