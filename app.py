@@ -3211,6 +3211,19 @@ def template_types():
     })
 
 
+@app.route('/api/template-perfect/<business_type>', methods=['GET'])
+def template_perfect_example(business_type):
+    """Return the perfect template definition for a business type — used by frontend to render the ideal page."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return jsonify({'error': f'Unknown type. Choose from: {", ".join(BUSINESS_TEMPLATES.keys())}'}), 400
+    return jsonify({
+        'status': 'success',
+        'business_type': business_type,
+        'template': template
+    })
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine — multi-provider, direct AI calls."""
@@ -4050,12 +4063,6 @@ def serve_admin():
 def serve_template_benchmark():
     """Template Benchmark Engine — compare URL against perfect business templates."""
     return send_from_directory('.', 'template-benchmark.html')
-
-
-@app.route('/template-compare')
-def serve_template_compare():
-    """Template Compare — side-by-side visual comparison of your page vs perfect template."""
-    return send_from_directory('.', 'template-compare.html')
 
 
 @app.route('/directory')
