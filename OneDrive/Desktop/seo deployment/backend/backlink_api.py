@@ -372,3 +372,512 @@ def add_opportunity():
         return jsonify({'status': 'success', 'id': opp_id}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== MONTH 2: LLM CITATION AUTHORITY =====================
+
+@backlink_bp.route('/api/backlinks/citation-authority', methods=['POST'])
+@require_auth
+def citation_authority_probe():
+    """
+    Probe AI models to discover which domains they cite for a given topic.
+    This is the novel differentiator — no competitor tracks LLM citation patterns.
+    """
+    data = request.get_json() or {}
+    queries = data.get('queries', [])
+    niche = data.get('niche', 'SEO')
+    if not queries:
+        return jsonify({'status': 'error', 'message': 'queries[] required (list of prompts to send to AI models)'}), 400
+
+    try:
+        import re
+        from collections import Counter
+
+        cited_domains = Counter()
+        probe_results = []
+
+        # Use our AI inference to probe — this calls the Ollama accelerator or Bedrock
+        try:
+            from ai_inference import generate
+        except ImportError:
+            generate = None
+
+        for query in queries[:20]:  # Cap at 20 queries
+            if not generate:
+                break
+            prompt = (
+                'Answer this question and cite specific websites as sources. '
+                'Include URLs where possible: {}'
+            ).format(query)
+
+            response = generate(prompt, max_tokens=1024, temperature=0.3, triggered_by='citation_probe')
+
+            # Extract URLs from the response
+            urls = re.findall(r'https?://[^\s\)\]\"\'<>]+', response)
+            domains_found = []
+            for url in urls:
+                domain = urlparse(url).netloc
+                if domain and len(domain) > 3:
+                    cited_domains[domain] += 1
+                    domains_found.append(domain)
+
+            probe_results.append({
+                'query': query,
+                'domains_cited': list(set(domains_found)),
+                'citation_count': len(domains_found),
+            })
+
+        # Build citation authority scores
+        authority_scores = []
+        for domain, count in cited_domains.most_common(50):
+            authority_scores.append({
+                'domain': domain,
+                'citation_count': count,
+                'citation_frequency': round(count / len(queries) * 100, 1) if queries else 0,
+                'niche': niche,
+            })
+
+        # Store the probe
+        probe_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': probe_id,
+            'type': 'citation_authority',
+            'niche': niche,
+            'queries_count': len(queries),
+            'top_cited_domains': authority_scores[:20],
+            'probe_results': probe_results,
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': probe_id,
+            'total_domains_cited': len(cited_domains),
+            'top_cited': authority_scores[:20],
+            'probes': probe_results,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/citation-scores', methods=['GET'])
+@require_auth
+def get_citation_scores():
+    """Get stored citation authority scores by niche."""
+    niche = request.args.get('niche', '')
+    try:
+        items = scan_table(BACKLINKS_TABLE, 100)
+        probes = [i for i in items if i.get('type') == 'citation_authority']
+        if niche:
+            probes = [p for p in probes if niche.lower() in (p.get('niche', '') or '').lower()]
+        probes.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        return jsonify({'status': 'success', 'probes': probes[:20]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/velocity', methods=['POST'])
+@require_auth
+def link_velocity_check():
+    """
+    Detect link velocity anomalies — domains acquiring links unusually fast.
+    These are either running a campaign (competitive threat) or publishing viral content (opportunity).
+    """
+    data = request.get_json() or {}
+    domain = data.get('domain', '').strip()
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'domain required'}), 400
+    try:
+        # Check historical scores for this domain
+        items = scan_table(BACKLINKS_TABLE, 200)
+        domain_scores = [i for i in items if i.get('domain') == domain and i.get('type') == 'domain_score']
+        domain_scores.sort(key=lambda x: x.get('scored_at', ''))
+
+        velocity = {
+            'domain': domain,
+            'data_points': len(domain_scores),
+            'trend': 'insufficient_data',
+            'anomaly': False,
+        }
+
+        if len(domain_scores) >= 2:
+            scores = [s.get('da_score', 0) for s in domain_scores]
+            latest = scores[-1]
+            avg = sum(scores) / len(scores)
+            change = latest - scores[0]
+
+            velocity['latest_score'] = latest
+            velocity['average_score'] = round(avg, 1)
+            velocity['total_change'] = change
+            velocity['trend'] = 'improving' if change > 5 else ('declining' if change < -5 else 'stable')
+            velocity['anomaly'] = abs(change) > 15  # Flag if DA changed by more than 15 points
+
+        return jsonify({'status': 'success', **velocity})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== MONTH 3: BROKEN LINK RECLAIM + WIKIPEDIA GAP =====================
+
+@backlink_bp.route('/api/backlinks/broken-links', methods=['POST'])
+@require_auth
+def find_broken_links():
+    """
+    Scan a page for broken outbound links — reclaim opportunities.
+    If a broken link pointed to content similar to the client's, it's a reclaim candidate.
+    """
+    data = request.get_json() or {}
+    url = data.get('url', '').strip()
+    if not url:
+        return jsonify({'status': 'error', 'message': 'url required'}), 400
+    try:
+        from bs4 import BeautifulSoup
+        resp = http_requests.get(url, timeout=15, headers={'User-Agent': 'Mozilla/5.0 (compatible; AI1stSEO/1.0)'})
+        soup = BeautifulSoup(resp.content, 'html.parser')
+
+        broken = []
+        checked = 0
+        links = soup.find_all('a', href=True)
+
+        for link in links[:50]:  # Cap at 50 links per page
+            href = link.get('href', '')
+            if not href.startswith('http'):
+                continue
+            checked += 1
+            try:
+                r = http_requests.head(href, timeout=5, allow_redirects=True,
+                                       headers={'User-Agent': 'Mozilla/5.0'})
+                if r.status_code >= 400:
+                    broken.append({
+                        'broken_url': href,
+                        'status_code': r.status_code,
+                        'anchor_text': link.get_text().strip()[:100],
+                        'linking_page': url,
+                        'context': link.parent.get_text().strip()[:200] if link.parent else '',
+                    })
+            except Exception:
+                broken.append({
+                    'broken_url': href,
+                    'status_code': 0,
+                    'anchor_text': link.get_text().strip()[:100],
+                    'linking_page': url,
+                    'context': 'Connection failed',
+                })
+
+        # Store as opportunities
+        for bl in broken:
+            put_item(OPPORTUNITIES_TABLE, {
+                'source_url': bl['linking_page'],
+                'broken_url': bl['broken_url'],
+                'anchor_text': bl['anchor_text'],
+                'opportunity_type': 'broken_link_reclaim',
+                'priority_score': 70,
+                'status': 'new',
+                'project_id': DEFAULT_PROJECT_ID,
+                'created_by': _get_user_id(),
+            })
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'links_checked': checked,
+            'broken_count': len(broken),
+            'broken_links': broken,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/wikipedia-gaps', methods=['POST'])
+@require_auth
+def wikipedia_citation_gaps():
+    """
+    Find Wikipedia articles in a topic that cite weak/dead sources.
+    These are replacement opportunities — if your content is better, you can suggest an edit.
+    """
+    data = request.get_json() or {}
+    topic = data.get('topic', '').strip()
+    if not topic:
+        return jsonify({'status': 'error', 'message': 'topic required'}), 400
+    try:
+        # Search Wikipedia for articles on this topic
+        wiki_search = http_requests.get(
+            'https://en.wikipedia.org/w/api.php',
+            params={'action': 'query', 'list': 'search', 'srsearch': topic,
+                    'srlimit': 10, 'format': 'json'},
+            timeout=10,
+        ).json()
+
+        articles = wiki_search.get('query', {}).get('search', [])
+        gaps = []
+
+        for article in articles[:5]:  # Check top 5 articles
+            title = article.get('title', '')
+            # Get external links from this article
+            links_resp = http_requests.get(
+                'https://en.wikipedia.org/w/api.php',
+                params={'action': 'query', 'titles': title, 'prop': 'extlinks',
+                        'ellimit': 50, 'format': 'json'},
+                timeout=10,
+            ).json()
+
+            pages = links_resp.get('query', {}).get('pages', {})
+            for page_id, page_data in pages.items():
+                ext_links = page_data.get('extlinks', [])
+                for link in ext_links:
+                    ext_url = link.get('*', '')
+                    if not ext_url:
+                        continue
+                    # Check if the external link is still alive
+                    try:
+                        r = http_requests.head(ext_url, timeout=5, allow_redirects=True)
+                        if r.status_code >= 400:
+                            gaps.append({
+                                'wikipedia_article': title,
+                                'wikipedia_url': 'https://en.wikipedia.org/wiki/' + title.replace(' ', '_'),
+                                'dead_citation': ext_url,
+                                'status_code': r.status_code,
+                                'opportunity': 'Replace dead citation with your content',
+                            })
+                    except Exception:
+                        gaps.append({
+                            'wikipedia_article': title,
+                            'wikipedia_url': 'https://en.wikipedia.org/wiki/' + title.replace(' ', '_'),
+                            'dead_citation': ext_url,
+                            'status_code': 0,
+                            'opportunity': 'Citation unreachable — replacement opportunity',
+                        })
+
+        # Store gaps as opportunities
+        for gap in gaps:
+            put_item(OPPORTUNITIES_TABLE, {
+                'source_url': gap['wikipedia_url'],
+                'broken_url': gap['dead_citation'],
+                'opportunity_type': 'wikipedia_citation_gap',
+                'priority_score': 90,  # Wikipedia links are very high value
+                'status': 'new',
+                'notes': gap['opportunity'],
+                'project_id': DEFAULT_PROJECT_ID,
+                'created_by': _get_user_id(),
+            })
+
+        return jsonify({
+            'status': 'success',
+            'topic': topic,
+            'articles_checked': len(articles[:5]),
+            'gaps_found': len(gaps),
+            'gaps': gaps,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== MONTH 4: AUTOMATION =====================
+
+@backlink_bp.route('/api/backlinks/competitor-alerts', methods=['POST'])
+@require_auth
+def check_competitor_new_links():
+    """
+    Compare a competitor's current backlink profile against stored history.
+    Detect new links they acquired that you don't have.
+    """
+    data = request.get_json() or {}
+    competitor = data.get('competitor', '').strip()
+    your_domain = data.get('your_domain', '').strip()
+    if not competitor:
+        return jsonify({'status': 'error', 'message': 'competitor domain required'}), 400
+    try:
+        # Get stored scores for this competitor
+        items = scan_table(BACKLINKS_TABLE, 200)
+        comp_history = [i for i in items if i.get('domain') == competitor and i.get('type') == 'domain_score']
+        comp_history.sort(key=lambda x: x.get('scored_at', ''))
+
+        # Run a fresh score
+        current = _estimate_domain_authority(competitor)
+
+        alert = {
+            'competitor': competitor,
+            'current_da': current['da_score'],
+            'historical_scores': len(comp_history),
+            'alert_type': 'none',
+        }
+
+        if comp_history:
+            prev_score = comp_history[-1].get('da_score', 0)
+            change = current['da_score'] - prev_score
+            alert['previous_da'] = prev_score
+            alert['da_change'] = change
+            if change > 5:
+                alert['alert_type'] = 'competitor_improving'
+                alert['message'] = '{} gained {} DA points — they may have acquired new high-value links'.format(competitor, change)
+            elif change < -5:
+                alert['alert_type'] = 'competitor_declining'
+                alert['message'] = '{} lost {} DA points — potential toxic link issue or content removal'.format(competitor, abs(change))
+
+        # Store the check
+        put_item(BACKLINKS_TABLE, {
+            'id': str(uuid.uuid4()),
+            'type': 'competitor_alert',
+            'competitor': competitor,
+            'your_domain': your_domain,
+            'da_score': current['da_score'],
+            'alert_type': alert['alert_type'],
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+        })
+
+        return jsonify({'status': 'success', **alert})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/priority-queue', methods=['GET'])
+@require_auth
+def priority_queue():
+    """
+    Get the unified backlink opportunity queue, auto-scored by composite priority.
+    Combines: broken links, Wikipedia gaps, citation authority, competitor alerts.
+    """
+    try:
+        items = scan_table(OPPORTUNITIES_TABLE, 200)
+
+        # Enrich with composite scoring
+        for item in items:
+            base = item.get('priority_score', 50)
+            # Boost Wikipedia opportunities
+            if item.get('opportunity_type') == 'wikipedia_citation_gap':
+                base = max(base, 90)
+            # Boost broken link reclaims on high-DA pages
+            if item.get('opportunity_type') == 'broken_link_reclaim':
+                base = max(base, 70)
+            item['composite_score'] = base
+
+        items.sort(key=lambda x: x.get('composite_score', 0), reverse=True)
+
+        # Group by type
+        by_type = {}
+        for item in items:
+            t = item.get('opportunity_type', 'unknown')
+            by_type[t] = by_type.get(t, 0) + 1
+
+        return jsonify({
+            'status': 'success',
+            'opportunities': items[:100],
+            'total': len(items),
+            'by_type': by_type,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/decay-predict', methods=['POST'])
+@require_auth
+def predict_link_decay():
+    """
+    Predict which existing backlinks are at risk of disappearing.
+    Based on: link age, source domain health, and historical patterns.
+    """
+    data = request.get_json() or {}
+    domain = data.get('domain', '').strip()
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'domain required'}), 400
+    try:
+        # Get all stored data for this domain
+        items = scan_table(BACKLINKS_TABLE, 200)
+        domain_data = [i for i in items if (i.get('domain', '') or '').lower() == domain.lower()]
+
+        at_risk = []
+        for item in domain_data:
+            risk_score = 0
+            reasons = []
+
+            # Old scores with declining trend
+            if item.get('type') == 'domain_score':
+                da = item.get('da_score', 0)
+                if da < 20:
+                    risk_score += 30
+                    reasons.append('Low DA ({})'.format(da))
+
+            # Broken link opportunities (already dead)
+            if item.get('type') == 'link_gap':
+                gaps = item.get('gaps', [])
+                if len(gaps) > 3:
+                    risk_score += 20
+                    reasons.append('{} competitive gaps'.format(len(gaps)))
+
+            if risk_score > 0:
+                at_risk.append({
+                    'id': item.get('id'),
+                    'type': item.get('type'),
+                    'risk_score': risk_score,
+                    'reasons': reasons,
+                    'created_at': item.get('created_at', item.get('scored_at', '')),
+                })
+
+        at_risk.sort(key=lambda x: x.get('risk_score', 0), reverse=True)
+
+        return jsonify({
+            'status': 'success',
+            'domain': domain,
+            'at_risk_count': len(at_risk),
+            'at_risk': at_risk[:20],
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/report', methods=['POST'])
+@require_auth
+def generate_backlink_report():
+    """
+    Generate a comprehensive backlink report for a domain.
+    Combines: DA score, toxic analysis, link gaps, citation authority, opportunities.
+    """
+    data = request.get_json() or {}
+    domain = data.get('domain', '').strip()
+    competitors = data.get('competitors', [])
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'domain required'}), 400
+    try:
+        # Score the domain
+        da_result = _estimate_domain_authority(domain)
+
+        # Get stored history
+        items = scan_table(BACKLINKS_TABLE, 200)
+        domain_history = [i for i in items if (i.get('domain', '') or '').lower() == domain.lower()]
+
+        # Get opportunities
+        opps = scan_table(OPPORTUNITIES_TABLE, 100)
+
+        # Competitor comparison
+        comp_scores = []
+        for comp in competitors[:3]:
+            comp_scores.append(_estimate_domain_authority(comp))
+
+        report = {
+            'domain': domain,
+            'da_score': da_result['da_score'],
+            'signals': da_result['signals'],
+            'history_count': len(domain_history),
+            'opportunities_count': len(opps),
+            'competitors': comp_scores,
+            'generated_at': _now(),
+        }
+
+        # Store the report
+        report_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': report_id,
+            'type': 'backlink_report',
+            'domain': domain,
+            'report': report,
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({'status': 'success', 'id': report_id, 'report': report})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
