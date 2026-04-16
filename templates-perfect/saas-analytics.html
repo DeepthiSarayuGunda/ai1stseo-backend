@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataPulse Analytics — AI-Powered Business Intelligence</title>
+    <meta name="description" content="DataPulse Analytics helps teams make faster decisions with AI-powered dashboards. Used by 1,200 companies. Start your free 14-day trial today.">
+    <link rel="canonical" href="https://datapulse.io">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[
+        {"@type":"SoftwareApplication","name":"DataPulse Analytics","description":"AI-powered business intelligence platform that transforms raw data into actionable insights in real time.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"49","priceCurrency":"USD"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"847"},"url":"https://datapulse.io"},
+        {"@type":"Organization","name":"DataPulse","url":"https://datapulse.io","logo":"https://datapulse.io/logo.png","foundingDate":"2022","numberOfEmployees":"45"},
+        {"@type":"FAQPage","mainEntity":[
+            {"@type":"Question","name":"What is DataPulse Analytics?","acceptedAnswer":{"@type":"Answer","text":"DataPulse Analytics is a cloud-based business intelligence platform that uses AI to automatically analyze your data, detect trends, and generate actionable insights. It connects to over 150 data sources and delivers real-time dashboards without requiring SQL knowledge."}},
+            {"@type":"Question","name":"How much does DataPulse cost?","acceptedAnswer":{"@type":"Answer","text":"DataPulse offers three plans: Starter at $49 per month for up to 5 users, Professional at $149 per month for up to 25 users, and Enterprise with custom pricing for unlimited users. All plans include a free 14-day trial."}},
+            {"@type":"Question","name":"Does DataPulse integrate with my existing tools?","acceptedAnswer":{"@type":"Answer","text":"Yes, DataPulse integrates with over 150 data sources including Salesforce, HubSpot, Google Analytics, Shopify, PostgreSQL, MySQL, Snowflake, BigQuery, and all major cloud platforms. Setup takes under 5 minutes per integration."}},
+            {"@type":"Question","name":"Is DataPulse secure?","acceptedAnswer":{"@type":"Answer","text":"DataPulse is SOC 2 Type II certified and GDPR compliant. All data is encrypted at rest using AES-256 and in transit using TLS 1.3. We offer SSO via SAML 2.0 and role-based access controls."}}
+        ]},
+        {"@type":"HowTo","name":"How to Get Started with DataPulse","step":[
+            {"@type":"HowToStep","position":1,"name":"Sign Up","text":"Create your free account at datapulse.io. No credit card required."},
+            {"@type":"HowToStep","position":2,"name":"Connect Data","text":"Connect your data sources using our one-click integrations. Over 150 sources supported."},
+            {"@type":"HowToStep","position":3,"name":"Get Insights","text":"DataPulse AI automatically analyzes your data and generates dashboards with actionable insights."}
+        ]},
+        {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapulse.io"},{"@type":"ListItem","position":2,"name":"Product","item":"https://datapulse.io/product"},{"@type":"ListItem","position":3,"name":"Pricing","item":"https://datapulse.io/pricing"}]}
+    ]}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:#0a0a0f;color:#e2e8f0;line-height:1.7}
+        nav{padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .container{max-width:900px;margin:0 auto;padding:0 24px}
+        nav .container{display:flex;justify-content:space-between;align-items:center}
+        .logo{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+        nav a{color:rgba(255,255,255,0.5);text-decoration:none;margin-left:24px;font-size:0.88rem}
+        .hero{padding:70px 0;text-align:center;background:radial-gradient(circle at 50% 0%,rgba(99,102,241,0.12),transparent 60%)}
+        .hero h1{font-size:2.2rem;font-weight:800;margin-bottom:14px;letter-spacing:-0.5px}
+        .hero h1 span{background:linear-gradient(135deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{color:rgba(255,255,255,0.55);font-size:1rem;max-width:580px;margin:0 auto 24px}
+        .btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6366f1,#06b6d4);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.95rem}
+        .stats{display:flex;justify-content:center;gap:48px;margin-top:32px}
+        .stat{text-align:center}
+        .stat strong{display:block;font-size:1.5rem;color:#a5b4fc}
+        .stat span{font-size:0.75rem;color:rgba(255,255,255,0.4)}
+        section{padding:48px 0}
+        .alt{background:rgba(255,255,255,0.02)}
+        h2{font-size:1.35rem;font-weight:700;margin-bottom:16px;color:#e2e8f0}
+        h3{font-size:1.05rem;color:#a5b4fc;margin:18px 0 8px}
+        p{margin-bottom:12px;color:rgba(255,255,255,0.6);font-size:0.93rem}
+        ul,ol{margin:12px 0 12px 24px;color:rgba(255,255,255,0.6)}
+        li{margin-bottom:6px;font-size:0.9rem}
+        table{width:100%;border-collapse:collapse;margin:16px 0}
+        th,td{padding:10px 14px;border:1px solid rgba(255,255,255,0.08);text-align:left;font-size:0.88rem}
+        th{background:rgba(255,255,255,0.04);color:#a5b4fc;font-weight:600}
+        td{color:rgba(255,255,255,0.55)}
+        .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;margin:12px 0}
+        .faq{background:rgba(99,102,241,0.04);border:1px solid rgba(99,102,241,0.1);border-radius:12px;padding:18px;margin:10px 0}
+        .faq-q{font-weight:600;color:#a5b4fc;margin-bottom:6px;font-size:0.92rem}
+        .faq-a{color:rgba(255,255,255,0.5);font-size:0.88rem}
+        img{max-width:100%;border-radius:10px;margin:14px 0;border:1px solid rgba(255,255,255,0.06)}
+        footer{border-top:1px solid rgba(255,255,255,0.06);padding:28px 0;text-align:center;color:rgba(255,255,255,0.3);font-size:0.82rem}
+        footer a{color:#6366f1;text-decoration:none}
+    </style>
+</head>
+<body>
+    <nav><div class="container"><a href="https://datapulse.io" class="logo">DataPulse</a><div><a href="https://datapulse.io/product">Product</a><a href="https://datapulse.io/pricing">Pricing</a><a href="https://datapulse.io/docs">Docs</a><a href="https://datapulse.io/contact">Contact</a></div></div></nav>
+
+    <div class="hero"><div class="container">
+        <h1>Turn raw data into <span>actionable insights</span></h1>
+        <p>DataPulse Analytics is an AI-powered business intelligence platform that connects to your data sources and delivers real-time dashboards without requiring SQL knowledge.</p>
+        <a href="https://datapulse.io/signup" class="btn">Start Free 14-Day Trial</a>
+        <div class="stats">
+            <div class="stat"><strong>1,200+</strong><span>Companies</span></div>
+            <div class="stat"><strong>4.8/5</strong><span>G2 Rating</span></div>
+            <div class="stat"><strong>150+</strong><span>Integrations</span></div>
+            <div class="stat"><strong>99.9%</strong><span>Uptime SLA</span></div>
+        </div>
+    </div></div>
+
+    <section><div class="container">
+        <h2>What is DataPulse Analytics</h2>
+        <p>DataPulse Analytics is defined as a cloud-based business intelligence platform that uses artificial intelligence to transform raw data into visual dashboards and predictive insights. The platform connects to over 150 data sources and automatically detects patterns, anomalies, and trends that would take analysts hours to find manually.</p>
+        <p>Founded in 2022, DataPulse serves over 1,200 companies across 40 countries. According to a 2025 study by Forrester Research, companies using AI-powered analytics platforms like DataPulse make data-driven decisions 3.2 times faster than those using traditional BI tools. Our platform processes over 2 billion data points daily with an average query response time of 1.4 seconds.</p>
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop" alt="DataPulse Analytics dashboard showing real-time business intelligence charts and AI-generated insights">
+    </div></section>
+
+    <section class="alt"><div class="container">
+        <h2>Key Features</h2>
+        <p>DataPulse provides a complete analytics toolkit designed for teams that need insights without the complexity of traditional BI platforms.</p>
+
+        <h3>AI-Powered Insights</h3>
+        <ul>
+            <li>Automatic anomaly detection that alerts you to unusual patterns in real time</li>
+            <li>Natural language queries — ask questions in plain English and get instant charts</li>
+            <li>Predictive forecasting using machine learning models trained on your historical data</li>
+            <li>Smart recommendations that suggest which metrics to track based on your industry</li>
+        </ul>
+
+        <h3>Data Connectivity</h3>
+        <ul>
+            <li>One-click integrations with Salesforce, HubSpot, Google Analytics, and Shopify</li>
+            <li>Direct database connections to PostgreSQL, MySQL, Snowflake, and BigQuery</li>
+            <li>REST API for custom data sources with webhook support</li>
+            <li>Real-time data sync with sub-minute refresh intervals</li>
+        </ul>
+
+        <h3>Collaboration Tools</h3>
+        <p>Share dashboards with your team using granular permissions. Schedule automated reports via email or Slack. Embed live charts in Notion, Confluence, or any webpage using our embed SDK.</p>
+    </div></section>
+
+    <section><div class="container">
+        <h2>How It Works</h2>
+        <p>Getting started with DataPulse takes under 10 minutes. No technical setup required.</p>
+        <ol>
+            <li><strong>Sign up for free.</strong> Create your account at datapulse.io. No credit card needed for the 14-day trial.</li>
+            <li><strong>Connect your data sources.</strong> Choose from 150 pre-built integrations. Most connections complete in under 5 minutes.</li>
+            <li><strong>Get instant insights.</strong> DataPulse AI scans your data and generates dashboards automatically. Ask questions in plain English to explore further.</li>
+            <li><strong>Share with your team.</strong> Invite team members, set permissions, and schedule automated reports.</li>
+        </ol>
+    </div></section>
+
+    <section class="alt"><div class="container">
+        <h2>Use Cases</h2>
+        <p>DataPulse serves teams across multiple industries. Here are the most common use cases reported by our customers.</p>
+
+        <h3>Marketing Teams</h3>
+        <p>Track campaign performance across all channels in one dashboard. DataPulse automatically correlates ad spend with revenue attribution. Marketing teams using DataPulse report a 28% improvement in campaign ROI within the first 90 days.</p>
+
+        <h3>Sales Teams</h3>
+        <p>Monitor pipeline health, forecast revenue, and identify at-risk deals before they slip. Our AI flags deals that show patterns similar to previously lost opportunities.</p>
+
+        <h3>Product Teams</h3>
+        <p>Analyze user behavior, feature adoption, and retention cohorts without writing SQL. DataPulse connects directly to your product database and event tracking tools.</p>
+    </div></section>
+
+    <section><div class="container">
+        <h2>Pricing</h2>
+        <p>Simple, transparent pricing with no hidden fees. All plans include a free 14-day trial.</p>
+        <table>
+            <tr><th>Plan</th><th>Price</th><th>Users</th><th>Data Sources</th><th>Features</th></tr>
+            <tr><td>Starter</td><td>$49/month</td><td>Up to 5</td><td>10</td><td>Core dashboards, email reports</td></tr>
+            <tr><td>Professional</td><td>$149/month</td><td>Up to 25</td><td>50</td><td>AI insights, Slack integration, API access</td></tr>
+            <tr><td>Enterprise</td><td>Custom</td><td>Unlimited</td><td>Unlimited</td><td>SSO, dedicated support, custom models</td></tr>
+        </table>
+        <p>According to data from G2 updated in 2026, DataPulse is rated 4.8 out of 5 stars across 847 verified reviews, making it the highest-rated AI analytics platform in its category.</p>
+    </div></section>
+
+    <section class="alt"><div class="container">
+        <h2>Integrations</h2>
+        <p>DataPulse connects to the tools your team already uses. Setup takes under 5 minutes per integration.</p>
+        <ul>
+            <li><strong>CRM:</strong> Salesforce, HubSpot, Pipedrive, Zoho CRM</li>
+            <li><strong>Marketing:</strong> Google Analytics, Google Ads, Meta Ads, Mailchimp</li>
+            <li><strong>E-Commerce:</strong> Shopify, WooCommerce, Stripe, Square</li>
+            <li><strong>Databases:</strong> PostgreSQL, MySQL, MongoDB, Snowflake, BigQuery</li>
+            <li><strong>Productivity:</strong> Slack, Notion, Confluence, Google Sheets</li>
+            <li><strong>Cloud:</strong> AWS, Google Cloud, Azure, Heroku</li>
+        </ul>
+    </div></section>
+
+    <section><div class="container">
+        <h2>Frequently Asked Questions</h2>
+        <p>Common questions about DataPulse Analytics. Contact our support team at support@datapulse.io for additional help.</p>
+
+        <div class="faq">
+            <div class="faq-q">What is DataPulse Analytics?</div>
+            <div class="faq-a">DataPulse Analytics is a cloud-based business intelligence platform that uses AI to automatically analyze your data, detect trends, and generate actionable insights. It connects to over 150 data sources and delivers real-time dashboards without requiring SQL knowledge.</div>
+        </div>
+        <div class="faq">
+            <div class="faq-q">How much does DataPulse cost?</div>
+            <div class="faq-a">DataPulse offers three plans: Starter at $49 per month for up to 5 users, Professional at $149 per month for up to 25 users, and Enterprise with custom pricing for unlimited users. All plans include a free 14-day trial.</div>
+        </div>
+        <div class="faq">
+            <div class="faq-q">Does DataPulse integrate with my existing tools?</div>
+            <div class="faq-a">Yes, DataPulse integrates with over 150 data sources including Salesforce, HubSpot, Google Analytics, Shopify, PostgreSQL, MySQL, Snowflake, BigQuery, and all major cloud platforms. Setup takes under 5 minutes per integration.</div>
+        </div>
+        <div class="faq">
+            <div class="faq-q">Is DataPulse secure?</div>
+            <div class="faq-a">DataPulse is SOC 2 Type II certified and GDPR compliant. All data is encrypted at rest using AES-256 and in transit using TLS 1.3. We offer SSO via SAML 2.0 and role-based access controls.</div>
+        </div>
+        <div class="faq">
+            <div class="faq-q">Can I try DataPulse before buying?</div>
+            <div class="faq-a">Yes, all plans include a free 14-day trial with full access to all features. No credit card is required to start your trial. You can upgrade or cancel at any time.</div>
+        </div>
+    </div></section>
+
+    <section class="alt"><div class="container">
+        <h2>Getting Started</h2>
+        <p>Join 1,200 companies that use DataPulse to make faster, smarter decisions. Start your free trial today and see results in under 10 minutes.</p>
+        <p>Last updated: April 2026. DataPulse Analytics is a registered trademark. All product data reflects the most recent platform release.</p>
+        <a href="https://datapulse.io/signup" class="btn">Start Free 14-Day Trial</a>
+    </div></section>
+
+    <footer><div class="container">
+        <p>&copy; 2026 DataPulse Analytics. All rights reserved.</p>
+        <p><a href="https://datapulse.io/privacy">Privacy</a> | <a href="https://datapulse.io/terms">Terms</a> | <a href="https://datapulse.io/security">Security</a> | <a href="https://datapulse.io/docs">API Docs</a></p>
+    </div></footer>
+</body>
+</html>
