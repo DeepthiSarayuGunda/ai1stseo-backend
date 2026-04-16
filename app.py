@@ -3226,49 +3226,20 @@ def template_perfect_example(business_type):
 
 @app.route('/api/template-preview/<business_type>', methods=['GET'])
 def template_preview_html(business_type):
-    """Generate a perfect example HTML preview for a business type — renders what a 100% page looks like."""
-    template = BUSINESS_TEMPLATES.get(business_type)
-    if not template:
-        return jsonify({'error': 'Unknown business type'}), 400
-
-    name = template['name']
-    sections_html = ''
-    for s in template['content_sections']:
-        sections_html += f'<section><h2>{s["heading"].replace("[Business Name]", "Example Co").replace("[Service]", "Professional").replace("[Product]", "Product")}</h2><p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">{s["purpose"]} — {s["min_words"]}+ words recommended</p></section>'
-
-    schema_tags = ', '.join(template['seo']['required_schema'])
-    aeo_elements = ', '.join(template['aeo']['required_elements'])
-
-    html = f'''<!DOCTYPE html><html lang="en"><head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{template["seo"]["title_format"].replace("[Service]","Professional Services").replace("[City]","Ottawa").replace("[Business Name]","Example Co").replace("[Industry]","Industry").replace("[Product]","Product").replace("[One-line Value Prop]","AI-Powered Solution").replace("[Company]","Example Co").replace("[Value Prop]","Best Quality")}</title>
-    <meta name="description" content="{template["seo"]["meta_desc_format"][:160]}">
-    <link rel="canonical" href="https://example.com">
-    <script type="application/ld+json">{{"@context":"https://schema.org","@type":"{template["seo"]["required_schema"][0]}","name":"Example Co","description":"Perfect {name} template"}}</script>
-    </head><body style="font-family:Inter,sans-serif;background:#0a0a0a;color:#e2e8f0;padding:40px;max-width:800px;margin:0 auto;">
-    <header style="margin-bottom:30px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:20px;">
-    <h1 style="font-size:1.8rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Perfect {name} Page</h1>
-    <p style="color:rgba(255,255,255,0.4);font-size:0.9rem;">This page demonstrates every element needed for a 100% AEO/GEO/SEO score</p>
-    </header>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);border-radius:12px;padding:14px;">
-    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">Schema Types</div>
-    <div style="font-size:0.85rem;color:#a78bfa;margin-top:4px;">{schema_tags}</div></div>
-    <div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);border-radius:12px;padding:14px;">
-    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">AEO Elements</div>
-    <div style="font-size:0.85rem;color:#67e8f9;margin-top:4px;">{aeo_elements}</div></div>
-    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:14px;">
-    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">Min Word Count</div>
-    <div style="font-size:0.85rem;color:#34d399;margin-top:4px;">{template["seo"]["min_word_count"]}+ words</div></div>
-    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15);border-radius:12px;padding:14px;">
-    <div style="font-size:0.7rem;color:rgba(255,255,255,0.4);text-transform:uppercase;">FAQ Count</div>
-    <div style="font-size:0.85rem;color:#fbbf24;margin-top:4px;">{template["aeo"]["min_faq_count"]}+ questions</div></div>
-    </div>
-    {sections_html}
-    <footer style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);font-size:0.75rem;color:rgba(255,255,255,0.3);">
-    Perfect {name} Template — AI1stSEO Benchmark Engine</footer>
-    </body></html>'''
-    return html, 200, {'Content-Type': 'text/html'}
+    """Serve the actual perfect HTML page for a business type."""
+    file_map = {
+        'service': 'templates-perfect/service-dentist.html',
+        'manufacturing': 'templates-perfect/manufacturing-parts.html',
+        'ecommerce': 'templates-perfect/ecommerce-store.html',
+        'saas': 'templates-perfect/saas-analytics.html',
+    }
+    filepath = file_map.get(business_type)
+    if not filepath:
+        return jsonify({'error': f'Unknown type. Choose from: {", ".join(file_map.keys())}'}), 400
+    try:
+        return send_from_directory('.', filepath)
+    except Exception:
+        return jsonify({'error': 'Template file not found'}), 404
 
 
 @app.route('/api/ai-brand-check', methods=['POST'])
