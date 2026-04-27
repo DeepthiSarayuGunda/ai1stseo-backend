@@ -198,8 +198,6 @@ def _sync_user_to_db(email, cognito_sub, name=''):
                 'created_at': now, 'last_login': now,
             })
             return 'member'
-    except Exception:
-        return 'member'
     except Exception as e:
         print("User sync failed: {}".format(e))
         return 'member'
