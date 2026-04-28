@@ -120,6 +120,16 @@ def init_sports_tables():
             )
         """)
 
+        # Add unique constraint for deduplication on repeated syncs
+        try:
+            cur.execute("""
+                ALTER TABLE sports_matches
+                ADD CONSTRAINT uq_match_identity
+                UNIQUE (sport_id, home_team_name, away_team_name, match_date)
+            """)
+        except Exception:
+            pass  # already exists
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS sports_rankings (
                 id          SERIAL PRIMARY KEY,
@@ -270,6 +280,14 @@ def create_match(sport_slug, data):
                 (sport_id, home_team_name, away_team_name, home_score, away_score,
                  status, league, venue, match_date, match_url, meta_json)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            ON CONFLICT (sport_id, home_team_name, away_team_name, match_date)
+            DO UPDATE SET
+                home_score = EXCLUDED.home_score,
+                away_score = EXCLUDED.away_score,
+                status     = EXCLUDED.status,
+                venue      = COALESCE(NULLIF(EXCLUDED.venue, ''), sports_matches.venue),
+                meta_json  = EXCLUDED.meta_json,
+                updated_at = NOW()
             RETURNING *
         """, (
             sport['id'], data['home_team'], data['away_team'],

@@ -13,14 +13,26 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all Python modules
 COPY *.py ./
 
-# Copy HTML dashboards
+# Copy sub-packages
+COPY directory/ ./directory/
+COPY deepthi_intelligence/ ./deepthi_intelligence/
+COPY month1_research/ ./month1_research/
+COPY month3_systems/ ./month3_systems/
+COPY growth/ ./growth/
+COPY dynamo/ ./dynamo/
+
+# Copy HTML dashboards & templates
 COPY *.html ./
+COPY templates/ ./templates/
+COPY s3-pages/ ./s3-pages/
 
 # Copy static assets
 COPY assets/ ./assets/
+COPY static/ ./static/
 
 # Copy config files
 COPY apprunner.yaml .
+COPY .ebextensions/ ./.ebextensions/
 
 EXPOSE 8080
 

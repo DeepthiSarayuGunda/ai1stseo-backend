@@ -141,6 +141,22 @@ def _run_scraper():
         logger.error("Scheduled scraper failed: %s", e)
 
 
+def _run_sports_sync():
+    """Sync live sports data from TheSportsDB — today's events + major leagues."""
+    try:
+        from directory.sports_fetcher import sync_todays_events, sync_all_sports
+        # Always sync today's events (quick, covers all sports)
+        today_count = sync_todays_events()
+        logger.info("Sports sync: %d events synced for today", today_count)
+        # Full league sync (teams, matches, standings) — runs less frequently
+        results = sync_all_sports()
+        for sport, r in results.items():
+            logger.info("Sports sync [%s]: matches=%d standings=%d teams=%d",
+                        sport, r.get("matches", 0), r.get("standings", 0), r.get("teams", 0))
+    except Exception as e:
+        logger.error("Scheduled sports sync failed: %s", e)
+
+
 def _run_geo_probes():
     """Run GEO probes for all registered brands, then transform to Month 3 tables."""
     brands = get_monitored_brands()
@@ -183,15 +199,17 @@ def _run_geo_probes():
 
 def _scheduler_loop():
     """Main scheduler loop — runs forever in a background thread."""
-    SCRAPER_INTERVAL = 24 * 3600   # 24 hours
-    GEO_PROBE_INTERVAL = 6 * 3600  # 6 hours
+    SCRAPER_INTERVAL = 24 * 3600       # 24 hours
+    GEO_PROBE_INTERVAL = 6 * 3600      # 6 hours
+    SPORTS_SYNC_INTERVAL = 4 * 3600    # 4 hours — keeps scores fresh
 
     last_scrape = 0
     last_geo = 0
+    last_sports = 0
 
     # Wait 60s after startup before first run to let the app fully initialize
     time.sleep(60)
-    logger.info("Scheduler started — scraper every 24h, GEO probes every 6h")
+    logger.info("Scheduler started — scraper every 24h, GEO probes every 6h, sports sync every 4h")
 
     while True:
         now = time.time()
@@ -205,6 +223,11 @@ def _scheduler_loop():
                 logger.info("Running scheduled GEO probes...")
                 _run_geo_probes()
                 last_geo = now
+
+            if now - last_sports >= SPORTS_SYNC_INTERVAL:
+                logger.info("Running scheduled sports sync...")
+                _run_sports_sync()
+                last_sports = now
         except Exception as e:
             logger.error("Scheduler loop error: %s", e)
 
