@@ -10,35 +10,23 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 a{color:var(--accent);text-decoration:none}
-
-/* Nav */
 nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
 .nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .nav-links{display:flex;gap:16px}
 .nav-links a{color:var(--muted);font-size:.88rem;transition:color .2s}
 .nav-links a:hover{color:var(--text)}
-
-/* Breadcrumb */
 .breadcrumb{padding:12px 28px;font-size:.82rem;color:var(--faint);max-width:1200px;margin:0 auto}
 .breadcrumb a{color:var(--muted)}
-
-/* Hero */
 .hero{max-width:1200px;margin:0 auto;padding:16px 28px 24px;display:flex;align-items:center;gap:16px}
 .hero-icon{font-size:2.8rem}
 .hero h1{font-size:1.8rem;font-weight:800}
 .hero p{color:var(--muted);font-size:.9rem;line-height:1.5;max-width:600px}
-
-/* Tabs */
 .tabs{display:flex;gap:6px;max-width:1200px;margin:0 auto;padding:0 28px 20px}
 .tab{padding:8px 20px;font-size:.85rem;font-weight:600;background:var(--card);border:1px solid var(--border);border-radius:20px;color:var(--muted);cursor:pointer;transition:all .2s}
 .tab:hover{border-color:rgba(0,212,255,.3);color:var(--text)}
 .tab.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
-
-/* Content area */
 .content{max-width:1200px;margin:0 auto;padding:0 28px 40px}
 .section-label{font-size:.78rem;font-weight:700;color:var(--faint);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-
-/* Match cards grid */
 .matches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:36px}
 .match-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;transition:all .2s}
 .match-card:hover{border-color:rgba(0,212,255,.25);transform:translateY(-2px)}
@@ -52,8 +40,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .match-status.scheduled{background:rgba(0,212,255,.1);color:var(--accent)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .match-score{font-size:.88rem;color:var(--muted);margin-top:6px}
-
-/* Rankings table */
 .rankings-table{width:100%;border-collapse:collapse;margin-bottom:36px;font-size:.85rem}
 .rankings-table th{text-align:left;padding:10px 12px;color:var(--faint);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
 .rankings-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
@@ -61,8 +47,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .rankings-table .pos{font-weight:800;color:var(--accent);width:40px}
 .rankings-table .team-name{font-weight:600}
 .rankings-table .pts{font-weight:800;color:var(--green)}
-
-/* News cards */
 .news-list{display:flex;flex-direction:column;gap:10px;margin-bottom:36px}
 .news-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;transition:all .2s;display:block;color:var(--text)}
 .news-card:hover{border-color:rgba(0,212,255,.25);transform:translateY(-1px)}
@@ -70,29 +54,20 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .news-summary{font-size:.82rem;color:var(--muted);line-height:1.4}
 .news-meta{font-size:.7rem;color:var(--faint);margin-top:6px}
 .trending-badge{font-size:.68rem;background:rgba(255,140,0,.12);color:var(--orange);padding:2px 8px;border-radius:6px;margin-left:8px}
-
-/* Explore grid */
 .explore-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:36px}
 .explore-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;transition:all .2s;display:block;color:var(--text)}
 .explore-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px)}
 .explore-name{font-size:.9rem;font-weight:700}
 .explore-desc{font-size:.72rem;color:var(--faint);margin-top:3px}
-
-/* Loading / Error */
 .state{text-align:center;padding:40px 20px;color:var(--muted)}
 .state h3{color:var(--accent);margin-bottom:6px}
 .state.error h3{color:var(--red)}
 .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* Footer */
 footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--faint);font-size:.78rem;max-width:1200px;margin:0 auto}
-
-/* League filter pills */
 .league-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .league-pill{padding:5px 14px;font-size:.78rem;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--muted);cursor:pointer;transition:all .2s}
 .league-pill:hover,.league-pill.active{background:rgba(168,85,247,.1);border-color:var(--purple);color:var(--purple)}
-
 @media(max-width:768px){
   nav{padding:10px 14px}
   .hero{flex-direction:column;text-align:center}
@@ -134,33 +109,24 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
 </div>
 
 <div class="content">
-  <!-- Matches tab -->
   <div id="tab-matches">
     <div class="section-label">MATCHES &amp; SCORES</div>
     <div class="league-pills" id="league-pills"></div>
     <div id="matches-container"><div class="state"><div class="spinner"></div><h3>Loading matches...</h3></div></div>
   </div>
-
-  <!-- News tab -->
   <div id="tab-news" style="display:none">
     <div class="section-label">NEWS</div>
     <div id="news-container"><div class="state"><div class="spinner"></div><h3>Loading news...</h3></div></div>
   </div>
-
-  <!-- Rankings tab -->
   <div id="tab-rankings" style="display:none">
     <div class="section-label">RANKINGS</div>
     <div class="league-pills" id="ranking-league-pills"></div>
     <div id="rankings-container"><div class="state"><div class="spinner"></div><h3>Loading rankings...</h3></div></div>
   </div>
-
-  <!-- Trending tab -->
   <div id="tab-trending" style="display:none">
     <div class="section-label">TRENDING</div>
     <div id="trending-container"><div class="state"><div class="spinner"></div><h3>Loading trending...</h3></div></div>
   </div>
-
-  <!-- Explore More -->
   <div class="section-label" style="margin-top:20px">EXPLORE MORE</div>
   <div class="explore-grid" id="explore-grid"></div>
 </div>
@@ -172,13 +138,9 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
 </footer>
 
 <script>
-const API = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com/api/sports';
-</script>
-</body>
-</html>
+// ── TheSportsDB direct client-side integration ───────────────────────────────
+const TSDB = 'https://www.thesportsdb.com/api/v1/json/3';
 
-<script>
-// ── Sport icon map ───────────────────────────────────────────────────────────
 const ICONS = {
   football:'&#9917;', cricket:'&#127951;', basketball:'&#127936;', tennis:'&#127934;',
   baseball:'&#9918;', 'ice-hockey':'&#127954;', hockey:'&#127954;', golf:'&#9971;',
@@ -187,17 +149,60 @@ const ICONS = {
   cycling:'&#128692;', esports:'&#127918;', mma:'&#129354;'
 };
 
+// Map our slugs to TheSportsDB league IDs
+const LEAGUE_MAP = {
+  football:    [{name:'English Premier League',id:4328},{name:'UEFA Champions League',id:4480},{name:'La Liga',id:4335},{name:'Serie A',id:4332},{name:'Bundesliga',id:4331},{name:'Ligue 1',id:4334},{name:'MLS',id:4346}],
+  cricket:     [{name:'Indian Premier League',id:4429}],
+  basketball:  [{name:'NBA',id:4387}],
+  baseball:    [{name:'MLB',id:4424}],
+  'ice-hockey':[{name:'NHL',id:4380}],
+  tennis:      [{name:'ATP World Tour',id:4464}],
+  rugby:       [{name:'Six Nations',id:4456}],
+  golf:        [{name:'PGA Tour',id:4419}],
+  'formula-1': [{name:'Formula 1',id:4370}],
+  cycling:     [{name:'Tour de France',id:4468}],
+  boxing:      [{name:'Boxing',id:4443}],
+  volleyball:  [{name:'FIVB Volleyball World League',id:4486}],
+  athletics:   [],
+  swimming:    [],
+  esports:     [],
+  mma:         [{name:'UFC',id:4443}]
+};
+
+const SPORT_INFO = {
+  football:    {name:'Football',desc:"The world's most popular sport with 4 billion fans. From the FIFA World Cup to the English Premier League, football unites the globe."},
+  cricket:     {name:'Cricket',desc:"The world's second most popular sport with 2.5 billion fans. Governed by the ICC, featuring formats from T20 to Test matches across 100+ countries."},
+  basketball:  {name:'Basketball',desc:'Fast-paced court sport. NBA is the premier league globally.'},
+  baseball:    {name:'Baseball',desc:"America's pastime. MLB features 30 teams with a 162-game regular season."},
+  'ice-hockey':{name:'Ice Hockey',desc:'Fast contact sport on ice. NHL is the top professional league.'},
+  tennis:      {name:'Tennis',desc:'Individual racquet sport with Grand Slam tournaments: Australian Open, French Open, Wimbledon, US Open.'},
+  rugby:       {name:'Rugby',desc:'Contact team sport with Rugby Union and Rugby League variants.'},
+  golf:        {name:'Golf',desc:'Precision club-and-ball sport. Major championships: Masters, US Open, The Open, PGA.'},
+  boxing:      {name:'Boxing',desc:'Combat sport with professional and amateur divisions across weight classes.'},
+  'formula-1': {name:'Formula 1',desc:'Pinnacle of motorsport. 10 teams, 20 drivers, races on circuits worldwide.'},
+  cycling:     {name:'Cycling',desc:'Road and track cycling. Tour de France is the most prestigious race.'},
+  swimming:    {name:'Swimming',desc:'Aquatic sport with freestyle, backstroke, breaststroke, and butterfly events.'},
+  athletics:   {name:'Athletics',desc:'Track and field events including sprints, marathons, jumps, and throws.'},
+  volleyball:  {name:'Volleyball',desc:'Team sport played indoor and on beach. Popular worldwide.'},
+  esports:     {name:'Esports',desc:'Competitive video gaming across titles like League of Legends, CS2, Valorant, and Dota 2.'},
+  mma:         {name:'MMA',desc:'Mixed martial arts combining striking and grappling disciplines.'}
+};
+
 // ── State ────────────────────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
 let sportSlug = params.get('sport') || 'football';
-// Map frontend slugs to backend slugs
 const SLUG_MAP = {hockey:'ice-hockey', f1:'formula-1'};
 if (SLUG_MAP[sportSlug]) sportSlug = SLUG_MAP[sportSlug];
 
 let currentTab = 'matches';
 let allMatches = [];
 let allLeagues = [];
-let currentLeague = 'all';
+
+async function tsdbGet(endpoint) {
+  const r = await fetch(`${TSDB}/${endpoint}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
@@ -206,49 +211,96 @@ async function init() {
   loadExplore();
 }
 
-// ── Sport info ───────────────────────────────────────────────────────────────
-async function loadSportInfo() {
-  try {
-    const r = await fetch(`${API}/${sportSlug}`);
-    if (!r.ok) throw new Error('Sport not found');
-    const d = await r.json();
-    const icon = ICONS[sportSlug] || '&#127942;';
-    document.getElementById('hero-icon').innerHTML = icon;
-    document.getElementById('hero-title').textContent = d.name || sportSlug;
-    document.getElementById('hero-desc').textContent = d.description || '';
-    document.getElementById('breadcrumb-sport').textContent = d.name || sportSlug;
-    document.title = `AI1stSEO Sports — ${d.name || sportSlug}`;
-    document.getElementById('metaDesc').content = d.description || '';
-  } catch(e) {
-    document.getElementById('hero-title').textContent = sportSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    document.getElementById('breadcrumb-sport').textContent = sportSlug;
-  }
+function loadSportInfo() {
+  const info = SPORT_INFO[sportSlug] || {name: sportSlug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), desc:''};
+  const icon = ICONS[sportSlug] || '&#127942;';
+  document.getElementById('hero-icon').innerHTML = icon;
+  document.getElementById('hero-title').textContent = info.name;
+  document.getElementById('hero-desc').textContent = info.desc;
+  document.getElementById('breadcrumb-sport').textContent = info.name;
+  document.title = `AI1stSEO Sports — ${info.name}`;
+  document.getElementById('metaDesc').content = info.desc;
 }
 
-// ── Matches ──────────────────────────────────────────────────────────────────
+// ── Matches (from TheSportsDB) ───────────────────────────────────────────────
 async function loadMatches() {
   const container = document.getElementById('matches-container');
-  try {
-    const r = await fetch(`${API}/${sportSlug}/matches?limit=30`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    allMatches = d.matches || [];
-
-    // Extract unique leagues for filter pills
-    allLeagues = [...new Set(allMatches.map(m => m.league).filter(Boolean))];
-    renderLeaguePills('league-pills', allLeagues, 'filterMatches');
-
-    renderMatches(allMatches);
-  } catch(e) {
-    container.innerHTML = `<div class="state error"><h3>Could not load matches</h3><p>${esc(e.message)}</p></div>`;
+  const leagues = LEAGUE_MAP[sportSlug] || [];
+  if (!leagues.length) {
+    container.innerHTML = '<div class="state"><h3>No league data available for this sport yet</h3><p>Check back soon.</p></div>';
+    return;
   }
+
+  allMatches = [];
+  allLeagues = [];
+
+  for (const league of leagues) {
+    try {
+      // Fetch past events (recent results)
+      const past = await tsdbGet(`eventspastleague.php?id=${league.id}`);
+      if (past && past.events) {
+        past.events.forEach(e => allMatches.push(parseEvent(e, league.name)));
+      }
+    } catch(e) { /* skip */ }
+
+    try {
+      // Fetch next events (upcoming)
+      const next = await tsdbGet(`eventsnextleague.php?id=${league.id}`);
+      if (next && next.events) {
+        next.events.forEach(e => allMatches.push(parseEvent(e, league.name)));
+      }
+    } catch(e) { /* skip */ }
+  }
+
+  // Deduplicate by event ID
+  const seen = new Set();
+  allMatches = allMatches.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+
+  // Sort: live first, then by date descending
+  allMatches.sort((a,b) => {
+    if (a.status === 'live' && b.status !== 'live') return -1;
+    if (b.status === 'live' && a.status !== 'live') return 1;
+    return new Date(b.match_date) - new Date(a.match_date);
+  });
+
+  allLeagues = [...new Set(allMatches.map(m => m.league).filter(Boolean))];
+  renderLeaguePills('league-pills', allLeagues, 'filterMatches');
+  renderMatches(allMatches);
+}
+
+function parseEvent(e, leagueName) {
+  const homeScore = e.intHomeScore || '';
+  const awayScore = e.intAwayScore || '';
+  let status = 'scheduled';
+  if (homeScore !== '' && homeScore !== null && awayScore !== '' && awayScore !== null) status = 'final';
+
+  let matchDate = e.dateEvent || '';
+  const timeStr = e.strTime || e.strTimestamp || '';
+  if (timeStr && !matchDate.includes('T')) {
+    const tp = timeStr.split('+')[0].replace('Z','');
+    if (tp.length >= 5) matchDate = `${matchDate}T${tp}`;
+  }
+
+  return {
+    id: e.idEvent,
+    home_team_name: e.strHomeTeam || 'TBD',
+    away_team_name: e.strAwayTeam || 'TBD',
+    home_score: homeScore != null ? String(homeScore) : '',
+    away_score: awayScore != null ? String(awayScore) : '',
+    status: status,
+    league: e.strLeague || leagueName,
+    match_date: matchDate,
+    meta_json: { round: e.intRound, season: e.strSeason, thumb: e.strThumb || '' }
+  };
 }
 
 function filterMatches(league) {
-  currentLeague = league;
   const filtered = league === 'all' ? allMatches : allMatches.filter(m => m.league === league);
   renderMatches(filtered);
-  // Update active pill
   document.querySelectorAll('#league-pills .league-pill').forEach(p =>
     p.classList.toggle('active', p.dataset.league === league)
   );
@@ -274,8 +326,6 @@ function renderMatches(matches) {
     const meta = m.meta_json || {};
     let extraInfo = '';
     if (meta.round) extraInfo = `Round ${meta.round}`;
-    if (meta.stage) extraInfo = meta.stage;
-    if (meta.race) extraInfo = meta.race;
 
     return `
       <div class="match-card">
@@ -293,62 +343,36 @@ function renderMatches(matches) {
   }).join('') + '</div>';
 }
 
-// ── News ─────────────────────────────────────────────────────────────────────
-async function loadNews() {
-  const container = document.getElementById('news-container');
-  container.innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading news...</h3></div>';
-  try {
-    const r = await fetch(`${API}/${sportSlug}/news?limit=20`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    const news = d.news || [];
-    if (!news.length) {
-      container.innerHTML = '<div class="state"><h3>No news yet</h3></div>';
-      return;
-    }
-    container.innerHTML = '<div class="news-list">' + news.map(n => `
-      <a class="news-card" href="${esc(n.source_url || '#')}" target="_blank" rel="noopener">
-        <div class="news-title">${esc(n.title)}${n.is_trending ? '<span class="trending-badge">Trending</span>' : ''}</div>
-        <div class="news-summary">${esc(n.summary || '')}</div>
-        <div class="news-meta">${n.published_at ? formatDate(n.published_at) : ''}</div>
-      </a>
-    `).join('') + '</div>';
-  } catch(e) {
-    container.innerHTML = `<div class="state error"><h3>Could not load news</h3><p>${esc(e.message)}</p></div>`;
-  }
-}
-
-// ── Rankings ─────────────────────────────────────────────────────────────────
-let rankingLeagues = [];
-
-async function loadRankings(league) {
+// ── Rankings (league table from TheSportsDB) ─────────────────────────────────
+async function loadRankings(leagueName) {
   const container = document.getElementById('rankings-container');
-
-  // If no league specified, try to get leagues from matches
-  if (!league) {
-    if (allLeagues.length) {
-      league = allLeagues[0];
-    } else {
-      league = 'Premier League'; // fallback
-    }
+  const leagues = LEAGUE_MAP[sportSlug] || [];
+  if (!leagues.length) {
+    container.innerHTML = '<div class="state"><h3>No rankings available for this sport</h3></div>';
+    return;
   }
 
-  // Render league pills for rankings
-  if (allLeagues.length) {
-    renderLeaguePills('ranking-league-pills', allLeagues, 'loadRankings');
+  // Pick league
+  let league = leagues[0];
+  if (leagueName) {
+    const found = leagues.find(l => l.name === leagueName);
+    if (found) league = found;
+  }
+
+  // Render league pills
+  if (leagues.length > 1) {
+    renderLeaguePills('ranking-league-pills', leagues.map(l=>l.name), 'loadRankings');
     document.querySelectorAll('#ranking-league-pills .league-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.league === league)
+      p.classList.toggle('active', p.dataset.league === league.name)
     );
   }
 
   container.innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading rankings...</h3></div>';
   try {
-    const r = await fetch(`${API}/${sportSlug}/rankings?league=${encodeURIComponent(league)}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    const rankings = d.rankings || [];
-    if (!rankings.length) {
-      container.innerHTML = '<div class="state"><h3>No rankings available</h3><p>Rankings may not be available for this league.</p></div>';
+    const d = await tsdbGet(`lookuptable.php?l=${league.id}&s=2024-2025`);
+    const table = d && d.table ? d.table : [];
+    if (!table.length) {
+      container.innerHTML = '<div class="state"><h3>No rankings available</h3><p>Rankings may not be available for this league/season.</p></div>';
       return;
     }
     container.innerHTML = `
@@ -357,13 +381,13 @@ async function loadRankings(league) {
           <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
         </tr></thead>
         <tbody>
-          ${rankings.map(r => `
+          ${table.map(r => `
             <tr>
-              <td class="pos">${r.position}</td>
-              <td class="team-name">${esc(r.team_name)}</td>
-              <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
-              <td>${r.gf}</td><td>${r.ga}</td><td>${r.gd}</td>
-              <td class="pts">${r.points}</td>
+              <td class="pos">${r.intRank || ''}</td>
+              <td class="team-name">${esc(r.strTeam || '')}</td>
+              <td>${r.intPlayed || 0}</td><td>${r.intWin || 0}</td><td>${r.intDraw || 0}</td><td>${r.intLoss || 0}</td>
+              <td>${r.intGoalsFor || 0}</td><td>${r.intGoalsAgainst || 0}</td><td>${r.intGoalDifference || 0}</td>
+              <td class="pts">${r.intPoints || 0}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -373,52 +397,65 @@ async function loadRankings(league) {
   }
 }
 
-// ── Trending ─────────────────────────────────────────────────────────────────
+// ── News (placeholder — TheSportsDB free tier has no news endpoint) ──────────
+async function loadNews() {
+  const container = document.getElementById('news-container');
+  // Build news-like cards from recent match results
+  const recentFinals = allMatches.filter(m => m.status === 'final').slice(0, 10);
+  if (!recentFinals.length) {
+    container.innerHTML = '<div class="state"><h3>No recent news</h3><p>Check back after matches are played.</p></div>';
+    return;
+  }
+  container.innerHTML = '<div class="news-list">' + recentFinals.map(m => {
+    const title = `${m.home_team_name} ${m.home_score} - ${m.away_score} ${m.away_team_name}`;
+    const summary = `${m.league}${m.meta_json.round ? ' · Round ' + m.meta_json.round : ''} — Match result`;
+    return `
+      <div class="news-card">
+        <div class="news-title">${esc(title)}</div>
+        <div class="news-summary">${esc(summary)}</div>
+        <div class="news-meta">${formatDate(m.match_date)}</div>
+      </div>`;
+  }).join('') + '</div>';
+}
+
+// ── Trending (recent high-scoring matches) ───────────────────────────────────
 async function loadTrending() {
   const container = document.getElementById('trending-container');
-  container.innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading trending...</h3></div>';
-  try {
-    const r = await fetch(`${API}/${sportSlug}/news?trending=true&limit=10`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    const news = d.news || [];
-    if (!news.length) {
-      container.innerHTML = '<div class="state"><h3>No trending items</h3></div>';
-      return;
-    }
-    container.innerHTML = '<div class="news-list">' + news.map((n, i) => `
-      <a class="news-card" href="${esc(n.source_url || '#')}" target="_blank" rel="noopener">
-        <div class="news-title"><span style="color:var(--orange);margin-right:6px">${i+1}</span>${esc(n.title)}</div>
-        <div class="news-summary">${esc(n.summary || '')}</div>
-      </a>
-    `).join('') + '</div>';
-  } catch(e) {
-    container.innerHTML = `<div class="state error"><h3>Could not load trending</h3><p>${esc(e.message)}</p></div>`;
+  const finals = allMatches.filter(m => m.status === 'final' && m.home_score && m.away_score);
+  // Sort by total goals/score descending
+  const sorted = finals.sort((a,b) => {
+    const totalA = (parseInt(a.home_score)||0) + (parseInt(a.away_score)||0);
+    const totalB = (parseInt(b.home_score)||0) + (parseInt(b.away_score)||0);
+    return totalB - totalA;
+  }).slice(0, 8);
+
+  if (!sorted.length) {
+    container.innerHTML = '<div class="state"><h3>No trending items</h3></div>';
+    return;
   }
+  container.innerHTML = '<div class="news-list">' + sorted.map((m, i) => `
+    <div class="news-card">
+      <div class="news-title"><span style="color:var(--orange);margin-right:6px">${i+1}</span>${esc(m.home_team_name)} ${esc(m.home_score)} - ${esc(m.away_score)} ${esc(m.away_team_name)}</div>
+      <div class="news-summary">${esc(m.league)} — High-scoring match</div>
+    </div>
+  `).join('') + '</div>';
 }
 
 // ── Explore More ─────────────────────────────────────────────────────────────
-async function loadExplore() {
+function loadExplore() {
   const grid = document.getElementById('explore-grid');
-  try {
-    const r = await fetch(`${API}/explore`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    const cats = (d.categories || []).filter(c => c.slug !== sportSlug);
-    grid.innerHTML = cats.map(c => {
-      const icon = ICONS[c.slug] || '&#127942;';
-      // Map backend slug back to frontend slug for links
-      const REVERSE_MAP = {'ice-hockey':'hockey','formula-1':'f1'};
-      const linkSlug = REVERSE_MAP[c.slug] || c.slug;
-      return `
-        <a class="explore-card" href="directory-sport-live.html?sport=${linkSlug}">
-          <div class="explore-name">${icon} ${esc(c.name)}</div>
-          <div class="explore-desc">Explore ${esc(c.name)}</div>
-        </a>`;
-    }).join('');
-  } catch(e) {
-    grid.innerHTML = '';
-  }
+  const allSports = Object.keys(SPORT_INFO).filter(s => s !== sportSlug);
+  grid.innerHTML = allSports.map(s => {
+    const icon = ICONS[s] || '&#127942;';
+    const info = SPORT_INFO[s];
+    const REVERSE_MAP = {'ice-hockey':'hockey','formula-1':'f1'};
+    const linkSlug = REVERSE_MAP[s] || s;
+    return `
+      <a class="explore-card" href="directory-sport.html?sport=${linkSlug}">
+        <div class="explore-name">${icon} ${esc(info.name)}</div>
+        <div class="explore-desc">Explore ${esc(info.name)}</div>
+      </a>`;
+  }).join('');
 }
 
 // ── Tab switching ────────────────────────────────────────────────────────────
@@ -430,7 +467,6 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t =>
     t.classList.toggle('active', t.dataset.tab === tab)
   );
-  // Lazy load tab content
   if (tab === 'news') loadNews();
   if (tab === 'rankings') loadRankings();
   if (tab === 'trending') loadTrending();
@@ -450,7 +486,6 @@ function formatDate(dateStr) {
     const d = new Date(dateStr);
     const now = new Date();
     const diff = d - now;
-    // If within 24 hours, show relative
     if (Math.abs(diff) < 86400000) {
       if (diff > 0) return 'Today';
       return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
@@ -469,3 +504,5 @@ function renderLeaguePills(containerId, leagues, onClickName) {
 // ── Boot ─────────────────────────────────────────────────────────────────────
 init();
 </script>
+</body>
+</html>
