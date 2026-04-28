@@ -446,11 +446,18 @@ function renderMatches(matches) {
     container.innerHTML = '<div class="state"><h3>No matches found</h3><p>Check back later or try a different sport.</p></div>';
     return;
   }
+  const today = new Date().toISOString().split('T')[0];
+  let hasToday = false;
+
   container.innerHTML = '<div class="matches-grid">' + matches.map(m => {
     let statusClass = 'scheduled';
     let statusText = formatDate(m.match_date);
-    if (m.status === 'live') { statusClass = 'live'; statusText = 'LIVE'; }
+    const matchDay = m.match_date ? m.match_date.split('T')[0] : '';
+    const isToday = matchDay === today;
+
+    if (m.status === 'live') { statusClass = 'live'; statusText = '● LIVE'; }
     else if (m.status === 'final') { statusClass = 'final'; statusText = 'Final'; }
+    else if (isToday) { statusClass = 'live'; statusText = '● LIVE'; hasToday = true; }
 
     let scoreHtml = '';
     if (m.home_score || m.away_score) {
@@ -475,6 +482,9 @@ function renderMatches(matches) {
         ${scoreHtml}
       </div>`;
   }).join('') + '</div>';
+
+  // Start auto-refresh if there are today's matches
+  if (hasToday) startAutoRefresh();
 }
 
 // ── Rankings (from TheSportsDB lookuptable — may not be available for all sports) ─
@@ -726,6 +736,76 @@ function checkDeepLink() {
   }
 }
 
+// ── Live Score Refresh ────────────────────────────────────────────────────────
+let autoRefreshInterval = null;
+
+async function refreshMatchScore(eventId) {
+  const btn = document.getElementById('refreshBtn-' + eventId);
+  if (btn) btn.innerHTML = '⏳ Refreshing...';
+
+  const tsdbSport = SPORT_NAME_MAP[sportSlug];
+  if (!tsdbSport) return;
+
+  // Re-fetch today's events to get updated scores
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    const data = await tsdbGet(`eventsday.php?d=${today}&s=${encodeURIComponent(tsdbSport)}`);
+    if (data && data.events && Array.isArray(data.events)) {
+      const updated = data.events.find(e => e.idEvent === eventId);
+      if (updated) {
+        // Update local match data
+        const idx = allMatches.findIndex(m => m.id === eventId);
+        if (idx >= 0) {
+          allMatches[idx] = parseEvent(updated, '');
+          // Re-render the modal with updated data
+          renderModalFromLocal(allMatches[idx]);
+          // Also re-render the match cards
+          const filtered = document.querySelector('#league-pills .league-pill.active');
+          const activeLeague = filtered ? filtered.dataset.league : 'all';
+          const matchesToRender = activeLeague === 'all' ? allMatches : allMatches.filter(m => m.league === activeLeague);
+          renderMatches(matchesToRender);
+          return;
+        }
+      }
+    }
+  } catch(e) { /* ignore */ }
+
+  if (btn) btn.innerHTML = '🔄 Refresh Score';
+}
+
+// Auto-refresh scores every 60 seconds for today's matches
+function startAutoRefresh() {
+  if (autoRefreshInterval) return;
+  autoRefreshInterval = setInterval(async () => {
+    const tsdbSport = SPORT_NAME_MAP[sportSlug];
+    if (!tsdbSport) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const data = await tsdbGet(`eventsday.php?d=${today}&s=${encodeURIComponent(tsdbSport)}`);
+      if (data && data.events && Array.isArray(data.events)) {
+        let updated = false;
+        data.events.forEach(e => {
+          const idx = allMatches.findIndex(m => m.id === e.idEvent);
+          if (idx >= 0) {
+            const newMatch = parseEvent(e, '');
+            if (newMatch.home_score !== allMatches[idx].home_score || newMatch.away_score !== allMatches[idx].away_score || newMatch.status !== allMatches[idx].status) {
+              allMatches[idx] = newMatch;
+              updated = true;
+            }
+          }
+        });
+        if (updated) {
+          const filtered = document.querySelector('#league-pills .league-pill.active');
+          const activeLeague = filtered ? filtered.dataset.league : 'all';
+          const matchesToRender = activeLeague === 'all' ? allMatches : allMatches.filter(m => m.league === activeLeague);
+          renderMatches(matchesToRender);
+        }
+      }
+    } catch(e) { /* silent */ }
+  }, 60000); // every 60 seconds
+}
+
 // ── Match Detail Modal ────────────────────────────────────────────────────────
 function openMatch(eventId) {
   const modal = document.getElementById('matchModal');
@@ -876,16 +956,19 @@ function renderModalFromLocal(m) {
 
   let linksHtml = `
     <div class="modal-links">
-      <a class="modal-link" href="https://www.google.com/search?q=${searchQuery}" target="_blank" rel="noopener">
-        🔍 Search Live Score on Google
+      <a class="modal-link" onclick="refreshMatchScore('${m.id}');return false" href="#" id="refreshBtn-${m.id}">
+        🔄 Refresh Score
       </a>
-      <a class="modal-link" href="https://www.espn.com/search/_/q/${encodeURIComponent(m.home_team_name + ' ' + m.away_team_name)}" target="_blank" rel="noopener">
-        📺 Check on ESPN
-      </a>`;
+    </div>`;
   if (m.video) {
-    linksHtml += `<a class="modal-link" href="${esc(m.video)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>`;
+    linksHtml = `
+    <div class="modal-links">
+      <a class="modal-link" onclick="refreshMatchScore('${m.id}');return false" href="#" id="refreshBtn-${m.id}">
+        🔄 Refresh Score
+      </a>
+      <a class="modal-link" href="${esc(m.video)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>
+    </div>`;
   }
-  linksHtml += '</div>';
 
   // Share buttons
   const shareHtml = `
