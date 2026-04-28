@@ -5,6 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="pageTitle">AI1stSEO Sports — Loading...</title>
 <meta name="description" id="metaDesc" content="Live sports scores, matches, rankings, and trending news powered by AI1stSEO.">
+<link rel="canonical" id="canonicalUrl" href="https://www.ai1stseo.com/directory-sport.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI1stSEO Sports">
+<meta property="og:title" id="ogTitle" content="AI1stSEO Sports — Live Scores & Matches">
+<meta property="og:description" id="ogDesc" content="Live sports scores, matches, rankings, and trending news across every major sport.">
+<meta property="og:url" id="ogUrl" content="https://www.ai1stseo.com/directory-sport.html">
+<meta property="og:image" id="ogImage" content="https://www.ai1stseo.com/assets/sports-og.png">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" id="twTitle" content="AI1stSEO Sports — Live Scores & Matches">
+<meta name="twitter:description" id="twDesc" content="Live sports scores, matches, rankings, and trending news across every major sport.">
+<meta name="twitter:image" id="twImage" content="https://www.ai1stseo.com/assets/sports-og.png">
+
+<!-- Structured Data: WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AI1stSEO Sports",
+  "url": "https://www.ai1stseo.com/directory-sports.html",
+  "description": "Live sports scores, schedules, rankings, and match results across 15+ sports worldwide.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.ai1stseo.com/directory-sport.html?sport={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Dynamic Structured Data (injected by JS) -->
+<script type="application/ld+json" id="breadcrumbLD">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ai1stseo.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Sports", "item": "https://www.ai1stseo.com/directory-sports.html"},
+    {"@type": "ListItem", "position": 3, "name": "Loading...", "item": "https://www.ai1stseo.com/directory-sport.html"}
+  ]
+}
+</script>
+<script type="application/ld+json" id="sportsEventsLD">[]</script>
 <style>
 :root{--bg:#0a0a0a;--text:#fff;--muted:rgba(255,255,255,.6);--faint:rgba(255,255,255,.3);--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);--accent:#00d4ff;--green:#00ff88;--red:#ff4757;--purple:#a855f7;--orange:#ff8c00}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -97,6 +143,17 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
 .modal-loading{text-align:center;padding:30px;color:var(--muted)}
 
 .match-card{cursor:pointer}
+
+/* Share buttons */
+.share-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.share-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:.78rem;font-weight:600;color:#fff;text-decoration:none;transition:opacity .2s}
+.share-btn:hover{opacity:.85}
+.share-btn.whatsapp{background:#25D366}
+.share-btn.twitter{background:#1DA1F2}
+.share-btn.facebook{background:#1877F2}
+.share-btn.copy{background:rgba(255,255,255,.1);color:var(--muted);border:1px solid var(--border)}
+.share-btn.copy:hover{color:var(--text)}
+.copied-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:8px 20px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:300;display:none}
 @media(max-width:768px){
   nav{padding:10px 14px}
   .hero{flex-direction:column;text-align:center}
@@ -159,6 +216,9 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
   <div class="section-label" style="margin-top:20px">EXPLORE MORE</div>
   <div class="explore-grid" id="explore-grid"></div>
 </div>
+
+<!-- Copied Toast -->
+<div class="copied-toast" id="copiedToast">Link copied!</div>
 
 <!-- Match Detail Modal -->
 <div class="modal-overlay" id="matchModal" onclick="if(event.target===this)closeModal()">
@@ -246,6 +306,7 @@ async function init() {
   loadSportInfo();
   loadMatches();
   loadExplore();
+  checkDeepLink();
 }
 
 function loadSportInfo() {
@@ -255,8 +316,33 @@ function loadSportInfo() {
   document.getElementById('hero-title').textContent = info.name;
   document.getElementById('hero-desc').textContent = info.desc;
   document.getElementById('breadcrumb-sport').textContent = info.name;
-  document.title = `AI1stSEO Sports — ${info.name}`;
-  document.getElementById('metaDesc').content = info.desc;
+
+  // SEO: Update title, description, canonical, OG, Twitter
+  const title = `${info.name} Live Scores, Schedule & Results 2026 — AI1stSEO Sports`;
+  const desc = `${info.desc} Live scores, upcoming matches, league standings, and results updated in real-time.`;
+  const url = `https://www.ai1stseo.com/directory-sport.html?sport=${sportSlug}`;
+
+  document.title = title;
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('metaDesc').content = desc;
+  document.getElementById('canonicalUrl').href = url;
+  document.getElementById('ogTitle').content = title;
+  document.getElementById('ogDesc').content = desc;
+  document.getElementById('ogUrl').content = url;
+  document.getElementById('twTitle').content = title;
+  document.getElementById('twDesc').content = desc;
+
+  // Update breadcrumb structured data
+  const bcLD = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ai1stseo.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Sports Directory", "item": "https://www.ai1stseo.com/directory-sports.html"},
+      {"@type": "ListItem", "position": 3, "name": info.name, "item": url}
+    ]
+  };
+  document.getElementById('breadcrumbLD').textContent = JSON.stringify(bcLD);
 }
 
 // ── Matches (from TheSportsDB eventsday.php) ─────────────────────────────────
@@ -305,6 +391,9 @@ async function loadMatches() {
   allLeagues = [...new Set(allMatches.map(m => m.league).filter(Boolean))];
   renderLeaguePills('league-pills', allLeagues, 'filterMatches');
   renderMatches(allMatches);
+
+  // SEO: Inject SportsEvent structured data for Google rich results
+  injectSportsEventsLD(allMatches.slice(0, 20));
 }
 
 function parseEvent(e, leagueName) {
@@ -555,6 +644,88 @@ function renderLeaguePills(containerId, leagues, onClickName) {
     leagues.map(l => `<div class="league-pill" data-league="${esc(l)}" onclick="${onClickName}('${l.replace(/'/g,"\\'")}')">${esc(l)}</div>`).join('');
 }
 
+// ── SEO: SportsEvent Structured Data ─────────────────────────────────────────
+function injectSportsEventsLD(matches) {
+  const sportInfo = SPORT_INFO[sportSlug] || {name: sportSlug};
+  const events = matches.map(m => {
+    const ev = {
+      "@context": "https://schema.org",
+      "@type": "SportsEvent",
+      "name": `${m.home_team_name} vs ${m.away_team_name}`,
+      "startDate": m.match_date || '',
+      "homeTeam": {"@type": "SportsTeam", "name": m.home_team_name},
+      "awayTeam": {"@type": "SportsTeam", "name": m.away_team_name},
+      "sport": sportInfo.name,
+      "url": `https://www.ai1stseo.com/directory-sport.html?sport=${sportSlug}&match=${m.id}`,
+      "eventStatus": m.status === 'final' ? "https://schema.org/EventScheduled" : "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode"
+    };
+    if (m.venue) ev.location = {"@type": "Place", "name": m.venue, "address": m.city || ''};
+    if (m.league) ev.superEvent = {"@type": "SportsEvent", "name": m.league};
+    if (m.thumb) ev.image = m.thumb;
+    return ev;
+  });
+  document.getElementById('sportsEventsLD').textContent = JSON.stringify(events);
+}
+
+// ── Share functionality ──────────────────────────────────────────────────────
+function getMatchShareUrl(matchId) {
+  return `https://www.ai1stseo.com/directory-sport.html?sport=${sportSlug}&match=${matchId}`;
+}
+
+function getMatchShareText(m) {
+  if (m.home_score && m.away_score) {
+    return `${m.home_team_name} ${m.home_score} - ${m.away_score} ${m.away_team_name} | ${m.league} — AI1stSEO Sports`;
+  }
+  return `${m.home_team_name} vs ${m.away_team_name} | ${m.league} — AI1stSEO Sports`;
+}
+
+function shareWhatsApp(matchId) {
+  const m = allMatches.find(x => x.id === matchId);
+  if (!m) return;
+  const text = getMatchShareText(m);
+  const url = getMatchShareUrl(matchId);
+  window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
+}
+
+function shareTwitter(matchId) {
+  const m = allMatches.find(x => x.id === matchId);
+  if (!m) return;
+  const text = getMatchShareText(m);
+  const url = getMatchShareUrl(matchId);
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareFacebook(matchId) {
+  const url = getMatchShareUrl(matchId);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+}
+
+function copyMatchLink(matchId) {
+  const url = getMatchShareUrl(matchId);
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.getElementById('copiedToast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2000);
+  });
+}
+
+// ── Deep link: auto-open match from URL ──────────────────────────────────────
+function checkDeepLink() {
+  const matchId = params.get('match');
+  if (matchId) {
+    // Wait for matches to load, then open the modal
+    const check = setInterval(() => {
+      if (allMatches.length > 0) {
+        clearInterval(check);
+        openMatch(matchId);
+      }
+    }, 300);
+    // Stop checking after 10 seconds
+    setTimeout(() => clearInterval(check), 10000);
+  }
+}
+
 // ── Match Detail Modal ────────────────────────────────────────────────────────
 function openMatch(eventId) {
   const modal = document.getElementById('matchModal');
@@ -716,6 +887,16 @@ function renderModalFromLocal(m) {
   }
   linksHtml += '</div>';
 
+  // Share buttons
+  const shareHtml = `
+    <div class="share-row">
+      <a class="share-btn whatsapp" onclick="shareWhatsApp('${m.id}');return false" href="#">💬 WhatsApp</a>
+      <a class="share-btn twitter" onclick="shareTwitter('${m.id}');return false" href="#">🐦 Twitter</a>
+      <a class="share-btn facebook" onclick="shareFacebook('${m.id}');return false" href="#">📘 Facebook</a>
+      <a class="share-btn copy" onclick="copyMatchLink('${m.id}');return false" href="#">📋 Copy Link</a>
+    </div>
+  `;
+
   content.innerHTML = `
     <div class="modal-header">
       <div class="modal-league">${badgeHtml}${esc(m.league || '')}${m.meta_json.round ? ' · Round ' + m.meta_json.round : ''}</div>
@@ -731,6 +912,7 @@ function renderModalFromLocal(m) {
     ${descHtml}
     ${detailsHtml}
     ${linksHtml}
+    ${shareHtml}
   `;
 }
 
