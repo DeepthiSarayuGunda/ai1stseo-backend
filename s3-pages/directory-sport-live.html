@@ -149,24 +149,24 @@ const ICONS = {
   cycling:'&#128692;', esports:'&#127918;', mma:'&#129354;'
 };
 
-// Map our slugs to TheSportsDB league IDs
-const LEAGUE_MAP = {
-  football:    [{name:'English Premier League',id:4328},{name:'UEFA Champions League',id:4480},{name:'La Liga',id:4335},{name:'Serie A',id:4332},{name:'Bundesliga',id:4331},{name:'Ligue 1',id:4334},{name:'MLS',id:4346}],
-  cricket:     [{name:'Indian Premier League',id:4429}],
-  basketball:  [{name:'NBA',id:4387}],
-  baseball:    [{name:'MLB',id:4424}],
-  'ice-hockey':[{name:'NHL',id:4380}],
-  tennis:      [{name:'ATP World Tour',id:4464}],
-  rugby:       [{name:'Six Nations',id:4456}],
-  golf:        [{name:'PGA Tour',id:4419}],
-  'formula-1': [{name:'Formula 1',id:4370}],
-  cycling:     [{name:'Tour de France',id:4468}],
-  boxing:      [{name:'Boxing',id:4443}],
-  volleyball:  [{name:'FIVB Volleyball World League',id:4486}],
-  athletics:   [],
-  swimming:    [],
-  esports:     [],
-  mma:         [{name:'UFC',id:4443}]
+// Map our slugs to TheSportsDB sport names for eventsday.php
+const SPORT_NAME_MAP = {
+  football: 'Soccer',
+  cricket: 'Cricket',
+  basketball: 'Basketball',
+  baseball: 'Baseball',
+  'ice-hockey': 'Ice Hockey',
+  tennis: 'Tennis',
+  rugby: 'Rugby',
+  golf: 'Golf',
+  boxing: 'Fighting',
+  'formula-1': 'Motorsport',
+  cycling: 'Cycling',
+  swimming: 'Swimming',
+  athletics: 'Athletics',
+  volleyball: 'Volleyball',
+  esports: null,
+  mma: 'Fighting'
 };
 
 const SPORT_INFO = {
@@ -222,34 +222,32 @@ function loadSportInfo() {
   document.getElementById('metaDesc').content = info.desc;
 }
 
-// ── Matches (from TheSportsDB) ───────────────────────────────────────────────
+// ── Matches (from TheSportsDB eventsday.php) ─────────────────────────────────
 async function loadMatches() {
   const container = document.getElementById('matches-container');
-  const leagues = LEAGUE_MAP[sportSlug] || [];
-  if (!leagues.length) {
-    container.innerHTML = '<div class="state"><h3>No league data available for this sport yet</h3><p>Check back soon.</p></div>';
+  const tsdbSport = SPORT_NAME_MAP[sportSlug];
+  if (!tsdbSport) {
+    container.innerHTML = '<div class="state"><h3>No live data available for this sport yet</h3><p>Check back soon.</p></div>';
     return;
   }
 
   allMatches = [];
   allLeagues = [];
 
-  for (const league of leagues) {
-    try {
-      // Fetch past events (recent results)
-      const past = await tsdbGet(`eventspastleague.php?id=${league.id}`);
-      if (past && past.events) {
-        past.events.forEach(e => allMatches.push(parseEvent(e, league.name)));
-      }
-    } catch(e) { /* skip */ }
+  // Fetch events for today, yesterday, day before, tomorrow, and day after
+  const today = new Date();
+  const days = [-2, -1, 0, 1, 2];
 
+  for (const offset of days) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + offset);
+    const dateStr = d.toISOString().split('T')[0];
     try {
-      // Fetch next events (upcoming)
-      const next = await tsdbGet(`eventsnextleague.php?id=${league.id}`);
-      if (next && next.events) {
-        next.events.forEach(e => allMatches.push(parseEvent(e, league.name)));
+      const data = await tsdbGet(`eventsday.php?d=${dateStr}&s=${encodeURIComponent(tsdbSport)}`);
+      if (data && data.events && Array.isArray(data.events)) {
+        data.events.forEach(e => allMatches.push(parseEvent(e, '')));
       }
-    } catch(e) { /* skip */ }
+    } catch(e) { /* skip day */ }
   }
 
   // Deduplicate by event ID
@@ -343,58 +341,67 @@ function renderMatches(matches) {
   }).join('') + '</div>';
 }
 
-// ── Rankings (league table from TheSportsDB) ─────────────────────────────────
+// ── Rankings (from TheSportsDB lookuptable — may not be available for all sports) ─
 async function loadRankings(leagueName) {
   const container = document.getElementById('rankings-container');
-  const leagues = LEAGUE_MAP[sportSlug] || [];
-  if (!leagues.length) {
-    container.innerHTML = '<div class="state"><h3>No rankings available for this sport</h3></div>';
+
+  // Try to find a league with standings from the matches we already loaded
+  if (!allLeagues.length) {
+    container.innerHTML = '<div class="state"><h3>No rankings available</h3><p>Rankings require league table data. Check back during the season.</p></div>';
     return;
   }
 
-  // Pick league
-  let league = leagues[0];
-  if (leagueName) {
-    const found = leagues.find(l => l.name === leagueName);
-    if (found) league = found;
-  }
+  const targetLeague = leagueName && leagueName !== 'all' ? leagueName : allLeagues[0];
 
   // Render league pills
-  if (leagues.length > 1) {
-    renderLeaguePills('ranking-league-pills', leagues.map(l=>l.name), 'loadRankings');
-    document.querySelectorAll('#ranking-league-pills .league-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.league === league.name)
-    );
+  renderLeaguePills('ranking-league-pills', allLeagues, 'loadRankings');
+  document.querySelectorAll('#ranking-league-pills .league-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.league === targetLeague)
+  );
+
+  // Build a simple win/loss table from match results we have
+  const leagueMatches = allMatches.filter(m => m.status === 'final' && m.league === targetLeague);
+  if (!leagueMatches.length) {
+    container.innerHTML = '<div class="state"><h3>No completed matches yet for ' + esc(targetLeague) + '</h3><p>Rankings will appear once matches are played.</p></div>';
+    return;
   }
 
-  container.innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading rankings...</h3></div>';
-  try {
-    const d = await tsdbGet(`lookuptable.php?l=${league.id}&s=2024-2025`);
-    const table = d && d.table ? d.table : [];
-    if (!table.length) {
-      container.innerHTML = '<div class="state"><h3>No rankings available</h3><p>Rankings may not be available for this league/season.</p></div>';
-      return;
-    }
-    container.innerHTML = `
-      <table class="rankings-table">
-        <thead><tr>
-          <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
-        </tr></thead>
-        <tbody>
-          ${table.map(r => `
-            <tr>
-              <td class="pos">${r.intRank || ''}</td>
-              <td class="team-name">${esc(r.strTeam || '')}</td>
-              <td>${r.intPlayed || 0}</td><td>${r.intWin || 0}</td><td>${r.intDraw || 0}</td><td>${r.intLoss || 0}</td>
-              <td>${r.intGoalsFor || 0}</td><td>${r.intGoalsAgainst || 0}</td><td>${r.intGoalDifference || 0}</td>
-              <td class="pts">${r.intPoints || 0}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>`;
-  } catch(e) {
-    container.innerHTML = `<div class="state error"><h3>Could not load rankings</h3><p>${esc(e.message)}</p></div>`;
-  }
+  // Aggregate team stats
+  const teams = {};
+  leagueMatches.forEach(m => {
+    const hs = parseInt(m.home_score) || 0;
+    const as = parseInt(m.away_score) || 0;
+    [m.home_team_name, m.away_team_name].forEach(t => {
+      if (!teams[t]) teams[t] = {name:t, p:0, w:0, d:0, l:0, gf:0, ga:0, pts:0};
+    });
+    const h = teams[m.home_team_name], a = teams[m.away_team_name];
+    h.p++; a.p++;
+    h.gf += hs; h.ga += as; a.gf += as; a.ga += hs;
+    if (hs > as) { h.w++; h.pts += 3; a.l++; }
+    else if (hs < as) { a.w++; a.pts += 3; h.l++; }
+    else { h.d++; a.d++; h.pts++; a.pts++; }
+  });
+
+  const sorted = Object.values(teams).sort((a,b) => b.pts - a.pts || (b.gf-b.ga) - (a.gf-a.ga));
+
+  container.innerHTML = `
+    <table class="rankings-table">
+      <thead><tr>
+        <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+      </tr></thead>
+      <tbody>
+        ${sorted.map((r, i) => `
+          <tr>
+            <td class="pos">${i+1}</td>
+            <td class="team-name">${esc(r.name)}</td>
+            <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
+            <td>${r.gf}</td><td>${r.ga}</td><td>${r.gf - r.ga}</td>
+            <td class="pts">${r.pts}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <p style="font-size:.72rem;color:var(--faint);margin-top:-20px;">Based on recent match results from TheSportsDB</p>`;
 }
 
 // ── News (placeholder — TheSportsDB free tier has no news endpoint) ──────────
