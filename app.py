@@ -2006,6 +2006,8 @@ def analyze_url():
             return jsonify({'error': 'Invalid or missing JSON body'}), 400
         url = data.get('url', '')
         categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
+        if isinstance(categories, str):
+            categories = [c.strip() for c in categories.split(',') if c.strip()]
     except Exception:
         return jsonify({'error': 'Invalid request'}), 400
     
