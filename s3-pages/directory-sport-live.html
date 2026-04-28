@@ -685,10 +685,18 @@ function getMatchShareUrl(matchId) {
 }
 
 function getMatchShareText(m) {
+  const timeStr = m.time_local ? m.time_local.substring(0,5) : '';
+  const tipsUrl = sportSlug === 'cricket' ? '\n🏆 See AI prediction: https://www.ai1stseo.com/cricket-tips.html' : '';
   if (m.home_score && m.away_score) {
-    return `${m.home_team_name} ${m.home_score} - ${m.away_score} ${m.away_team_name} | ${m.league} — AI1stSEO Sports`;
+    return `${m.home_team_name} ${m.home_score} - ${m.away_score} ${m.away_team_name} | ${m.league} 🏏${tipsUrl}`;
   }
-  return `${m.home_team_name} vs ${m.away_team_name} | ${m.league} — AI1stSEO Sports`;
+  const today = new Date().toISOString().split('T')[0];
+  const matchDay = m.match_date ? m.match_date.split('T')[0] : '';
+  const isToday = matchDay === today;
+  if (isToday && timeStr) {
+    return `${m.home_team_name} vs ${m.away_team_name} tonight ${timeStr} 🏏 | ${m.league}${tipsUrl}`;
+  }
+  return `${m.home_team_name} vs ${m.away_team_name} | ${m.league} 🏏${tipsUrl}`;
 }
 
 function shareWhatsApp(matchId) {
@@ -909,32 +917,43 @@ function renderModalFromAPI(e, localMatch) {
 
 function renderModalFromLocal(m) {
   const content = document.getElementById('modal-content');
-  const searchQuery = encodeURIComponent(`${m.home_team_name} vs ${m.away_team_name} live score`);
 
   // Check if match is today
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
   const matchDay = m.match_date ? m.match_date.split('T')[0] : '';
   const isToday = matchDay === today;
+  const isCricket = sportSlug === 'cricket';
 
   let statusLabel = m.status === 'final' ? 'Final' : formatDate(m.match_date);
-  if (isToday && m.status !== 'final') statusLabel = 'Today';
+  if (isToday && m.status !== 'final') statusLabel = '● LIVE Today';
 
+  // Score display — prominent when available
   let scoreHtml = '';
   if (m.home_score || m.away_score) {
     scoreHtml = `<div class="modal-score">${esc(m.home_score)} - ${esc(m.away_score)}</div>`;
-  } else {
+  } else if (isToday) {
     const timeDisplay = m.time_local ? m.time_local.substring(0,5) : '';
-    scoreHtml = `<div class="modal-score scheduled">${isToday && timeDisplay ? '🔴 ' + timeDisplay + ' (Local Time)' : formatDate(m.match_date)}</div>`;
+    scoreHtml = `<div class="modal-score scheduled">🔴 ${timeDisplay ? timeDisplay + ' (Local Time)' : 'In Progress'}</div>
+      <div style="text-align:center;font-size:.78rem;color:var(--muted);margin-bottom:8px">Score updates automatically every 60 seconds</div>`;
+  } else {
+    scoreHtml = `<div class="modal-score scheduled">${formatDate(m.match_date)}</div>`;
   }
 
-  // Build details grid
+  // Build details grid — fix date to use match_date timestamp properly
   const details = [];
   if (m.venue) details.push({label:'Venue', value: m.venue});
   if (m.city) details.push({label:'City', value: m.city + (m.country ? ', ' + m.country : '')});
   if (m.meta_json.round) details.push({label:'Round', value: m.meta_json.round});
   if (m.meta_json.season) details.push({label:'Season', value: m.meta_json.season});
   if (m.spectators && m.spectators !== '0' && m.spectators !== 'null') details.push({label:'Spectators', value: parseInt(m.spectators).toLocaleString()});
-  if (matchDay) details.push({label:'Date', value: new Date(matchDay).toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'})});
+  // Fix: parse date from match_date using UTC to avoid timezone offset
+  if (matchDay) {
+    const [y, mo, d] = matchDay.split('-').map(Number);
+    const dateObj = new Date(y, mo - 1, d);
+    details.push({label:'Date', value: dateObj.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'})});
+  }
+  if (m.time_local) details.push({label:'Time', value: m.time_local.substring(0,5) + ' (Local)'});
 
   let detailsHtml = '';
   if (details.length) {
@@ -955,21 +974,31 @@ function renderModalFromLocal(m) {
   let badgeHtml = '';
   if (m.league_badge) badgeHtml = `<img src="${esc(m.league_badge)}" alt="" style="height:20px;vertical-align:middle;margin-right:6px;border-radius:3px">`;
 
-  let linksHtml = `
-    <div class="modal-links">
-      <a class="modal-link" onclick="refreshMatchScore('${m.id}');return false" href="#" id="refreshBtn-${m.id}">
-        🔄 Refresh Score
-      </a>
-    </div>`;
-  if (m.video) {
-    linksHtml = `
-    <div class="modal-links">
-      <a class="modal-link" onclick="refreshMatchScore('${m.id}');return false" href="#" id="refreshBtn-${m.id}">
-        🔄 Refresh Score
-      </a>
-      <a class="modal-link" href="${esc(m.video)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>
-    </div>`;
+  // Action buttons
+  let linksHtml = '<div class="modal-links">';
+
+  // Tips & Prediction button (cricket only — key conversion point)
+  if (isCricket) {
+    linksHtml += `<a class="modal-link" href="https://www.ai1stseo.com/cricket-tips.html" style="background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.25);color:#ffd700;font-weight:700">
+      🏆 View Tips & Prediction
+    </a>`;
   }
+
+  linksHtml += `<a class="modal-link" onclick="refreshMatchScore('${m.id}');return false" href="#" id="refreshBtn-${m.id}">
+    🔄 Refresh Score
+  </a>`;
+
+  // Set Reminder button (for upcoming matches)
+  if (m.status !== 'final' && m.match_date) {
+    linksHtml += `<a class="modal-link" onclick="setReminder('${m.id}');return false" href="#" id="reminderBtn-${m.id}">
+      🔔 Set Reminder (30 min before)
+    </a>`;
+  }
+
+  if (m.video) {
+    linksHtml += `<a class="modal-link" href="${esc(m.video)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>`;
+  }
+  linksHtml += '</div>';
 
   // Share buttons
   const shareHtml = `
@@ -990,7 +1019,7 @@ function renderModalFromLocal(m) {
         <span>${esc(m.away_team_name)}</span>
       </div>
     </div>
-    <div class="modal-status"><span class="${m.status}">${statusLabel}</span></div>
+    <div class="modal-status"><span class="${m.status === 'final' ? 'final' : isToday ? 'live' : 'scheduled'}">${statusLabel}</span></div>
     ${scoreHtml}
     ${thumbHtml}
     ${descHtml}
@@ -998,6 +1027,58 @@ function renderModalFromLocal(m) {
     ${linksHtml}
     ${shareHtml}
   `;
+}
+
+// ── Set Reminder (browser notification) ──────────────────────────────────────
+async function setReminder(matchId) {
+  const m = allMatches.find(x => x.id === matchId);
+  if (!m) return;
+
+  const btn = document.getElementById('reminderBtn-' + matchId);
+
+  // Request notification permission
+  if (!('Notification' in window)) {
+    if (btn) btn.innerHTML = '❌ Notifications not supported';
+    return;
+  }
+
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
+    if (btn) btn.innerHTML = '❌ Notifications blocked';
+    return;
+  }
+
+  // Calculate time until 30 min before match
+  const matchTime = new Date(m.match_date);
+  const reminderTime = matchTime.getTime() - (30 * 60 * 1000); // 30 min before
+  const now = Date.now();
+  const delay = reminderTime - now;
+
+  if (delay <= 0) {
+    // Match is starting soon or already started
+    new Notification(`🏏 ${m.home_team_name} vs ${m.away_team_name}`, {
+      body: `Match is starting now! ${m.league}`,
+      icon: m.league_badge || undefined
+    });
+    if (btn) btn.innerHTML = '✅ Match starting now!';
+    return;
+  }
+
+  // Set timeout for the reminder
+  setTimeout(() => {
+    new Notification(`🏏 ${m.home_team_name} vs ${m.away_team_name}`, {
+      body: `Starting in 30 minutes! ${m.league}${m.venue ? ' at ' + m.venue : ''}`,
+      icon: m.league_badge || undefined
+    });
+  }, delay);
+
+  const minsUntil = Math.round(delay / 60000);
+  if (btn) btn.innerHTML = `✅ Reminder set (${minsUntil} min)`;
+
+  // Store in localStorage so it persists
+  const reminders = JSON.parse(localStorage.getItem('ai1stseo_reminders') || '[]');
+  reminders.push({matchId, matchTime: matchTime.toISOString(), home: m.home_team_name, away: m.away_team_name});
+  localStorage.setItem('ai1stseo_reminders', JSON.stringify(reminders));
 }
 
 function closeModal() {
