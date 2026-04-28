@@ -4546,6 +4546,14 @@ try:
 except Exception as e:
     print(f"\u26a0 Multi-Site API: {e}")
 
+# --- AI Referral Attribution API (Dev 3 - Troy) ---
+try:
+    from attribution_api import attribution_bp
+    app.register_blueprint(attribution_bp)
+except Exception as e:
+    print(f"\u26a0 Attribution API: {e}")
+
+
 
 
 
