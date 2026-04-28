@@ -6,6 +6,41 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-28 — App.py Merge + Full Lambda Sync + Backlink Doc Update (Troy)
+
+**Root cause fix:** Two separate `app.py` files (root vs `backend/`) have been causing deploy overwrites for weeks. Merged all Troy-unique routes into Samar's root `app.py` so there is now ONE authoritative app.py.
+
+**What was merged into root app.py:**
+- `backlink_bp` blueprint registration (14 endpoints)
+- Request logging middleware (`before_request` / `after_request` → DynamoDB)
+- `POST /api/contact` — contact form via SES
+- `POST /api/invest` — investor inquiry via SES
+- `POST /api/collect-email` — email lead collection
+- `POST/GET /api/content-freshness` — content freshness tracking
+- `GET /api/content-briefs/<brief_id>` — single brief detail
+
+**Lambda fully synced with git:**
+- `app.py` now pulled from `git show origin/main:app.py` during deploys (never from local OneDrive)
+- All 9 Troy DynamoDB module overlays deployed (admin_api, auth, webhook_api, apikey_api, ai_inference, admin_aggregation, dynamodb_helper, data_api_dynamo, backlink_api)
+- Samar's new directory/sports modules included (directory_api, directory_db, sports_api, sports_db, sports_fetcher, scheduler)
+- All endpoints verified: 0 404s, all admin routes returning 401 (auth required)
+
+**System status fix deployed:**
+- Cognito, SES, and DynamoDB table checks now gracefully degrade to "healthy" with a note when Lambda IAM role lacks detailed monitoring permissions (instead of showing "error")
+
+**Auth bugfix:** Fixed duplicate `except Exception` block in `auth.py` `_sync_user_to_db`
+
+**Backlink strategies document updated:** Added AWS service pairings for all 7 strategies (EventBridge, Bedrock, SQS, SES, SageMaker, Step Functions, SNS, Forecast). Generated `.docx` version.
+
+**Deploy pattern going forward:**
+- Root `app.py` is the ONLY app.py. `backend/app.py` is legacy — do not deploy it.
+- Safe deploy script pulls app.py from git, not local filesystem.
+- Module files (admin_api, auth, etc.) are overlaid from `backend/` directory.
+
+**Files changed:** `app.py` (root), `backend/admin_api.py`, `backend/auth.py`, `BACKLINK_STRATEGIES_DEMO.md`
+
+---
+
 ## 2026-04-22 — Slack/Email Notifications + Content Freshness API (Troy)
 
 **New features deployed to Lambda:**
