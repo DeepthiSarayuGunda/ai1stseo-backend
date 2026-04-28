@@ -329,7 +329,17 @@ function parseEvent(e, leagueName) {
     status: status,
     league: e.strLeague || leagueName,
     match_date: matchDate,
-    meta_json: { round: e.intRound, season: e.strSeason, thumb: e.strThumb || '' }
+    venue: e.strVenue || '',
+    city: e.strCity || '',
+    country: e.strCountry || '',
+    time_local: e.strTimeLocal || e.strTime || '',
+    spectators: e.intSpectators || '',
+    description: e.strDescriptionEN || '',
+    video: e.strVideo || '',
+    thumb: e.strThumb || '',
+    poster: e.strPoster || '',
+    league_badge: e.strLeagueBadge || '',
+    meta_json: { round: e.intRound, season: e.strSeason }
   };
 }
 
@@ -550,28 +560,14 @@ function openMatch(eventId) {
   const modal = document.getElementById('matchModal');
   const content = document.getElementById('modal-content');
   modal.classList.add('open');
-  content.innerHTML = '<div class="modal-loading"><div class="spinner"></div>Loading match details...</div>';
 
-  // Find match in our local data first for instant display
-  const localMatch = allMatches.find(m => m.id === eventId);
-
-  // Fetch full details from TheSportsDB
-  fetch(`${TSDB}/lookupevent.php?id=${eventId}`)
-    .then(r => r.json())
-    .then(data => {
-      const e = data && data.events && data.events[0];
-      if (!e) {
-        // Fallback to local data
-        if (localMatch) renderModalFromLocal(localMatch);
-        else content.innerHTML = '<div class="modal-loading">Match details not available</div>';
-        return;
-      }
-      renderModalFromAPI(e, localMatch);
-    })
-    .catch(() => {
-      if (localMatch) renderModalFromLocal(localMatch);
-      else content.innerHTML = '<div class="modal-loading">Could not load match details</div>';
-    });
+  // Use local match data (already fetched from eventsday.php)
+  const m = allMatches.find(m => m.id === eventId);
+  if (!m) {
+    content.innerHTML = '<div class="modal-loading">Match details not available</div>';
+    return;
+  }
+  renderModalFromLocal(m);
 }
 
 function renderModalFromAPI(e, localMatch) {
@@ -663,32 +659,78 @@ function renderModalFromLocal(m) {
   const content = document.getElementById('modal-content');
   const searchQuery = encodeURIComponent(`${m.home_team_name} vs ${m.away_team_name} live score`);
 
+  // Check if match is today
+  const today = new Date().toISOString().split('T')[0];
+  const matchDay = m.match_date ? m.match_date.split('T')[0] : '';
+  const isToday = matchDay === today;
+
+  let statusLabel = m.status === 'final' ? 'Final' : formatDate(m.match_date);
+  if (isToday && m.status !== 'final') statusLabel = 'Today';
+
   let scoreHtml = '';
   if (m.home_score || m.away_score) {
     scoreHtml = `<div class="modal-score">${esc(m.home_score)} - ${esc(m.away_score)}</div>`;
   } else {
-    scoreHtml = `<div class="modal-score scheduled">${formatDate(m.match_date)}</div>`;
+    const timeDisplay = m.time_local ? m.time_local.substring(0,5) : '';
+    scoreHtml = `<div class="modal-score scheduled">${isToday && timeDisplay ? '🔴 ' + timeDisplay + ' (Local Time)' : formatDate(m.match_date)}</div>`;
   }
 
-  content.innerHTML = `
-    <div class="modal-header">
-      <div class="modal-league">${esc(m.league || '')}</div>
-      <div class="modal-teams">
-        <span>${esc(m.home_team_name)}</span>
-        <span class="vs">vs</span>
-        <span>${esc(m.away_team_name)}</span>
-      </div>
-    </div>
-    <div class="modal-status"><span class="${m.status}">${m.status === 'final' ? 'Final' : formatDate(m.match_date)}</span></div>
-    ${scoreHtml}
+  // Build details grid
+  const details = [];
+  if (m.venue) details.push({label:'Venue', value: m.venue});
+  if (m.city) details.push({label:'City', value: m.city + (m.country ? ', ' + m.country : '')});
+  if (m.meta_json.round) details.push({label:'Round', value: m.meta_json.round});
+  if (m.meta_json.season) details.push({label:'Season', value: m.meta_json.season});
+  if (m.spectators && m.spectators !== '0' && m.spectators !== 'null') details.push({label:'Spectators', value: parseInt(m.spectators).toLocaleString()});
+  if (matchDay) details.push({label:'Date', value: new Date(matchDay).toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'})});
+
+  let detailsHtml = '';
+  if (details.length) {
+    detailsHtml = '<div class="modal-details">' + details.map(d =>
+      `<div class="modal-detail"><div class="modal-detail-label">${esc(d.label)}</div><div class="modal-detail-value">${esc(String(d.value))}</div></div>`
+    ).join('') + '</div>';
+  }
+
+  let descHtml = '';
+  if (m.description) {
+    descHtml = `<p style="font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:14px">${esc(m.description)}</p>`;
+  }
+
+  let thumbHtml = '';
+  if (m.thumb) thumbHtml = `<img class="modal-thumb" src="${esc(m.thumb)}" alt="Match" loading="lazy">`;
+  else if (m.poster) thumbHtml = `<img class="modal-thumb" src="${esc(m.poster)}" alt="Match" loading="lazy">`;
+
+  let badgeHtml = '';
+  if (m.league_badge) badgeHtml = `<img src="${esc(m.league_badge)}" alt="" style="height:20px;vertical-align:middle;margin-right:6px;border-radius:3px">`;
+
+  let linksHtml = `
     <div class="modal-links">
       <a class="modal-link" href="https://www.google.com/search?q=${searchQuery}" target="_blank" rel="noopener">
         🔍 Search Live Score on Google
       </a>
       <a class="modal-link" href="https://www.espn.com/search/_/q/${encodeURIComponent(m.home_team_name + ' ' + m.away_team_name)}" target="_blank" rel="noopener">
         📺 Check on ESPN
-      </a>
+      </a>`;
+  if (m.video) {
+    linksHtml += `<a class="modal-link" href="${esc(m.video)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>`;
+  }
+  linksHtml += '</div>';
+
+  content.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-league">${badgeHtml}${esc(m.league || '')}${m.meta_json.round ? ' · Round ' + m.meta_json.round : ''}</div>
+      <div class="modal-teams">
+        <span>${esc(m.home_team_name)}</span>
+        <span class="vs">vs</span>
+        <span>${esc(m.away_team_name)}</span>
+      </div>
     </div>
+    <div class="modal-status"><span class="${m.status}">${statusLabel}</span></div>
+    ${scoreHtml}
+    ${thumbHtml}
+    ${descHtml}
+    ${detailsHtml}
+    ${linksHtml}
   `;
 }
 
