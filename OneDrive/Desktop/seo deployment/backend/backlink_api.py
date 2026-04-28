@@ -382,10 +382,14 @@ def citation_authority_probe():
     """
     Probe AI models to discover which domains they cite for a given topic.
     This is the novel differentiator — no competitor tracks LLM citation patterns.
+    Supports country/persona/language segmentation for market-specific insights.
     """
     data = request.get_json() or {}
     queries = data.get('queries', [])
     niche = data.get('niche', 'SEO')
+    country = data.get('country', '').strip()       # e.g. "Canada", "US", "UK"
+    persona = data.get('persona', '').strip()        # e.g. "small business owner", "enterprise CMO"
+    language = data.get('language', '').strip()       # e.g. "French", "Spanish"
     if not queries:
         return jsonify({'status': 'error', 'message': 'queries[] required (list of prompts to send to AI models)'}), 400
 
@@ -394,6 +398,7 @@ def citation_authority_probe():
         from collections import Counter
 
         cited_domains = Counter()
+        cited_pages = Counter()  # Page-level tracking
         probe_results = []
 
         # Use our AI inference to probe — this calls the Ollama accelerator or Bedrock
@@ -405,25 +410,44 @@ def citation_authority_probe():
         for query in queries[:20]:  # Cap at 20 queries
             if not generate:
                 break
+
+            # Build context-aware prompt with segmentation
+            context_parts = []
+            if country:
+                context_parts.append('Answer from the perspective of someone in {}.'.format(country))
+            if persona:
+                context_parts.append('The user is a {}.'.format(persona))
+            if language:
+                context_parts.append('Respond in {}.'.format(language))
+            context = ' '.join(context_parts)
+
             prompt = (
+                '{context}'
                 'Answer this question and cite specific websites as sources. '
-                'Include URLs where possible: {}'
-            ).format(query)
+                'Include full URLs where possible: {query}'
+            ).format(context=context + ' ' if context else '', query=query)
 
             response = generate(prompt, max_tokens=1024, temperature=0.3, triggered_by='citation_probe')
 
             # Extract URLs from the response
             urls = re.findall(r'https?://[^\s\)\]\"\'<>]+', response)
             domains_found = []
+            pages_found = []
             for url in urls:
-                domain = urlparse(url).netloc
+                parsed = urlparse(url)
+                domain = parsed.netloc
                 if domain and len(domain) > 3:
                     cited_domains[domain] += 1
                     domains_found.append(domain)
+                    # Track full page URL (not just domain)
+                    clean_url = '{}://{}{}'.format(parsed.scheme, parsed.netloc, parsed.path.rstrip('/'))
+                    cited_pages[clean_url] += 1
+                    pages_found.append(clean_url)
 
             probe_results.append({
                 'query': query,
                 'domains_cited': list(set(domains_found)),
+                'pages_cited': list(set(pages_found)),
                 'citation_count': len(domains_found),
             })
 
@@ -437,15 +461,225 @@ def citation_authority_probe():
                 'niche': niche,
             })
 
-        # Store the probe
+        # Build page-level citation scores
+        page_scores = []
+        for page_url, count in cited_pages.most_common(50):
+            page_scores.append({
+                'url': page_url,
+                'domain': urlparse(page_url).netloc,
+                'citation_count': count,
+                'citation_frequency': round(count / len(queries) * 100, 1) if queries else 0,
+            })
+
+        # Store the probe with segmentation metadata
         probe_id = str(uuid.uuid4())
-        put_item(BACKLINKS_TABLE, {
+        probe_record = {
             'id': probe_id,
             'type': 'citation_authority',
             'niche': niche,
             'queries_count': len(queries),
             'top_cited_domains': authority_scores[:20],
+            'top_cited_pages': page_scores[:20],
             'probe_results': probe_results,
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        }
+        # Add segmentation fields if provided
+        if country:
+            probe_record['country'] = country
+        if persona:
+            probe_record['persona'] = persona
+        if language:
+            probe_record['language'] = language
+
+        put_item(BACKLINKS_TABLE, probe_record)
+
+        result = {
+            'status': 'success',
+            'id': probe_id,
+            'total_domains_cited': len(cited_domains),
+            'total_pages_cited': len(cited_pages),
+            'top_cited': authority_scores[:20],
+            'top_cited_pages': page_scores[:20],
+            'probes': probe_results,
+        }
+        if country:
+            result['country'] = country
+        if persona:
+            result['persona'] = persona
+        if language:
+            result['language'] = language
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/citation-scores', methods=['GET'])
+@require_auth
+def get_citation_scores():
+    """Get stored citation authority scores. Filter by niche, country, persona."""
+    niche = request.args.get('niche', '')
+    country = request.args.get('country', '')
+    persona = request.args.get('persona', '')
+    try:
+        items = scan_table(BACKLINKS_TABLE, 100)
+        probes = [i for i in items if i.get('type') == 'citation_authority']
+        if niche:
+            probes = [p for p in probes if niche.lower() in (p.get('niche', '') or '').lower()]
+        if country:
+            probes = [p for p in probes if country.lower() in (p.get('country', '') or '').lower()]
+        if persona:
+            probes = [p for p in probes if persona.lower() in (p.get('persona', '') or '').lower()]
+        probes.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        return jsonify({'status': 'success', 'probes': probes[:20]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== AI SENTIMENT & HALLUCINATION MONITORING =====================
+
+@backlink_bp.route('/api/backlinks/brand-sentiment', methods=['POST'])
+@require_auth
+def brand_sentiment_probe():
+    """
+    Probe AI models for brand sentiment and factual accuracy.
+    Sends brand-specific queries to AI, then analyzes the response for:
+    - Sentiment (positive/neutral/negative)
+    - Factual accuracy (hallucination detection)
+    - Competitor mentions in the same response
+    - Recommendation strength (does the AI recommend the brand?)
+    """
+    data = request.get_json() or {}
+    brand = data.get('brand', '').strip()
+    domain = data.get('domain', '').strip()
+    queries = data.get('queries', [])
+    if not brand:
+        return jsonify({'status': 'error', 'message': 'brand name required'}), 400
+
+    # Default queries if none provided
+    if not queries:
+        queries = [
+            'What is {} and is it any good?'.format(brand),
+            'What are the pros and cons of {}?'.format(brand),
+            'Would you recommend {} for SEO?'.format(brand),
+            'Compare {} to its competitors.'.format(brand),
+            'Is {} trustworthy and reliable?'.format(brand),
+        ]
+
+    try:
+        import re
+        try:
+            from ai_inference import generate
+        except ImportError:
+            generate = None
+
+        if not generate:
+            return jsonify({'status': 'error', 'message': 'AI inference not available'}), 503
+
+        results = []
+        sentiment_counts = {'positive': 0, 'neutral': 0, 'negative': 0}
+        total_recommendation_score = 0
+
+        for query in queries[:10]:
+            response = generate(query, max_tokens=1024, temperature=0.3, triggered_by='sentiment_probe')
+            response_lower = response.lower()
+            brand_lower = brand.lower()
+
+            # Sentiment analysis (keyword-based heuristic)
+            positive_signals = ['recommend', 'excellent', 'great', 'powerful', 'effective',
+                                'impressive', 'reliable', 'trusted', 'innovative', 'leading',
+                                'best', 'top', 'strong', 'valuable', 'worth']
+            negative_signals = ['avoid', 'poor', 'weak', 'unreliable', 'expensive', 'limited',
+                                'lacking', 'disappointing', 'outdated', 'concern', 'issue',
+                                'problem', 'drawback', 'downside', 'risk']
+
+            pos_count = sum(1 for w in positive_signals if w in response_lower)
+            neg_count = sum(1 for w in negative_signals if w in response_lower)
+
+            if pos_count > neg_count + 1:
+                sentiment = 'positive'
+            elif neg_count > pos_count + 1:
+                sentiment = 'negative'
+            else:
+                sentiment = 'neutral'
+            sentiment_counts[sentiment] += 1
+
+            # Recommendation strength (0-100)
+            rec_score = 50  # neutral baseline
+            if 'recommend' in response_lower and brand_lower in response_lower:
+                rec_score = 80
+            if 'highly recommend' in response_lower:
+                rec_score = 95
+            if 'not recommend' in response_lower or 'avoid' in response_lower:
+                rec_score = 15
+            total_recommendation_score += rec_score
+
+            # Brand mention check
+            brand_mentioned = brand_lower in response_lower
+            brand_mention_count = response_lower.count(brand_lower)
+
+            # Domain mention check
+            domain_mentioned = domain.lower() in response_lower if domain else False
+
+            # Competitor detection (other brands mentioned)
+            competitor_mentions = []
+            common_seo_brands = ['semrush', 'ahrefs', 'moz', 'surfer', 'clearscope',
+                                 'brightedge', 'conductor', 'se ranking', 'seoclarity']
+            for comp in common_seo_brands:
+                if comp in response_lower and comp != brand_lower:
+                    competitor_mentions.append(comp)
+
+            # Hallucination flags (claims we can check)
+            hallucination_flags = []
+            # Check for made-up pricing
+            price_matches = re.findall(r'\$[\d,]+(?:\.\d{2})?(?:/mo| per month| monthly)?', response)
+            if price_matches:
+                hallucination_flags.append({
+                    'type': 'pricing_claim',
+                    'claims': price_matches,
+                    'note': 'Verify these prices are accurate',
+                })
+            # Check for specific year claims
+            year_matches = re.findall(r'(?:founded|launched|started|since|established)\s+(?:in\s+)?(\d{4})', response_lower)
+            if year_matches:
+                hallucination_flags.append({
+                    'type': 'founding_date_claim',
+                    'claims': year_matches,
+                    'note': 'Verify founding/launch dates',
+                })
+
+            results.append({
+                'query': query,
+                'sentiment': sentiment,
+                'positive_signals': pos_count,
+                'negative_signals': neg_count,
+                'recommendation_score': rec_score,
+                'brand_mentioned': brand_mentioned,
+                'brand_mention_count': brand_mention_count,
+                'domain_mentioned': domain_mentioned,
+                'competitor_mentions': competitor_mentions,
+                'hallucination_flags': hallucination_flags,
+                'response_length': len(response),
+            })
+
+        # Aggregate
+        avg_rec = round(total_recommendation_score / len(queries), 1) if queries else 0
+        dominant_sentiment = max(sentiment_counts, key=sentiment_counts.get)
+
+        # Store the probe
+        probe_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': probe_id,
+            'type': 'brand_sentiment',
+            'brand': brand,
+            'domain': domain,
+            'queries_count': len(queries),
+            'dominant_sentiment': dominant_sentiment,
+            'sentiment_breakdown': sentiment_counts,
+            'avg_recommendation_score': avg_rec,
+            'results': results,
             'created_at': _now(),
             'project_id': DEFAULT_PROJECT_ID,
             'created_by': _get_user_id(),
@@ -454,24 +688,27 @@ def citation_authority_probe():
         return jsonify({
             'status': 'success',
             'id': probe_id,
-            'total_domains_cited': len(cited_domains),
-            'top_cited': authority_scores[:20],
-            'probes': probe_results,
+            'brand': brand,
+            'dominant_sentiment': dominant_sentiment,
+            'sentiment_breakdown': sentiment_counts,
+            'avg_recommendation_score': avg_rec,
+            'total_hallucination_flags': sum(len(r.get('hallucination_flags', [])) for r in results),
+            'results': results,
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-@backlink_bp.route('/api/backlinks/citation-scores', methods=['GET'])
+@backlink_bp.route('/api/backlinks/brand-sentiment/history', methods=['GET'])
 @require_auth
-def get_citation_scores():
-    """Get stored citation authority scores by niche."""
-    niche = request.args.get('niche', '')
+def brand_sentiment_history():
+    """Get brand sentiment probe history. Filter by brand name."""
+    brand = request.args.get('brand', '')
     try:
         items = scan_table(BACKLINKS_TABLE, 100)
-        probes = [i for i in items if i.get('type') == 'citation_authority']
-        if niche:
-            probes = [p for p in probes if niche.lower() in (p.get('niche', '') or '').lower()]
+        probes = [i for i in items if i.get('type') == 'brand_sentiment']
+        if brand:
+            probes = [p for p in probes if brand.lower() in (p.get('brand', '') or '').lower()]
         probes.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         return jsonify({'status': 'success', 'probes': probes[:20]})
     except Exception as e:

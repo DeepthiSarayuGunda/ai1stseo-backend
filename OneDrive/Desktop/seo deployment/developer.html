@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 1st SEO — Developer API</title>
+<style>
+  :root { --primary: #00d4ff; --accent: #7b2cbf; --bg: #0a0e1a; --card: #111827; --text: #e0e0e0; --muted: #9ca3af; --border: #1f2937; --green: #10b981; --orange: #f59e0b; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  h2 { color: var(--primary); margin: 40px 0 16px; font-size: 1.4rem; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent); margin: 24px 0 8px; font-size: 1.1rem; }
+  p, li { color: var(--muted); margin-bottom: 8px; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 6px; }
+  .badge-get { background: #064e3b; color: #6ee7b7; }
+  .badge-post { background: #1e3a5f; color: #93c5fd; }
+  .badge-del { background: #7f1d1d; color: #fca5a5; }
+  .badge-auth { background: #4c1d95; color: #c4b5fd; }
+  .badge-public { background: #065f46; color: #6ee7b7; }
+  code { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #e2e8f0; }
+  pre { background: #1e293b; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 0.85em; line-height: 1.5; color: #e2e8f0; }
+  .endpoint { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; font-family: monospace; font-size: 0.95em; }
+  .endpoint-desc { color: var(--muted); font-size: 0.9em; margin-left: 24px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9em; }
+  th { color: var(--primary); font-weight: 600; }
+  .rate-box { display: flex; gap: 24px; flex-wrap: wrap; }
+  .rate-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; flex: 1; min-width: 200px; }
+  .rate-item h4 { color: var(--primary); margin-bottom: 4px; }
+  .footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>AI 1st SEO Developer API</h1>
+<p class="subtitle">Integrate SEO analysis, GEO visibility, backlink intelligence, and AI citation data into your applications.</p>
+
+<div class="card">
+  <strong>Base URL:</strong> <code>https://api.ai1stseo.com</code><br>
+  <strong>Auth:</strong> <code>Authorization: Bearer ai1st_YOUR_KEY</code> or <code>X-API-Key: ai1st_YOUR_KEY</code><br>
+  <strong>Format:</strong> JSON request/response. All responses include <code>"status": "success"</code> or <code>"status": "error"</code>.
+</div>
+
+<h2>Authentication</h2>
+<p>All API endpoints require either a Cognito JWT token (from login) or a developer API key. API keys are prefixed with <code>ai1st_</code> and support scoped access (read, write, admin).</p>
+
+<div class="card">
+  <h3>Get an API Key</h3>
+  <p>Log in to the <a href="/admin">admin dashboard</a>, navigate to API Keys, and generate a new key. Keys are shown once — save it immediately.</p>
+  <div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/keys</code></div>
+  <pre>{ "label": "My Integration", "scopes": ["read", "write"], "rate_limit_per_hour": 100 }</pre>
+</div>
+
+<h2>Rate Limits</h2>
+<div class="rate-box">
+  <div class="rate-item"><h4>Default</h4><p>100 requests/hour per key</p></div>
+  <div class="rate-item"><h4>Custom</h4><p>Set per key at creation (up to 1000/hr)</p></div>
+  <div class="rate-item"><h4>Burst</h4><p>10 requests/second max</p></div>
+</div>
+
+<h2>SEO Analysis</h2>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/analyze</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Run 200+ SEO checks across 10 categories. Returns scores, passed/failed checks, and recommendations.</p>
+<pre>Request:  { "url": "https://example.com" }
+Response: { "status": "success", "overallScore": 75, "categories": {...}, "checks": [...] }</pre>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/content-score</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Score a URL for readability (Flesch), SEO (on-page), and AEO (AI-extractable content).</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/content-brief</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Generate an AI content brief for a target keyword with SERP analysis.</p>
+
+<div class="endpoint"><span class="badge badge-get">GET</span> <code>/api/health</code> <span class="badge badge-public">public</span></div>
+<p class="endpoint-desc">Service health check. Returns available categories and check counts.</p>
+
+<h2>GEO / AI Citation Probing</h2>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/geo-probe</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Probe an AI model (ChatGPT, Gemini, Perplexity) to check if it cites a brand for a keyword.</p>
+<pre>Request:  { "keyword": "best seo tools", "ai_model": "chatgpt", "url": "https://example.com", "brand_name": "Example" }
+Response: { "status": "success", "probe": { "cited": true, "position": 3, ... } }</pre>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/geo-probe/batch</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Probe multiple AI models simultaneously for the same keyword.</p>
+
+<div class="endpoint"><span class="badge badge-get">GET</span> <code>/api/geo-probe/models</code> <span class="badge badge-public">public</span></div>
+<p class="endpoint-desc">List available AI models for probing.</p>
+
+<div class="endpoint"><span class="badge badge-get">GET</span> <code>/api/geo-probe/history</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Get probe history. Filter by keyword, model, date range.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/aeo/analyze</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Run Answer Engine Optimization analysis on a URL.</p>
+
+<h2>Backlink Intelligence</h2>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/score</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Score a domain's authority (0-100) using 10+ real-time signals.</p>
+<pre>Request:  { "domain": "example.com" }
+Response: { "status": "success", "da_score": 72, "signals": { "https": true, "response_time_ms": 340, ... } }</pre>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/analyze-toxic</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Classify backlinks as potentially toxic using heuristic signals.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/link-gap</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Compare your domain against competitors to find backlink gaps.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/citation-authority</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Probe AI models to discover which domains they cite for a topic. No competitor offers this.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/broken-links</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Scan a page for broken outbound links — reclaim opportunities.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/wikipedia-gaps</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Find dead citations in Wikipedia articles as replacement opportunities.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/competitor-alerts</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Detect when a competitor gains or loses significant domain authority.</p>
+
+<div class="endpoint"><span class="badge badge-get">GET</span> <code>/api/backlinks/priority-queue</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Unified opportunity queue ranked by composite priority score.</p>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/backlinks/report/download</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Generate a white-label HTML report with presigned S3 download URL.</p>
+
+<h2>Data API</h2>
+
+<table>
+  <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/data/audits</code></td><td>Store an audit result</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/data/audits</code></td><td>List audits (filter by URL)</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/data/geo-probes</code></td><td>Store a GEO probe result</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/data/geo-probes</code></td><td>List GEO probes</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/data/content-briefs</code></td><td>Store a content brief</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/data/content-briefs</code></td><td>List content briefs</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/data/competitors</code></td><td>Add a tracked competitor</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/data/competitors</code></td><td>List tracked competitors</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/data/reports</code></td><td>Store a report</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/data/reports</code></td><td>List reports</td></tr>
+</table>
+
+<h2>Webhooks & Notifications</h2>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/webhooks</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Register a URL to receive event notifications (HMAC-signed).</p>
+<pre>{ "url": "https://your-server.com/hook", "events": ["audit.created", "*"], "secret": "your-hmac-secret" }</pre>
+
+<div class="endpoint"><span class="badge badge-post">POST</span> <code>/api/notifications/subscribe</code> <span class="badge badge-auth">auth</span></div>
+<p class="endpoint-desc">Subscribe to events via Slack webhook or email.</p>
+<pre>{ "channel": "slack", "target": "https://hooks.slack.com/services/...", "events": ["*"] }</pre>
+
+<div class="endpoint"><span class="badge badge-get">GET</span> <code>/api/webhooks/events</code> <span class="badge badge-public">public</span></div>
+<p class="endpoint-desc">List all available event types.</p>
+
+<h2>Public Endpoints (No Auth)</h2>
+<table>
+  <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/contact</code></td><td>Contact form (sends via SES)</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/invest</code></td><td>Investor inquiry form</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/collect-email</code></td><td>Email lead collection</td></tr>
+  <tr><td><span class="badge badge-post">POST</span></td><td><code>/api/content-freshness</code></td><td>Record content update timestamp</td></tr>
+  <tr><td><span class="badge badge-get">GET</span></td><td><code>/api/content-freshness</code></td><td>Get freshness history</td></tr>
+</table>
+
+<h2>Error Handling</h2>
+<div class="card">
+  <p>All errors return JSON with <code>"status": "error"</code> and a <code>"message"</code> field.</p>
+  <table>
+    <tr><th>Code</th><th>Meaning</th></tr>
+    <tr><td>400</td><td>Bad request — missing or invalid parameters</td></tr>
+    <tr><td>401</td><td>Unauthorized — missing or expired token/key</td></tr>
+    <tr><td>403</td><td>Forbidden — insufficient role (admin required)</td></tr>
+    <tr><td>404</td><td>Not found — resource or endpoint doesn't exist</td></tr>
+    <tr><td>429</td><td>Rate limited — exceeded requests per hour</td></tr>
+    <tr><td>500</td><td>Server error — check the message field</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  <p>AI 1st SEO Developer API &mdash; <a href="https://www.ai1stseo.com">ai1stseo.com</a> &mdash; <a href="mailto:support@ai1stseo.com">support@ai1stseo.com</a></p>
+  <p>Full reference: <a href="https://github.com/DeepthiSarayuGunda/ai1stseo-backend/blob/main/API_REFERENCE.md">API_REFERENCE.md on GitHub</a></p>
+</div>
+
+</div>
+</body>
+</html>
