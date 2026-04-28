@@ -68,6 +68,35 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
 .league-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .league-pill{padding:5px 14px;font-size:.78rem;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--muted);cursor:pointer;transition:all .2s}
 .league-pill:hover,.league-pill.active{background:rgba(168,85,247,.1);border-color:var(--purple);color:var(--purple)}
+
+/* Match detail modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:200;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#111;border:1px solid var(--border);border-radius:18px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:28px;position:relative}
+.modal-close{position:absolute;top:14px;right:18px;font-size:1.4rem;color:var(--muted);cursor:pointer;background:none;border:none;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-header{margin-bottom:18px}
+.modal-league{font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.modal-teams{display:flex;justify-content:space-between;align-items:center;font-size:1.3rem;font-weight:800;margin-bottom:8px}
+.modal-teams .vs{color:var(--faint);font-size:.8rem;font-weight:400}
+.modal-score{font-size:1.6rem;font-weight:900;text-align:center;margin:12px 0;color:var(--green)}
+.modal-score.scheduled{color:var(--accent);font-size:1rem;font-weight:600}
+.modal-status{text-align:center;margin-bottom:16px}
+.modal-status span{padding:4px 14px;border-radius:10px;font-size:.78rem;font-weight:700}
+.modal-status .live{background:rgba(255,71,87,.15);color:var(--red)}
+.modal-status .final{background:rgba(0,255,136,.1);color:var(--green)}
+.modal-status .scheduled{background:rgba(0,212,255,.1);color:var(--accent)}
+.modal-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.modal-detail{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.modal-detail-label{font-size:.68rem;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.modal-detail-value{font-size:.88rem;font-weight:600}
+.modal-links{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.modal-link{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--accent);font-size:.85rem;font-weight:600;transition:all .2s}
+.modal-link:hover{border-color:var(--accent);background:rgba(0,212,255,.06)}
+.modal-thumb{width:100%;border-radius:10px;margin-bottom:14px}
+.modal-loading{text-align:center;padding:30px;color:var(--muted)}
+
+.match-card{cursor:pointer}
 @media(max-width:768px){
   nav{padding:10px 14px}
   .hero{flex-direction:column;text-align:center}
@@ -129,6 +158,14 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:v
   </div>
   <div class="section-label" style="margin-top:20px">EXPLORE MORE</div>
   <div class="explore-grid" id="explore-grid"></div>
+</div>
+
+<!-- Match Detail Modal -->
+<div class="modal-overlay" id="matchModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modal-content"><div class="modal-loading"><div class="spinner"></div>Loading match details...</div></div>
+  </div>
 </div>
 
 <footer>
@@ -326,7 +363,7 @@ function renderMatches(matches) {
     if (meta.round) extraInfo = `Round ${meta.round}`;
 
     return `
-      <div class="match-card">
+      <div class="match-card" onclick="openMatch('${m.id}')">
         <div class="match-top">
           <span class="match-league">${esc(m.league || '')}${extraInfo ? ' &middot; ' + esc(extraInfo) : ''}</span>
           <span class="match-status ${statusClass}">${statusText}</span>
@@ -507,6 +544,160 @@ function renderLeaguePills(containerId, leagues, onClickName) {
   el.innerHTML = `<div class="league-pill active" data-league="all" onclick="${onClickName}('all')">All</div>` +
     leagues.map(l => `<div class="league-pill" data-league="${esc(l)}" onclick="${onClickName}('${l.replace(/'/g,"\\'")}')">${esc(l)}</div>`).join('');
 }
+
+// ── Match Detail Modal ────────────────────────────────────────────────────────
+function openMatch(eventId) {
+  const modal = document.getElementById('matchModal');
+  const content = document.getElementById('modal-content');
+  modal.classList.add('open');
+  content.innerHTML = '<div class="modal-loading"><div class="spinner"></div>Loading match details...</div>';
+
+  // Find match in our local data first for instant display
+  const localMatch = allMatches.find(m => m.id === eventId);
+
+  // Fetch full details from TheSportsDB
+  fetch(`${TSDB}/lookupevent.php?id=${eventId}`)
+    .then(r => r.json())
+    .then(data => {
+      const e = data && data.events && data.events[0];
+      if (!e) {
+        // Fallback to local data
+        if (localMatch) renderModalFromLocal(localMatch);
+        else content.innerHTML = '<div class="modal-loading">Match details not available</div>';
+        return;
+      }
+      renderModalFromAPI(e, localMatch);
+    })
+    .catch(() => {
+      if (localMatch) renderModalFromLocal(localMatch);
+      else content.innerHTML = '<div class="modal-loading">Could not load match details</div>';
+    });
+}
+
+function renderModalFromAPI(e, localMatch) {
+  const content = document.getElementById('modal-content');
+  const homeScore = e.intHomeScore || '';
+  const awayScore = e.intAwayScore || '';
+  const hasScore = homeScore !== '' && homeScore !== null && awayScore !== '' && awayScore !== null;
+
+  let status = 'scheduled';
+  let statusLabel = formatDate(e.dateEvent);
+  if (hasScore) { status = 'final'; statusLabel = 'Final'; }
+
+  // Check if match is today
+  const today = new Date().toISOString().split('T')[0];
+  const isToday = e.dateEvent === today;
+  if (isToday && !hasScore) { statusLabel = 'Today'; }
+
+  // Build search query for live score links
+  const searchQuery = encodeURIComponent(`${e.strHomeTeam} vs ${e.strAwayTeam} live score`);
+  const googleSearch = `https://www.google.com/search?q=${searchQuery}`;
+  const espnSearch = `https://www.espn.com/search/_/q/${encodeURIComponent(e.strHomeTeam + ' ' + e.strAwayTeam)}`;
+
+  let thumbHtml = '';
+  if (e.strThumb) thumbHtml = `<img class="modal-thumb" src="${esc(e.strThumb)}" alt="Match thumbnail" loading="lazy">`;
+
+  let scoreHtml = '';
+  if (hasScore) {
+    scoreHtml = `<div class="modal-score">${esc(String(homeScore))} - ${esc(String(awayScore))}</div>`;
+  } else {
+    const timeStr = e.strTimeLocal || e.strTime || '';
+    const displayTime = timeStr ? timeStr.substring(0,5) : statusLabel;
+    scoreHtml = `<div class="modal-score scheduled">${isToday ? '🔴 ' + displayTime + ' (Local Time)' : displayTime}</div>`;
+  }
+
+  let detailsHtml = '';
+  const details = [];
+  if (e.strVenue) details.push({label:'Venue', value: e.strVenue});
+  if (e.strCity) details.push({label:'City', value: e.strCity + (e.strCountry ? ', ' + e.strCountry : '')});
+  if (e.intRound) details.push({label:'Round', value: e.intRound});
+  if (e.strSeason) details.push({label:'Season', value: e.strSeason});
+  if (e.intSpectators && e.intSpectators !== '0') details.push({label:'Spectators', value: parseInt(e.intSpectators).toLocaleString()});
+  if (e.dateEvent) details.push({label:'Date', value: new Date(e.dateEvent).toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'})});
+
+  if (details.length) {
+    detailsHtml = '<div class="modal-details">' + details.map(d =>
+      `<div class="modal-detail"><div class="modal-detail-label">${esc(d.label)}</div><div class="modal-detail-value">${esc(d.value)}</div></div>`
+    ).join('') + '</div>';
+  }
+
+  let descHtml = '';
+  if (e.strDescriptionEN) {
+    descHtml = `<p style="font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:14px">${esc(e.strDescriptionEN)}</p>`;
+  }
+
+  // Live score links — especially useful for today's matches
+  let linksHtml = `
+    <div class="modal-links">
+      <a class="modal-link" href="${googleSearch}" target="_blank" rel="noopener">
+        🔍 Search Live Score on Google
+      </a>
+      <a class="modal-link" href="${espnSearch}" target="_blank" rel="noopener">
+        📺 Check on ESPN
+      </a>`;
+
+  if (e.strVideo) {
+    linksHtml += `<a class="modal-link" href="${esc(e.strVideo)}" target="_blank" rel="noopener">▶️ Watch Highlights</a>`;
+  }
+  linksHtml += '</div>';
+
+  content.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-league">${esc(e.strLeague || '')}${e.intRound ? ' · Round ' + e.intRound : ''}</div>
+      <div class="modal-teams">
+        <span>${esc(e.strHomeTeam)}</span>
+        <span class="vs">vs</span>
+        <span>${esc(e.strAwayTeam)}</span>
+      </div>
+    </div>
+    <div class="modal-status"><span class="${status}">${statusLabel}</span></div>
+    ${scoreHtml}
+    ${thumbHtml}
+    ${descHtml}
+    ${detailsHtml}
+    ${linksHtml}
+  `;
+}
+
+function renderModalFromLocal(m) {
+  const content = document.getElementById('modal-content');
+  const searchQuery = encodeURIComponent(`${m.home_team_name} vs ${m.away_team_name} live score`);
+
+  let scoreHtml = '';
+  if (m.home_score || m.away_score) {
+    scoreHtml = `<div class="modal-score">${esc(m.home_score)} - ${esc(m.away_score)}</div>`;
+  } else {
+    scoreHtml = `<div class="modal-score scheduled">${formatDate(m.match_date)}</div>`;
+  }
+
+  content.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-league">${esc(m.league || '')}</div>
+      <div class="modal-teams">
+        <span>${esc(m.home_team_name)}</span>
+        <span class="vs">vs</span>
+        <span>${esc(m.away_team_name)}</span>
+      </div>
+    </div>
+    <div class="modal-status"><span class="${m.status}">${m.status === 'final' ? 'Final' : formatDate(m.match_date)}</span></div>
+    ${scoreHtml}
+    <div class="modal-links">
+      <a class="modal-link" href="https://www.google.com/search?q=${searchQuery}" target="_blank" rel="noopener">
+        🔍 Search Live Score on Google
+      </a>
+      <a class="modal-link" href="https://www.espn.com/search/_/q/${encodeURIComponent(m.home_team_name + ' ' + m.away_team_name)}" target="_blank" rel="noopener">
+        📺 Check on ESPN
+      </a>
+    </div>
+  `;
+}
+
+function closeModal() {
+  document.getElementById('matchModal').classList.remove('open');
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 init();
