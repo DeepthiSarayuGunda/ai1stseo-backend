@@ -4539,6 +4539,14 @@ try:
 except Exception as e:
     print(f"\u26a0 Backlink API: {e}")
 
+# --- Multi-Site Dashboard API (Dev 3 - Troy) ---
+try:
+    from multisite_api import multisite_bp
+    app.register_blueprint(multisite_bp)
+except Exception as e:
+    print(f"\u26a0 Multi-Site API: {e}")
+
+
 
 
 
