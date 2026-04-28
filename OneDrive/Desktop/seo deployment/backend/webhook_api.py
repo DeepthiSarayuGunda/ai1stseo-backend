@@ -22,7 +22,7 @@ VALID_EVENTS = {
     'audit.created', 'geo_probe.created', 'ai_visibility.created',
     'content_brief.created', 'social_post.created', 'social_post.updated',
     'social_post.deleted', 'competitor.created', 'benchmark.created',
-    'report.created', 'uptime.down', 'content.changed', '*',
+    'report.created', 'uptime.down', 'content.changed', 'answer.changed', '*',
 }
 
 
@@ -118,9 +118,37 @@ def dispatch_event(event_type, payload):
     _dispatch_notifications(event_type, payload)
 
 
+def _get_webhook_branding():
+    """Load white-label branding for webhook payloads. Returns minimal branding dict."""
+    try:
+        config = get_item('ai1stseo-webhooks', {'id': '_white_label_cache'})
+        if config:
+            return {
+                'brand': config.get('brand_name', 'AI 1st SEO'),
+                'url': config.get('custom_domain', 'https://ai1stseo.com'),
+            }
+    except Exception:
+        pass
+    # Fallback: try admin metrics table where white-label config is stored
+    try:
+        from dynamodb_helper import get_item as _get
+        config = _get('ai1stseo-admin-metrics', {'metric_date': 'white_label_config'})
+        if config:
+            return {
+                'brand': config.get('brand_name', 'AI 1st SEO'),
+                'url': config.get('custom_domain', 'https://ai1stseo.com'),
+            }
+    except Exception:
+        pass
+    return {'brand': 'AI 1st SEO', 'url': 'https://ai1stseo.com'}
+
+
 def _deliver(webhook_id, url, secret, event_type, payload):
+    # Inject white-label branding into payload if available
+    branding = _get_webhook_branding()
     body = json.dumps({'event': event_type, 'data': payload,
-                       'timestamp': __import__('datetime').datetime.utcnow().isoformat()})
+                       'timestamp': __import__('datetime').datetime.utcnow().isoformat(),
+                       'source': branding})
     headers = {'Content-Type': 'application/json', 'X-Webhook-Event': event_type}
     if secret:
         sig = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
@@ -157,17 +185,20 @@ _SES_SENDER = 'no-reply@ai1stseo.com'
 def send_slack_notification(webhook_url, event_type, payload):
     """Send a formatted Slack message via incoming webhook."""
     try:
+        branding = _get_webhook_branding()
+        brand_name = branding.get('brand', 'AI 1st SEO')
         emoji = {'audit.created': ':mag:', 'uptime.down': ':rotating_light:',
                  'content.changed': ':pencil2:', 'geo_probe.created': ':robot_face:',
-                 'content_brief.created': ':page_facing_up:', 'competitor.created': ':chart_with_upwards_trend:'
+                 'content_brief.created': ':page_facing_up:', 'competitor.created': ':chart_with_upwards_trend:',
+                 'answer.changed': ':warning:',
                  }.get(event_type, ':bell:')
         text = '{} *{}*\n'.format(emoji, event_type)
         if isinstance(payload, dict):
             for k, v in list(payload.items())[:6]:
                 text += '> *{}:* {}\n'.format(k, v)
         blocks = [{'type': 'section', 'text': {'type': 'mrkdwn', 'text': text}},
-                  {'type': 'context', 'elements': [{'type': 'mrkdwn', 'text': 'AI 1st SEO | {}'.format(
-                      __import__('datetime').datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC'))}]}]
+                  {'type': 'context', 'elements': [{'type': 'mrkdwn', 'text': '{} | {}'.format(
+                      brand_name, __import__('datetime').datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC'))}]}]
         http_requests.post(webhook_url, json={'blocks': blocks, 'text': text}, timeout=10)
     except Exception as e:
         print('Slack notification failed: {}'.format(e))

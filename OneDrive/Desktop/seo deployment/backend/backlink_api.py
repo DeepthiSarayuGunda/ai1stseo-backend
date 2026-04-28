@@ -1656,3 +1656,208 @@ def analyze_internal_links():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== ANSWER FINGERPRINT CHANGE DETECTION =====================
+
+import hashlib as _hashlib
+
+@backlink_bp.route('/api/backlinks/fingerprint-probe', methods=['POST'])
+@require_auth
+def fingerprint_probe():
+    """
+    Probe an AI model and fingerprint the response. Compares against previous
+    fingerprint for the same query+model to detect answer changes.
+    Returns: current response, hash, and diff against previous if one exists.
+    """
+    data = request.get_json() or {}
+    query_text = data.get('query', '').strip()
+    model = data.get('model', 'default')
+    brand = data.get('brand', '').strip()
+    if not query_text:
+        return jsonify({'status': 'error', 'message': 'query required'}), 400
+
+    try:
+        import re
+
+        try:
+            from ai_inference import generate
+        except ImportError:
+            return jsonify({'status': 'error', 'message': 'AI inference not available'}), 503
+
+        # Generate response
+        response_text = generate(query_text, max_tokens=1024, temperature=0.3,
+                                 triggered_by='fingerprint_probe')
+
+        # Hash the response
+        response_hash = _hashlib.sha256(response_text.encode('utf-8')).hexdigest()
+
+        # Extract cited URLs
+        urls = re.findall(r'https?://[^\s\)\]\"\'<>]+', response_text)
+        cited_domains = list(set(urlparse(u).netloc for u in urls if urlparse(u).netloc))
+
+        # Check for brand mention
+        brand_mentioned = brand.lower() in response_text.lower() if brand else False
+
+        # Look up previous fingerprint for this query+model
+        lookup_key = _hashlib.md5((query_text + '|' + model).encode()).hexdigest()[:16]
+        items = scan_table(BACKLINKS_TABLE, 200)
+        previous = None
+        for item in items:
+            if item.get('type') == 'answer_fingerprint' and item.get('lookup_key') == lookup_key:
+                if previous is None or item.get('created_at', '') > previous.get('created_at', ''):
+                    previous = item
+
+        # Compute diff if previous exists
+        diff = None
+        changed = False
+        if previous:
+            prev_hash = previous.get('response_hash', '')
+            if prev_hash != response_hash:
+                changed = True
+                prev_domains = set(previous.get('cited_domains', []))
+                curr_domains = set(cited_domains)
+                diff = {
+                    'hash_changed': True,
+                    'previous_hash': prev_hash[:12],
+                    'current_hash': response_hash[:12],
+                    'domains_added': sorted(curr_domains - prev_domains),
+                    'domains_removed': sorted(prev_domains - curr_domains),
+                    'domains_unchanged': sorted(curr_domains & prev_domains),
+                    'brand_mentioned_before': previous.get('brand_mentioned', False),
+                    'brand_mentioned_now': brand_mentioned,
+                    'previous_date': previous.get('created_at', ''),
+                }
+            else:
+                diff = {'hash_changed': False, 'message': 'Response identical to previous probe'}
+
+        # Store the fingerprint
+        fp_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': fp_id,
+            'type': 'answer_fingerprint',
+            'lookup_key': lookup_key,
+            'query': query_text,
+            'model': model,
+            'brand': brand,
+            'response_hash': response_hash,
+            'cited_domains': cited_domains,
+            'brand_mentioned': brand_mentioned,
+            'response_length': len(response_text),
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        # If answer changed and we have webhooks, dispatch an event
+        if changed:
+            try:
+                from webhook_api import dispatch_event
+                dispatch_event('answer.changed', {
+                    'query': query_text[:100],
+                    'model': model,
+                    'brand': brand,
+                    'domains_added': diff.get('domains_added', [])[:5],
+                    'domains_removed': diff.get('domains_removed', [])[:5],
+                })
+            except Exception:
+                pass
+
+        return jsonify({
+            'status': 'success',
+            'id': fp_id,
+            'query': query_text,
+            'model': model,
+            'response_hash': response_hash[:12],
+            'cited_domains': cited_domains,
+            'brand_mentioned': brand_mentioned,
+            'changed': changed,
+            'diff': diff,
+            'has_previous': previous is not None,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/fingerprint-history', methods=['GET'])
+@require_auth
+def fingerprint_history():
+    """Get answer fingerprint history. Filter by query or brand."""
+    query_filter = request.args.get('query', '')
+    brand_filter = request.args.get('brand', '')
+    try:
+        items = scan_table(BACKLINKS_TABLE, 200)
+        fps = [i for i in items if i.get('type') == 'answer_fingerprint']
+        if query_filter:
+            fps = [f for f in fps if query_filter.lower() in (f.get('query', '') or '').lower()]
+        if brand_filter:
+            fps = [f for f in fps if brand_filter.lower() in (f.get('brand', '') or '').lower()]
+        fps.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        return jsonify({'status': 'success', 'fingerprints': fps[:50]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== CITATION AUTHORITY DATA EXPORT =====================
+
+@backlink_bp.route('/api/backlinks/citation-authority/export', methods=['GET'])
+@require_auth
+def export_citation_authority():
+    """
+    Bulk export all citation authority data as JSON.
+    Includes: all citation probes, domain scores, page-level citations,
+    and historical fingerprints. Designed for data licensing and analytics.
+    Query params: ?format=json (default) or ?format=csv&type=citation_authority
+    """
+    export_format = request.args.get('format', 'json')
+    data_type = request.args.get('type', '')  # filter by type
+    try:
+        items = scan_table(BACKLINKS_TABLE, 500)
+
+        # Filter by type if specified
+        if data_type:
+            items = [i for i in items if i.get('type') == data_type]
+        else:
+            # Default: export citation-relevant data only
+            citation_types = {'citation_authority', 'domain_score', 'answer_fingerprint',
+                              'brand_sentiment', 'backlink_report', 'mention_scan'}
+            items = [i for i in items if i.get('type') in citation_types]
+
+        items.sort(key=lambda x: x.get('created_at', x.get('scored_at', '')), reverse=True)
+
+        if export_format == 'csv':
+            # Generate CSV
+            import io, csv
+            output = io.StringIO()
+            if items:
+                # Flatten top-level keys
+                all_keys = set()
+                for item in items:
+                    all_keys.update(k for k, v in item.items() if not isinstance(v, (dict, list)))
+                all_keys = sorted(all_keys)
+
+                writer = csv.DictWriter(output, fieldnames=all_keys, extrasaction='ignore')
+                writer.writeheader()
+                for item in items:
+                    # Flatten: skip nested dicts/lists
+                    flat = {k: v for k, v in item.items() if not isinstance(v, (dict, list))}
+                    writer.writerow(flat)
+
+            from flask import Response
+            return Response(
+                output.getvalue(),
+                mimetype='text/csv',
+                headers={'Content-Disposition': 'attachment; filename=citation-authority-export.csv'}
+            )
+        else:
+            # JSON export
+            return jsonify({
+                'status': 'success',
+                'export_type': 'citation_authority_data',
+                'total_records': len(items),
+                'data_types': list(set(i.get('type', '') for i in items)),
+                'exported_at': _now(),
+                'records': items,
+            })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
