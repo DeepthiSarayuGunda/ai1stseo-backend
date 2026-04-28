@@ -881,3 +881,212 @@ def generate_backlink_report():
         return jsonify({'status': 'success', 'id': report_id, 'report': report})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== WHITE-LABEL HTML REPORT (S3 download) =====================
+
+import boto3 as _report_boto3
+
+_report_s3 = _report_boto3.client('s3', region_name='us-east-1')
+_REPORT_BUCKET = 'ai1stseo-documents'
+
+
+def _generate_report_html(domain, da_result, competitors, opportunities, config):
+    """Generate a branded HTML backlink report."""
+    brand = config.get('brand_name', 'AI 1st SEO')
+    primary = config.get('primary_color', '#00d4ff')
+    accent = config.get('accent_color', '#7b2cbf')
+    logo = config.get('logo_url', '')
+    footer = config.get('footer_text', 'AI 1st SEO — AI-Powered Search Engine Optimization')
+
+    # Build competitor rows
+    comp_rows = ''
+    for c in competitors:
+        comp_rows += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n'.format(
+            c.get('domain', ''), c.get('da_score', 0),
+            'Yes' if c.get('signals', {}).get('https') else 'No')
+
+    # Build opportunity rows
+    opp_rows = ''
+    for o in opportunities[:10]:
+        opp_rows += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n'.format(
+            o.get('source_url', '')[:60], o.get('opportunity_type', ''),
+            o.get('priority_score', 0))
+
+    # Signal breakdown
+    signals = da_result.get('signals', {})
+    signal_items = ''
+    for k, v in signals.items():
+        if k == 'error':
+            continue
+        signal_items += '<tr><td>{}</td><td>{}</td></tr>\n'.format(k, v)
+
+    logo_html = '<img src="{}" style="max-height:50px;" />'.format(logo) if logo else ''
+
+    html = '''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Backlink Report — {domain}</title>
+<style>
+  body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }}
+  h1 {{ color: {primary}; border-bottom: 3px solid {accent}; padding-bottom: 10px; }}
+  h2 {{ color: {accent}; margin-top: 30px; }}
+  .header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }}
+  .brand {{ font-size: 24px; font-weight: bold; color: {primary}; }}
+  .score-box {{ background: linear-gradient(135deg, {primary}, {accent}); color: white; padding: 30px;
+    border-radius: 12px; text-align: center; margin: 20px 0; }}
+  .score-box .score {{ font-size: 64px; font-weight: bold; }}
+  .score-box .label {{ font-size: 18px; opacity: 0.9; }}
+  table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+  th, td {{ padding: 10px 14px; text-align: left; border-bottom: 1px solid #e0e0e0; }}
+  th {{ background: #f5f5f5; font-weight: 600; color: {accent}; }}
+  tr:hover {{ background: #fafafa; }}
+  .footer {{ margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #888; font-size: 13px; }}
+  .badge {{ display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }}
+  .badge-green {{ background: #e6f9e6; color: #2d7d2d; }}
+  .badge-red {{ background: #fde8e8; color: #c0392b; }}
+  .badge-yellow {{ background: #fff8e1; color: #f39c12; }}
+  @media print {{ body {{ margin: 20px; }} .score-box {{ -webkit-print-color-adjust: exact; }} }}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>{logo_html}<span class="brand">{brand}</span></div>
+  <div style="color:#888;">Generated: {date}</div>
+</div>
+
+<h1>Backlink Analysis Report</h1>
+<p><strong>Domain:</strong> {domain}</p>
+
+<div class="score-box">
+  <div class="score">{da_score}</div>
+  <div class="label">Domain Authority Score (0-100)</div>
+</div>
+
+<h2>Signal Breakdown</h2>
+<table>
+  <tr><th>Signal</th><th>Value</th></tr>
+  {signal_items}
+</table>
+
+<h2>Competitor Comparison</h2>
+{comp_section}
+
+<h2>Top Backlink Opportunities</h2>
+{opp_section}
+
+<div class="footer">
+  <p>{footer}</p>
+  <p>Report ID: {report_id} | This report was generated automatically by {brand}.</p>
+</div>
+</body>
+</html>'''
+
+    comp_section = '<p>No competitors analyzed.</p>'
+    if comp_rows:
+        comp_section = '<table><tr><th>Domain</th><th>DA Score</th><th>HTTPS</th></tr>\n{}</table>'.format(comp_rows)
+
+    opp_section = '<p>No opportunities found yet. Run backlink scans to populate.</p>'
+    if opp_rows:
+        opp_section = '<table><tr><th>Source URL</th><th>Type</th><th>Priority</th></tr>\n{}</table>'.format(opp_rows)
+
+    return html.format(
+        domain=domain,
+        primary=primary,
+        accent=accent,
+        brand=brand,
+        logo_html=logo_html,
+        date=_now()[:10],
+        da_score=da_result.get('da_score', 0),
+        signal_items=signal_items,
+        comp_section=comp_section,
+        opp_section=opp_section,
+        footer=footer,
+        report_id=str(uuid.uuid4())[:8],
+    )
+
+
+@backlink_bp.route('/api/backlinks/report/download', methods=['POST'])
+@require_auth
+def generate_downloadable_report():
+    """
+    Generate a white-label HTML backlink report, upload to S3, return presigned URL.
+    Uses the white-label config from admin settings for branding.
+    """
+    data = request.get_json() or {}
+    domain = data.get('domain', '').strip()
+    competitors = data.get('competitors', [])
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'domain required'}), 400
+
+    try:
+        # Score the domain
+        da_result = _estimate_domain_authority(domain)
+
+        # Score competitors
+        comp_scores = []
+        for comp in competitors[:3]:
+            comp_scores.append(_estimate_domain_authority(comp))
+
+        # Get opportunities
+        opps = scan_table(OPPORTUNITIES_TABLE, 50)
+        opps.sort(key=lambda x: x.get('priority_score', 0), reverse=True)
+
+        # Get white-label config
+        config = {}
+        try:
+            config = get_item('ai1stseo-admin-metrics', {'metric_date': 'white_label_config'}) or {}
+        except Exception:
+            pass
+
+        # Generate HTML
+        html = _generate_report_html(domain, da_result, comp_scores, opps, config)
+
+        # Upload to S3
+        report_id = str(uuid.uuid4())
+        s3_key = 'reports/backlink-{}-{}.html'.format(
+            domain.replace('.', '-'), report_id[:8])
+
+        _report_s3.put_object(
+            Bucket=_REPORT_BUCKET,
+            Key=s3_key,
+            Body=html.encode('utf-8'),
+            ContentType='text/html',
+        )
+
+        # Generate presigned URL (valid 24 hours)
+        url = _report_s3.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': _REPORT_BUCKET,
+                'Key': s3_key,
+                'ResponseContentDisposition': 'inline; filename="backlink-report-{}.html"'.format(domain),
+            },
+            ExpiresIn=86400,
+        )
+
+        # Store report metadata
+        put_item(BACKLINKS_TABLE, {
+            'id': report_id,
+            'type': 'backlink_report_download',
+            'domain': domain,
+            's3_key': s3_key,
+            'da_score': da_result['da_score'],
+            'competitors': [c.get('domain') for c in comp_scores],
+            'opportunities_count': len(opps),
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': report_id,
+            'download_url': url,
+            'expires_in': 86400,
+            'domain': domain,
+            'da_score': da_result['da_score'],
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
