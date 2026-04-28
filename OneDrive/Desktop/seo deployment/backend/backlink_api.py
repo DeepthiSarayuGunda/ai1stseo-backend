@@ -1327,3 +1327,332 @@ def generate_downloadable_report():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== WEB MENTION / PR MONITORING =====================
+
+@backlink_bp.route('/api/mentions/scan', methods=['POST'])
+@require_auth
+def scan_web_mentions():
+    """
+    Scan the web for brand mentions. Checks Google News and Reddit
+    for unlinked mentions — each is a potential backlink opportunity.
+    """
+    data = request.get_json() or {}
+    brand = data.get('brand', '').strip()
+    domain = data.get('domain', '').strip()
+    if not brand:
+        return jsonify({'status': 'error', 'message': 'brand name required'}), 400
+
+    try:
+        mentions = []
+
+        # 1. Google News search via RSS
+        try:
+            from urllib.parse import quote_plus
+            news_url = 'https://news.google.com/rss/search?q={}&hl=en'.format(quote_plus(brand))
+            news_resp = http_requests.get(news_url, timeout=10, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; AI1stSEO/1.0)'
+            })
+            if news_resp.status_code == 200:
+                # Parse RSS XML
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(news_resp.content)
+                for item in root.findall('.//item')[:20]:
+                    title = item.findtext('title', '')
+                    link = item.findtext('link', '')
+                    pub_date = item.findtext('pubDate', '')
+                    source = item.findtext('source', '')
+
+                    # Check if the mention links to our domain
+                    has_link = domain.lower() in link.lower() if domain else False
+
+                    mentions.append({
+                        'source': 'google_news',
+                        'title': title,
+                        'url': link,
+                        'published': pub_date,
+                        'publication': source,
+                        'has_backlink': has_link,
+                        'opportunity_type': 'linked' if has_link else 'unlinked_mention',
+                    })
+        except Exception as e:
+            mentions.append({'source': 'google_news', 'error': str(e)[:100]})
+
+        # 2. Reddit search
+        try:
+            reddit_url = 'https://www.reddit.com/search.json?q={}&sort=new&limit=20'.format(
+                quote_plus(brand))
+            reddit_resp = http_requests.get(reddit_url, timeout=10, headers={
+                'User-Agent': 'AI1stSEO-MentionScanner/1.0'
+            })
+            if reddit_resp.status_code == 200:
+                reddit_data = reddit_resp.json()
+                for post in reddit_data.get('data', {}).get('children', []):
+                    p = post.get('data', {})
+                    post_url = 'https://reddit.com{}'.format(p.get('permalink', ''))
+                    selftext = p.get('selftext', '')
+
+                    has_link = domain.lower() in selftext.lower() if domain else False
+
+                    mentions.append({
+                        'source': 'reddit',
+                        'title': p.get('title', ''),
+                        'url': post_url,
+                        'subreddit': p.get('subreddit', ''),
+                        'score': p.get('score', 0),
+                        'num_comments': p.get('num_comments', 0),
+                        'published': datetime.fromtimestamp(
+                            p.get('created_utc', 0), tz=timezone.utc
+                        ).isoformat() if p.get('created_utc') else '',
+                        'has_backlink': has_link,
+                        'opportunity_type': 'linked' if has_link else 'unlinked_mention',
+                    })
+        except Exception as e:
+            mentions.append({'source': 'reddit', 'error': str(e)[:100]})
+
+        # Separate linked vs unlinked
+        unlinked = [m for m in mentions if m.get('opportunity_type') == 'unlinked_mention']
+        linked = [m for m in mentions if m.get('opportunity_type') == 'linked']
+
+        # Store unlinked mentions as backlink opportunities
+        for m in unlinked[:10]:
+            if m.get('url'):
+                put_item(OPPORTUNITIES_TABLE, {
+                    'source_url': m['url'],
+                    'opportunity_type': 'unlinked_mention',
+                    'brand': brand,
+                    'title': m.get('title', ''),
+                    'source_platform': m.get('source', ''),
+                    'priority_score': 65,
+                    'status': 'new',
+                    'project_id': DEFAULT_PROJECT_ID,
+                    'created_by': _get_user_id(),
+                })
+
+        # Store the scan
+        scan_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': scan_id,
+            'type': 'mention_scan',
+            'brand': brand,
+            'domain': domain,
+            'total_mentions': len(mentions),
+            'unlinked_count': len(unlinked),
+            'linked_count': len(linked),
+            'sources_checked': ['google_news', 'reddit'],
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': scan_id,
+            'brand': brand,
+            'total_mentions': len(mentions),
+            'unlinked_count': len(unlinked),
+            'linked_count': len(linked),
+            'mentions': mentions,
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/mentions/history', methods=['GET'])
+@require_auth
+def mention_scan_history():
+    """Get brand mention scan history."""
+    brand = request.args.get('brand', '')
+    try:
+        items = scan_table(BACKLINKS_TABLE, 100)
+        scans = [i for i in items if i.get('type') == 'mention_scan']
+        if brand:
+            scans = [s for s in scans if brand.lower() in (s.get('brand', '') or '').lower()]
+        scans.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        return jsonify({'status': 'success', 'scans': scans[:20]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== INTERNAL LINK ANALYSIS =====================
+
+@backlink_bp.route('/api/internal-links/analyze', methods=['POST'])
+@require_auth
+def analyze_internal_links():
+    """
+    Crawl a site's pages and analyze the internal link structure.
+    Detects: orphan pages, over-linked pages, poor anchor text,
+    and suggests new internal links between related pages.
+    """
+    data = request.get_json() or {}
+    url = data.get('url', '').strip()
+    max_pages = data.get('max_pages', 20)
+    if not url:
+        return jsonify({'status': 'error', 'message': 'url required'}), 400
+
+    try:
+        from bs4 import BeautifulSoup
+        from collections import defaultdict
+
+        parsed_base = urlparse(url)
+        base_domain = parsed_base.netloc
+        if not base_domain:
+            return jsonify({'status': 'error', 'message': 'Invalid URL'}), 400
+
+        # Crawl pages starting from the given URL
+        visited = set()
+        to_visit = [url]
+        pages = {}  # url -> {title, internal_links, external_links, word_count}
+        link_graph = defaultdict(set)  # source -> set of targets
+        inbound_count = defaultdict(int)  # target -> count of pages linking to it
+
+        while to_visit and len(visited) < min(max_pages, 30):
+            current = to_visit.pop(0)
+            if current in visited:
+                continue
+            visited.add(current)
+
+            try:
+                resp = http_requests.get(current, timeout=10, headers={
+                    'User-Agent': 'Mozilla/5.0 (compatible; AI1stSEO/1.0)'
+                }, allow_redirects=True)
+                if resp.status_code != 200 or 'text/html' not in resp.headers.get('content-type', ''):
+                    continue
+
+                soup = BeautifulSoup(resp.content, 'html.parser')
+                title = soup.find('title')
+                title_text = title.get_text().strip() if title else current
+
+                # Extract links
+                all_links = soup.find_all('a', href=True)
+                internal_links = []
+                external_links = []
+
+                for link in all_links:
+                    href = link.get('href', '')
+                    # Resolve relative URLs
+                    from urllib.parse import urljoin
+                    full_url = urljoin(current, href)
+                    link_parsed = urlparse(full_url)
+
+                    if link_parsed.netloc == base_domain:
+                        # Internal link
+                        clean = '{}://{}{}'.format(link_parsed.scheme, link_parsed.netloc,
+                                                    link_parsed.path.rstrip('/'))
+                        anchor = link.get_text().strip()[:100]
+                        internal_links.append({'url': clean, 'anchor': anchor})
+                        link_graph[current].add(clean)
+                        inbound_count[clean] += 1
+
+                        # Add to crawl queue
+                        if clean not in visited and clean not in to_visit:
+                            to_visit.append(clean)
+                    elif link_parsed.scheme in ('http', 'https'):
+                        external_links.append({
+                            'url': full_url[:200],
+                            'anchor': link.get_text().strip()[:100],
+                        })
+
+                word_count = len(soup.get_text().split())
+
+                pages[current] = {
+                    'url': current,
+                    'title': title_text[:200],
+                    'internal_link_count': len(internal_links),
+                    'external_link_count': len(external_links),
+                    'word_count': word_count,
+                    'internal_links': internal_links[:20],
+                }
+
+            except Exception:
+                continue
+
+        # Analysis
+        all_crawled_urls = set(pages.keys())
+
+        # Orphan pages: pages that exist but no other page links to them
+        orphan_pages = []
+        for page_url in all_crawled_urls:
+            if inbound_count.get(page_url, 0) == 0 and page_url != url:
+                orphan_pages.append({
+                    'url': page_url,
+                    'title': pages[page_url]['title'],
+                    'issue': 'No internal links point to this page',
+                })
+
+        # Over-linked pages: pages with too many outbound internal links
+        over_linked = []
+        under_linked = []
+        for page_url, page_data in pages.items():
+            count = page_data['internal_link_count']
+            if count > 50:
+                over_linked.append({
+                    'url': page_url,
+                    'title': page_data['title'],
+                    'internal_links': count,
+                    'issue': 'Too many internal links ({}) — dilutes link equity'.format(count),
+                })
+            elif count < 2 and page_data['word_count'] > 200:
+                under_linked.append({
+                    'url': page_url,
+                    'title': page_data['title'],
+                    'internal_links': count,
+                    'word_count': page_data['word_count'],
+                    'issue': 'Only {} internal link(s) on a {}-word page'.format(count, page_data['word_count']),
+                })
+
+        # Generic anchor text detection
+        generic_anchors = []
+        generic_terms = {'click here', 'read more', 'learn more', 'here', 'link', 'this', 'more'}
+        for page_url, page_data in pages.items():
+            for link in page_data.get('internal_links', []):
+                if link['anchor'].lower().strip() in generic_terms:
+                    generic_anchors.append({
+                        'page': page_url,
+                        'target': link['url'],
+                        'anchor': link['anchor'],
+                        'issue': 'Generic anchor text — use descriptive keywords instead',
+                    })
+
+        # Store the analysis
+        analysis_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': analysis_id,
+            'type': 'internal_link_analysis',
+            'domain': base_domain,
+            'pages_crawled': len(pages),
+            'orphan_count': len(orphan_pages),
+            'over_linked_count': len(over_linked),
+            'under_linked_count': len(under_linked),
+            'generic_anchor_count': len(generic_anchors),
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': analysis_id,
+            'domain': base_domain,
+            'pages_crawled': len(pages),
+            'issues': {
+                'orphan_pages': orphan_pages[:10],
+                'over_linked': over_linked[:10],
+                'under_linked': under_linked[:10],
+                'generic_anchors': generic_anchors[:20],
+            },
+            'summary': {
+                'total_pages': len(pages),
+                'total_internal_links': sum(p['internal_link_count'] for p in pages.values()),
+                'avg_internal_links': round(
+                    sum(p['internal_link_count'] for p in pages.values()) / max(len(pages), 1), 1),
+                'orphan_pages': len(orphan_pages),
+                'over_linked_pages': len(over_linked),
+                'under_linked_pages': len(under_linked),
+                'generic_anchor_issues': len(generic_anchors),
+            },
+            'pages': list(pages.values())[:20],
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
