@@ -8,76 +8,147 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;padding:0;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1200px;margin:0 auto;padding:24px}
-.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
-.nav a{color:#58a6ff;font-size:.82rem;text-decoration:none;padding:8px 18px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#12141a}
-.nav a:hover{background:#1a1d27;border-color:#58a6ff}
-.section{margin-bottom:32px}
-.section-title{font-size:1.05rem;color:#e1e4e8;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px}
+
+/* Navigation */
+.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.nav a{color:#c9d1d9;font-size:.82rem;text-decoration:none;padding:8px 18px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(18,20,26,.8);backdrop-filter:blur(8px);transition:all .2s;display:flex;align-items:center;gap:6px}
+.nav a:hover{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.3);color:#58a6ff}
+.nav a svg{width:14px;height:14px}
+
+/* Section titles with SVG icons */
+.section{margin-bottom:36px}
+.section-title{font-size:1.1rem;color:#e1e4e8;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+.section-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-icon svg{width:16px;height:16px}
+.section-icon.geo{background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(63,185,80,.15))}
+.section-icon.geo svg{color:#58a6ff}
+.section-icon.key{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,140,0,.12))}
+.section-icon.key svg{color:#ffd700}
+.section-icon.comp{background:linear-gradient(135deg,rgba(248,81,73,.12),rgba(210,153,34,.12))}
+.section-icon.comp svg{color:#f85149}
+.section-icon.auto{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(129,140,248,.12))}
+.section-icon.auto svg{color:#818cf8}
+.section-icon.cite{background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(88,166,255,.12))}
+.section-icon.cite svg{color:#22d3ee}
+.section-icon.rec{background:linear-gradient(135deg,rgba(63,185,80,.12),rgba(35,134,54,.12))}
+.section-icon.rec svg{color:#3fb950}
+
+/* Grids */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
-.card{background:#12141a;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;position:relative;overflow:hidden}
-.card:hover{border-color:rgba(255,255,255,.14)}
-.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:10px;font-weight:700}
-.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+
+/* Cards — glassmorphism */
+.card{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;position:relative;overflow:hidden;transition:all .25s}
+.card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(88,166,255,.3),transparent);opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
+.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* Stat row — premium look */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
 @media(max-width:900px){.stat-row{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr}}
-.stat{background:#12141a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px;text-align:center}
-.stat .label{font-size:.65rem;color:#7d8590;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:6px}
-.stat .value{font-size:1.6rem;font-weight:800;line-height:1}
-.stat .sub{font-size:.7rem;color:#484f58;margin-top:4px}
+.stat{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px;text-align:center;position:relative;overflow:hidden;transition:all .25s}
+.stat:hover{border-color:rgba(88,166,255,.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.stat:nth-child(1)::after{background:linear-gradient(90deg,#58a6ff,#3fb950)}
+.stat:nth-child(2)::after{background:linear-gradient(90deg,#3fb950,#22d3ee)}
+.stat:nth-child(3)::after{background:linear-gradient(90deg,#d29922,#e3b341)}
+.stat:nth-child(4)::after{background:linear-gradient(90deg,#f85149,#ff7b72)}
+.stat:nth-child(5)::after{background:linear-gradient(90deg,#818cf8,#a78bfa)}
+.stat .label{font-size:.65rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+.stat .value{font-size:1.8rem;font-weight:800;line-height:1;letter-spacing:-.02em}
+.stat .sub{font-size:.72rem;color:#484f58;margin-top:6px}
 .up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
-.pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.68rem;font-weight:700}
-.pill-green{background:rgba(63,185,80,.12);color:#3fb950}
-.pill-red{background:rgba(248,81,73,.12);color:#f85149}
-.pill-amber{background:rgba(210,153,34,.12);color:#d29922}
-.pill-blue{background:rgba(88,166,255,.1);color:#58a6ff}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:700}
+.pill-green{background:rgba(63,185,80,.1);color:#3fb950}
+.pill-red{background:rgba(248,81,73,.1);color:#f85149}
+.pill-amber{background:rgba(210,153,34,.1);color:#d29922}
+.pill-blue{background:rgba(88,166,255,.08);color:#58a6ff}
+
+/* Tables */
 table{width:100%;border-collapse:collapse;font-size:.8rem}
-th{text-align:left;color:#7d8590;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
-td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
-.bar{height:6px;border-radius:3px;background:#1a1d27;overflow:hidden;margin-top:4px}
-.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+th{text-align:left;color:#7d8590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9}
+tr:hover td{background:rgba(88,166,255,.02)}
+
+/* Progress bars */
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 .bar-green{background:linear-gradient(90deg,#238636,#3fb950)}
 .bar-amber{background:linear-gradient(90deg,#d29922,#e3b341)}
 .bar-red{background:linear-gradient(90deg,#da3633,#f85149)}
 .bar-blue{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
-.rec{background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid transparent}
+
+/* Recommendation cards */
+.rec{background:rgba(13,15,20,.6);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:16px;margin-bottom:12px;border-left:3px solid transparent;transition:all .2s}
+.rec:hover{border-color:rgba(255,255,255,.08);background:rgba(13,15,20,.8)}
 .rec-high{border-left-color:#f85149}.rec-medium{border-left-color:#d29922}
-.rec .title{font-weight:700;font-size:.85rem;color:#e1e4e8;margin-bottom:4px}
-.rec .desc{font-size:.78rem;color:#7d8590;line-height:1.5}
-.loading{text-align:center;padding:60px;color:#7d8590;font-size:.9rem}
-.loading .spinner{display:inline-block;width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+.rec .title{font-weight:700;font-size:.85rem;color:#e1e4e8;margin-bottom:6px}
+.rec .desc{font-size:.78rem;color:#7d8590;line-height:1.5;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* Loading */
+.loading{text-align:center;padding:80px;color:#7d8590;font-size:.9rem}
+.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid rgba(255,255,255,.06);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.job-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+
+/* Automation jobs */
+.job-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.job-row:hover{background:rgba(88,166,255,.02)}
 .job-row:last-child{border:none}
-.job-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot-green{background:#3fb950}.dot-amber{background:#d29922}.dot-grey{background:#484f58}
-.job-name{font-size:.82rem;font-weight:600;color:#c9d1d9;flex:1}
-.job-meta{font-size:.72rem;color:#7d8590;text-align:right}
+.job-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px}
+.dot-green{background:#3fb950;box-shadow:0 0 8px rgba(63,185,80,.4)}
+.dot-amber{background:#d29922;box-shadow:0 0 8px rgba(210,153,34,.4)}
+.dot-grey{background:#484f58;box-shadow:none}
+.job-name{font-size:.84rem;font-weight:600;color:#c9d1d9;flex:1}
+.job-meta{font-size:.72rem;color:#7d8590;text-align:right;line-height:1.5}
+
+/* Animated gradient header */
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.header-gradient{background:linear-gradient(135deg,#58a6ff,#3fb950,#818cf8,#22d3ee);background-size:300% 300%;animation:gradientShift 8s ease infinite;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Probe card */
+.probe-card{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(99,102,241,.15);border-radius:16px;padding:24px;margin-bottom:28px;position:relative;overflow:hidden}
+.probe-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#6366f1,#818cf8,#a78bfa)}
+
+/* Responsive */
+@media(max-width:768px){
+  .wrap{padding:16px}
+  .stat .value{font-size:1.4rem}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div style="text-align:center;padding:24px 0 16px">
-  <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:6px">
-    <span style="font-size:1.8rem">🧠</span>
-    <h1 style="font-size:1.5rem;background:linear-gradient(135deg,#58a6ff,#3fb950);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">GEO Intelligence Dashboard</h1>
+<div style="text-align:center;padding:32px 0 20px">
+  <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:8px">
+    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(63,185,80,.15));display:flex;align-items:center;justify-content:center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l6.5-3.5"/><circle cx="12" cy="12" r="3"/></svg>
+    </div>
+    <h1 style="font-size:1.6rem" class="header-gradient">GEO Intelligence Dashboard</h1>
   </div>
-  <p style="color:#7d8590;font-size:.82rem">Multi-brand AI visibility intelligence &middot; Updated in real-time from probe data</p>
+  <p style="color:#7d8590;font-size:.84rem;max-width:500px;margin:0 auto;line-height:1.5">Multi-brand AI visibility intelligence · Real-time probe data · Competitive analysis</p>
 </div>
-<nav class="nav" style="justify-content:center">
-  <a href="/geo-scanner">← Back to Scanner</a>
-  <a href="/dashboard.html">Dashboard</a>
-  <a href="/">Home</a>
+<nav class="nav">
+  <a href="/geo-scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Back to Scanner</a>
+  <a href="/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+  <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a>
 </nav>
 
 <!-- Live Probe Input -->
-<div class="card" style="margin-bottom:24px;border-color:rgba(99,102,241,.2)">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-    <span style="font-size:1.1rem">🔍</span>
-    <h2 style="font-size:1rem;color:#e1e4e8;font-weight:700">Run a Live AI Visibility Probe</h2>
+<div class="probe-card">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.15));display:flex;align-items:center;justify-content:center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </div>
+    <div>
+      <h2 style="font-size:1rem;color:#e1e4e8;font-weight:700">Run a Live AI Visibility Probe</h2>
+      <p style="font-size:.75rem;color:#7d8590;margin-top:2px">Check how AI models mention your brand in real-time</p>
+    </div>
   </div>
-  <p style="font-size:.78rem;color:#7d8590;margin-bottom:16px">Enter any brand name and keywords to check AI visibility in real-time. Results are saved and appear in the dashboard below.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div>
       <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Brand Name</label>
@@ -95,7 +166,10 @@ td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
     <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Keywords — one per line</label>
     <textarea id="probe-keywords" rows="3" placeholder="best seo tool&#10;ai seo optimization&#10;keyword research tool" style="width:100%;padding:10px 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem;font-family:inherit;resize:vertical"></textarea>
   </div>
-  <button id="probe-btn" onclick="runLiveProbe()" style="margin-top:14px;height:44px;width:100%;border:none;border-radius:8px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#6366f1,#818cf8);transition:all .15s">🔬 Run Live AI Probe</button>
+  <button id="probe-btn" onclick="runLiveProbe()" style="margin-top:14px;height:48px;width:100%;border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#6366f1,#818cf8);transition:all .2s;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Run Live AI Probe
+  </button>
   <div id="probe-status" style="display:none;margin-top:12px;padding:12px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:8px;font-size:.82rem"></div>
 </div>
 
@@ -107,13 +181,13 @@ td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
 
 <!-- 1. GEO Score Tracker -->
 <div class="section" id="sec-geo">
-  <div class="section-title"><span>📊</span> GEO Score Tracker — Multi-Brand</div>
+  <div class="section-title"><div class="section-icon geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div> GEO Score Tracker — Multi-Brand</div>
   <div id="geo-table-wrap"></div>
 </div>
 
 <!-- 2. Keyword Performance -->
 <div class="section" id="sec-kw">
-  <div class="section-title"><span>🔑</span> Keyword Performance Register</div>
+  <div class="section-title"><div class="section-icon key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div> Keyword Performance Register</div>
   <div class="grid2">
     <div class="card"><h3>Top Keywords — AI1stSEO Cited</h3><div id="kw-top"></div></div>
     <div class="card"><h3>Competitor Wins — Where They Beat Us</h3><div id="kw-gaps"></div></div>
@@ -123,20 +197,20 @@ td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
 
 <!-- 3. Competitor Matrix -->
 <div class="section" id="sec-comp">
-  <div class="section-title"><span>⚔️</span> Competitor Visibility Matrix</div>
+  <div class="section-title"><div class="section-icon comp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div> Competitor Visibility Matrix</div>
   <div id="comp-matrix"></div>
   <div class="card" style="margin-top:16px"><h3>Engine Preferences — Who Each AI Recommends</h3><div id="engine-prefs"></div></div>
 </div>
 
 <!-- 4. Automation Status -->
 <div class="section" id="sec-auto">
-  <div class="section-title"><span>⚙️</span> Automation Status</div>
+  <div class="section-title"><div class="section-icon auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div> Automation Status</div>
   <div class="card"><div id="auto-jobs"></div></div>
 </div>
 
 <!-- 5. Citation Intelligence -->
 <div class="section" id="sec-cite">
-  <div class="section-title"><span>📎</span> Citation Intelligence</div>
+  <div class="section-title"><div class="section-icon cite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div> Citation Intelligence</div>
   <div class="grid2">
     <div class="card"><h3>Citation Rate by Brand</h3><div id="cite-rates"></div></div>
     <div class="card"><h3>Content Format Performance</h3><div id="cite-formats"></div></div>
@@ -145,7 +219,7 @@ td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:#c9d1d9}
 
 <!-- 6. Recommendations -->
 <div class="section" id="sec-recs">
-  <div class="section-title"><span>🎯</span> Recommended Next Actions</div>
+  <div class="section-title"><div class="section-icon rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div> Recommended Next Actions</div>
   <div id="recs-list"></div>
 </div>
 
