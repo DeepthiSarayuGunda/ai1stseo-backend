@@ -104,6 +104,20 @@ try:
 except Exception:
     pass
 
+# --- Generic Directory Module (Sports, Tools, Brands, etc.) ---
+try:
+    from directory.directory_api import register_directory_module
+    register_directory_module(app)
+except Exception as e:
+    print(f"⚠ Directory module: {e}")
+
+# --- Sports Module (matches, scores, rankings, news, teams) ---
+try:
+    from directory.sports_api import register_sports_module
+    register_sports_module(app)
+except Exception as e:
+    print(f"⚠ Sports module: {e}")
+
 # --- Month 3 Intelligence Systems API ---
 try:
     from month3_systems.api import m3_bp
@@ -4056,6 +4070,13 @@ def serve_template_benchmark():
 def serve_directory():
     """AI Business Directory — Top 10 dentists in Ottawa."""
     return render_template('directory_category.html')
+
+
+@app.route('/directory-home.html')
+@app.route('/directory-home')
+def serve_directory_home():
+    """AI Directory Hub — Sports, AI Tools, Brands, SEO Tools, Analytics."""
+    return render_template('directory_home.html')
 
 
 @app.route('/directory-listing.html')
