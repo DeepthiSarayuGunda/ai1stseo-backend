@@ -20,7 +20,7 @@ from typing import Dict, List, Optional
 
 import psycopg2
 import psycopg2.extras
-import psycopg2.pool
+from psycopg2 import pool
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ _pool = None
 def _get_pool():
     global _pool
     if _pool is None:
-        _pool = psycopg2.pool.ThreadedConnectionPool(
+        _pool = pool.ThreadedConnectionPool(
             minconn=1, maxconn=5,
             host=os.environ.get("DB_HOST", "localhost"),
             port=int(os.environ.get("DB_PORT", "5432")),
