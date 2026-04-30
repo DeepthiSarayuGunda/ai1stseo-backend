@@ -4,7 +4,7 @@ SEO Analyzer Backend - Flask API
 Based on SEMrush, Moz, Ahrefs, and industry best practices
 """
 
-from flask import Flask, jsonify, request, send_from_directory, redirect
+from flask import Flask, jsonify, request, send_from_directory, redirect, render_template
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -38,6 +38,69 @@ CORS(app, origins=[
     'http://127.0.0.1:5001'
 ])
 
+# --- Load .env for local development (Lambda sets env vars natively) ---
+if not IS_LAMBDA:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        # python-dotenv not installed — load .env manually
+        _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+        if os.path.exists(_env_path):
+            with open(_env_path) as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and not _line.startswith('#') and '=' in _line:
+                        _k, _v = _line.split('=', 1)
+                        os.environ.setdefault(_k.strip(), _v.strip())
+
+# --- Blueprint registrations (auth, admin, data, webhooks, API keys) ---
+try:
+    from auth import auth_bp
+    app.register_blueprint(auth_bp)
+except Exception:
+    pass
+try:
+    from admin_api import admin_bp
+    app.register_blueprint(admin_bp)
+except Exception:
+    pass
+try:
+    from data_api import data_bp
+    app.register_blueprint(data_bp)
+except Exception:
+    pass
+try:
+    from webhook_api import webhook_bp
+    app.register_blueprint(webhook_bp)
+except Exception:
+    pass
+try:
+    from apikey_api import apikey_bp
+    app.register_blueprint(apikey_bp)
+except Exception:
+    pass
+
+# --- AI Business Directory routes (isolated module) ---
+try:
+    from directory.routes import register_directory_routes
+    register_directory_routes(app)
+except Exception:
+    pass
+
+# --- Month 3 Intelligence Systems API ---
+try:
+    from month3_systems.api import m3_bp
+    app.register_blueprint(m3_bp)
+except Exception as e:
+    print(f"⚠ Month 3 systems: {e}")
+
+try:
+    from visitor_tracking.tracker_api import register_blueprint as register_tracker
+    register_tracker(app)
+except Exception as e:
+    print(f"⚠ visitor_tracking: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
@@ -57,44 +120,33 @@ def handle_405(e):
         return jsonify({'error': 'Method not allowed', 'status': 'error'}), 405
     return e
 
-# ── RDS initialization ────────────────────────────────────────────────────────
-try:
-    from db import init_db
-    init_db()
-    print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
-    # Initialize new feature tables
+@app.errorhandler(400)
+def handle_400(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Bad request', 'status': 'error'}), 400
+    return e
+
+# ── Database initialization ────────────────────────────────────────────────────
+# RDS is stopped per Gurbachan/Troy directive — use DynamoDB directly.
+# Set USE_DYNAMODB=True to skip the RDS connection attempt (avoids 10s+ timeout on Lambda cold start).
+# To re-enable RDS: set env var USE_RDS=1
+USE_DYNAMODB = not bool(os.environ.get("USE_RDS"))
+if not USE_DYNAMODB:
     try:
-        from answer_fingerprint import init_fingerprint_tables
-        init_fingerprint_tables()
-        print("✓ answer_fingerprints table initialized")
-    except Exception as e2:
-        print(f"⚠ answer_fingerprints init: {e2}")
+        from db import init_db
+        init_db()
+        print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+    except Exception as e:
+        print(f"⚠ RDS init failed, switching to DynamoDB: {e}")
+        USE_DYNAMODB = True
+
+if USE_DYNAMODB:
     try:
-        from model_comparison import init_comparison_tables
-        init_comparison_tables()
-        print("✓ model_comparisons table initialized")
+        from db_dynamo import init_db
+        init_db()
+        print("✓ DynamoDB mode active")
     except Exception as e2:
-        print(f"⚠ model_comparisons init: {e2}")
-    try:
-        from multilang_probe import init_multilang_columns
-        init_multilang_columns()
-        print("✓ multilang columns initialized")
-    except Exception as e2:
-        print(f"⚠ multilang init: {e2}")
-    try:
-        from share_of_voice import init_sov_tables
-        init_sov_tables()
-        print("✓ share_of_voice table initialized")
-    except Exception as e2:
-        print(f"⚠ share_of_voice init: {e2}")
-    try:
-        from prompt_simulator import init_simulator_tables
-        init_simulator_tables()
-        print("✓ prompt_simulations table initialized")
-    except Exception as e2:
-        print(f"⚠ prompt_simulations init: {e2}")
-except Exception as e:
-    print(f"⚠ RDS init failed (will retry on first request): {e}")
+        print(f"⚠ DynamoDB init also failed: {e2}")
 
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
@@ -1919,7 +1971,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/ai-recommendations', '/api/health', '/api/status']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/ai-recommendations', '/api/health', '/api/status']
     })
 
 @app.route('/api/status')
@@ -2309,9 +2361,12 @@ def generate_content_brief():
             response_data['ai_generated'] = False
             response_data['note'] = 'LLM unavailable — brief generated from SERP data analysis'
         
-        # Save brief to database
+        # Save brief to database (DynamoDB or RDS)
         try:
-            from db import save_content_brief
+            if USE_DYNAMODB:
+                from db_dynamo import save_content_brief
+            else:
+                from db import save_content_brief
             brief_id = save_content_brief(
                 keyword=keyword,
                 content_type=content_type,
@@ -2335,7 +2390,10 @@ def generate_content_brief():
 def list_content_briefs():
     """Retrieve past content briefs, optionally filtered by keyword."""
     try:
-        from db import get_content_briefs, get_content_brief_by_id
+        if USE_DYNAMODB:
+            from db_dynamo import get_content_briefs, get_content_brief_by_id
+        else:
+            from db import get_content_briefs, get_content_brief_by_id
         brief_id = request.args.get('id')
         if brief_id:
             brief = get_content_brief_by_id(brief_id)
@@ -2492,6 +2550,240 @@ def content_score():
         })
     except Exception as e:
         return jsonify({'error': f'Scoring failed: {str(e)}'}), 500
+
+
+# ============== KEYWORD CLUSTERING & TF-IDF ENGINE (Dev 2) ==============
+
+def extract_keywords_from_text(text, top_n=50):
+    """Extract keywords using TF-IDF-like frequency analysis."""
+    import math
+    # Common stop words to filter out
+    stop_words = set('the a an is are was were be been being have has had do does did will would shall should may might can could and but or nor for yet so at by from in into on onto to with as of it its this that these those i me my we our you your he him his she her they them their what which who whom how when where why all each every both few more most other some such no not only own same than too very just because about between through during before after above below up down out off over under again further then once here there'.split())
+    
+    words = re.findall(r'\b[a-z]{3,}\b', text.lower())
+    words = [w for w in words if w not in stop_words]
+    
+    # Term frequency
+    word_count = len(words)
+    tf = Counter(words)
+    
+    # Normalize and get top keywords
+    keywords = []
+    for word, count in tf.most_common(top_n):
+        keywords.append({
+            'term': word,
+            'frequency': count,
+            'tf_score': round(count / max(word_count, 1), 4)
+        })
+    return keywords
+
+
+def extract_ngrams(text, n=2, top_n=30):
+    """Extract n-grams (bigrams/trigrams) from text."""
+    stop_words = set('the a an is are was were be been being have has had do does did will would shall should may might can could and but or nor for yet so at by from in into on onto to with as of it its this that these those i me my we our you your he him his she her they them their what which who whom how when where why all each every both few more most other some such no not only own same than too very just because about between through during before after above below up down out off over under again further then once here there'.split())
+    
+    words = re.findall(r'\b[a-z]{3,}\b', text.lower())
+    words = [w for w in words if w not in stop_words]
+    
+    ngrams = []
+    for i in range(len(words) - n + 1):
+        ngram = ' '.join(words[i:i+n])
+        ngrams.append(ngram)
+    
+    ngram_counts = Counter(ngrams)
+    return [{'phrase': phrase, 'frequency': count} for phrase, count in ngram_counts.most_common(top_n)]
+
+
+def cluster_keywords_by_intent(keywords, seed_keyword=''):
+    """Group keywords into semantic clusters based on intent patterns."""
+    clusters = {
+        'informational': {'keywords': [], 'description': 'Users seeking information or answers'},
+        'commercial': {'keywords': [], 'description': 'Users researching before a purchase'},
+        'transactional': {'keywords': [], 'description': 'Users ready to take action or buy'},
+        'navigational': {'keywords': [], 'description': 'Users looking for a specific site or page'},
+        'local': {'keywords': [], 'description': 'Users searching for nearby services'}
+    }
+    
+    informational_signals = ['how', 'what', 'why', 'when', 'where', 'who', 'guide', 'tutorial', 'tips', 'learn', 'example', 'definition', 'meaning', 'explain', 'difference', 'vs']
+    commercial_signals = ['best', 'top', 'review', 'compare', 'comparison', 'alternative', 'vs', 'versus', 'pros', 'cons', 'worth', 'recommend']
+    transactional_signals = ['buy', 'price', 'cost', 'cheap', 'deal', 'discount', 'order', 'purchase', 'subscribe', 'download', 'free', 'trial', 'coupon', 'hire', 'book']
+    navigational_signals = ['login', 'sign', 'website', 'official', 'app', 'dashboard', 'account', 'portal']
+    local_signals = ['near', 'nearby', 'local', 'city', 'town', 'area', 'region', 'ottawa', 'toronto', 'canada', 'usa']
+    
+    for kw in keywords:
+        term = kw['term'].lower() if isinstance(kw, dict) else kw.lower()
+        assigned = False
+        
+        for signal in local_signals:
+            if signal in term:
+                clusters['local']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in transactional_signals:
+            if signal in term:
+                clusters['transactional']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in commercial_signals:
+            if signal in term:
+                clusters['commercial']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in navigational_signals:
+            if signal in term:
+                clusters['navigational']['keywords'].append(kw)
+                assigned = True
+                break
+        if assigned:
+            continue
+            
+        for signal in informational_signals:
+            if signal in term:
+                clusters['informational']['keywords'].append(kw)
+                assigned = True
+                break
+        
+        if not assigned:
+            clusters['informational']['keywords'].append(kw)
+    
+    # Remove empty clusters
+    return {k: v for k, v in clusters.items() if v['keywords']}
+
+
+@app.route('/api/keyword-cluster', methods=['POST'])
+def keyword_cluster():
+    """Keyword Clustering & TF-IDF Engine — analyzes a URL or seed keyword,
+    extracts keywords, groups them by search intent, and provides TF-IDF scores."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        
+        url = (data.get('url') or '').strip()
+        seed_keyword = (data.get('keyword') or '').strip()
+        
+        if not url and not seed_keyword:
+            return jsonify({'error': 'Provide a url or keyword'}), 400
+        
+        text = ''
+        page_title = ''
+        headings = []
+        
+        if url:
+            # Scrape the URL for content
+            try:
+                resp, soup, load_time = fetch_website(url)
+                text = soup.get_text(separator=' ', strip=True)
+                title_tag = soup.find('title')
+                page_title = title_tag.string.strip() if title_tag and title_tag.string else ''
+                headings = [h.get_text(strip=True) for h in soup.find_all(['h1', 'h2', 'h3'])]
+            except Exception as e:
+                return jsonify({'error': f'Failed to fetch URL: {str(e)}'}), 400
+        
+        if seed_keyword and not url:
+            # Use LLM to generate related keywords for the seed
+            prompt = f"""Generate a comprehensive list of 30 related keywords and phrases for the topic: "{seed_keyword}"
+
+Group them into these categories:
+1. INFORMATIONAL — questions and how-to queries people search
+2. COMMERCIAL — comparison and review queries  
+3. TRANSACTIONAL — purchase-intent queries
+4. LOCAL — location-based queries
+
+Return ONLY a JSON object with this exact structure, no other text:
+{{"informational": ["keyword1", "keyword2"], "commercial": ["keyword1"], "transactional": ["keyword1"], "local": ["keyword1"]}}"""
+            
+            try:
+                llm_response = call_llm(prompt, timeout=15)
+                if llm_response:
+                    # Try to parse JSON from LLM response
+                    json_match = re.search(r'\{[^{}]*\}', llm_response, re.DOTALL)
+                    if json_match:
+                        llm_clusters = json.loads(json_match.group())
+                        clusters = {}
+                        intent_descriptions = {
+                            'informational': 'Users seeking information or answers',
+                            'commercial': 'Users researching before a purchase',
+                            'transactional': 'Users ready to take action or buy',
+                            'local': 'Users searching for nearby services'
+                        }
+                        for intent, kws in llm_clusters.items():
+                            if kws and isinstance(kws, list):
+                                clusters[intent] = {
+                                    'description': intent_descriptions.get(intent, ''),
+                                    'keywords': [{'term': kw, 'frequency': 0, 'tf_score': 0, 'source': 'ai_generated'} for kw in kws]
+                                }
+                        
+                        return jsonify({
+                            'status': 'success',
+                            'seed_keyword': seed_keyword,
+                            'source': 'ai_generated',
+                            'clusters': clusters,
+                            'total_keywords': sum(len(c['keywords']) for c in clusters.values()),
+                            'tfidf_keywords': [],
+                            'bigrams': [],
+                            'trigrams': [],
+                            'generated_at': datetime.utcnow().isoformat()
+                        })
+            except Exception:
+                pass
+            
+            # Fallback: return basic cluster structure
+            return jsonify({
+                'status': 'success',
+                'seed_keyword': seed_keyword,
+                'source': 'fallback',
+                'clusters': {
+                    'informational': {
+                        'description': 'Users seeking information or answers',
+                        'keywords': [{'term': f'what is {seed_keyword}', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'how to {seed_keyword}', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} guide', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} tips', 'frequency': 0, 'tf_score': 0},
+                                     {'term': f'{seed_keyword} examples', 'frequency': 0, 'tf_score': 0}]
+                    }
+                },
+                'total_keywords': 5,
+                'tfidf_keywords': [],
+                'bigrams': [],
+                'trigrams': [],
+                'generated_at': datetime.utcnow().isoformat()
+            })
+        
+        # URL-based analysis: extract TF-IDF keywords and cluster them
+        tfidf_keywords = extract_keywords_from_text(text, top_n=40)
+        bigrams = extract_ngrams(text, n=2, top_n=20)
+        trigrams = extract_ngrams(text, n=3, top_n=15)
+        
+        # Combine single keywords + bigrams for clustering
+        all_terms = tfidf_keywords + [{'term': b['phrase'], 'frequency': b['frequency'], 'tf_score': 0} for b in bigrams[:15]]
+        clusters = cluster_keywords_by_intent(all_terms, seed_keyword)
+        
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'page_title': page_title,
+            'headings': headings[:15],
+            'source': 'url_analysis',
+            'clusters': clusters,
+            'total_keywords': len(tfidf_keywords),
+            'tfidf_keywords': tfidf_keywords[:25],
+            'bigrams': bigrams[:15],
+            'trigrams': trigrams[:10],
+            'generated_at': datetime.utcnow().isoformat()
+        })
+    
+    except Exception as e:
+        return jsonify({'error': f'Keyword clustering failed: {str(e)}'}), 500
 
 
 @app.route('/api/geo-probe', methods=['POST'])
@@ -2758,6 +3050,28 @@ def aeo_analyze():
         return jsonify({'error': f'AEO analysis failed: {str(e)}'}), 500
 
 
+# ============== AEO VISIBILITY (LLM Mention Detection) ==============
+
+@app.route('/api/aeo-results')
+def aeo_visibility_results():
+    """Return AEO visibility data — LLM mention detection results + score."""
+    results_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'aeo_results.json')
+    if not os.path.exists(results_path):
+        return jsonify({'error': 'No AEO results yet. Run: python services/aeo_engine.py'}), 404
+    try:
+        with open(results_path, 'r') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read AEO results: {str(e)}'}), 500
+
+
+@app.route('/aeo-dashboard')
+def serve_aeo_dashboard():
+    """AEO Visibility Dashboard — LLM mention tracking."""
+    return send_from_directory('.', 'aeo-dashboard.html')
+
+
 # ============== AI RANKING RECOMMENDATIONS ==============
 
 @app.route('/api/ai/ranking-recommendations', methods=['POST'])
@@ -2930,6 +3244,7 @@ def llm_citation_probe():
 # ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
 
 @app.route('/api/geo-scanner/scan', methods=['POST'])
+@app.route('/api/geo-scanner/scan', methods=['POST'])
 def geo_scanner_scan():
     """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
     from geo_scanner_agent import run_full_scan
@@ -2946,9 +3261,53 @@ def geo_scanner_scan():
             provider=data.get('provider', 'nova'),
             scanners=data.get('scanners'),
         )
+
+        # Persist full scan result to geo-scans table for history
+        try:
+            from dynamo.geo_repository import GEORepository
+            repo = GEORepository()
+            repo.save_scan(brand, {
+                'geo_score': result.get('overall_score', 0),
+                'grade': _score_to_grade(result.get('overall_score', 0)),
+                'metrics': {
+                    'scanners_run': result.get('scanners_run', []),
+                    'elapsed_seconds': result.get('elapsed_seconds', 0),
+                },
+                'suggestions': result.get('recommendations', []),
+                'missing': [],
+                'verdict': result.get('executive_summary', ''),
+            })
+        except Exception as e:
+            app.logger.warning("Failed to persist GEO scan to history: %s", e)
+
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': f'GEO scan failed: {str(e)}'}), 500
+
+
+def _score_to_grade(score):
+    if score >= 90: return 'A+'
+    if score >= 80: return 'A'
+    if score >= 70: return 'B'
+    if score >= 60: return 'C'
+    if score >= 50: return 'D'
+    return 'F'
+
+
+@app.route('/api/geo-scanner/history', methods=['GET'])
+def geo_scanner_history():
+    """GET /api/geo-scanner/history — retrieve past GEO scanner scan results."""
+    brand = request.args.get('brand', request.args.get('brand_name', ''))
+    limit = int(request.args.get('limit', 20))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    try:
+        from dynamo.geo_repository import GEORepository
+        repo = GEORepository()
+        scans = repo.get_scans(brand, limit=limit)
+        return jsonify({'brand': brand, 'scans': scans, 'count': len(scans)})
+    except Exception as e:
+        return jsonify({'brand': brand, 'scans': [], 'error': str(e)})
 
 
 @app.route('/api/geo-scanner/agents', methods=['GET'])
@@ -3111,10 +3470,30 @@ def geo_prompt_simulator_history(brand_name):
 
 # ── RDS Data Persistence Endpoints ────────────────────────────────────────────
 
+@app.route('/api/data/geo-probes', methods=['GET'])
+def data_geo_probes_get():
+    """GET /api/data/geo-probes — retrieve GEO probe history."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_probes
+    else:
+        from db import get_probes
+    brand = request.args.get('brand')
+    ai_model = request.args.get('ai_model')
+    limit = int(request.args.get('limit', 50))
+    try:
+        probes = get_probes(limit=limit, brand=brand, ai_model=ai_model)
+        return jsonify({'probes': probes, 'count': len(probes)})
+    except Exception as e:
+        return jsonify({'probes': [], 'count': 0, 'error': str(e)})
+
+
 @app.route('/api/data/geo-probes', methods=['POST'])
 def data_geo_probes():
-    """POST /api/data/geo-probes — persist GEO probe results to RDS."""
-    from db import insert_probe
+    """POST /api/data/geo-probes — persist GEO probe results."""
+    if USE_DYNAMODB:
+        from db_dynamo import insert_probe
+    else:
+        from db import insert_probe
     data = request.get_json() or {}
     keyword = (data.get('keyword') or '').strip()
     brand = (data.get('brand') or data.get('brand_name') or '').strip()
@@ -3139,10 +3518,47 @@ def data_geo_probes():
         return jsonify({'error': f'Failed to save probe: {str(e)}'}), 500
 
 
+@app.route('/api/data/ai-visibility', methods=['GET'])
+def data_ai_visibility_get():
+    """GET /api/data/ai-visibility — retrieve visibility history."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_visibility_history
+    else:
+        from db import get_visibility_history
+    brand = request.args.get('brand')
+    limit = int(request.args.get('limit', 20))
+    try:
+        history = get_visibility_history(limit=limit, brand=brand)
+        return jsonify({'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'history': [], 'count': 0, 'error': str(e)})
+
+
+@app.route('/api/data/ai-visibility/trend', methods=['GET'])
+def data_ai_visibility_trend():
+    """GET /api/data/ai-visibility/trend — daily probe trend for a brand."""
+    if USE_DYNAMODB:
+        from db_dynamo import get_probe_trend
+    else:
+        from db import get_probe_trend
+    brand = request.args.get('brand', '')
+    limit = int(request.args.get('limit', 30))
+    if not brand:
+        return jsonify({'error': 'brand query param is required'}), 400
+    try:
+        trend = get_probe_trend(brand, limit=limit)
+        return jsonify({'brand': brand, 'trend': trend, 'count': len(trend)})
+    except Exception as e:
+        return jsonify({'brand': brand, 'trend': [], 'error': str(e)})
+
+
 @app.route('/api/data/ai-visibility', methods=['POST'])
 def data_ai_visibility():
-    """POST /api/data/ai-visibility — persist batch visibility results to RDS."""
-    from db import insert_visibility_batch
+    """POST /api/data/ai-visibility — persist batch visibility results."""
+    if USE_DYNAMODB:
+        from db_dynamo import insert_visibility_batch
+    else:
+        from db import insert_visibility_batch
     data = request.get_json() or {}
     brand = (data.get('brand') or data.get('brand_name') or '').strip()
     ai_model = (data.get('ai_model') or data.get('provider') or 'nova').strip()
@@ -3195,6 +3611,60 @@ def serve_dashboard_redirect():
 def serve_admin():
     """Admin dashboard — overview, users, usage, AI costs, errors, health."""
     return send_from_directory('.', 'admin.html')
+
+
+@app.route('/directory')
+def serve_directory():
+    """AI Business Directory — Top 10 dentists in Ottawa."""
+    return render_template('directory_category.html')
+
+
+@app.route('/directory-listing.html')
+@app.route('/directory-listing')
+def serve_directory_listing():
+    """AI Business Directory — individual listing detail page."""
+    return render_template('directory_listing.html')
+
+
+@app.route('/directory-compare.html')
+@app.route('/directory-compare')
+def serve_directory_compare():
+    """AI Business Directory — compare two businesses side by side."""
+    return render_template('directory_compare.html')
+
+
+# ── Root-level AI crawler files (proxy to directory module) ───────────────────
+
+@app.route('/llms.txt')
+def serve_root_llms_txt():
+    """Serve llms.txt at root level for AI crawlers."""
+    from flask import Response
+    try:
+        from directory.routes import _get_backend
+        from directory.seo_files import generate_llms_txt
+        backend = _get_backend()
+        listings = backend.get_all_listings(limit=200)
+        categories = backend.get_categories()
+        content = generate_llms_txt(listings, categories)
+        return Response(content, mimetype='text/plain; charset=utf-8')
+    except Exception as e:
+        return Response(f'# Error: {e}', mimetype='text/plain'), 500
+
+
+@app.route('/sitemap-ai.xml')
+def serve_root_sitemap_ai():
+    """Serve sitemap-ai.xml at root level for AI crawlers."""
+    from flask import Response
+    try:
+        from directory.routes import _get_backend
+        from directory.seo_files import generate_sitemap_ai_xml
+        backend = _get_backend()
+        listings = backend.get_all_listings(limit=500)
+        categories = backend.get_categories()
+        content = generate_sitemap_ai_xml(listings, categories)
+        return Response(content, mimetype='application/xml; charset=utf-8')
+    except Exception as e:
+        return Response(f'<!-- Error: {e} -->', mimetype='application/xml'), 500
 
 
 # ── Month 1 Research API ──────────────────────────────────────────────────────
@@ -3297,8 +3767,8 @@ def month1_results_by_type(deliverable):
 # ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
 import sqlite3
 
-SOCIAL_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+SOCIAL_DB = os.path.join('/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
+UPLOAD_DIR = os.path.join('/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png'}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -3463,6 +3933,42 @@ try:
     app.register_blueprint(growth_bp)
 except Exception as e:
     print(f"⚠ growth Blueprint: {e}")
+
+try:
+    from social_publishing.api import register_blueprint as register_publish_bp
+    register_publish_bp(app)
+except Exception as e:
+    print(f"⚠ social_publishing Blueprint: {e}")
+
+# --- System activation (non-blocking) ---
+_queue_worker_ok = False
+_duplicate_detector_ok = False
+_publish_api_ok = "social_publish" in app.blueprints
+_visitor_tracking_ok = "visitor_tracking" in app.blueprints
+
+try:
+    from social_publishing.queue import start_worker
+    start_worker()
+    _queue_worker_ok = True
+    print("✓ queue worker started")
+except Exception as e:
+    print(f"⚠ queue worker: {e}")
+
+try:
+    from social_publishing.duplicate_detector import is_duplicate
+    _duplicate_detector_ok = True
+    print("✓ duplicate detector active")
+except Exception as e:
+    print(f"⚠ duplicate detector: {e}")
+
+print("\n" + "=" * 48)
+print("  SYSTEM STATUS")
+print("=" * 48)
+print(f"  Publishing API:       {'ACTIVE' if _publish_api_ok else 'INACTIVE'}")
+print(f"  Queue Worker:         {'ACTIVE' if _queue_worker_ok else 'INACTIVE'}")
+print(f"  Duplicate Detection:  {'ACTIVE' if _duplicate_detector_ok else 'INACTIVE'}")
+print(f"  Visitor Tracking:     {'ACTIVE' if _visitor_tracking_ok else 'INACTIVE'}")
+print("=" * 48 + "\n")
 
 @app.route('/<path:path>')
 def catch_all(path):

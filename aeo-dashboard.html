@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEO Visibility Dashboard - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 0 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: rgba(255,255,255,0.6); margin-top: 6px; font-size: 0.95rem; }
+        .back-link {
+            display: inline-block; margin-top: 12px;
+            color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #00d4ff; }
+
+        /* Metrics cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .metric-card:hover { border-color: rgba(0,212,255,0.4); transform: translateY(-2px); }
+        .metric-value { font-size: 2.2rem; font-weight: bold; margin-bottom: 4px; }
+        .metric-label { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.25rem; font-weight: 600; margin: 32px 0 14px;
+            padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Query result cards */
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        .result-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px 20px;
+            transition: border-color 0.2s;
+        }
+        .result-card.mentioned { border-color: rgba(0,230,118,0.35); }
+        .result-card:hover { border-color: rgba(0,212,255,0.3); }
+        .result-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .result-query { font-weight: 600; font-size: 1rem; }
+        .result-excerpt { color: rgba(255,255,255,0.55); font-size: 0.88rem; line-height: 1.5; margin-bottom: 8px; }
+        .badge {
+            font-size: 0.78rem; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+        }
+        .badge-yes { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+        .badge-no  { background: rgba(255,82,82,0.12); color: #ff5252; border: 1px solid rgba(255,82,82,0.25); }
+        .comp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .comp-tag {
+            font-size: 0.75rem; padding: 2px 10px; border-radius: 12px;
+            background: rgba(123,44,191,0.18); color: #ce93d8; border: 1px solid rgba(123,44,191,0.3);
+        }
+
+        /* Bar chart */
+        .bar-chart { display: flex; flex-direction: column; gap: 10px; max-width: 600px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; }
+        .bar-label { width: 110px; font-size: 0.88rem; text-align: right; color: rgba(255,255,255,0.8); }
+        .bar-track { flex: 1; height: 22px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #00d4ff, #7b2cbf); border-radius: 6px; transition: width 0.6s ease; }
+        .bar-count { width: 36px; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+
+        /* Insights */
+        .insight-list { list-style: none; padding: 0; }
+        .insight-list li {
+            padding: 10px 16px; margin-bottom: 6px;
+            background: rgba(255,171,0,0.08); border-left: 3px solid #ffab00;
+            border-radius: 0 8px 8px 0; font-size: 0.9rem; color: rgba(255,255,255,0.8);
+        }
+
+        /* Recommendations */
+        .rec-list { display: flex; flex-direction: column; gap: 8px; }
+        .rec-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 16px; background: rgba(0,212,255,0.06);
+            border: 1px solid rgba(0,212,255,0.15); border-radius: 10px;
+            font-size: 0.9rem; color: rgba(255,255,255,0.85);
+        }
+        .rec-num {
+            flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,212,255,0.2); border-radius: 50%; font-size: 0.8rem; font-weight: 700; color: #00d4ff;
+        }
+
+        /* Timestamp */
+        .timestamp { margin-top: 32px; text-align: center; color: rgba(255,255,255,0.35); font-size: 0.8rem; }
+
+        /* Mode badge */
+        .mode-badge {
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px; margin-top: 10px;
+        }
+        .mode-live     { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+        .mode-fallback { background: rgba(255,171,0,0.15); color: #ffab00; border: 1px solid rgba(255,171,0,0.3); }
+        .mode-real     { background: rgba(0,176,255,0.15); color: #00b0ff; border: 1px solid rgba(0,176,255,0.3); }
+
+        /* Sources list */
+        .sources-list { margin-top: 8px; padding-left: 0; list-style: none; }
+        .sources-list li {
+            font-size: 0.8rem; padding: 4px 0; color: rgba(255,255,255,0.45);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .sources-list li:last-child { border-bottom: none; }
+        .sources-list a { color: #00d4ff; text-decoration: none; }
+        .sources-list a:hover { text-decoration: underline; }
+        .source-title { color: rgba(255,255,255,0.7); }
+        .toggle-sources {
+            background: none; border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5);
+            padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+            margin-top: 6px; font-family: inherit; transition: all 0.2s;
+        }
+        .toggle-sources:hover { border-color: rgba(0,212,255,0.4); color: #00d4ff; }
+
+        /* Spinner */
+        .spinner {
+            width: 44px; height: 44px; margin: 0 auto 16px;
+            border: 3px solid rgba(255,255,255,0.15); border-top-color: #00d4ff;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .bar-label { width: 80px; font-size: 0.8rem; }
+        }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AISEO Master</div>
+            <div class="subtitle">AEO Visibility Dashboard — LLM Mention Tracking</div>
+            <a href="/" class="back-link">← Back to Home</a>
+        </header>
+
+        <!-- Loading -->
+        <div id="loading" style="text-align:center;padding:60px;">
+            <div class="spinner"></div>
+            <p style="color:rgba(255,255,255,0.6)">Loading AEO data…</p>
+        </div>
+
+        <!-- Error -->
+        <div id="error-msg" style="display:none;text-align:center;padding:40px;">
+            <p style="color:#ff6b6b;font-size:1.1rem;" id="error-text"></p>
+            <p style="color:rgba(255,255,255,0.5);margin-top:8px;">Run <code style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;">python services/aeo_engine.py</code> to generate data.</p>
+        </div>
+
+        <!-- Dashboard content (hidden until loaded) -->
+        <div id="dashboard" style="display:none;">
+
+            <!-- Metric cards -->
+            <div class="metrics-grid" id="metrics-grid"></div>
+
+            <!-- Sections container -->
+            <div id="sections"></div>
+        </div>
+    </div>
+
+<script>
+(async function() {
+    const loadingEl = document.getElementById('loading');
+    const errorEl   = document.getElementById('error-msg');
+    const errorText = document.getElementById('error-text');
+    const dashboard = document.getElementById('dashboard');
+
+    try {
+        // Use App Runner backend in production, relative path locally
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? ''
+            : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+        const res = await fetch(API_BASE + '/api/aeo-results');
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        loadingEl.style.display = 'none';
+        dashboard.style.display = 'block';
+        renderDashboard(data);
+    } catch (err) {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        errorText.textContent = err.message;
+    }
+})();
+
+function renderDashboard(data) {
+    // ── Mode badge ──
+    const mode = data.mode || 'live';
+    const modeMap = {
+        real_search: { cls: 'mode-real',     label: '● Real Search Data' },
+        live:        { cls: 'mode-live',      label: '● Live API Mode' },
+        fallback:    { cls: 'mode-fallback',  label: '⚠ Fallback Mode (mock data)' },
+    };
+    const mi = modeMap[mode] || modeMap.live;
+    const headerEl = document.querySelector('header');
+    const badgeEl = document.createElement('div');
+    badgeEl.innerHTML = `<span class="mode-badge ${mi.cls}">${mi.label}</span>`;
+    headerEl.appendChild(badgeEl);
+
+    // ── Metric cards ──
+    const scoreColor = data.visibility_score >= 50 ? '#00e676'
+                     : data.visibility_score > 0  ? '#ffab00'
+                     : '#ff5252';
+
+    const metricsHTML = `
+        <div class="metric-card">
+            <div class="metric-value" style="color:${scoreColor}">${data.visibility_score}%</div>
+            <div class="metric-label">Visibility Score</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${data.total_queries}</div>
+            <div class="metric-label">Queries Tested</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${data.mentions_found}</div>
+            <div class="metric-label">Mentions Found</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${Object.keys(data.competitor_frequency || {}).length}</div>
+            <div class="metric-label">Competitors Detected</div>
+        </div>
+    `;
+    document.getElementById('metrics-grid').innerHTML = metricsHTML;
+
+    // ── Build sections ──
+    let html = '';
+
+    // Query results
+    html += sectionTitle('Query Results');
+    html += '<div class="card-list">';
+    (data.results || []).forEach((r, idx) => {
+        const badge = r.mentioned
+            ? '<span class="badge badge-yes">✅ Mentioned</span>'
+            : '<span class="badge badge-no">❌ Not Mentioned</span>';
+        const comps = r.competitors && r.competitors.length
+            ? `<div class="comp-tags">${r.competitors.map(c => `<span class="comp-tag">${c}</span>`).join('')}</div>`
+            : '';
+
+        // Support both old (response_excerpt) and new (summary + sources) formats
+        const excerptText = r.summary || r.response_excerpt || '';
+
+        // Sources (new real_search format)
+        let sourcesHtml = '';
+        if (r.sources && r.sources.length) {
+            const srcId = 'src-' + idx;
+            sourcesHtml = `
+                <button class="toggle-sources" onclick="var el=document.getElementById('${srcId}');el.style.display=el.style.display==='none'?'block':'none';this.textContent=el.style.display==='none'?'Show sources (${r.sources.length})':'Hide sources'">Show sources (${r.sources.length})</button>
+                <ul class="sources-list" id="${srcId}" style="display:none">
+                    ${r.sources.map(s => `<li><span class="source-title">${escHtml(s.title)}</span><br>${escHtml(s.snippet || '').slice(0, 120)}${s.url ? ` — <a href="${escHtml(s.url)}" target="_blank" rel="noopener">${escHtml(new URL(s.url).hostname)}</a>` : ''}</li>`).join('')}
+                </ul>`;
+        }
+
+        html += `
+            <div class="result-card ${r.mentioned ? 'mentioned' : ''}">
+                <div class="result-header">
+                    <span class="result-query">${escHtml(r.query)}</span>
+                    ${badge}
+                </div>
+                <p class="result-excerpt">${escHtml(excerptText)}</p>
+                ${comps}
+                ${sourcesHtml}
+            </div>`;
+    });
+    html += '</div>';
+
+    // Competitor frequency
+    const cf = data.competitor_frequency || {};
+    if (Object.keys(cf).length) {
+        html += sectionTitle('Competitor Frequency');
+        html += '<div class="bar-chart">';
+        const maxVal = Math.max(...Object.values(cf), 1);
+        Object.entries(cf)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([name, count]) => {
+                const pct = Math.round((count / maxVal) * 100);
+                html += `
+                    <div class="bar-row">
+                        <span class="bar-label">${escHtml(name)}</span>
+                        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        <span class="bar-count">${count}×</span>
+                    </div>`;
+            });
+        html += '</div>';
+    }
+
+    // Insights
+    if (data.insights && data.insights.length) {
+        html += sectionTitle('Insights');
+        html += '<ul class="insight-list">';
+        data.insights.forEach(i => { html += `<li>${escHtml(i)}</li>`; });
+        html += '</ul>';
+    }
+
+    // Recommendations
+    if (data.recommendations && data.recommendations.length) {
+        html += sectionTitle('Recommendations');
+        html += '<div class="rec-list">';
+        data.recommendations.forEach((r, idx) => {
+            html += `<div class="rec-item"><span class="rec-num">${idx + 1}</span><span>${escHtml(r)}</span></div>`;
+        });
+        html += '</div>';
+    }
+
+    // Timestamp + mode
+    if (data.generated_at) {
+        const modeNotes = {
+            real_search: ' · Real search data (DuckDuckGo)',
+            live: ' · Live API data',
+            fallback: ' · Fallback mode (API unavailable)',
+        };
+        const modeNote = modeNotes[mode] || '';
+        html += `<p class="timestamp">Data generated: ${new Date(data.generated_at).toLocaleString()}${modeNote}</p>`;
+    }
+
+    document.getElementById('sections').innerHTML = html;
+}
+
+function sectionTitle(text) {
+    return `<h2 class="section-title">${text}</h2>`;
+}
+
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+</script>
+</body>
+</html>

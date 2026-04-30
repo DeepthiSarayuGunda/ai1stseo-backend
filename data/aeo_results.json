@@ -1,0 +1,205 @@
+{
+  "mode": "real_search",
+  "visibility_score": 0,
+  "total_queries": 4,
+  "successful_queries": 4,
+  "mentions_found": 0,
+  "competitor_frequency": {
+    "SEMrush": 2,
+    "Surfer SEO": 2,
+    "Clearscope": 2,
+    "MarketMuse": 2,
+    "Frase": 2
+  },
+  "content_patterns_detected": [
+    "qa_content",
+    "comparison_content",
+    "how_to_content",
+    "list_content"
+  ],
+  "insights": [
+    "ai1stseo.com does not appear in any top search results for target queries.",
+    "Competitors dominate search results — ai1stseo.com has no organic presence for these terms.",
+    "Top competitors in search results: SEMrush (2×), Surfer SEO (2×), Clearscope (2×), MarketMuse (2×), Frase (2×)",
+    "Top-ranking pages use list-based content — this format is favored by AI retrieval systems.",
+    "Comparison content (vs. pages) appears in results — a strong signal for AI citation.",
+    "FAQ and Q&A-style content is present in top results — AI engines prefer structured answers.",
+    "How-to and tutorial content ranks well — step-by-step formats improve AI extractability."
+  ],
+  "recommendations": [
+    "Create content directly targeting these search queries with answer-style formatting.",
+    "Add FAQ schema (FAQPage JSON-LD) to key landing pages to improve AI extraction.",
+    "Publish comparison pages (e.g., 'ai1stseo vs SEMrush') to build brand association in search.",
+    "Increase entity mentions of 'ai1stseo' across authoritative third-party sites.",
+    "Strengthen semantic coverage with topic clusters and internal linking.",
+    "Improve SEO ranking for target queries to influence AI retrieval systems.",
+    "Submit site to AI training data sources (Common Crawl, Wikipedia citations)."
+  ],
+  "results": [
+    {
+      "query": "best AI SEO tools",
+      "mentioned": false,
+      "competitors": [
+        "SEMrush",
+        "Surfer SEO",
+        "Clearscope",
+        "MarketMuse",
+        "Frase"
+      ],
+      "content_patterns": [
+        "list_content",
+        "qa_content"
+      ],
+      "sources": [
+        {
+          "title": "We Tested the 12 Best (& Underrated) AI SEO Tools in 2026",
+          "snippet": "15 May 2025...We Tested the 12Best(& Underrated)AI SEO Toolsin 2026 · 1. Writesonic · 2. AirOps · 3. Rankscale.ai· 4. SE RankingAIOverview Tracker · 5.",
+          "url": "https://whatagraph.com/blog/articles/ai-seo-tools"
+        },
+        {
+          "title": "We Tested 13 Best AI SEO Content Optimization Tools ... - Rankability",
+          "snippet": "7 Jan 2026...Top13BestContent OptimizationTools· 1. Rankability · 2. SurferSEO· 3. Frase · 4. Clearscope · 5. MarketMuse · 6. Writesonic · 7. Scalenut.",
+          "url": "https://www.rankability.com/blog/best-seo-content-optimization-tools/"
+        },
+        {
+          "title": "14 Best AI SEO Tools We've Tested for 2026 - OneLittleWeb",
+          "snippet": "5 Dec 2025...14Best AI SEO Toolsin 2026 (Free + Paid) · 1. Semrush One – Best for Comprehensive SEO Analysis · 2. Surfer SEO – Best for Content ...",
+          "url": "https://onelittleweb.com/top-tools/best-ai-seo-tools/"
+        },
+        {
+          "title": "I Tried 18 AI SEO Tools. Here Are The Ones That Really Work",
+          "snippet": "8 Apr 2026...Writesonic is one of the most accessibleAI-poweredSEO toolsI tested. It's easy to get started, loaded with templates, and geared towards ...",
+          "url": "https://freddiechatt.com/ai-seo-tools/"
+        },
+        {
+          "title": "What's the Best AI Tool for SEO Work Right Now? : r/AIToolTesting",
+          "snippet": "13 Nov 2025...Gemini for writing, chatGPT for polishing, Grok for some bolder topics, Perplexity for researching, and Semrush for a basic grasp of ...",
+          "url": "https://www.reddit.com/r/AIToolTesting/comments/1ovwnyh/whats_the_best_ai_tool_for_seo_work_right_now/"
+        }
+      ],
+      "summary": "Top results for \"best AI SEO tools\":\n1. 15 May 2025...We Tested the 12Best(& Underrated)AI SEO Toolsin 2026 · 1. Writesonic · 2. AirOps · 3. Rankscale.ai· 4. SE RankingAIOverview Tracker · 5. (whatagraph.com)\n2. 7 Jan 2026...Top13BestContent OptimizationTools· 1. Rankability · 2. SurferSEO· 3. Frase · 4. Clearscope · 5. MarketMuse · 6. Writesonic · 7. Scalenut. (www.rankability.com)\n3. 5 Dec 2025...14Best AI SEO Toolsin 2026 (Free + Paid) · 1. Semrush One – Best for Comprehensive SEO Analysis · 2. Surfer SEO – Best for Content ... (onelittleweb.com)",
+      "search_engine": "startpage"
+    },
+    {
+      "query": "what is AEO SEO",
+      "mentioned": false,
+      "competitors": [],
+      "content_patterns": [
+        "comparison_content",
+        "qa_content"
+      ],
+      "sources": [
+        {
+          "title": "What Is Answer Engine Optimization? - Coursera",
+          "snippet": "9 Dec 2025...Answer engine optimization (AEO) helps your brand stand out on AI-powered platforms by making your content more likely to appear as a response ...",
+          "url": "https://www.coursera.org/articles/what-is-answer-engine-optimization"
+        },
+        {
+          "title": "SEO vs AEO: What's the difference and why it matters - Optimizely",
+          "snippet": "14 Oct 2025...In essence,SEOhelps search engines find your content, whilstAEOhelps AI understand and utilize your content. Both are crucial for visibility ...",
+          "url": "https://www.optimizely.com/insights/blog/seo-vs-aeo/"
+        },
+        {
+          "title": "Search Everywhere Optimization: What Is SEO, GEO, and AEO?",
+          "snippet": "12 Nov 2025...What is AEO? Unlike traditionalSEO, which aims to attract clicks,AEOfocuses on structuring content so it can be cited directly within AI- ...",
+          "url": "https://digitalmarketinginstitute.com/blog/what-is-seo-geo-and-aeo"
+        },
+        {
+          "title": "Can someone explain GEO and AEO in a simple way? Trying to ...",
+          "snippet": "3 Dec 2025...AEO(Answer Engine Optimization) optimizes for AI systems that extract direct answers to questions. ChatGPT, Perplexity, and Google AI Overviews ...",
+          "url": "https://www.reddit.com/r/DigitalMarketing/comments/1pd7lti/can_someone_explain_geo_and_aeo_in_a_simple_way/"
+        },
+        {
+          "title": "What Is Answer Engine Optimization? Answers, Tools, & Proven Tips",
+          "snippet": "14 Aug 2025...It's a subset ofsearch engine optimization(SEO).AEOis unlike traditionalSEO, which aims to rank web pages for specific keywords. Instead, ...",
+          "url": "https://aioseo.com/what-is-answer-engine-optimization/"
+        }
+      ],
+      "summary": "Top results for \"what is AEO SEO\":\n1. 9 Dec 2025...Answer engine optimization (AEO) helps your brand stand out on AI-powered platforms by making your content more likely to appear as a response ... (www.coursera.org)\n2. 14 Oct 2025...In essence,SEOhelps search engines find your content, whilstAEOhelps AI understand and utilize your content. Both are crucial for visibility ... (www.optimizely.com)\n3. 12 Nov 2025...What is AEO? Unlike traditionalSEO, which aims to attract clicks,AEOfocuses on structuring content so it can be cited directly within AI- ... (digitalmarketinginstitute.com)",
+      "search_engine": "startpage"
+    },
+    {
+      "query": "top AI SEO platforms",
+      "mentioned": false,
+      "competitors": [
+        "SEMrush",
+        "Surfer SEO",
+        "Clearscope",
+        "MarketMuse",
+        "Frase"
+      ],
+      "content_patterns": [
+        "list_content",
+        "qa_content"
+      ],
+      "sources": [
+        {
+          "title": "We Tested 13 Best AI SEO Content Optimization Tools ... - Rankability",
+          "snippet": "7 Jan 2026...Top13BestContent OptimizationTools· 1. Rankability · 2. SurferSEO· 3. Frase · 4. Clearscope · 5. MarketMuse · 6. Writesonic · 7. Scalenut.",
+          "url": "https://www.rankability.com/blog/best-seo-content-optimization-tools/"
+        },
+        {
+          "title": "We Tested the 12 Best (& Underrated) AI SEO Tools in 2026",
+          "snippet": "15 May 2025...We Tested the 12Best(& Underrated)AI SEO Toolsin 2026 · 1. Writesonic · 2. AirOps · 3. Rankscale.ai· 4. SE RankingAIOverview Tracker · 5.",
+          "url": "https://whatagraph.com/blog/articles/ai-seo-tools"
+        },
+        {
+          "title": "14 Best AI SEO Tools We've Tested for 2026 - OneLittleWeb",
+          "snippet": "5 Dec 2025...14Best AI SEO Toolsin 2026 (Free + Paid) · 1. Semrush One – Best for Comprehensive SEO Analysis · 2. Surfer SEO – Best for Content ...",
+          "url": "https://onelittleweb.com/top-tools/best-ai-seo-tools/"
+        },
+        {
+          "title": "I Tried 18 AI SEO Tools. Here Are The Ones That Really Work",
+          "snippet": "8 Apr 2026...Writesonic is one of the most accessibleAI-poweredSEO toolsI tested. It's easy to get started, loaded with templates, and geared towards ...",
+          "url": "https://freddiechatt.com/ai-seo-tools/"
+        },
+        {
+          "title": "AI SEO - done for you by an AI agent",
+          "snippet": "YourAI SEOagent does more than publish content. It helps your business get found in Google, become a trusted source forAIanswers, and build the authority ...",
+          "url": "https://seo.ai/"
+        }
+      ],
+      "summary": "Top results for \"top AI SEO platforms\":\n1. 7 Jan 2026...Top13BestContent OptimizationTools· 1. Rankability · 2. SurferSEO· 3. Frase · 4. Clearscope · 5. MarketMuse · 6. Writesonic · 7. Scalenut. (www.rankability.com)\n2. 15 May 2025...We Tested the 12Best(& Underrated)AI SEO Toolsin 2026 · 1. Writesonic · 2. AirOps · 3. Rankscale.ai· 4. SE RankingAIOverview Tracker · 5. (whatagraph.com)\n3. 5 Dec 2025...14Best AI SEO Toolsin 2026 (Free + Paid) · 1. Semrush One – Best for Comprehensive SEO Analysis · 2. Surfer SEO – Best for Content ... (onelittleweb.com)",
+      "search_engine": "startpage"
+    },
+    {
+      "query": "how to rank in ChatGPT search results",
+      "mentioned": false,
+      "competitors": [],
+      "content_patterns": [
+        "how_to_content",
+        "qa_content"
+      ],
+      "sources": [
+        {
+          "title": "How to rank on ChatGPT for traffic and leads - LinkedIn",
+          "snippet": "30 Jun 2025...- Build high DR backlinks to create \"authority\" for your brand. #5: TrackResults- Every 2-4 weeks,searchthe prompts onChatGPTagain. - Take ...",
+          "url": "https://www.linkedin.com/posts/connorgillivan_my-chatgpt-ranking-cheat-sheet-how-i-rank-activity-7345435259347378176-nabv"
+        },
+        {
+          "title": "I Cracked the Code to Ranking #1 on ChatGPT (Here's How ... - Reddit",
+          "snippet": "13 Jan 2025...ChatGPTfunctions differently. It's designed to read, interpret, andrankinformation in ways traditionalsearchengines (ahem ahem Google etc.) ...",
+          "url": "https://www.reddit.com/r/SaaS/comments/1i08zxq/i_cracked_the_code_to_ranking_1_on_chatgpt_heres/"
+        },
+        {
+          "title": "How To Rank in ChatGPT (with REAL Examples!) - YouTube",
+          "snippet": "3 Mar 2025...How To Rank in ChatGPT(with REAL Examples!) @Exposure Ninja ... How to Dominate AISearch Resultsin 2026 (ChatGPT, AI Overviews & More).",
+          "url": "https://www.youtube.com/watch?v=GggbVoNsOic"
+        },
+        {
+          "title": "ChatGPT SEO: How to Rank in AI Search Results? | by Sarath C P",
+          "snippet": "18 Jun 2025...Question-First Approach. Rather than starting with keywords, begin with the questions your audience asksChatGPT. These conversational queries ...",
+          "url": "https://medium.com/@sarathcp92/chatgpt-seo-how-to-rank-in-ai-search-results-a3bdc208b753"
+        },
+        {
+          "title": "SEO for ChatGPT: How to Rank Your Website in the LLM - Neil Patel",
+          "snippet": "25 Sept 2023...Focus on authority and clarity. Build strong brand mentions across trusted sites, create content that directly answers questions, and use ...",
+          "url": "https://neilpatel.com/blog/how-to-rank-your-website-on-chatgpt/"
+        }
+      ],
+      "summary": "Top results for \"how to rank in ChatGPT search results\":\n1. 30 Jun 2025...- Build high DR backlinks to create \"authority\" for your brand. #5: TrackResults- Every 2-4 weeks,searchthe prompts onChatGPTagain. - Take ... (www.linkedin.com)\n2. 13 Jan 2025...ChatGPTfunctions differently. It's designed to read, interpret, andrankinformation in ways traditionalsearchengines (ahem ahem Google etc.) ... (www.reddit.com)\n3. 3 Mar 2025...How To Rank in ChatGPT(with REAL Examples!) @Exposure Ninja ... How to Dominate AISearch Resultsin 2026 (ChatGPT, AI Overviews & More). (www.youtube.com)",
+      "search_engine": "startpage"
+    }
+  ],
+  "generated_at": "2026-04-30T14:59:31.035326+00:00"
+}
