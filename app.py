@@ -2006,6 +2006,8 @@ def analyze_url():
             return jsonify({'error': 'Invalid or missing JSON body'}), 400
         url = data.get('url', '')
         categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
+        if isinstance(categories, str):
+            categories = [c.strip() for c in categories.split(',') if c.strip()]
     except Exception:
         return jsonify({'error': 'Invalid request'}), 400
     
@@ -4536,6 +4538,22 @@ try:
     app.register_blueprint(backlink_bp)
 except Exception as e:
     print(f"\u26a0 Backlink API: {e}")
+
+# --- Multi-Site Dashboard API (Dev 3 - Troy) ---
+try:
+    from multisite_api import multisite_bp
+    app.register_blueprint(multisite_bp)
+except Exception as e:
+    print(f"\u26a0 Multi-Site API: {e}")
+
+# --- AI Referral Attribution API (Dev 3 - Troy) ---
+try:
+    from attribution_api import attribution_bp
+    app.register_blueprint(attribution_bp)
+except Exception as e:
+    print(f"\u26a0 Attribution API: {e}")
+
+
 
 
 

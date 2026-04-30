@@ -1861,3 +1861,119 @@ def export_citation_authority():
             })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== CITATION PROBE BRIDGE (for Content Brief Generator) =====================
+
+@backlink_bp.route('/api/backlinks/brief-citation-probe', methods=['POST'])
+@require_auth
+def brief_citation_probe():
+    """
+    Lightweight citation probe designed to be called by the content brief generator.
+    Takes a keyword, probes AI models, returns:
+    - Which sources AI models cite for this keyword
+    - What content formats trigger citations (tables, FAQs, lists)
+    - What data points appear in AI answers (prices, stats, comparisons)
+    - Green/amber/red signals for the brief
+
+    This bridges Troy's citation engine with Samar's brief pipeline.
+    """
+    data = request.get_json() or {}
+    keyword = data.get('keyword', '').strip()
+    if not keyword:
+        return jsonify({'status': 'error', 'message': 'keyword required'}), 400
+
+    try:
+        import re
+        try:
+            from ai_inference import generate
+        except ImportError:
+            return jsonify({'status': 'error', 'message': 'AI inference not available'}), 503
+
+        # Probe with a citation-focused prompt
+        prompt = (
+            'Answer this question thoroughly and cite specific websites as sources with URLs. '
+            'Include statistics, comparisons, and data points where relevant: '
+            'What are the best resources and information about "{}"?'
+        ).format(keyword)
+
+        response = generate(prompt, max_tokens=1024, temperature=0.3,
+                            triggered_by='brief_citation_probe')
+
+        # Extract cited URLs
+        urls = re.findall(r'https?://[^\s\)\]\"\'<>]+', response)
+        cited_domains = list(set(urlparse(u).netloc for u in urls if urlparse(u).netloc))
+        cited_pages = list(set(
+            '{}://{}{}'.format(urlparse(u).scheme, urlparse(u).netloc, urlparse(u).path.rstrip('/'))
+            for u in urls if urlparse(u).netloc
+        ))
+
+        # Detect content formats mentioned
+        response_lower = response.lower()
+        format_signals = {
+            'tables': bool(re.search(r'table|comparison|versus|vs\.', response_lower)),
+            'faqs': bool(re.search(r'faq|frequently asked|question', response_lower)),
+            'lists': bool(re.search(r'top \d|best \d|\d\.\s', response_lower)),
+            'statistics': bool(re.search(r'\d+%|\$\d|million|billion|study|research', response_lower)),
+            'how_to': bool(re.search(r'how to|step \d|guide|tutorial', response_lower)),
+            'definitions': bool(re.search(r'is defined as|refers to|means that', response_lower)),
+        }
+
+        # Build green/amber/red signals for the brief
+        green_signals = []  # Include these
+        amber_signals = []  # Recommended additions
+        red_signals = []    # Gaps/opportunities
+
+        if format_signals['tables']:
+            green_signals.append('Comparison tables trigger AI citations — include a comparison table')
+        if format_signals['faqs']:
+            green_signals.append('FAQ format detected in AI answers — add FAQ schema')
+        if format_signals['statistics']:
+            green_signals.append('AI cites specific statistics — include data points with sources')
+        if format_signals['lists']:
+            green_signals.append('Numbered/ranked lists appear in AI answers — use list format')
+
+        if not format_signals['how_to']:
+            amber_signals.append('Add step-by-step instructions — AI models prefer actionable content')
+        if not format_signals['definitions']:
+            amber_signals.append('Add clear definitions — AI models extract these for direct answers')
+        if len(cited_domains) < 3:
+            amber_signals.append('Few sources cited — opportunity to become a primary source')
+
+        if not cited_domains:
+            red_signals.append('No domains cited — AI models lack authoritative sources for this topic')
+        if keyword.lower() not in response_lower:
+            red_signals.append('Keyword not prominently featured in AI response — content gap')
+
+        # Store the probe
+        probe_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': probe_id,
+            'type': 'brief_citation_probe',
+            'keyword': keyword,
+            'cited_domains': cited_domains,
+            'cited_pages': cited_pages,
+            'format_signals': format_signals,
+            'green_signals': green_signals,
+            'amber_signals': amber_signals,
+            'red_signals': red_signals,
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': probe_id,
+            'keyword': keyword,
+            'cited_domains': cited_domains,
+            'cited_pages': cited_pages[:10],
+            'format_signals': format_signals,
+            'signals': {
+                'green': green_signals,
+                'amber': amber_signals,
+                'red': red_signals,
+            },
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500

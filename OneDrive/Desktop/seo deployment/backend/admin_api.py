@@ -19,12 +19,40 @@ def admin_overview():
         audits = scan_table('ai1stseo-audits', 200)
         scores = [a.get('overall_score', 0) for a in audits if a.get('overall_score')]
         avg_score = round(sum(scores) / len(scores), 1) if scores else 0
+
+        # Count total rows across all DynamoDB tables
+        db_tables = [
+            'ai1stseo-users', 'ai1stseo-audits', 'ai1stseo-geo-probes',
+            'ai1stseo-content-briefs', 'ai1stseo-social-posts', 'ai1stseo-admin-metrics',
+            'ai1stseo-api-logs', 'ai1stseo-webhooks', 'ai1stseo-api-keys',
+            'ai1stseo-competitors', 'ai1stseo-monitor', 'ai1stseo-email-leads',
+            'ai1stseo-documents', 'ai1stseo-backlinks', 'ai1stseo-backlink-opportunities',
+        ]
+        total_rows = 0
+        table_counts = {}
+        try:
+            import boto3
+            ddb = boto3.client('dynamodb', region_name='us-east-1')
+            for tbl in db_tables:
+                try:
+                    desc = ddb.describe_table(TableName=tbl)
+                    count = desc['Table'].get('ItemCount', 0)
+                    table_counts[tbl] = count
+                    total_rows += count
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
         return jsonify({
             'status': 'success',
             'users': {'total': len(users), 'new_7d': 0, 'active_24h': 0},
             'scans': {'total': len(audits), 'last_7d': 0, 'avg_score': avg_score},
             'errors': {'unresolved': 0},
             'monitoring': {'active_sites': 0},
+            'database_rows': total_rows,
+            'total_records': total_rows,
+            'table_counts': table_counts,
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
