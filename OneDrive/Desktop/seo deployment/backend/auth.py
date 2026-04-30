@@ -166,10 +166,12 @@ def _get_user_role(email):
 
 
 def _get_user_tier(email):
-    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'."""
+    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'.
+    Auto-expires pro trials after 7 days."""
     try:
         import boto3
         from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone, timedelta
         ddb = boto3.resource('dynamodb', region_name='us-east-1')
         table = ddb.Table('ai1stseo-users')
         resp = table.query(
@@ -181,8 +183,26 @@ def _get_user_tier(email):
             if item.get('role') == 'admin':
                 return 'admin'
             tier = item.get('subscription_tier', 'free')
-            if tier in ('pro', 'admin'):
-                return tier
+            if tier == 'pro':
+                # Check if trial has expired (7 days)
+                tier_updated = item.get('tier_updated_at', '')
+                if tier_updated:
+                    try:
+                        updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                        if datetime.now(timezone.utc) - updated_time > timedelta(days=7):
+                            # Trial expired — downgrade to free
+                            table.update_item(
+                                Key={'userId': item['userId']},
+                                UpdateExpression='SET subscription_tier = :tier, trial_expired = :exp',
+                                ExpressionAttributeValues={
+                                    ':tier': 'free',
+                                    ':exp': True,
+                                },
+                            )
+                            return 'free'
+                    except Exception:
+                        pass
+                return 'pro'
         return 'free'
     except Exception:
         return 'free'
@@ -538,14 +558,40 @@ def delete_account():
 @auth_bp.route('/api/user/tier', methods=['GET'])
 @require_auth
 def get_user_tier():
-    """Get the current user's subscription tier."""
+    """Get the current user's subscription tier with trial expiry info."""
     user = request.cognito_user
-    return jsonify({
+    tier = user.get('subscription_tier', 'free')
+    result = {
         'status': 'success',
         'email': user.get('email', ''),
-        'tier': user.get('subscription_tier', 'free'),
+        'tier': tier,
         'role': user.get('role', 'member'),
-    })
+    }
+    # Add trial expiry info for pro users
+    if tier == 'pro':
+        try:
+            import boto3
+            from boto3.dynamodb.conditions import Key
+            from datetime import datetime, timezone, timedelta
+            ddb = boto3.resource('dynamodb', region_name='us-east-1')
+            table = ddb.Table('ai1stseo-users')
+            resp = table.query(
+                IndexName='email-index',
+                KeyConditionExpression=Key('email').eq(user.get('email', '')),
+                Limit=1,
+            )
+            items = resp.get('Items', [])
+            if items:
+                tier_updated = items[0].get('tier_updated_at', '')
+                if tier_updated:
+                    updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                    expires_at = updated_time + timedelta(days=7)
+                    remaining = (expires_at - datetime.now(timezone.utc)).total_seconds()
+                    result['trial_expires_at'] = expires_at.isoformat()
+                    result['trial_days_remaining'] = max(0, round(remaining / 86400, 1))
+        except Exception:
+            pass
+    return jsonify(result)
 
 
 @auth_bp.route('/api/webhooks/stripe', methods=['POST'])
@@ -643,7 +689,7 @@ def create_checkout_session():
                 'payment_method_types[]': 'card',
                 'line_items[0][price_data][currency]': 'usd',
                 'line_items[0][price_data][product_data][name]': 'AI 1st SEO Pro Trial',
-                'line_items[0][price_data][product_data][description]': '30-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
+                'line_items[0][price_data][product_data][description]': '7-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
                 'line_items[0][price_data][unit_amount]': '500',  # $5.00 in cents
                 'line_items[0][quantity]': '1',
                 'success_url': success_url,
