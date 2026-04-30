@@ -226,6 +226,47 @@ GET  /api/health             — Health check with category counts
   that score 100% and serve as benchmarks for AEO/GEO/SEO scoring
 - Per meeting task: investigate where "AI First SEO" ranks in AI platforms
 
+16. PREDICTIVE SEARCH INTELLIGENCE ENGINE (PSIE) — April 16
+--------------------------------------------------------------
+- POST /api/psie/predict: analyzes 12 ranking signals, predicts SERP position
+  with confidence score for any URL + keyword combination
+- POST /api/psie/optimize: prediction + ranked optimization roadmap
+  - 12 signals: title/meta/H1 keyword match, content depth, heading structure,
+    schema richness, FAQ density, answer formatting, E-E-A-T, internal linking,
+    keyword density, authority links
+  - Each optimization shows predicted position improvement
+  - AI strategic action plan via LLM for reaching top 3
+- Frontend: psie.html with animated gradient UI, prediction box, signal bars
+- Per Gurbachan's email: PSIE is the proprietary NLP system that predicts
+  search engine ranking outcomes for specific content modifications
+
+17. AI COUNCIL — Multi-Agent Analysis System — April 16
+---------------------------------------------------------
+- POST /api/council/analyze: runs 5 specialized agents in parallel
+  - AEO Specialist: AI citation readiness (FAQ schema, definitions, lists)
+  - SEO Specialist: on-page optimization (title, meta, headings, schema)
+  - Content Quality Analyst: readability, depth, E-E-A-T signals
+  - Competitor Intelligence: page structure vs top-ranking patterns
+  - GEO/Local Specialist: address, phone, hours, LocalBusiness schema
+- Council Moderator (LLM) synthesizes all 5 reports into unified action plan
+- Weighted overall score: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%
+- Frontend: council.html with AOS scroll animations, agent cards, moderator summary
+- Prototype page — accessible at /council, not linked from main site
+- No competitor has multi-agent analysis — SEMrush gives one score, we give five
+  expert perspectives that debate and agree on a plan
+
+18. PERFECT HTML TEMPLATE PAGES — April 13-16
+------------------------------------------------
+- 4 fully built HTML pages with real content, unique designs, full schema markup:
+  - templates-perfect/service-dentist.html (Bright Smile Dental, light theme, blue)
+  - templates-perfect/saas-analytics.html (DataPulse Analytics, dark theme, purple/cyan)
+  - templates-perfect/manufacturing-parts.html (NovaTech Industries, industrial, amber)
+  - templates-perfect/ecommerce-store.html (UpDesk Co Standing Desks, clean white, green)
+- Each page has: proper title/meta, canonical, JSON-LD schema (multiple types),
+  5+ FAQs, data tables, statistics, source citations, freshness signals, 1000+ words
+- GET /api/template-preview/<type> serves actual HTML files
+- Per Gurbachan's directive: build actual perfect pages that score 100/100
+
 ========================================================================
 API ENDPOINTS (Dev 2 owned)
 ========================================================================
@@ -239,11 +280,22 @@ GET  /api/template-types     — List available business template types
 GET  /api/template-perfect/<type> — Full template definition
 GET  /api/template-preview/<type> — Rendered perfect HTML page
 POST /api/ai-brand-check     — AI platform visibility check
+POST /api/psie/predict       — PSIE ranking prediction (12 signals)
+POST /api/psie/optimize      — PSIE prediction + optimization roadmap
+POST /api/council/analyze    — AI Council multi-agent analysis (5 agents + moderator)
 POST /api/ai-recommendations — AI-powered SEO recommendations
 GET  /api/health             — Health check with category counts
 
 ========================================================================
+FRONTEND PAGES (Dev 2 owned)
+========================================================================
+/template-benchmark.html  — Template benchmark (5 tabs: compare, gaps, preview, blueprint, AI visibility)
+/psie.html                — Predictive Search Intelligence Engine
+/council.html             — AI Council (prototype — not linked from main site)
+/audit.html               — SEO audit (keyword clustering + content brief sections added by Dev 2)
+
+========================================================================
 BRANCH INFO
 ========================================================================
-Branch: dev2-samar-merge (merged into main April 2)
+Branch: dev2-samar-merge (merged into main)
 All Dev 2 code is on both branches. Kept in sync.
