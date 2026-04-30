@@ -13,6 +13,7 @@ and are shared across all gunicorn workers.
 
 import json
 import logging
+import os
 import threading
 import time
 from datetime import datetime, timezone
@@ -199,9 +200,10 @@ def _run_geo_probes():
 
 def _scheduler_loop():
     """Main scheduler loop — runs forever in a background thread."""
-    SCRAPER_INTERVAL = 24 * 3600       # 24 hours
-    GEO_PROBE_INTERVAL = 6 * 3600      # 6 hours
-    SPORTS_SYNC_INTERVAL = 4 * 3600    # 4 hours — keeps scores fresh
+    # Configurable via environment variables — increased frequency for more data points
+    SCRAPER_INTERVAL = int(os.environ.get('SCRAPER_INTERVAL_HOURS', 12)) * 3600
+    GEO_PROBE_INTERVAL = int(os.environ.get('GEO_PROBE_INTERVAL_HOURS', 3)) * 3600
+    SPORTS_SYNC_INTERVAL = int(os.environ.get('SPORTS_SYNC_INTERVAL_HOURS', 2)) * 3600
 
     last_scrape = 0
     last_geo = 0
@@ -209,7 +211,10 @@ def _scheduler_loop():
 
     # Wait 60s after startup before first run to let the app fully initialize
     time.sleep(60)
-    logger.info("Scheduler started — scraper every 24h, GEO probes every 6h, sports sync every 4h")
+    logger.info(
+        "Scheduler started — scraper every %dh, GEO probes every %dh, sports sync every %dh",
+        SCRAPER_INTERVAL // 3600, GEO_PROBE_INTERVAL // 3600, SPORTS_SYNC_INTERVAL // 3600
+    )
 
     while True:
         now = time.time()
@@ -231,8 +236,8 @@ def _scheduler_loop():
         except Exception as e:
             logger.error("Scheduler loop error: %s", e)
 
-        # Sleep 5 minutes between checks
-        time.sleep(300)
+        # Sleep 2 minutes between checks (reduced from 5 for faster response)
+        time.sleep(120)
 
 
 def start_scheduler():

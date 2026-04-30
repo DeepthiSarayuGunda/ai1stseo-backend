@@ -231,3 +231,139 @@ def freshness_digest_compute(brand):
     from deepthi_intelligence.freshness_integration import FreshnessDigest
     result = FreshnessDigest().compute_digest_from_freshness(brand)
     return jsonify(result), 201
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 7. AI-GENERATED DASHBOARD EXPLANATIONS (Amazon Bedrock / Nova)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@deepthi_bp.route('/explain-dashboard', methods=['GET'])
+def explain_dashboard():
+    """
+    Generate plain-English explanations of current dashboard metrics
+    using Amazon Bedrock (Nova Lite). Returns cached result if < 1 hour old.
+    """
+    import time
+    import json as _json
+
+    # Simple in-memory cache (1 hour TTL)
+    now = time.time()
+    cache = getattr(explain_dashboard, '_cache', None)
+    if cache and (now - cache['ts']) < 3600:
+        return jsonify(cache['data'])
+
+    try:
+        # Fetch current intelligence summary
+        from deepthi_intelligence.intelligence_summary_api import _build_summary
+        summary = _build_summary()
+
+        # Build a concise data snapshot for the LLM
+        brands = summary.get('multi_brand_scores', {}).get('brands', [])
+        brand_lines = []
+        for b in brands[:5]:
+            score = round((b.get('geo_score', 0)) * 100)
+            delta = b.get('change_vs_last_week', {}).get('delta', 0)
+            brand_lines.append(f"{b['brand']}: {score}% GEO (Δ {delta:+.1%})")
+
+        top_kw = summary.get('keyword_performance', {}).get('top_cited_keywords', [])[:3]
+        kw_lines = [f"{k['keyword']}: {round(k['geo_score']*100)}%" for k in top_kw]
+
+        gaps = summary.get('keyword_performance', {}).get('competitor_beating_us', [])[:3]
+        gap_lines = [f"{g['keyword']}: {g['competitor']} leads by {round(g['gap']*100)}%" for g in gaps]
+
+        prompt = (
+            "You are an SEO analytics assistant. Given these dashboard metrics, "
+            "write 1-2 sentence plain-English insights for a non-technical business user. "
+            "Be specific about what the numbers mean and what action to take.\n\n"
+            f"Brand Scores: {'; '.join(brand_lines)}\n"
+            f"Top Keywords: {'; '.join(kw_lines)}\n"
+            f"Competitor Gaps: {'; '.join(gap_lines) if gap_lines else 'None'}\n\n"
+            "Return JSON with keys: brand_scores, geo_tracker, keyword_performance, "
+            "competitor_matrix, citations. Each value is a 1-2 sentence insight."
+        )
+
+        from ai_provider import ask_ai
+        raw = ask_ai(prompt, provider='nova')
+        # Try to parse JSON from the response
+        try:
+            # Find JSON in the response
+            start = raw.find('{')
+            end = raw.rfind('}') + 1
+            if start >= 0 and end > start:
+                explanations = _json.loads(raw[start:end])
+            else:
+                explanations = {'brand_scores': raw[:200]}
+        except Exception:
+            explanations = {'brand_scores': raw[:200]}
+
+        result = {'explanations': explanations, 'generated_at': now}
+        explain_dashboard._cache = {'ts': now, 'data': result}
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'explanations': {}, 'error': str(e)}), 200
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 8. DATABASE STATS — row counts for admin dashboard
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@deepthi_bp.route('/db-stats', methods=['GET'])
+def db_stats():
+    """Return row counts for all major database tables."""
+    try:
+        from db import get_conn as get_main_conn
+        tables_main = [
+            'seo_scans', 'geo_probes', 'ai_visibility', 'content_briefs',
+            'users', 'scan_errors', 'ai_usage_log', 'daily_metrics'
+        ]
+        counts = {}
+        with get_main_conn() as conn:
+            cur = conn.cursor()
+            for t in tables_main:
+                try:
+                    cur.execute(f"SELECT COUNT(*) FROM {t}")  # noqa: S608
+                    counts[t] = cur.fetchone()[0]
+                except Exception:
+                    counts[t] = None
+                    conn.rollback()
+    except Exception:
+        counts = {}
+
+    # Sports tables
+    try:
+        from directory.sports_db import get_conn as get_sports_conn
+        sports_tables = [
+            'sports', 'sports_matches', 'sports_teams',
+            'sports_rankings', 'sports_news'
+        ]
+        with get_sports_conn() as conn:
+            cur = conn.cursor()
+            for t in sports_tables:
+                try:
+                    cur.execute(f"SELECT COUNT(*) FROM {t}")  # noqa: S608
+                    counts[t] = cur.fetchone()[0]
+                except Exception:
+                    counts[t] = None
+                    conn.rollback()
+    except Exception:
+        pass
+
+    # Directory tables
+    try:
+        from directory.directory_db import get_conn as get_dir_conn
+        dir_tables = ['directory_categories', 'directory_items']
+        with get_dir_conn() as conn:
+            cur = conn.cursor()
+            for t in dir_tables:
+                try:
+                    cur.execute(f"SELECT COUNT(*) FROM {t}")  # noqa: S608
+                    counts[t] = cur.fetchone()[0]
+                except Exception:
+                    counts[t] = None
+                    conn.rollback()
+    except Exception:
+        pass
+
+    total = sum(v for v in counts.values() if v is not None)
+    return jsonify({'counts': counts, 'total_rows': total})
