@@ -285,17 +285,25 @@ function renderProviders(data) {
     const active = data.active || [];
     const skipped = data.skipped || {};
     const all = data.priority_order || ['gemini','openai','claude','perplexity','ollama','mock'];
+    const labels = {gemini:'Gemini',openai:'ChatGPT',claude:'Claude',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'};
 
     let html = '';
-    for (const p of all) {
-        if (p === 'mock') continue;
-        const isActive = active.includes(p);
-        const cls = isActive ? 'active' : 'skipped';
-        const title = isActive ? 'Available' : (skipped[p] || 'Unavailable');
-        html += `<span class="provider-chip ${cls}" title="${esc(title)}"><span class="dot"></span>${esc(p)}</span>`;
-    }
-    if (active.includes('mock')) {
-        html += '<span class="provider-chip skipped" title="No real providers available"><span class="dot"></span>mock mode</span>';
+    const isMockOnly = active.length === 1 && active[0] === 'mock';
+
+    if (isMockOnly) {
+        html = '<span class="provider-chip active" style="background:rgba(255,171,0,0.12);color:#ffab00;border-color:rgba(255,171,0,0.25);"><span class="dot" style="background:#ffab00;"></span>Demo Mode — simulated AI responses</span>';
+    } else {
+        for (const p of all) {
+            if (p === 'mock') continue;
+            const isActive = active.includes(p);
+            if (isActive) {
+                html += `<span class="provider-chip active"><span class="dot"></span>${labels[p]||p}</span>`;
+            }
+        }
+        const skippedCount = Object.keys(skipped).length;
+        if (skippedCount > 0) {
+            html += `<span class="provider-chip skipped">${skippedCount} unavailable</span>`;
+        }
     }
     bar.innerHTML = html;
 }
@@ -377,6 +385,9 @@ function renderResults(data) {
     // Metrics
     const vis = summary.visibility_score || 0;
     const visColor = vis >= 50 ? '#00e676' : vis > 0 ? '#ffab00' : '#ff5252';
+    const bestLlmLabel = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'}[summary.best_llm] || summary.best_llm;
+    const activeCount = (summary.active_llms || []).length;
+    const isMock = (summary.active_llms || []).includes('mock') && activeCount === 1;
     document.getElementById('metrics').innerHTML = `
         <div class="metric-card">
             <div class="metric-value" style="color:${visColor}">${vis}%</div>
@@ -391,11 +402,11 @@ function renderResults(data) {
             <div class="metric-label">Citations Found</div>
         </div>
         <div class="metric-card">
-            <div class="metric-value">${(summary.active_llms || []).length}</div>
-            <div class="metric-label">Active LLMs</div>
+            <div class="metric-value">${isMock ? 'Demo' : activeCount}</div>
+            <div class="metric-label">${isMock ? 'Mode' : 'Active LLMs'}</div>
         </div>
         <div class="metric-card">
-            <div class="metric-value">${summary.best_llm ? esc(summary.best_llm) : '—'}</div>
+            <div class="metric-value">${bestLlmLabel ? esc(bestLlmLabel) : '—'}</div>
             <div class="metric-label">Best LLM</div>
         </div>
         <div class="metric-card">
@@ -412,43 +423,44 @@ function renderResults(data) {
     const queryPerf = summary.query_performance || {};
     document.getElementById('query-bars').innerHTML = renderBars(queryPerf, queryBarColor);
 
-    // Info panels (skipped + errors)
+    // Info panels — only show errors that matter to users, hide internal config details
     let panelsHtml = '';
-    const skipped = summary.skipped_llms || {};
-    if (Object.keys(skipped).length) {
-        panelsHtml += '<div class="info-panel"><h3>Skipped Providers</h3>';
-        for (const [llm, reason] of Object.entries(skipped)) {
-            panelsHtml += `<div class="info-row"><span>${esc(llm)}</span><span class="reason">${esc(reason)}</span></div>`;
-        }
+    const isMockMode = (summary.active_llms || []).includes('mock') && (summary.active_llms || []).length === 1;
+    if (isMockMode) {
+        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,171,0,0.15);"><h3 style="color:#ffab00;">Demo Mode</h3>';
+        panelsHtml += '<div class="info-row"><span style="color:rgba(255,255,255,0.6);">Results are simulated. Connect API keys or Ollama for real AI responses.</span></div>';
         panelsHtml += '</div>';
     }
     const errors = summary.errors_by_llm || {};
-    if (Object.keys(errors).length) {
-        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,82,82,0.15);"><h3 style="color:#ff8a80;">Runtime Errors</h3>';
+    if (Object.keys(errors).length && !isMockMode) {
+        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,82,82,0.15);"><h3 style="color:#ff8a80;">Some providers had issues</h3>';
         for (const [llm, errs] of Object.entries(errors)) {
-            panelsHtml += `<div class="info-row"><span>${esc(llm)}</span><span class="reason">${esc((errs[0]||'').substring(0,80))}</span></div>`;
+            const friendlyName = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama'}[llm] || llm;
+            panelsHtml += `<div class="info-row"><span>${esc(friendlyName)}</span><span class="reason">temporarily unavailable</span></div>`;
         }
         panelsHtml += '</div>';
     }
     document.getElementById('info-panels').innerHTML = panelsHtml;
 
     // Results table
+    const llmLabels = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'AI Scan'};
     let tbody = '';
     for (const r of results) {
         const cited = r.citation_found;
         const citedBadge = cited
             ? '<span class="badge badge-cited">Cited</span>'
             : '<span class="badge badge-missed">Not cited</span>';
-        const mockBadge = r.mock ? ' <span class="badge badge-mock">mock</span>' : '';
-        const errorBadge = r.error ? ' <span class="badge badge-error">error</span>' : '';
+        const mockBadge = r.mock ? ' <span class="badge badge-mock">demo</span>' : '';
+        const errorBadge = r.error ? ' <span class="badge badge-error">retry</span>' : '';
         const matchType = r.match_type ? esc(r.match_type.replace(/_/g, ' ')) : '—';
+        const llmName = llmLabels[r.llm] || r.llm;
         const snippet = r.error
-            ? `<span style="color:#ff8a80">${esc(r.error.substring(0,100))}</span>`
+            ? '<span style="color:rgba(255,255,255,0.3);">Provider temporarily unavailable</span>'
             : esc((r.response_snippet || '').substring(0, 120)) + (r.response_snippet && r.response_snippet.length > 120 ? '…' : '');
 
         tbody += `<tr>
             <td>${esc(r.query)}</td>
-            <td><span class="badge badge-llm">${esc(r.llm)}</span>${mockBadge}${errorBadge}</td>
+            <td><span class="badge badge-llm">${esc(llmName)}</span>${mockBadge}${errorBadge}</td>
             <td>${citedBadge}</td>
             <td>${matchType}</td>
             <td class="snippet">${snippet}</td>
@@ -460,12 +472,14 @@ function renderResults(data) {
 function renderBars(perfObj, colorFn) {
     const entries = Object.entries(perfObj).sort((a, b) => b[1].rate - a[1].rate);
     if (!entries.length) return '<p style="color:rgba(255,255,255,0.3);font-size:0.85rem;">No data</p>';
+    const labels = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'};
     let html = '';
     for (const [name, stats] of entries) {
         const pct = stats.rate || 0;
         const color = colorFn(pct);
+        const label = labels[name] || name;
         html += `<div class="bar-row">
-            <span class="bar-label">${esc(name.length > 14 ? name.substring(0,14) + '…' : name)}</span>
+            <span class="bar-label">${esc(label.length > 14 ? label.substring(0,14) + '…' : label)}</span>
             <div class="bar-track">
                 <div class="bar-fill" style="width:${pct}%;background:${color};"></div>
                 <span class="bar-pct">${pct}% (${stats.cited}/${stats.total})</span>
