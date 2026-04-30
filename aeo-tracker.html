@@ -3,507 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AEO Rank Tracker - AISEO Master</title>
+    <title>AI Visibility Checker - AI1stSEO</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            color: #fff;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;min-height:100vh;color:#e6edf3}
 
-        /* Header */
-        header {
-            text-align: center;
-            padding: 30px 0 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 30px;
-        }
-        .logo {
-            font-size: 2rem; font-weight: bold;
-            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-        .subtitle { color: rgba(255,255,255,0.6); margin-top: 6px; font-size: 0.95rem; }
-        .back-link {
-            display: inline-block; margin-top: 12px;
-            color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem;
-        }
-        .back-link:hover { color: #00d4ff; }
+        /* Nav */
+        .nav{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+        .nav-back{color:#8b949e;text-decoration:none;font-size:.85rem;transition:color .2s}
+        .nav-back:hover{color:#00d4ff}
 
-        /* Provider status bar */
-        .provider-bar {
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-            margin-bottom: 28px; padding: 14px; border-radius: 12px;
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-        }
-        .provider-chip {
-            font-size: 0.78rem; padding: 4px 12px; border-radius: 20px;
-            display: flex; align-items: center; gap: 5px;
-        }
-        .provider-chip.active { background: rgba(0,230,118,0.12); color: #00e676; border: 1px solid rgba(0,230,118,0.25); }
-        .provider-chip.skipped { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.08); }
-        .provider-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
-        .provider-chip.active .dot { background: #00e676; }
-        .provider-chip.skipped .dot { background: rgba(255,255,255,0.25); }
+        /* Hero */
+        .hero{text-align:center;padding:60px 24px 48px;background:linear-gradient(180deg,rgba(0,212,255,0.04) 0%,transparent 100%)}
+        .hero-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.2);margin-bottom:16px}
+        .hero h1{font-size:2rem;font-weight:800;line-height:1.2;margin-bottom:10px}
+        .hero h1 span{background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:#8b949e;font-size:1rem;max-width:560px;margin:0 auto 8px;line-height:1.6}
+        .hero-features{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:20px;font-size:.82rem;color:#8b949e}
+        .hero-features span{display:flex;align-items:center;gap:6px}
+        .hero-features .check{color:#00e676;font-weight:700}
 
-        /* Scan form */
-        .scan-form {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; padding: 28px; margin-bottom: 32px;
-        }
-        .form-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 200px; }
-        .form-group label {
-            display: block; font-size: 0.82rem; color: rgba(255,255,255,0.6);
-            margin-bottom: 6px; font-weight: 500;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%; padding: 10px 14px; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
-            color: #fff; font-size: 0.92rem; font-family: inherit; outline: none;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: rgba(0,212,255,0.5);
-        }
-        .form-group textarea { resize: vertical; min-height: 70px; }
-        .form-hint { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px; }
-        .btn-scan {
-            padding: 12px 36px; border: none; border-radius: 10px; cursor: pointer;
-            font-size: 1rem; font-weight: 600; font-family: inherit;
-            background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-        .btn-scan:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-scan:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        /* Form */
+        .form-card{max-width:640px;margin:-20px auto 0;padding:28px 32px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;position:relative;z-index:1}
+        .form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+        .form-field{flex:1;min-width:180px}
+        .form-field label{display:block;font-size:.78rem;color:#8b949e;margin-bottom:5px;font-weight:500}
+        .form-field input,.form-field textarea{width:100%;padding:11px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e6edf3;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+        .form-field input:focus,.form-field textarea:focus{border-color:#00d4ff}
+        .form-field textarea{resize:vertical;min-height:68px}
+        .form-hint{font-size:.72rem;color:#484f58;margin-top:3px}
+        .btn-primary{width:100%;padding:13px;border:none;border-radius:10px;cursor:pointer;font-size:1rem;font-weight:700;font-family:inherit;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;transition:opacity .2s,transform .15s;letter-spacing:.3px}
+        .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+        .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
-        /* Metrics cards */
-        .metrics-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 14px; margin-bottom: 28px;
-        }
-        .metric-card {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px; padding: 22px; text-align: center;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-        .metric-card:hover { border-color: rgba(0,212,255,0.4); transform: translateY(-2px); }
-        .metric-value { font-size: 2rem; font-weight: bold; margin-bottom: 4px; }
-        .metric-label { color: rgba(255,255,255,0.6); font-size: 0.82rem; }
+        /* Results */
+        .results{max-width:960px;margin:0 auto;padding:0 24px 60px;display:none}
 
-        /* Section titles */
-        .section-title {
-            font-size: 1.2rem; font-weight: 600; margin: 28px 0 12px;
-            padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        /* Score hero */
+        .score-hero{text-align:center;padding:40px 0 32px}
+        .score-ring{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative}
+        .score-ring::before{content:'';position:absolute;inset:0;border-radius:50%;padding:4px;background:conic-gradient(var(--ring-color) var(--ring-pct),rgba(255,255,255,0.06) 0);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+        .score-num{font-size:2.2rem;font-weight:800;z-index:1}
+        .score-label{color:#8b949e;font-size:.85rem;margin-bottom:4px}
+        .score-sub{color:#484f58;font-size:.78rem}
 
-        /* LLM performance bars */
-        .bar-chart { display: flex; flex-direction: column; gap: 10px; max-width: 600px; margin-bottom: 24px; }
-        .bar-row { display: flex; align-items: center; gap: 10px; }
-        .bar-label { width: 100px; font-size: 0.85rem; text-align: right; color: rgba(255,255,255,0.8); }
-        .bar-track { flex: 1; height: 22px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; position: relative; }
-        .bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
-        .bar-pct { position: absolute; right: 8px; top: 2px; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+        /* Stat cards */
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:32px}
+        .stat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;text-align:center;transition:border-color .2s}
+        .stat:hover{border-color:rgba(0,212,255,0.2)}
+        .stat-val{font-size:1.4rem;font-weight:700;margin-bottom:2px}
+        .stat-lbl{font-size:.73rem;color:#8b949e}
 
-        /* Results table */
-        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-        .results-table th {
-            text-align: left; padding: 10px 14px; font-size: 0.8rem; font-weight: 600;
-            color: rgba(255,255,255,0.5); border-bottom: 1px solid rgba(255,255,255,0.1);
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .results-table td {
-            padding: 12px 14px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.85); vertical-align: top;
-        }
-        .results-table tr:hover td { background: rgba(255,255,255,0.02); }
-        .results-table .snippet { color: rgba(255,255,255,0.45); font-size: 0.8rem; max-width: 320px; }
+        /* Section */
+        .sec-title{font-size:1.05rem;font-weight:600;margin:28px 0 14px;color:#e6edf3;display:flex;align-items:center;gap:8px}
+        .sec-title .icon{font-size:1.1rem}
 
-        /* Badges */
-        .badge {
-            font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
-            display: inline-block;
-        }
-        .badge-cited { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
-        .badge-missed { background: rgba(255,82,82,0.12); color: #ff5252; border: 1px solid rgba(255,82,82,0.25); }
-        .badge-mock { background: rgba(255,171,0,0.12); color: #ffab00; border: 1px solid rgba(255,171,0,0.25); }
-        .badge-error { background: rgba(255,82,82,0.08); color: #ff8a80; border: 1px solid rgba(255,82,82,0.15); }
-        .badge-llm {
-            background: rgba(123,44,191,0.15); color: #ce93d8; border: 1px solid rgba(123,44,191,0.25);
-            font-size: 0.73rem; padding: 2px 8px;
-        }
+        /* Query cards */
+        .query-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+        .qcard{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .2s}
+        .qcard:hover{border-color:rgba(0,212,255,0.15)}
+        .qcard.cited{border-left:3px solid #00e676}
+        .qcard.missed{border-left:3px solid rgba(255,82,82,0.4)}
+        .qcard-left{flex:1}
+        .qcard-query{font-size:.9rem;font-weight:500;margin-bottom:4px}
+        .qcard-meta{font-size:.75rem;color:#8b949e;display:flex;gap:10px;flex-wrap:wrap}
+        .qcard-right{text-align:right;flex-shrink:0}
+        .pill{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.72rem;font-weight:600}
+        .pill-yes{background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2)}
+        .pill-no{background:rgba(255,82,82,0.08);color:#ff5252;border:1px solid rgba(255,82,82,0.15)}
+        .pill-llm{background:rgba(123,44,191,0.1);color:#ce93d8;border:1px solid rgba(123,44,191,0.15);font-weight:500}
 
-        /* Skipped / errors panel */
-        .info-panel {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
-        }
-        .info-panel h3 { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
-        .info-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85rem; }
-        .info-row .reason { color: rgba(255,255,255,0.4); }
+        /* Insight cards */
+        .insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:32px}
+        .insight{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;transition:border-color .2s}
+        .insight:hover{border-color:rgba(0,212,255,0.15)}
+        .insight-icon{font-size:1.3rem;margin-bottom:8px}
+        .insight-title{font-size:.88rem;font-weight:600;margin-bottom:4px}
+        .insight-desc{font-size:.78rem;color:#8b949e;line-height:1.5}
 
-        /* DB error banner */
-        .db-banner {
-            background: rgba(255,171,0,0.08); border: 1px solid rgba(255,171,0,0.2);
-            border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
-            font-size: 0.85rem; color: #ffab00; display: none;
-        }
+        /* CTA */
+        .cta-box{text-align:center;padding:32px;background:linear-gradient(135deg,rgba(0,212,255,0.06),rgba(123,44,191,0.06));border:1px solid rgba(255,255,255,0.06);border-radius:16px;margin-top:32px}
+        .cta-box h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+        .cta-box p{color:#8b949e;font-size:.85rem;margin-bottom:16px}
+        .btn-cta{display:inline-block;padding:12px 32px;border-radius:10px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;text-decoration:none;font-size:.92rem;font-weight:600;transition:opacity .2s}
+        .btn-cta:hover{opacity:.85}
 
-        /* Spinner */
-        .spinner {
-            width: 40px; height: 40px; margin: 0 auto 14px;
-            border: 3px solid rgba(255,255,255,0.15); border-top-color: #00d4ff;
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-overlay {
-            text-align: center; padding: 50px 0; display: none;
-        }
-        .loading-overlay p { color: rgba(255,255,255,0.5); font-size: 0.92rem; }
+        /* Loading */
+        .loading{text-align:center;padding:60px 0;display:none}
+        .spinner{width:44px;height:44px;margin:0 auto 16px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading p{color:#8b949e;font-size:.9rem}
+        .loading .sub{color:#484f58;font-size:.78rem;margin-top:6px}
 
-        /* Empty state */
-        .empty-state {
-            text-align: center; padding: 50px 20px; color: rgba(255,255,255,0.4);
-        }
-        .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+        /* Footer */
+        .footer{text-align:center;padding:24px;color:#484f58;font-size:.72rem;border-top:1px solid rgba(255,255,255,0.04);margin-top:40px}
 
-        /* Responsive */
-        @media (max-width: 700px) {
-            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-            .form-row { flex-direction: column; }
-            .results-table { font-size: 0.82rem; }
-            .results-table .snippet { max-width: 180px; }
+        @media(max-width:600px){
+            .hero h1{font-size:1.5rem}
+            .form-row{flex-direction:column}
+            .stats{grid-template-columns:repeat(2,1fr)}
+            .score-ring{width:100px;height:100px}
+            .score-num{font-size:1.8rem}
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div class="logo">AISEO Master</div>
-        <div class="subtitle">AEO Rank Tracker — Multi-LLM Citation Detection</div>
-        <a href="/" class="back-link">← Back to Home</a>
-    </header>
 
-    <!-- Provider status -->
-    <div class="provider-bar" id="provider-bar">
-        <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Checking providers…</span>
-    </div>
+<nav class="nav">
+    <a href="/" class="nav-logo">AI1stSEO</a>
+    <a href="/" class="nav-back">← Back to Home</a>
+</nav>
 
-    <!-- Scan form -->
-    <div class="scan-form">
-        <div class="form-row">
-            <div class="form-group">
-                <label for="brand">Brand Name</label>
-                <input type="text" id="brand" placeholder="AI1stSEO" value="AI1stSEO">
-            </div>
-            <div class="form-group">
-                <label for="domain">Target Domain</label>
-                <input type="text" id="domain" placeholder="ai1stseo.com" value="ai1stseo.com">
-            </div>
-        </div>
-        <div class="form-group" style="margin-bottom:18px;">
-            <label for="queries">Search Queries (one per line)</label>
-            <textarea id="queries" placeholder="best SEO tools&#10;top AI marketing platforms&#10;how to improve website ranking">best SEO tools
-top AI marketing platforms
-how to improve website ranking</textarea>
-            <div class="form-hint">1–20 queries. These are sent to each active LLM provider.</div>
-        </div>
-        <button class="btn-scan" id="btn-scan" onclick="runScan()">Run AEO Scan</button>
-    </div>
-
-    <!-- DB error banner -->
-    <div class="db-banner" id="db-banner"></div>
-
-    <!-- Loading -->
-    <div class="loading-overlay" id="loading">
-        <div class="spinner"></div>
-        <p id="loading-text">Scanning across LLM providers…</p>
-    </div>
-
-    <!-- Results (hidden until scan completes) -->
-    <div id="results-area" style="display:none;">
-
-        <!-- Metrics -->
-        <div class="metrics-grid" id="metrics"></div>
-
-        <!-- LLM Performance -->
-        <h2 class="section-title">Citation Rate by LLM</h2>
-        <div class="bar-chart" id="llm-bars"></div>
-
-        <!-- Query Performance -->
-        <h2 class="section-title">Citation Rate by Query</h2>
-        <div class="bar-chart" id="query-bars"></div>
-
-        <!-- Skipped / Errors -->
-        <div id="info-panels"></div>
-
-        <!-- Results table -->
-        <h2 class="section-title">Detailed Results</h2>
-        <div style="overflow-x:auto;">
-            <table class="results-table" id="results-table">
-                <thead>
-                    <tr>
-                        <th>Query</th>
-                        <th>LLM</th>
-                        <th>Cited</th>
-                        <th>Match</th>
-                        <th>Snippet</th>
-                    </tr>
-                </thead>
-                <tbody id="results-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Empty state -->
-    <div class="empty-state" id="empty-state">
-        <div class="icon">🔍</div>
-        <p>Enter your brand details and run a scan to see how LLMs cite your brand.</p>
+<div class="hero">
+    <span class="hero-badge">Free Tool</span>
+    <h1>Is Your Brand Visible to <span>AI Search?</span></h1>
+    <p>Find out if ChatGPT, Gemini, Claude, and Perplexity mention your brand when people ask about your industry.</p>
+    <div class="hero-features">
+        <span><span class="check">✓</span> Free instant scan</span>
+        <span><span class="check">✓</span> 4 AI models checked</span>
+        <span><span class="check">✓</span> No signup required</span>
     </div>
 </div>
+
+<div class="form-card">
+    <form id="scan-form">
+        <div class="form-row">
+            <div class="form-field">
+                <label>Brand Name</label>
+                <input type="text" id="f-brand" placeholder="Your Company" required>
+            </div>
+            <div class="form-field">
+                <label>Domain</label>
+                <input type="text" id="f-domain" placeholder="yourcompany.com" required>
+            </div>
+        </div>
+        <div class="form-field" style="margin-bottom:16px">
+            <label>What should AI say about you? (one query per line)</label>
+            <textarea id="f-queries" placeholder="best tools in your industry&#10;top companies like yours&#10;alternatives to your competitors"></textarea>
+            <div class="form-hint">We'll ask each AI model these questions and check if they mention you.</div>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-scan">Check My AI Visibility</button>
+    </form>
+</div>
+
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Asking AI models about your brand…</p>
+    <p class="sub">This takes a few seconds</p>
+</div>
+
+<div class="results" id="results"></div>
+
+<div class="footer">AI1stSEO — AI-First SEO Platform · AEO · GEO · SEO</div>
 
 <script>
 const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? '' : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const LLM_NAMES = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'AI Scan'};
 
-// ── Load provider status on page load ──
-(async function loadProviders() {
-    try {
-        const res = await fetch(API_BASE + '/api/aeo-tracker/providers');
-        const data = await res.json();
-        renderProviders(data);
-    } catch (e) {
-        document.getElementById('provider-bar').innerHTML =
-            '<span style="color:#ff8a80;font-size:0.8rem;">Could not reach backend</span>';
-    }
-})();
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
-function renderProviders(data) {
-    const bar = document.getElementById('provider-bar');
-    const active = data.active || [];
-    const skipped = data.skipped || {};
-    const all = data.priority_order || ['gemini','openai','claude','perplexity','ollama','mock'];
-    const labels = {gemini:'Gemini',openai:'ChatGPT',claude:'Claude',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'};
+document.getElementById('scan-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const brand = document.getElementById('f-brand').value.trim();
+    const rawDomain = document.getElementById('f-domain').value.trim();
+    const rawQ = document.getElementById('f-queries').value.trim();
 
-    let html = '';
-    const isMockOnly = active.length === 1 && active[0] === 'mock';
+    if(!brand||!rawDomain) return;
+    const domain = rawDomain.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0].toLowerCase();
+    const queries = rawQ ? rawQ.split('\n').map(q=>q.trim()).filter(Boolean) : [
+        'best '+brand+' alternatives',
+        'top companies like '+domain,
+        'is '+domain+' recommended'
+    ];
+    if(queries.length>20){alert('Maximum 20 queries.');return}
 
-    if (isMockOnly) {
-        html = '<span class="provider-chip active" style="background:rgba(255,171,0,0.12);color:#ffab00;border-color:rgba(255,171,0,0.25);"><span class="dot" style="background:#ffab00;"></span>Demo Mode — simulated AI responses</span>';
-    } else {
-        for (const p of all) {
-            if (p === 'mock') continue;
-            const isActive = active.includes(p);
-            if (isActive) {
-                html += `<span class="provider-chip active"><span class="dot"></span>${labels[p]||p}</span>`;
-            }
-        }
-        const skippedCount = Object.keys(skipped).length;
-        if (skippedCount > 0) {
-            html += `<span class="provider-chip skipped">${skippedCount} unavailable</span>`;
-        }
-    }
-    bar.innerHTML = html;
-}
+    const btn=document.getElementById('btn-scan');
+    const loading=document.getElementById('loading');
+    const results=document.getElementById('results');
 
-// ── Run scan ──
-async function runScan() {
-    const brand = document.getElementById('brand').value.trim();
-    const domain = document.getElementById('domain').value.trim();
-    const raw = document.getElementById('queries').value.trim();
-    const queries = raw.split('\n').map(q => q.trim()).filter(Boolean);
+    btn.disabled=true;btn.textContent='Scanning…';
+    loading.style.display='block';results.style.display='none';
+    loading.scrollIntoView({behavior:'smooth',block:'center'});
 
-    if (!brand || !domain || !queries.length) {
-        alert('Please fill in brand name, domain, and at least one query.');
-        return;
-    }
-    if (queries.length > 20) {
-        alert('Maximum 20 queries per scan.');
-        return;
-    }
-
-    const btn = document.getElementById('btn-scan');
-    const loading = document.getElementById('loading');
-    const resultsArea = document.getElementById('results-area');
-    const emptyState = document.getElementById('empty-state');
-    const dbBanner = document.getElementById('db-banner');
-
-    btn.disabled = true;
-    loading.style.display = 'block';
-    resultsArea.style.display = 'none';
-    emptyState.style.display = 'none';
-    dbBanner.style.display = 'none';
-
-    try {
-        const res = await fetch(API_BASE + '/api/aeo-tracker/run', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ brand_name: brand, target_domain: domain, queries }),
+    try{
+        const res=await fetch(API_BASE+'/api/aeo-tracker/run',{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({brand_name:brand,target_domain:domain,queries:queries})
         });
-        const data = await res.json();
-
-        if (data.status !== 'ok') {
-            throw new Error(data.error || 'Scan failed');
-        }
-
-        loading.style.display = 'none';
-        resultsArea.style.display = 'block';
-        renderResults(data);
-
-        // Refresh provider bar with latest info
-        if (data.summary && data.summary.active_llms) {
-            renderProviders({
-                active: data.summary.active_llms,
-                skipped: data.summary.skipped_llms || {},
-                priority_order: ['gemini','openai','claude','perplexity','ollama','mock'],
-            });
-        }
-
-    } catch (e) {
-        loading.style.display = 'none';
-        emptyState.style.display = 'block';
-        emptyState.innerHTML = `<div class="icon">⚠️</div><p style="color:#ff8a80;">${esc(e.message)}</p>`;
-    } finally {
-        btn.disabled = false;
+        const data=await res.json();
+        if(data.status!=='ok') throw new Error(data.error||'Scan failed');
+        loading.style.display='none';
+        results.style.display='block';
+        render(data,brand,domain);
+        results.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(err){
+        loading.style.display='none';
+        results.style.display='block';
+        results.innerHTML='<div style="text-align:center;padding:40px 0"><p style="color:#ff8a80;font-size:1rem">'+esc(err.message)+'</p><p style="color:#8b949e;font-size:.85rem;margin-top:8px">Please try again.</p></div>';
+    }finally{
+        btn.disabled=false;btn.textContent='Check My AI Visibility';
     }
-}
+});
+</script>
+<script>
+function render(data,brand,domain){
+    const s=data.summary||{};const res=data.results||[];
+    const vis=s.visibility_score||0;
+    const cited=s.total_cited||0;const total=s.total_scanned||0;
+    const ringColor=vis>=50?'#00e676':vis>0?'#ffab00':'#ff5252';
+    const bestLlm=LLM_NAMES[s.best_llm]||s.best_llm||'—';
+    const topQ=s.top_query||'—';
 
-// ── Render results ──
-function renderResults(data) {
-    const summary = data.summary || {};
-    const results = data.results || [];
+    let h='';
 
-    // DB error banner
-    if (summary.db_error || data.db_error) {
-        const banner = document.getElementById('db-banner');
-        banner.textContent = '⚠ Database unavailable — results shown but not persisted.';
-        banner.style.display = 'block';
+    // Score hero
+    h+=`<div class="score-hero">
+        <div class="score-ring" style="--ring-color:${ringColor};--ring-pct:${vis}%">
+            <span class="score-num" style="color:${ringColor}">${vis}%</span>
+        </div>
+        <div class="score-label">AI Visibility Score for <strong>${esc(domain)}</strong></div>
+        <div class="score-sub">${cited} of ${total} AI responses mentioned your brand</div>
+    </div>`;
+
+    // Stats
+    h+=`<div class="stats">
+        <div class="stat"><div class="stat-val" style="color:#00d4ff">${total}</div><div class="stat-lbl">AI Responses Checked</div></div>
+        <div class="stat"><div class="stat-val" style="color:#00e676">${cited}</div><div class="stat-lbl">Times Cited</div></div>
+        <div class="stat"><div class="stat-val">${esc(bestLlm)}</div><div class="stat-lbl">Most Likely to Cite You</div></div>
+        <div class="stat"><div class="stat-val" style="font-size:.95rem;line-height:1.4rem">${esc(topQ.length>28?topQ.substring(0,28)+'…':topQ)}</div><div class="stat-lbl">Best Performing Query</div></div>
+    </div>`;
+
+    // Insights
+    h+=`<div class="sec-title"><span class="icon">💡</span> What This Means</div>`;
+    h+='<div class="insights">';
+    if(vis>=70){
+        h+=insightCard('🟢','Strong AI Presence','Your brand is well-represented in AI search results. Keep creating authoritative content to maintain this position.');
+    }else if(vis>=30){
+        h+=insightCard('🟡','Moderate Visibility','AI models sometimes mention you, but there\'s room to grow. Focus on structured content and FAQ schema.');
+    }else{
+        h+=insightCard('🔴','Low AI Visibility','AI models rarely cite your brand. This means potential customers asking AI won\'t find you. Action needed.');
     }
-
-    // Metrics
-    const vis = summary.visibility_score || 0;
-    const visColor = vis >= 50 ? '#00e676' : vis > 0 ? '#ffab00' : '#ff5252';
-    const bestLlmLabel = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'}[summary.best_llm] || summary.best_llm;
-    const activeCount = (summary.active_llms || []).length;
-    const isMock = (summary.active_llms || []).includes('mock') && activeCount === 1;
-    document.getElementById('metrics').innerHTML = `
-        <div class="metric-card">
-            <div class="metric-value" style="color:${visColor}">${vis}%</div>
-            <div class="metric-label">Visibility Score</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">${summary.total_scanned || 0}</div>
-            <div class="metric-label">Total Scanned</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value" style="color:#00e676">${summary.total_cited || 0}</div>
-            <div class="metric-label">Citations Found</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">${isMock ? 'Demo' : activeCount}</div>
-            <div class="metric-label">${isMock ? 'Mode' : 'Active LLMs'}</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">${bestLlmLabel ? esc(bestLlmLabel) : '—'}</div>
-            <div class="metric-label">Best LLM</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value" style="font-size:1rem;line-height:2rem;">${summary.top_query ? esc(summary.top_query).substring(0,25) : '—'}</div>
-            <div class="metric-label">Top Query</div>
-        </div>
-    `;
-
-    // LLM performance bars
-    const llmPerf = summary.llm_performance || {};
-    document.getElementById('llm-bars').innerHTML = renderBars(llmPerf, llmBarColor);
-
-    // Query performance bars
-    const queryPerf = summary.query_performance || {};
-    document.getElementById('query-bars').innerHTML = renderBars(queryPerf, queryBarColor);
-
-    // Info panels — only show errors that matter to users, hide internal config details
-    let panelsHtml = '';
-    const isMockMode = (summary.active_llms || []).includes('mock') && (summary.active_llms || []).length === 1;
-    if (isMockMode) {
-        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,171,0,0.15);"><h3 style="color:#ffab00;">Demo Mode</h3>';
-        panelsHtml += '<div class="info-row"><span style="color:rgba(255,255,255,0.6);">Results are simulated. Connect API keys or Ollama for real AI responses.</span></div>';
-        panelsHtml += '</div>';
+    if(cited>0){
+        h+=insightCard('✅','You\'re Being Cited','AI models are already referencing your brand — this is a strong signal. Build on this with more targeted content.');
+    }else{
+        h+=insightCard('⚠️','Not Yet Cited','No AI model mentioned your brand in these queries. Create answer-style content targeting these exact questions.');
     }
-    const errors = summary.errors_by_llm || {};
-    if (Object.keys(errors).length && !isMockMode) {
-        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,82,82,0.15);"><h3 style="color:#ff8a80;">Some providers had issues</h3>';
-        for (const [llm, errs] of Object.entries(errors)) {
-            const friendlyName = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama'}[llm] || llm;
-            panelsHtml += `<div class="info-row"><span>${esc(friendlyName)}</span><span class="reason">temporarily unavailable</span></div>`;
-        }
-        panelsHtml += '</div>';
-    }
-    document.getElementById('info-panels').innerHTML = panelsHtml;
+    h+=insightCard('📊','Competitive Edge','Most businesses haven\'t optimized for AI search yet. Acting now puts you ahead of competitors in AI discovery.');
+    h+='</div>';
 
-    // Results table
-    const llmLabels = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'AI Scan'};
-    let tbody = '';
-    for (const r of results) {
-        const cited = r.citation_found;
-        const citedBadge = cited
-            ? '<span class="badge badge-cited">Cited</span>'
-            : '<span class="badge badge-missed">Not cited</span>';
-        const mockBadge = r.mock ? ' <span class="badge badge-mock">demo</span>' : '';
-        const errorBadge = r.error ? ' <span class="badge badge-error">retry</span>' : '';
-        const matchType = r.match_type ? esc(r.match_type.replace(/_/g, ' ')) : '—';
-        const llmName = llmLabels[r.llm] || r.llm;
-        const snippet = r.error
-            ? '<span style="color:rgba(255,255,255,0.3);">Provider temporarily unavailable</span>'
-            : esc((r.response_snippet || '').substring(0, 120)) + (r.response_snippet && r.response_snippet.length > 120 ? '…' : '');
-
-        tbody += `<tr>
-            <td>${esc(r.query)}</td>
-            <td><span class="badge badge-llm">${esc(llmName)}</span>${mockBadge}${errorBadge}</td>
-            <td>${citedBadge}</td>
-            <td>${matchType}</td>
-            <td class="snippet">${snippet}</td>
-        </tr>`;
-    }
-    document.getElementById('results-body').innerHTML = tbody;
-}
-
-function renderBars(perfObj, colorFn) {
-    const entries = Object.entries(perfObj).sort((a, b) => b[1].rate - a[1].rate);
-    if (!entries.length) return '<p style="color:rgba(255,255,255,0.3);font-size:0.85rem;">No data</p>';
-    const labels = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',mock:'Demo'};
-    let html = '';
-    for (const [name, stats] of entries) {
-        const pct = stats.rate || 0;
-        const color = colorFn(pct);
-        const label = labels[name] || name;
-        html += `<div class="bar-row">
-            <span class="bar-label">${esc(label.length > 14 ? label.substring(0,14) + '…' : label)}</span>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:${pct}%;background:${color};"></div>
-                <span class="bar-pct">${pct}% (${stats.cited}/${stats.total})</span>
+    // Query results
+    h+=`<div class="sec-title"><span class="icon">🔍</span> Results by Query</div>`;
+    h+='<div class="query-cards">';
+    for(const r of res){
+        const isCited=r.citation_found;
+        const llm=LLM_NAMES[r.llm]||r.llm;
+        const matchLabel=r.match_type?r.match_type.replace(/_/g,' '):'';
+        h+=`<div class="qcard ${isCited?'cited':'missed'}">
+            <div class="qcard-left">
+                <div class="qcard-query">"${esc(r.query)}"</div>
+                <div class="qcard-meta">
+                    <span class="pill pill-llm">${esc(llm)}</span>
+                    ${matchLabel?'<span>'+esc(matchLabel)+'</span>':''}
+                </div>
+            </div>
+            <div class="qcard-right">
+                ${isCited?'<span class="pill pill-yes">✓ Cited</span>':'<span class="pill pill-no">Not found</span>'}
             </div>
         </div>`;
     }
-    return html;
+    h+='</div>';
+
+    // Per-LLM breakdown
+    const llmPerf=s.llm_performance||{};
+    const llmEntries=Object.entries(llmPerf).sort((a,b)=>b[1].rate-a[1].rate);
+    if(llmEntries.length>1){
+        h+=`<div class="sec-title"><span class="icon">🤖</span> Performance by AI Model</div>`;
+        h+='<div class="stats">';
+        for(const [k,v] of llmEntries){
+            const name=LLM_NAMES[k]||k;
+            const c=v.rate>=50?'#00e676':v.rate>0?'#ffab00':'#ff5252';
+            h+=`<div class="stat"><div class="stat-val" style="color:${c}">${v.rate}%</div><div class="stat-lbl">${esc(name)} (${v.cited}/${v.total})</div></div>`;
+        }
+        h+='</div>';
+    }
+
+    // CTA
+    h+=`<div class="cta-box">
+        <h3>Want to Improve Your AI Visibility?</h3>
+        <p>Get a full 236-point SEO + AEO audit with actionable recommendations.</p>
+        <a href="/analyze" class="btn-cta">Run Full SEO Analysis →</a>
+    </div>`;
+
+    document.getElementById('results').innerHTML=h;
 }
 
-function llmBarColor(pct) {
-    if (pct >= 60) return 'linear-gradient(90deg, #00e676, #00c853)';
-    if (pct >= 30) return 'linear-gradient(90deg, #ffab00, #ff9100)';
-    return 'linear-gradient(90deg, #ff5252, #d50000)';
-}
-function queryBarColor(pct) {
-    if (pct >= 60) return 'linear-gradient(90deg, #00d4ff, #7b2cbf)';
-    if (pct >= 30) return 'linear-gradient(90deg, #7b2cbf, #ce93d8)';
-    return 'linear-gradient(90deg, #ff5252, #ff8a80)';
-}
-
-function esc(str) {
-    const d = document.createElement('div');
-    d.textContent = str || '';
-    return d.innerHTML;
+function insightCard(icon,title,desc){
+    return `<div class="insight"><div class="insight-icon">${icon}</div><div class="insight-title">${esc(title)}</div><div class="insight-desc">${esc(desc)}</div></div>`;
 }
 </script>
 </body>
