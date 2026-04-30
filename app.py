@@ -111,6 +111,12 @@ try:
 except Exception as e:
     print(f"⚠ Month 3 systems: {e}")
 
+try:
+    from visitor_tracking.tracker_api import register_blueprint as register_tracker
+    register_tracker(app)
+except Exception as e:
+    print(f"⚠ visitor_tracking: {e}")
+
 # ── Global JSON error handlers (prevent HTML error pages for API routes) ──────
 @app.errorhandler(500)
 def handle_500(e):
@@ -3085,6 +3091,28 @@ def aeo_analyze():
         return jsonify({'error': f'AEO analysis failed: {str(e)}'}), 500
 
 
+# ============== AEO VISIBILITY (LLM Mention Detection) ==============
+
+@app.route('/api/aeo-results')
+def aeo_visibility_results():
+    """Return AEO visibility data — LLM mention detection results + score."""
+    results_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'aeo_results.json')
+    if not os.path.exists(results_path):
+        return jsonify({'error': 'No AEO results yet. Run: python services/aeo_engine.py'}), 404
+    try:
+        with open(results_path, 'r') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read AEO results: {str(e)}'}), 500
+
+
+@app.route('/aeo-dashboard')
+def serve_aeo_dashboard():
+    """AEO Visibility Dashboard — LLM mention tracking."""
+    return send_from_directory('.', 'aeo-dashboard.html')
+
+
 # ============== AI RANKING RECOMMENDATIONS ==============
 
 @app.route('/api/ai/ranking-recommendations', methods=['POST'])
@@ -3946,6 +3974,42 @@ try:
     app.register_blueprint(growth_bp)
 except Exception as e:
     print(f"⚠ growth Blueprint: {e}")
+
+try:
+    from social_publishing.api import register_blueprint as register_publish_bp
+    register_publish_bp(app)
+except Exception as e:
+    print(f"⚠ social_publishing Blueprint: {e}")
+
+# --- System activation (non-blocking) ---
+_queue_worker_ok = False
+_duplicate_detector_ok = False
+_publish_api_ok = "social_publish" in app.blueprints
+_visitor_tracking_ok = "visitor_tracking" in app.blueprints
+
+try:
+    from social_publishing.queue import start_worker
+    start_worker()
+    _queue_worker_ok = True
+    print("✓ queue worker started")
+except Exception as e:
+    print(f"⚠ queue worker: {e}")
+
+try:
+    from social_publishing.duplicate_detector import is_duplicate
+    _duplicate_detector_ok = True
+    print("✓ duplicate detector active")
+except Exception as e:
+    print(f"⚠ duplicate detector: {e}")
+
+print("\n" + "=" * 48)
+print("  SYSTEM STATUS")
+print("=" * 48)
+print(f"  Publishing API:       {'ACTIVE' if _publish_api_ok else 'INACTIVE'}")
+print(f"  Queue Worker:         {'ACTIVE' if _queue_worker_ok else 'INACTIVE'}")
+print(f"  Duplicate Detection:  {'ACTIVE' if _duplicate_detector_ok else 'INACTIVE'}")
+print(f"  Visitor Tracking:     {'ACTIVE' if _visitor_tracking_ok else 'INACTIVE'}")
+print("=" * 48 + "\n")
 
 @app.route('/<path:path>')
 def catch_all(path):
