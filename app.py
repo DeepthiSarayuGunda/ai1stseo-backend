@@ -4111,6 +4111,11 @@ def serve_aeo_dashboard():
     """AEO Visibility Dashboard — LLM mention tracking."""
     return send_from_directory('.', 'aeo-dashboard.html')
 
+@app.route('/aeo-tracker')
+def serve_aeo_tracker():
+    """AEO Rank Tracker — Multi-LLM citation detection UI."""
+    return send_from_directory('.', 'aeo-tracker.html')
+
 
 # ============== OUTREACH GENERATOR (Unlinked Mentions) ==============
 
@@ -5212,7 +5217,26 @@ try:
 except Exception as e:
     print(f"\u26a0 Attribution API: {e}")
 
-
+# --- AEO Rank Tracker (Multi-LLM citation detection) ---
+try:
+    from aeo_rank_tracker.api import aeo_tracker_bp
+    app.register_blueprint(aeo_tracker_bp)
+    # Startup status log
+    try:
+        from aeo_rank_tracker.tracker import detect_available_llms
+        _det = detect_available_llms()
+        _active = _det["active"]
+        if _active == ["mock"]:
+            _mode = "mock"
+        elif len(_active) == 1:
+            _mode = _active[0]
+        else:
+            _mode = "mixed"
+        print(f"✓ AEO Rank Tracker ready — running in {_mode} mode (providers: {', '.join(_active)})")
+    except Exception:
+        print("✓ AEO Rank Tracker registered (provider detection deferred)")
+except Exception as e:
+    print(f"\u26a0 AEO Rank Tracker: {e}")
 
 
 
