@@ -6,6 +6,42 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-30 — Stripe Integration + Attribution Pipeline + Admin Fix + Infrastructure Hardening (Troy)
+
+**Stripe Payment Integration:**
+- Stripe live keys configured as Lambda env vars (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PUBLISHABLE_KEY)
+- Webhook endpoint created on Stripe: `https://api.ai1stseo.com/api/webhooks/stripe` → `checkout.session.completed`
+- `POST /api/stripe/create-checkout` — creates a $5 Pro trial checkout session, returns Stripe hosted URL
+- `GET /api/stripe/config` — returns publishable key for frontend
+- `POST /api/webhooks/stripe` — Stripe webhook handler, auto-upgrades user tier to `pro` on payment
+- Subscription tier system: `subscription_tier` field on users (free/pro/admin), `GET /api/user/tier`
+
+**AI Referral Attribution Pipeline:**
+- `POST /api/attribution/track` (public) — receives referral events from JS snippet, normalizes 15+ AI referrer patterns
+- `POST /api/attribution/convert` (public) — tracks conversion events tied to AI sessions
+- `GET /api/attribution/ai-referrals` (auth) — aggregated dashboard by source
+- `GET /api/attribution/snippet` (public) — returns copy-paste JS tracking snippet
+
+**Admin Endpoint Fix:**
+- Deepthi pushed 534 lines to app.py + new modules (month5_systems, aeo_engine). Lambda was stale.
+- Redeployed with full sync: all Troy modules + Deepthi's new modules + Samar's directory modules
+- All admin endpoints restored (system-status, audit-history, white-label, api-usage, documents)
+
+**New Features from Product Spec:**
+- AI inference response caching (24h DynamoDB TTL for low-temperature calls)
+- Citation probe bridge for content brief generator (`POST /api/backlinks/brief-citation-probe`)
+- SEO data API wrapper (`backend/seo_data_api.py`) — Ahrefs/DataForSEO/builtin fallback
+- `database_rows` + `table_counts` added to admin overview response
+
+**Infrastructure Hardening:**
+- DynamoDB point-in-time recovery enabled on all 15 tables
+- CloudWatch alarms: Lambda errors (>5/10min), throttles (>3/5min), duration (>25s avg)
+- Node.js 20.x EOL notice received — affects `seo-audit-tool` and `automation-hub` Lambdas (not ours)
+
+**Files changed:** `backend/auth.py`, `backend/admin_api.py`, `backend/ai_inference.py`, `backend/backlink_api.py`, `backend/attribution_api.py`, `backend/seo_data_api.py`, `backend/multisite_api.py`
+
+---
+
 ## 2026-04-28 — App.py Merge + Full Lambda Sync + Backlink Doc Update (Troy)
 
 **Root cause fix:** Two separate `app.py` files (root vs `backend/`) have been causing deploy overwrites for weeks. Merged all Troy-unique routes into Samar's root `app.py` so there is now ONE authoritative app.py.

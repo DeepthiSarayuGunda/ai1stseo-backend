@@ -606,3 +606,142 @@ Response: {"status": "success", "id": "uuid", "report": {"da_score": 45, "signal
 | ai1stseo-documents | Document repository metadata |
 | ai1stseo-backlinks | Backlink scores, analyses, reports (GSI: domain-index) |
 | ai1stseo-backlink-opportunities | Backlink opportunity queue |
+
+
+---
+
+## Multi-Site Dashboard *(auth required)*
+
+### POST /api/multi-site/add
+Save a site to the user's monitored list.
+```json
+Request:  {"url": "https://example.com", "name": "My Site"}
+Response: {"status": "success", "id": "uuid", "url": "https://example.com", "name": "My Site"}
+```
+
+### GET /api/multi-site/sites
+Return all saved sites with latest scores for the current user.
+```json
+Response: {"status": "success", "sites": [...], "total": 5}
+```
+
+### POST /api/multi-site/bulk-scan
+Trigger quick scans for multiple sites at once (10-check lightweight score).
+```json
+Request:  {"site_ids": ["uuid1", "uuid2"]} or {"urls": ["https://site1.com", "https://site2.com"]}
+Response: {"status": "success", "scanned": 2, "errors": 0, "results": [{...}]}
+```
+
+### DELETE /api/multi-site/:id
+Remove a site from the user's list (ownership verified).
+
+---
+
+## AI Referral Attribution
+
+### POST /api/attribution/track *(no auth — public)*
+Track a referral event from the JS snippet. Normalizes AI referrers (chatgpt.com, claude.ai, perplexity.ai, etc.).
+```json
+Request:  {"referrer": "https://chatgpt.com/c/abc", "landing_page": "https://yoursite.com/page", "site_id": "xxx", "session_id": "yyy"}
+Response: {"status": "success", "source": "ChatGPT", "is_ai": true}
+```
+
+### POST /api/attribution/convert *(no auth — public)*
+Track a conversion event tied to an AI referral session.
+```json
+Request:  {"session_id": "yyy", "type": "signup", "value": 0}
+Response: {"status": "success", "conversion_type": "signup"}
+```
+
+### GET /api/attribution/ai-referrals *(auth required)*
+Aggregated AI referral dashboard. Query: `?days=30&site_id=xxx`
+```json
+Response: {"status": "success", "ai_referrals": 45, "ai_conversions": 3, "conversion_rate": 6.7, "by_source": [{"source": "ChatGPT", "visits": 28}, ...]}
+```
+
+### GET /api/attribution/snippet *(no auth — public)*
+Returns the JavaScript tracking snippet for client installation. Query: `?site_id=xxx`
+```json
+Response: {"status": "success", "snippet": "<script>...</script>", "instructions": [...]}
+```
+
+---
+
+## Stripe / Payments
+
+### POST /api/stripe/create-checkout *(no auth)*
+Create a Stripe Checkout Session for the $5 Pro trial. Returns a redirect URL.
+```json
+Request:  {"email": "user@example.com"}
+Response: {"status": "success", "checkout_url": "https://checkout.stripe.com/...", "session_id": "cs_live_..."}
+```
+
+### GET /api/stripe/config *(no auth)*
+Returns the Stripe publishable key for frontend use.
+```json
+Response: {"status": "success", "publishable_key": "pk_live_...", "has_stripe": true}
+```
+
+### POST /api/webhooks/stripe *(Stripe only)*
+Stripe webhook endpoint. Receives `checkout.session.completed` events and upgrades user tier to `pro`.
+
+---
+
+## Subscription Tier
+
+### GET /api/user/tier *(auth required)*
+Get the current user's subscription tier.
+```json
+Response: {"status": "success", "email": "user@example.com", "tier": "free", "role": "member"}
+```
+
+---
+
+## Additional Backlink Endpoints *(auth required)*
+
+### POST /api/backlinks/brief-citation-probe
+Lightweight citation probe for the content brief generator. Returns cited domains, format signals, and green/amber/red recommendations.
+```json
+Request:  {"keyword": "best seo tools"}
+Response: {"status": "success", "cited_domains": [...], "format_signals": {"tables": true, "faqs": false, ...}, "signals": {"green": [...], "amber": [...], "red": [...]}}
+```
+
+### POST /api/backlinks/fingerprint-probe
+Probe an AI model and fingerprint the response. Detects answer changes vs previous probe.
+```json
+Request:  {"query": "What is AI 1st SEO?", "model": "default", "brand": "AI 1st SEO"}
+Response: {"status": "success", "response_hash": "abc123...", "changed": true, "diff": {"domains_added": [...], "domains_removed": [...]}}
+```
+
+### GET /api/backlinks/fingerprint-history
+Browse answer fingerprint history. Query: `?brand=AI 1st SEO&query=seo`
+
+### GET /api/backlinks/citation-authority/export
+Bulk export all citation authority data. Query: `?format=csv&type=citation_authority`
+
+### POST /api/mentions/scan
+Scan Google News and Reddit for brand mentions. Identifies unlinked backlink opportunities.
+```json
+Request:  {"brand": "AI 1st SEO", "domain": "ai1stseo.com"}
+Response: {"status": "success", "total_mentions": 12, "unlinked_count": 8, "linked_count": 4, "mentions": [...]}
+```
+
+### GET /api/mentions/history
+Brand mention scan history. Query: `?brand=AI 1st SEO`
+
+### POST /api/internal-links/analyze
+Crawl a site and analyze internal link structure. Detects orphan pages, over/under-linked pages, generic anchors.
+```json
+Request:  {"url": "https://ai1stseo.com", "max_pages": 20}
+Response: {"status": "success", "pages_crawled": 15, "issues": {"orphan_pages": [...], "under_linked": [...], "generic_anchors": [...]}, "summary": {...}}
+```
+
+### POST /api/backlinks/brand-sentiment
+Probe AI models for brand sentiment, recommendation strength, and hallucination detection.
+```json
+Request:  {"brand": "AI 1st SEO", "domain": "ai1stseo.com"}
+Response: {"status": "success", "dominant_sentiment": "positive", "avg_recommendation_score": 78.5, "hallucination_flags": [...]}
+```
+
+### GET /api/backlinks/brand-sentiment/history
+Brand sentiment probe history. Query: `?brand=AI 1st SEO`
