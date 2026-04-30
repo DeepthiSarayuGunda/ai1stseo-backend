@@ -3611,6 +3611,196 @@ Provide a 5-step strategic action plan to move this page from position #{analysi
         return jsonify({'error': f'PSIE optimization failed: {str(e)}'}), 500
 
 
+# ============== AI COUNCIL — Multi-Agent Analysis System (Dev 2) ==============
+
+def council_aeo_agent(soup, text, keyword):
+    """AEO Agent — evaluates AI citation readiness."""
+    score_data = compute_aeo_score(soup, text)
+    passed = [d['check'] for d in score_data['details'] if d['status'] == 'pass']
+    failed = [d['check'] for d in score_data['details'] if d['status'] == 'fail']
+    return {
+        'agent': 'AEO Specialist',
+        'focus': 'AI Engine Optimization — how likely AI chatbots will cite this content',
+        'score': score_data['score'],
+        'verdict': 'Strong' if score_data['score'] >= 70 else ('Moderate' if score_data['score'] >= 40 else 'Weak'),
+        'passed': passed,
+        'failed': failed,
+        'top_recommendations': [f'Fix: {f}' for f in failed[:3]] or ['All AEO checks passing'],
+    }
+
+def council_seo_agent(url, soup, text, keyword):
+    """SEO Agent — evaluates traditional on-page SEO."""
+    score_data = compute_seo_score(url, soup, text)
+    passed = [d['check'] for d in score_data['details'] if d['status'] == 'pass']
+    failed = [d['check'] for d in score_data['details'] if d['status'] == 'fail']
+    return {
+        'agent': 'SEO Specialist',
+        'focus': 'On-page SEO — title, meta, headings, content depth, structured data',
+        'score': score_data['score'],
+        'verdict': 'Strong' if score_data['score'] >= 70 else ('Moderate' if score_data['score'] >= 40 else 'Weak'),
+        'passed': passed,
+        'failed': failed,
+        'top_recommendations': [f'Fix: {f}' for f in failed[:3]] or ['All SEO checks passing'],
+    }
+
+def council_content_agent(text, soup):
+    """Content Quality Agent — evaluates readability, depth, E-E-A-T."""
+    readability = compute_readability_score(text)
+    word_count = len(text.split())
+    has_author = bool(re.search(r'(author|written by|posted by|dr\.|phd)', text.lower()))
+    has_date = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text.lower()))
+    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text.lower()))
+    eeat_count = sum([has_author, has_date, has_citations])
+    
+    issues = []
+    if word_count < 1000: issues.append(f'Content too thin ({word_count} words — aim for 1500+)')
+    if readability['score'] < 40: issues.append(f'Readability too low ({readability["score"]} — aim for 60+)')
+    if not has_author: issues.append('No author attribution found')
+    if not has_date: issues.append('No freshness signals (dates, "updated" markers)')
+    if not has_citations: issues.append('No source citations or research references')
+    
+    score = min(100, round((min(word_count, 2000) / 2000 * 40) + (readability['score'] * 0.3) + (eeat_count * 10)))
+    return {
+        'agent': 'Content Quality Analyst',
+        'focus': 'Readability, depth, E-E-A-T signals, freshness',
+        'score': score,
+        'verdict': 'Strong' if score >= 70 else ('Moderate' if score >= 40 else 'Weak'),
+        'passed': [x for x in ['Word count adequate', 'Good readability', 'Author present', 'Date present', 'Citations present'] if not any(x.lower().split()[0] in i.lower() for i in issues)],
+        'failed': issues,
+        'top_recommendations': issues[:3] or ['Content quality is strong'],
+        'metrics': {'word_count': word_count, 'readability': readability['score'], 'grade': readability['grade'], 'eeat_signals': eeat_count}
+    }
+
+def council_competitor_agent(url, soup, text, keyword):
+    """Competitor Intelligence Agent — compares against top-ranking patterns."""
+    parsed = urlparse(url)
+    h2s = [h.get_text(strip=True) for h in soup.find_all('h2')]
+    h3s = [h.get_text(strip=True) for h in soup.find_all('h3')]
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_count = len(json_ld)
+    lists = soup.find_all(['ul', 'ol'])
+    tables = soup.find_all('table')
+    images = soup.find_all('img')
+    
+    issues = []
+    if len(h2s) < 4: issues.append(f'Only {len(h2s)} H2 headings — top competitors average 6-8')
+    if len(h3s) < 3: issues.append(f'Only {len(h3s)} H3 sub-headings — add more depth')
+    if schema_count < 2: issues.append(f'Only {schema_count} schema types — competitors use 3-5')
+    if len(lists) < 3: issues.append('Fewer structured lists than typical top-ranking pages')
+    if not tables: issues.append('No data tables — competitors use comparison tables for AI extraction')
+    if len(images) < 2: issues.append('Few images — top pages use 3-5 relevant images with alt text')
+    
+    score = max(0, 100 - len(issues) * 15)
+    return {
+        'agent': 'Competitor Intelligence',
+        'focus': 'How this page compares to typical top-ranking content patterns',
+        'score': score,
+        'verdict': 'Competitive' if score >= 70 else ('Below average' if score >= 40 else 'Significant gaps'),
+        'passed': [f'{len(h2s)} H2 headings', f'{schema_count} schema types', f'{len(lists)} lists', f'{len(images)} images'],
+        'failed': issues,
+        'top_recommendations': issues[:3] or ['Content structure matches top competitors'],
+    }
+
+def council_geo_agent(soup, text, url):
+    """GEO/Local Agent — evaluates local search and geographic signals."""
+    has_address = bool(re.search(r'\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd)\b', text.lower()))
+    has_phone = bool(re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', text))
+    has_hours = bool(re.search(r'(monday|tuesday|wednesday|thursday|friday|saturday|sunday|hours|open)', text.lower()))
+    json_ld = ' '.join(s.string or '' for s in soup.find_all('script', {'type': 'application/ld+json'})).lower()
+    has_local_schema = 'localbusiness' in json_ld
+    has_geo = 'geocoordinates' in json_ld
+    has_local_keywords = bool(re.search(r'(ottawa|toronto|vancouver|montreal|canada|near me|local|nearby)', text.lower()))
+    
+    signals = [has_address, has_phone, has_hours, has_local_schema, has_geo, has_local_keywords]
+    score = round(sum(signals) / len(signals) * 100)
+    
+    issues = []
+    if not has_address: issues.append('No physical address detected')
+    if not has_phone: issues.append('No phone number found')
+    if not has_hours: issues.append('No business hours mentioned')
+    if not has_local_schema: issues.append('No LocalBusiness schema markup')
+    if not has_geo: issues.append('No GeoCoordinates in schema')
+    if not has_local_keywords: issues.append('No local/geographic keywords')
+    
+    return {
+        'agent': 'GEO/Local Specialist',
+        'focus': 'Local search optimization, NAP data, geographic signals',
+        'score': score,
+        'verdict': 'Strong local presence' if score >= 70 else ('Partial' if score >= 40 else 'Weak local signals'),
+        'passed': [x for x, v in [('Address present', has_address), ('Phone number', has_phone), ('Business hours', has_hours), ('LocalBusiness schema', has_local_schema), ('GeoCoordinates', has_geo), ('Local keywords', has_local_keywords)] if v],
+        'failed': issues,
+        'top_recommendations': issues[:3] or ['Strong local SEO signals'],
+    }
+
+
+@app.route('/api/council/analyze', methods=['POST'])
+def council_analyze():
+    """AI Council — 5 specialized agents analyze a URL and produce a unified action plan."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        if not url:
+            return jsonify({'error': 'url is required'}), 400
+        if not url.startswith('http'):
+            url = 'https://' + url
+
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+
+        # Run all 5 agents
+        agents = [
+            council_aeo_agent(soup, text, keyword),
+            council_seo_agent(url, soup, text, keyword),
+            council_content_agent(text, soup),
+            council_competitor_agent(url, soup, text, keyword),
+            council_geo_agent(soup, text, url),
+        ]
+
+        # Overall council score (weighted: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%)
+        weights = [0.30, 0.25, 0.20, 0.15, 0.10]
+        overall = round(sum(a['score'] * w for a, w in zip(agents, weights)))
+
+        # Council moderator — LLM synthesizes all agent findings
+        council_summary = None
+        all_recs = []
+        for a in agents:
+            all_recs.extend([(a['agent'], r) for r in a['top_recommendations'][:2]])
+        
+        if all_recs:
+            recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
+            prompt = f"""You are the moderator of an AI Council analyzing a webpage for "{keyword or url}". Five specialist agents have reviewed the page. Overall score: {overall}/100.
+
+Agent findings:
+{recs_text}
+
+As the council moderator, produce:
+1. A 2-sentence executive summary of the page's strengths and weaknesses
+2. The top 5 priority actions ranked by impact, resolving any conflicts between agents
+3. One bold strategic recommendation that would have the biggest single impact
+
+Be concise and actionable. Format as a numbered list."""
+            try:
+                council_summary = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'keyword': keyword or '(not specified)',
+            'overall_score': overall,
+            'agents': agents,
+            'council_summary': council_summary,
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': f'Council analysis failed: {str(e)}'}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""
@@ -4496,6 +4686,12 @@ def serve_template_benchmark():
 def serve_psie():
     """PSIE — Predictive Search Intelligence Engine."""
     return send_from_directory('.', 'psie.html')
+
+
+@app.route('/council')
+def serve_council():
+    """AI Council — Multi-Agent Analysis System."""
+    return send_from_directory('.', 'council.html')
 
 
 @app.route('/directory')
