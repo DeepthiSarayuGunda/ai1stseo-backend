@@ -14,9 +14,4 @@ build/
 .DS_Store
 *.log
 /OneDrive/Documents/NetBeansProjects/usermanager/target/
-.vscode/
-*.db
-social_scheduler.db
-directory/directory.db
-output/
-image.png
+/OneDrive/Documents/NetBeansProjects/lab4-submission/usermanager/target/
