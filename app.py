@@ -4652,6 +4652,12 @@ def serve_client_dashboard():
     return send_from_directory('.', 'client-dashboard.html')
 
 
+@app.route('/ai-visibility-checker')
+def serve_ai_visibility_checker():
+    """Free AI Visibility Checker — public lead magnet tool."""
+    return send_from_directory('.', 'ai-visibility-checker.html')
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):

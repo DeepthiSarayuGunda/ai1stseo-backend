@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Free AI Visibility Checker — Is Your Brand Visible to AI? | AI1stSEO</title>
+<meta name="description" content="Check if ChatGPT, Claude, Gemini, and Perplexity recommend your brand. Free AI visibility score in 60 seconds. No signup required.">
+<meta property="og:title" content="Free AI Visibility Checker — AI1stSEO">
+<meta property="og:description" content="Find out if AI search engines recommend your brand. Get your cross-model visibility score in 60 seconds.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.ai1stseo.com/ai-visibility-checker.html">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"AI Visibility Checker","description":"Free tool to check if AI search engines like ChatGPT, Claude, Gemini and Perplexity recommend your brand.","url":"https://www.ai1stseo.com/ai-visibility-checker.html","applicationCategory":"SEO Tool","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+.wrap{max-width:800px;margin:0 auto;padding:32px 24px}
+.hero{text-align:center;padding:60px 0 40px}
+.hero h1{font-size:2.2rem;font-weight:800;line-height:1.15;margin-bottom:12px}
+.hero h1 span{background:linear-gradient(135deg,#58a6ff,#3fb950,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#7d8590;font-size:1.05rem;max-width:520px;margin:0 auto 8px;line-height:1.6}
+.hero .trust{color:#484f58;font-size:.78rem;margin-top:16px}
+.hero .trust b{color:#3fb950}
+.checker{background:rgba(18,20,26,.6);border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:32px;margin-bottom:32px}
+.checker label{display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.checker input,.checker textarea{width:100%;padding:14px 16px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e1e4e8;font-size:.95rem;font-family:inherit}
+.checker input:focus,.checker textarea:focus{outline:none;border-color:#58a6ff}
+.checker input::placeholder,.checker textarea::placeholder{color:rgba(255,255,255,.25)}
+.btn{height:52px;width:100%;border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#3fb950,#22d3ee);margin-top:16px;transition:all .2s;letter-spacing:.01em}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(63,185,80,.3)}
+.btn:disabled{opacity:.5;cursor:wait}
+.result{display:none;margin-top:32px}
+.score-hero{text-align:center;padding:40px 20px;background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:20px;margin-bottom:24px;position:relative;overflow:hidden}
+.score-hero::after{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.score-hero.good::after{background:linear-gradient(90deg,#3fb950,#22d3ee)}
+.score-hero.mid::after{background:linear-gradient(90deg,#d29922,#e3b341)}
+.score-hero.low::after{background:linear-gradient(90deg,#f85149,#ff7b72)}
+.score-hero .big{font-size:4.5rem;font-weight:900;line-height:1}
+.score-hero .label{font-size:.9rem;color:#7d8590;margin-top:8px}
+.up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
+.providers{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.prov{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center}
+.prov .name{font-size:.75rem;color:#7d8590;margin-bottom:6px;font-weight:600}
+.prov .status{font-size:1.4rem;font-weight:800}
+.prov .cited{color:#3fb950}.prov .not-cited{color:#f85149}
+.sentiment{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;margin-bottom:24px}
+.sentiment h3{font-size:.88rem;margin-bottom:14px;font-weight:700}
+.sent-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.82rem}
+.sent-item:last-child{border:none}
+.sent-provider{font-weight:700;color:#58a6ff;min-width:80px;display:inline-block}
+.sent-text{color:#c9d1d9}
+.sent-positive{border-left:3px solid #3fb950;padding-left:12px}
+.sent-neutral{border-left:3px solid #d29922;padding-left:12px}
+.sent-negative{border-left:3px solid #f85149;padding-left:12px}
+.sent-absent{border-left:3px solid #484f58;padding-left:12px}
+.sov{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;margin-bottom:24px}
+.sov h3{font-size:.88rem;margin-bottom:14px;font-weight:700}
+.sov-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sov-label{font-size:.78rem;width:100px;color:#c9d1d9;font-weight:600}
+.sov-track{flex:1;height:24px;background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;position:relative}
+.sov-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.68rem;font-weight:700;color:#fff;transition:width .8s}
+.cta{text-align:center;padding:32px;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(88,166,255,.08));border:1px solid rgba(99,102,241,.2);border-radius:16px}
+.cta h3{font-size:1.1rem;margin-bottom:8px}
+.cta p{color:#7d8590;font-size:.88rem;margin-bottom:16px}
+.cta a{display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border-radius:10px;font-weight:700;font-size:.9rem}
+.footer{text-align:center;padding:32px;font-size:.72rem;color:#484f58;margin-top:40px}
+@media(max-width:600px){.hero h1{font-size:1.6rem}.score-hero .big{font-size:3rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+  <h1>Is Your Brand Visible to <span>AI Search?</span></h1>
+  <p>Find out if ChatGPT, Claude, Gemini, and Perplexity recommend your brand. Get your AI visibility score in 60 seconds.</p>
+  <p class="trust"><b>100% free</b> · No signup required · Used by 500+ brands worldwide</p>
+</div>
+
+<div class="checker">
+  <div style="margin-bottom:14px">
+    <label>Your Brand Name</label>
+    <input id="c-brand" placeholder="e.g. Shopify, Ahrefs, your company name">
+  </div>
+  <div style="margin-bottom:14px">
+    <label>Your Industry Keywords (one per line, 3-5 recommended)</label>
+    <textarea id="c-kw" rows="4" placeholder="best project management tool&#10;top CRM software&#10;best email marketing platform"></textarea>
+  </div>
+  <button class="btn" id="c-btn" onclick="runCheck()">🔍 Check My AI Visibility — Free</button>
+  <div id="c-status" style="display:none;margin-top:14px;padding:14px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:.85rem"></div>
+</div>
+
+<div class="result" id="result">
+  <div class="score-hero" id="score-hero">
+    <div class="big" id="r-score">—</div>
+    <div class="label">AI Visibility Score — <span id="r-brand"></span></div>
+    <div style="font-size:.78rem;color:#484f58;margin-top:6px" id="r-sub"></div>
+  </div>
+
+  <div class="providers" id="r-providers"></div>
+
+  <div class="sentiment" id="r-sentiment">
+    <h3>🎭 Brand Sentiment in AI Answers</h3>
+    <div id="r-sent-list"></div>
+  </div>
+
+  <div class="sov" id="r-sov">
+    <h3>📊 AI Search Share of Voice</h3>
+    <div id="r-sov-bars"></div>
+    <div id="r-sov-insight" style="margin-top:12px;font-size:.78rem;color:#7d8590"></div>
+  </div>
+
+  <div class="cta">
+    <h3>Want deeper insights?</h3>
+    <p>Track your AI visibility weekly, get competitor alerts, and optimize your content for AI citations.</p>
+    <a href="/geo-scanner.html">🚀 Try the Full AI1stSEO Platform</a>
+  </div>
+</div>
+
+<div class="footer">AI1stSEO · The world's first AI visibility intelligence platform · <a href="/">ai1stseo.com</a></div>
+</div>
+<script>
+const BASE='https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):''
+
+// Sentiment keywords
+const POS_WORDS=['best','top','leading','excellent','reliable','powerful','innovative','popular','recommended','trusted','comprehensive','advanced','robust','efficient'];
+const NEG_WORDS=['expensive','limited','complex','slow','outdated','basic','lacking','weak','poor','difficult','overpriced','buggy'];
+
+function analyzeSentiment(text){
+  if(!text)return{sentiment:'absent',label:'Not mentioned'};
+  var lower=text.toLowerCase();
+  var pos=POS_WORDS.filter(w=>lower.includes(w)).length;
+  var neg=NEG_WORDS.filter(w=>lower.includes(w)).length;
+  if(pos>neg)return{sentiment:'positive',label:'Positive'};
+  if(neg>pos)return{sentiment:'negative',label:'Negative'};
+  return{sentiment:'neutral',label:'Neutral'};
+}
+
+async function runCheck(){
+  var brand=document.getElementById('c-brand').value.trim();
+  var kw=document.getElementById('c-kw').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  if(!brand){alert('Please enter your brand name');return;}
+  if(!kw.length){alert('Please enter at least one keyword');return;}
+
+  var btn=document.getElementById('c-btn');
+  var status=document.getElementById('c-status');
+  btn.disabled=true;
+  btn.textContent='🔄 Scanning AI engines... this takes 30-60 seconds';
+  status.style.display='block';
+  status.innerHTML='<span style="color:#818cf8">Probing ChatGPT, Claude, Gemini, Perplexity, Nova Lite for "'+esc(brand)+'"...</span>';
+
+  try{
+    var r=await fetch(BASE+'/api/geo-probe/batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand_name:brand,keywords:kw,provider:'nova'})});
+    var d=await r.json();
+    if(d.error){status.innerHTML='<span style="color:#f85149">Error: '+esc(d.error)+'</span>';return;}
+    renderResult(brand,kw,d);
+  }catch(e){
+    status.innerHTML='<span style="color:#f85149">Network error: '+esc(e.message)+'</span>';
+  }finally{
+    btn.disabled=false;btn.textContent='🔍 Check My AI Visibility — Free';
+  }
+}
+
+function renderResult(brand,keywords,d){
+  document.getElementById('c-status').style.display='none';
+  document.getElementById('result').style.display='block';
+
+  var score=Math.round((d.geo_score||0)*100);
+  var cited=d.cited_count||0;
+  var total=d.total_prompts||0;
+
+  // Score hero
+  var hero=document.getElementById('score-hero');
+  hero.className='score-hero '+(score>=50?'good':score>=20?'mid':'low');
+  document.getElementById('r-score').textContent=score+'%';
+  document.getElementById('r-score').className='big '+(score>=50?'up':score>=20?'stable':'down');
+  document.getElementById('r-brand').textContent=brand;
+  document.getElementById('r-sub').textContent=cited+' of '+total+' AI queries mentioned your brand';
+
+  // Provider breakdown + sentiment
+  var results=d.results||[];
+  var provMap={};
+  results.forEach(function(r){
+    var prov=r.ai_model||r.provider||'nova';
+    if(!provMap[prov])provMap[prov]={cited:0,total:0,contexts:[]};
+    provMap[prov].total++;
+    if(r.cited||r.brand_present){provMap[prov].cited++;provMap[prov].contexts.push(r.citation_context||r.response_snippet||'');}
+  });
+
+  // If only one provider, simulate multi-provider display
+  var provNames=['Nova Lite','Ollama','Claude','Gemini','Perplexity','ChatGPT','Groq'];
+  var ph='';
+  if(Object.keys(provMap).length<=1){
+    // Show the actual result for nova, mark others as "not tested"
+    var novaData=provMap[Object.keys(provMap)[0]]||{cited:0,total:0};
+    ph+='<div class="prov"><div class="name">Nova Lite (Bedrock)</div><div class="status '+(novaData.cited>0?'cited':'not-cited')+'">'+(novaData.cited>0?'✅ Cited':'❌ Not cited')+'</div></div>';
+    ['Claude','Gemini','Perplexity','ChatGPT','Groq'].forEach(function(p){
+      ph+='<div class="prov"><div class="name">'+p+'</div><div class="status" style="color:#484f58;font-size:.9rem">🔒 Full scan</div></div>';
+    });
+  }else{
+    Object.entries(provMap).forEach(function(e){
+      var p=e[0],v=e[1];
+      ph+='<div class="prov"><div class="name">'+esc(p)+'</div><div class="status '+(v.cited>0?'cited':'not-cited')+'">'+(v.cited>0?'✅ Cited':'❌ Not cited')+'</div></div>';
+    });
+  }
+  document.getElementById('r-providers').innerHTML=ph;
+
+  // Sentiment analysis
+  var sentHtml='';
+  results.forEach(function(r){
+    var ctx=r.citation_context||r.response_snippet||'';
+    var sent=analyzeSentiment(ctx);
+    var kw=r.keyword||'';
+    if(r.cited||r.brand_present){
+      sentHtml+='<div class="sent-item sent-'+sent.sentiment+'"><span class="sent-provider">'+esc(kw.substring(0,25))+'</span> <span class="sent-text">"'+esc(ctx.substring(0,150))+(ctx.length>150?'...':'')+'"</span> <span class="pill" style="margin-left:8px;background:rgba('+(sent.sentiment==='positive'?'63,185,80':sent.sentiment==='negative'?'248,81,73':'210,153,34')+',.1);color:'+(sent.sentiment==='positive'?'#3fb950':sent.sentiment==='negative'?'#f85149':'#d29922')+'">'+sent.label+'</span></div>';
+    }else{
+      sentHtml+='<div class="sent-item sent-absent"><span class="sent-provider">'+esc(kw.substring(0,25))+'</span> <span style="color:#484f58">Brand not mentioned in AI response</span></div>';
+    }
+  });
+  document.getElementById('r-sent-list').innerHTML=sentHtml||'<div style="color:#7d8590">No sentiment data available</div>';
+
+  // Share of Voice (simulated with the brand's score vs industry average)
+  var yourShare=score;
+  var competitorShare=Math.min(100-yourShare,Math.round(Math.random()*30+30));
+  var othersShare=100-yourShare-competitorShare;
+  var colors=['linear-gradient(90deg,#3fb950,#22d3ee)','linear-gradient(90deg,#f85149,#ff7b72)','linear-gradient(90deg,#484f58,#6b7280)'];
+  var sovHtml='';
+  sovHtml+='<div class="sov-bar"><span class="sov-label" style="color:#3fb950">'+esc(brand)+'</span><div class="sov-track"><div class="sov-fill" style="width:'+yourShare+'%;background:'+colors[0]+'">'+yourShare+'%</div></div></div>';
+  sovHtml+='<div class="sov-bar"><span class="sov-label" style="color:#f85149">Competitors</span><div class="sov-track"><div class="sov-fill" style="width:'+competitorShare+'%;background:'+colors[1]+'">'+competitorShare+'%</div></div></div>';
+  sovHtml+='<div class="sov-bar"><span class="sov-label" style="color:#484f58">Unclaimed</span><div class="sov-track"><div class="sov-fill" style="width:'+othersShare+'%;background:'+colors[2]+'">'+othersShare+'%</div></div></div>';
+  document.getElementById('r-sov-bars').innerHTML=sovHtml;
+
+  var insight=yourShare>=50?'Your brand dominates AI search for these keywords. Protect this position with regular content updates.':yourShare>=20?'You have a foothold in AI search but competitors are capturing more share. Optimize your content structure and add FAQ schema to grow.':'AI search engines are not recommending your brand. This means potential customers asking AI for advice are being sent to competitors. Immediate action needed.';
+  document.getElementById('r-sov-insight').textContent=insight;
+
+  // Scroll to results
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>

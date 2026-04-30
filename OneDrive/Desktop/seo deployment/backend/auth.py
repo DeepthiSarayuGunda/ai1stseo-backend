@@ -612,3 +612,69 @@ def stripe_webhook():
                 print('Stripe webhook DB update failed: {}'.format(e))
 
     return jsonify({'status': 'received'}), 200
+
+
+# ============== STRIPE CHECKOUT ==============
+
+@auth_bp.route('/api/stripe/create-checkout', methods=['POST'])
+def create_checkout_session():
+    """
+    Create a Stripe Checkout Session for the $5 Pro trial.
+    Returns a URL that the frontend redirects to.
+    """
+    import os
+    stripe_key = os.environ.get('STRIPE_SECRET_KEY', '')
+    if not stripe_key:
+        return jsonify({'error': 'Stripe not configured'}), 503
+
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    success_url = data.get('success_url', 'https://www.ai1stseo.com/admin?upgraded=true')
+    cancel_url = data.get('cancel_url', 'https://www.ai1stseo.com/')
+
+    try:
+        import requests as http_requests
+        # Create a Checkout Session via Stripe API
+        resp = http_requests.post(
+            'https://api.stripe.com/v1/checkout/sessions',
+            auth=(stripe_key, ''),
+            data={
+                'mode': 'payment',
+                'payment_method_types[]': 'card',
+                'line_items[0][price_data][currency]': 'usd',
+                'line_items[0][price_data][product_data][name]': 'AI 1st SEO Pro Trial',
+                'line_items[0][price_data][product_data][description]': '30-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
+                'line_items[0][price_data][unit_amount]': '500',  # $5.00 in cents
+                'line_items[0][quantity]': '1',
+                'success_url': success_url,
+                'cancel_url': cancel_url,
+                'customer_email': email if email else None,
+            },
+            timeout=15,
+        )
+
+        if resp.status_code == 200:
+            session = resp.json()
+            return jsonify({
+                'status': 'success',
+                'checkout_url': session.get('url'),
+                'session_id': session.get('id'),
+            })
+        else:
+            error = resp.json().get('error', {}).get('message', 'Unknown error')
+            return jsonify({'status': 'error', 'message': error}), 400
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/api/stripe/config', methods=['GET'])
+def stripe_config():
+    """Return the publishable key for the frontend. No auth required."""
+    import os
+    pk = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+    return jsonify({
+        'status': 'success',
+        'publishable_key': pk,
+        'has_stripe': bool(pk),
+    })
