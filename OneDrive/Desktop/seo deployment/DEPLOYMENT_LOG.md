@@ -6,129 +6,114 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
-## 2026-04-30 — Stripe Integration + Attribution Pipeline + Admin Fix + Infrastructure Hardening (Troy)
+## 2026-04-02 19:00 — DynamoDB Migration Complete + RDS Deleted (Troy)
 
-**Stripe Payment Integration:**
-- Stripe live keys configured as Lambda env vars (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PUBLISHABLE_KEY)
-- Webhook endpoint created on Stripe: `https://api.ai1stseo.com/api/webhooks/stripe` → `checkout.session.completed`
-- `POST /api/stripe/create-checkout` — creates a $5 Pro trial checkout session, returns Stripe hosted URL
-- `GET /api/stripe/config` — returns publishable key for frontend
-- `POST /api/webhooks/stripe` — Stripe webhook handler, auto-upgrades user tier to `pro` on payment
-- Subscription tier system: `subscription_tier` field on users (free/pro/admin), `GET /api/user/tier`
+**Full migration from RDS PostgreSQL to DynamoDB. RDS instance deleted.**
 
-**AI Referral Attribution Pipeline:**
-- `POST /api/attribution/track` (public) — receives referral events from JS snippet, normalizes 15+ AI referrer patterns
-- `POST /api/attribution/convert` (public) — tracks conversion events tied to AI sessions
-- `GET /api/attribution/ai-referrals` (auth) — aggregated dashboard by source
-- `GET /api/attribution/snippet` (public) — returns copy-paste JS tracking snippet
+**Modules updated to DynamoDB:**
+- `app.py` — swapped `data_api` import to `data_api_dynamo`, request logging writes to DynamoDB
+- `admin_api.py` — all 9 endpoints rewritten for DynamoDB scans/queries
+- `webhook_api.py` — CRUD + dispatch rewritten for DynamoDB
+- `apikey_api.py` — key storage, validation, rate limiting rewritten for DynamoDB
+- `admin_aggregation.py` — daily metrics aggregation rewritten for DynamoDB
+- `ai_inference.py` — AI usage logging writes to DynamoDB
+- `auth.py` — role lookup checks DynamoDB first, RDS fallback removed
 
-**Admin Endpoint Fix:**
-- Deepthi pushed 534 lines to app.py + new modules (month5_systems, aeo_engine). Lambda was stale.
-- Redeployed with full sync: all Troy modules + Deepthi's new modules + Samar's directory modules
-- All admin endpoints restored (system-status, audit-history, white-label, api-usage, documents)
+**Data migrated (981 rows):**
+- users (8) → ai1stseo-users
+- audits (14) → ai1stseo-audits
+- geo_probes (336) → ai1stseo-geo-probes
+- content_briefs (11) → ai1stseo-content-briefs
+- admin_metrics (8) → ai1stseo-admin-metrics
+- api_request_log (570) + ai_usage_log (18) → ai1stseo-api-logs
+- monitored_sites (1) + uptime_checks (15) → ai1stseo-monitor
 
-**New Features from Product Spec:**
-- AI inference response caching (24h DynamoDB TTL for low-temperature calls)
-- Citation probe bridge for content brief generator (`POST /api/backlinks/brief-citation-probe`)
-- SEO data API wrapper (`backend/seo_data_api.py`) — Ahrefs/DataForSEO/builtin fallback
-- `database_rows` + `table_counts` added to admin overview response
+**RDS deleted:**
+- Instance `ai1stseo-db` deleted (was already stopped since Apr 1)
+- Final snapshot preserved: `ai1stseo-final-backup-20260401`
+- Saves ~$15/month
 
-**Infrastructure Hardening:**
-- DynamoDB point-in-time recovery enabled on all 15 tables
-- CloudWatch alarms: Lambda errors (>5/10min), throttles (>3/5min), duration (>25s avg)
-- Node.js 20.x EOL notice received — affects `seo-audit-tool` and `automation-hub` Lambdas (not ours)
-
-**Files changed:** `backend/auth.py`, `backend/admin_api.py`, `backend/ai_inference.py`, `backend/backlink_api.py`, `backend/attribution_api.py`, `backend/seo_data_api.py`, `backend/multisite_api.py`
+**Impact:** All backend modules now use DynamoDB exclusively. No RDS dependency remains. Lambda deployed and verified working.
 
 ---
 
-## 2026-04-28 — App.py Merge + Full Lambda Sync + Backlink Doc Update (Troy)
+## 2026-04-02 18:15 — OpenClaw Gateway Installed on seo-dev (Troy)
 
-**Root cause fix:** Two separate `app.py` files (root vs `backend/`) have been causing deploy overwrites for weeks. Merged all Troy-unique routes into Samar's root `app.py` so there is now ONE authoritative app.py.
+**OpenClaw Gateway v2026.4.1 installed and running on Gurbachan's Tailscale server.**
 
-**What was merged into root app.py:**
-- `backlink_bp` blueprint registration (14 endpoints)
-- Request logging middleware (`before_request` / `after_request` → DynamoDB)
-- `POST /api/contact` — contact form via SES
-- `POST /api/invest` — investor inquiry via SES
-- `POST /api/collect-email` — email lead collection
-- `POST/GET /api/content-freshness` — content freshness tracking
-- `GET /api/content-briefs/<brief_id>` — single brief detail
+**What was done:**
+- Upgraded Node.js from v20.20.0 to v22.22.2 (OpenClaw requires Node 22+)
+- Installed OpenClaw globally via `npm install -g openclaw@latest`
+- Ran non-interactive onboarding with Ollama provider pointing to local accelerator
+- Installed as systemd user service (`openclaw-gateway.service`), enabled with lingering
+- Configured agent timeout to 120s for the 30B model
+- Customized workspace SOUL.md with site monitor identity and capabilities
+- Installed 4 ClawHub skills: `seo-geo-audit`, `site-monitor`, `seo-competitor-analysis`, `geo-seo-optimizer`
+- Tested agent — responding correctly using local Ollama qwen3:30b-a3b
 
-**Lambda fully synced with git:**
-- `app.py` now pulled from `git show origin/main:app.py` during deploys (never from local OneDrive)
-- All 9 Troy DynamoDB module overlays deployed (admin_api, auth, webhook_api, apikey_api, ai_inference, admin_aggregation, dynamodb_helper, data_api_dynamo, backlink_api)
-- Samar's new directory/sports modules included (directory_api, directory_db, sports_api, sports_db, sports_fetcher, scheduler)
-- All endpoints verified: 0 404s, all admin routes returning 401 (auth required)
+**Configuration:**
+| Setting | Value |
+|---------|-------|
+| Version | OpenClaw 2026.4.1 |
+| Port | 18789 (loopback) |
+| Auth | Token mode |
+| Model | ollama/qwen3:30b-a3b (local LAN) |
+| Workspace | /opt/ai1stseo/openclaw-workspace |
+| Service | systemd user service, enabled, running |
+| Skills | seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer |
 
-**System status fix deployed:**
-- Cognito, SES, and DynamoDB table checks now gracefully degrade to "healthy" with a note when Lambda IAM role lacks detailed monitoring permissions (instead of showing "error")
-
-**Auth bugfix:** Fixed duplicate `except Exception` block in `auth.py` `_sync_user_to_db`
-
-**Backlink strategies document updated:** Added AWS service pairings for all 7 strategies (EventBridge, Bedrock, SQS, SES, SageMaker, Step Functions, SNS, Forecast). Generated `.docx` version.
-
-**Deploy pattern going forward:**
-- Root `app.py` is the ONLY app.py. `backend/app.py` is legacy — do not deploy it.
-- Safe deploy script pulls app.py from git, not local filesystem.
-- Module files (admin_api, auth, etc.) are overlaid from `backend/` directory.
-
-**Files changed:** `app.py` (root), `backend/admin_api.py`, `backend/auth.py`, `BACKLINK_STRATEGIES_DEMO.md`
+**Next steps:** Connect messaging channels (WhatsApp QR pairing requires phone), wire up Phase 1 integration (report delivery via /hooks/agent).
 
 ---
 
-## 2026-04-22 — Slack/Email Notifications + Content Freshness API (Troy)
+## 2026-04-01 22:55 — Local Ollama Accelerator Integration (Troy)
 
-**New features deployed to Lambda:**
+**Connected site monitor to Gurbachan's local Ollama accelerator on LAN (192.168.2.200:11434).**
 
-**Slack + Email Notification Channels (WBS 6.3):**
-- `POST /api/notifications/subscribe` — subscribe to events via Slack webhook URL or email address
-  - Body: `{"channel": "slack", "target": "https://hooks.slack.com/...", "events": ["audit.created", "*"]}`
-  - Or: `{"channel": "email", "target": "user@example.com", "events": ["uptime.down"]}`
-- `GET /api/notifications` — list notification subscriptions
-- All `dispatch_event()` calls now trigger both webhook URLs AND Slack/email notifications
-- Slack messages include emoji per event type and formatted payload
-- Email notifications sent via SES from no-reply@ai1stseo.com
+**What was done:**
+- Updated `start.sh` on seo-dev server: `OLLAMA_URL` changed from `https://ollama.sageaios.com` to `http://192.168.2.200:11434` (direct LAN, no internet hop)
+- Added tiered model environment variables: `OLLAMA_FAST_MODEL`, `OLLAMA_HEAVY_MODEL`, `OLLAMA_EMBED_MODEL`
+- Enhanced `ai_inference.py` with 3 model tiers + embedding support:
+  - `generate_fast()` → llama3.1:8b (5GB, <2s) — quick summaries, classifications
+  - `generate()` → qwen3:30b-a3b (18.5GB, ~5s) — standard analysis (default)
+  - `generate_deep()` → qwen3:235b-a22b (142GB, ~30s) — deep competitor intel, detailed reports
+  - `get_embeddings()` → nomic-embed-text (274MB) — semantic similarity for content comparison
+- Updated `ai_analyzer.py` to use tiered models:
+  - Fast (8B): score change explanations, scan summaries, chat answers, next action suggestions
+  - Standard (30B): scan analysis, fix code generation
+  - Heavy (235B): competitor gap analysis, competitor strength identification
+- Restarted `troy-monitor.service` — confirmed running
 
-**Content Freshness API (for AI ranking maintenance):**
-- `POST /api/content-freshness` — record a content update timestamp
-  - Body: `{"url": "https://ai1stseo.com/page", "update_type": "content_refresh", "sections": ["faq", "pricing"]}`
-- `GET /api/content-freshness?url=...` — get freshness history for a URL
-- Gurbachan emphasized that AI algorithms require regular timestamped updates to maintain rankings
-
-**Files changed:** `backend/webhook_api.py`, `backend/app.py`
-
-**Reminder:** Read `IMPORTANT_READ_BEFORE_PUSHING.md` before merging to main. Do NOT revert backend files to RDS imports.
+**Available models on accelerator:**
+| Model | Size | Tier | Use Case |
+|-------|------|------|----------|
+| llama3.1:8b | 5 GB | Fast | Quick summaries, chat |
+| qwen3:30b-a3b | 18.5 GB | Standard | SEO analysis, fix generation |
+| qwen3:235b-a22b | 142 GB | Heavy | Deep competitor intel |
+| nomic-embed-text | 274 MB | Embed | Semantic similarity |
 
 ---
 
-## 2026-04-09 17:00 — Admin API Fix + Rate Limiting + Investor Endpoint (Troy)
+## 2026-04-01 11:00 — Email Lead Collection Endpoint + DynamoDB Table (Troy)
 
-**Issue:** `admin_api.py` was reverted to the old RDS version by a team merge, causing all admin dashboard endpoints to fail (they tried to query the stopped RDS database).
+**Per Amira's request:** PDF download email gate needs backend storage.
 
-**Fix:** Restored the DynamoDB version of `admin_api.py` with all endpoints working against DynamoDB. Redeployed Lambda.
+**What was done:**
+- Created DynamoDB table: `ai1stseo-email-leads` (PK: `id`, GSI: `email-index`, PAY_PER_REQUEST)
+- Added `POST /api/collect-email` endpoint to `app.py` — no auth required (public lead capture)
+- Accepts: `{email, source, page_url, report_type}`
+- Returns: `{status: "success"}` on save
 
-**New endpoints deployed in this cycle:**
-- `GET /api/admin/api-usage` — API key rate limiting dashboard (per-key stats)
-- `GET /api/admin/api-usage/logs` — request log analytics with endpoint filtering
-- `POST /api/invest` — investor inquiry form, sends via SES to gurbachan@ai1stseo.com
-- `POST /api/admin/documents` — document upload (S3 + DynamoDB)
-- `GET /api/admin/documents` — list documents, filter by `?developer=dev1`
-- `GET /api/admin/documents/:id/download` — presigned S3 download URL
-- `DELETE /api/admin/documents/:id` — delete document (admin only)
-- `POST /api/collect-email` — email lead collection for PDF downloads
-- `invest.html` + `contact.html` — restyled to match main site design, live on S3
+**For Amira:** Update your PDF download JS to POST to `https://api.ai1stseo.com/api/collect-email` with the email before generating the PDF. Example:
+```js
+fetch('https://api.ai1stseo.com/api/collect-email', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({email: userEmail, source: 'pdf_download', page_url: window.location.href, report_type: 'seo_audit'})
+});
+```
 
-**Infrastructure changes this week:**
-- DynamoDB migration complete — all 6 backend modules rewritten, 981 rows migrated, RDS deleted ($15/mo saved)
-- OpenClaw Gateway v2026.4.1 installed on seo-dev server (port 18789)
-- Local Ollama accelerator connected with tiered models (8B/30B/235B + embeddings)
-- 4 ClawHub skills installed (seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer)
-- OpenShell CLI + Podman installed — blocked on LXC seccomp restriction for sandbox creation
-- Node.js upgraded to v22 on seo-dev
-- Investor link added to homepage footer
-
-**Reminder to all devs:** When merging branches to main, check the diff for `backend/*.py` files. If you see hundreds of deleted lines you didn't write, your merge is overwriting someone else's work. Always `git pull origin main` before pushing.
+**Note:** This endpoint is in `app.py` but NOT yet deployed to Lambda. Will be included in the next Lambda deploy (DynamoDB migration).
 
 ---
 

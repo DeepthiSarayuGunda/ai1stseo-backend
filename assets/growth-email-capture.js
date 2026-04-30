@@ -20,8 +20,8 @@
   section.innerHTML =
     '<div style="max-width:480px;margin:0 auto">'
     + '<p style="color:#00d4ff;font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px">Free Resource</p>'
-    + '<h3 style="color:#e6edf3;font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get the Free AEO/GEO SEO Analysis</h3>'
-    + '<p style="color:#8b949e;font-size:.85rem;margin:0 0 20px;line-height:1.5">Free AI visibility analysis, GEO strategies, and early access to new tools.</p>'
+    + '<h3 style="color:#e6edf3;font-size:1.25rem;font-weight:600;margin:0 0 8px;line-height:1.3">Get Your Free AEO/GEO & SEO Analysis</h3>'
+    + '<p style="color:#8b949e;font-size:.85rem;margin:0 0 20px;line-height:1.5">Free AEO, GEO visibility analysis and full SEO audit for your website.</p>'
     + '<form id="growth-email-form" style="display:flex;gap:8px;max-width:400px;margin:0 auto;flex-wrap:wrap">'
     + '<input id="growth-email-input" type="email" placeholder="you@company.com" required style="flex:1;min-width:180px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e6edf3;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor=\'#00d4ff\'" onblur="this.style.borderColor=\'rgba(255,255,255,0.1)\'">'
     + '<button type="submit" id="growth-email-btn" style="padding:10px 20px;border:none;border-radius:8px;background:#00d4ff;color:#0d1117;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .2s;" onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'">Subscribe</button>'

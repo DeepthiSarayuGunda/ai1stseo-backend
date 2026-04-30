@@ -8,15 +8,23 @@ from typing import Optional
 
 
 class AIAnalyzer:
-    """Uses Nova Lite (primary) + Ollama (fallback) for SEO analysis"""
+    """Uses tiered AI models: fast (8B) for summaries, standard (30B) for analysis, heavy (235B) for deep intel."""
 
-    def _call_llm(self, prompt, max_tokens=1024):
-        """Route through the shared dual-path inference module."""
+    def _call_llm(self, prompt, max_tokens=1024, tier='standard'):
+        """Route through the tiered inference module."""
         try:
             from ai_inference import generate
-            return generate(prompt, max_tokens=max_tokens, temperature=0.7)
+            return generate(prompt, max_tokens=max_tokens, temperature=0.7, tier=tier)
         except Exception as e:
             return "[AI Analysis unavailable: {}]".format(e)
+
+    def _call_fast(self, prompt, max_tokens=512):
+        """Quick inference for summaries and classifications."""
+        return self._call_llm(prompt, max_tokens=max_tokens, tier='fast')
+
+    def _call_deep(self, prompt, max_tokens=4096):
+        """Deep inference for detailed analysis and competitor intel."""
+        return self._call_llm(prompt, max_tokens=max_tokens, tier='heavy')
 
     # =========================================
     # 1. AI-POWERED REPORT ANALYSIS
@@ -45,7 +53,7 @@ class AIAnalyzer:
             issues=json.dumps(scan_data.get("critical_issues", [])),
             warnings=json.dumps(scan_data.get("warnings", [])),
         )
-        return self._call_llm(prompt, max_tokens=300)
+        return self._call_fast(prompt, max_tokens=300)
 
     def explain_score_change(self, current_score, previous_score,
                              current_issues, previous_issues):
@@ -68,7 +76,7 @@ class AIAnalyzer:
             new=json.dumps(new_issues) if new_issues else "None",
             fixed=json.dumps(fixed_issues) if fixed_issues else "None",
         )
-        return self._call_llm(prompt, max_tokens=200)
+        return self._call_fast(prompt, max_tokens=200)
 
     # =========================================
     # 2. AUTO-GENERATED FIX SUGGESTIONS
@@ -133,7 +141,7 @@ class AIAnalyzer:
             lt=your_data.get("load_time"),
             comps=json.dumps(competitor_data, indent=2),
         )
-        return self._call_llm(prompt, max_tokens=400)
+        return self._call_deep(prompt, max_tokens=400)
 
     def identify_competitor_strengths(self, competitor_data):
         """Identify what top competitors are doing well."""
@@ -147,7 +155,7 @@ class AIAnalyzer:
             "Only output valid JSON."
         ).format(comps=json.dumps(competitor_data, indent=2))
 
-        response = self._call_llm(prompt, max_tokens=500)
+        response = self._call_deep(prompt, max_tokens=500)
         try:
             return json.loads(response)
         except (json.JSONDecodeError, TypeError):
@@ -177,7 +185,7 @@ class AIAnalyzer:
             ai=scan_data.get("ai_citation_rate", "N/A"),
             q=question,
         )
-        return self._call_llm(prompt, max_tokens=250)
+        return self._call_fast(prompt, max_tokens=250)
 
     def suggest_next_action(self, scan_data):
         """Suggest the single most impactful next action."""
@@ -193,7 +201,7 @@ class AIAnalyzer:
             issues=json.dumps(scan_data.get("critical_issues", [])),
             warnings=json.dumps(scan_data.get("warnings", [])[:3]),
         )
-        return self._call_llm(prompt, max_tokens=150)
+        return self._call_fast(prompt, max_tokens=150)
 
 
 # Singleton instance

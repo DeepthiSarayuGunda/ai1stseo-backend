@@ -4112,6 +4112,129 @@ def serve_aeo_dashboard():
     return send_from_directory('.', 'aeo-dashboard.html')
 
 
+# ============== OUTREACH GENERATOR (Unlinked Mentions) ==============
+
+@app.route('/api/outreach/generate', methods=['POST'])
+def outreach_generate():
+    """Generate outreach drafts from unlinked brand mentions."""
+    from services.outreach_generator import generate_outreach
+
+    data = request.get_json(silent=True) or {}
+    mentions = data.get('mentions')  # Optional: pass mentions directly
+
+    try:
+        result = generate_outreach(mentions=mentions)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Outreach generation failed: {str(e)}'}), 500
+
+
+@app.route('/api/outreach/list')
+def outreach_list():
+    """Return the current outreach queue."""
+    from services.outreach_generator import get_outreach_queue
+
+    try:
+        data = get_outreach_queue()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read outreach queue: {str(e)}'}), 500
+
+
+@app.route('/api/outreach/status', methods=['POST'])
+def outreach_update_status():
+    """Update the status of an outreach item."""
+    from services.outreach_generator import update_outreach_status
+
+    data = request.get_json(silent=True) or {}
+    url = data.get('url', '').strip()
+    status = data.get('status', '').strip()
+
+    if not url or not status:
+        return jsonify({'error': 'url and status are required'}), 400
+
+    if status not in ('pending', 'sent', 'replied', 'converted', 'skipped'):
+        return jsonify({'error': 'Invalid status. Use: pending, sent, replied, converted, skipped'}), 400
+
+    updated = update_outreach_status(url, status)
+    if updated:
+        return jsonify({'success': True, 'url': url, 'status': status})
+    return jsonify({'error': 'URL not found in outreach queue'}), 404
+
+
+# ============== AEO → OUTREACH FULL FLOW (Demo) ==============
+
+@app.route('/api/demo/full-flow')
+def demo_full_flow():
+    """End-to-end AEO → Outreach pipeline demo.
+
+    1. Reads AEO visibility data (search results)
+    2. Converts gaps into mention targets
+    3. Generates outreach drafts
+    4. Returns combined summary
+    """
+    from services.outreach_generator import generate_outreach
+
+    # Step 1: Load AEO data
+    aeo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'aeo_results.json')
+    if not os.path.exists(aeo_path):
+        return jsonify({'error': 'No AEO data. Run: python services/aeo_engine.py'}), 404
+
+    try:
+        with open(aeo_path, 'r') as f:
+            aeo = json.load(f)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read AEO data: {e}'}), 500
+
+    # Step 2: Extract all sources as outreach targets (competitor pages where we're absent)
+    mentions = []
+    for result in aeo.get('results', []):
+        for src in result.get('sources', []):
+            mentions.append({
+                'url': src.get('url', ''),
+                'title': src.get('title', ''),
+                'snippet': src.get('snippet', ''),
+                'source': 'aeo',
+                'date': aeo.get('generated_at', '')[:10],
+            })
+
+    # Step 3: Generate outreach (None triggers AEO fallback with competitor page targeting)
+    try:
+        outreach = generate_outreach(mentions=None)
+    except Exception as e:
+        return jsonify({'error': f'Outreach generation failed: {e}'}), 500
+
+    # Step 4: Build summary
+    sample = outreach['queue'][:3] if outreach.get('queue') else []
+
+    return jsonify({
+        'status': 'success',
+        'pipeline': 'AEO → Mentions → Outreach',
+        'aeo_summary': {
+            'mode': aeo.get('mode'),
+            'visibility_score': aeo.get('visibility_score'),
+            'total_queries': aeo.get('total_queries'),
+            'mentions_found': aeo.get('mentions_found'),
+            'competitors': aeo.get('competitor_frequency', {}),
+            'total_sources_found': len(mentions),
+        },
+        'outreach_summary': {
+            'mentions_scanned': outreach.get('total_mentions_scanned'),
+            'outreach_generated': outreach.get('outreach_generated'),
+            'source_breakdown': outreach.get('source_breakdown', {}),
+        },
+        'sample_outreach': [
+            {
+                'domain': item['domain'],
+                'subject': item['subject'],
+                'email_preview': item['email_body'][:200] + '...',
+                'status': item['status'],
+            }
+            for item in sample
+        ],
+    })
+
+
 # ============== AI RANKING RECOMMENDATIONS ==============
 
 @app.route('/api/ai/ranking-recommendations', methods=['POST'])
