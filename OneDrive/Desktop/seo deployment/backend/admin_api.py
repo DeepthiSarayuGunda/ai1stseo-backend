@@ -1,3 +1,11 @@
+# ======================================================================
+# WARNING: SHARED FILE - DO NOT OVERWRITE WITHOUT PULLING FIRST
+# Owner: Troy (Dev 3) | Uses DynamoDB (NOT RDS)
+# BEFORE EDITING: git pull origin main
+# BEFORE PUSHING: git diff backend/admin_api.py (verify no endpoints removed)
+# Key features: overview+database_rows, users, usage, ai-costs, errors, health, metrics, requests, me, documents, api-usage, system-status, audit-history, white-label
+# If any are missing after your edit, you broke it.
+# ======================================================================
 """
 Admin Dashboard API â€” DynamoDB version.
 Temporarily using require_auth (any logged-in user) instead of require_admin

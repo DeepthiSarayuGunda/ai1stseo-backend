@@ -1,3 +1,11 @@
+# ======================================================================
+# WARNING: SHARED FILE - DO NOT OVERWRITE WITHOUT PULLING FIRST
+# Owner: Troy (Dev 3) | Uses DynamoDB (NOT RDS)
+# BEFORE EDITING: git pull origin main
+# BEFORE PUSHING: git diff backend/apikey_api.py (verify no endpoints removed)
+# Key features: API key CRUD, rate limiting, credit metering, scopes
+# If any are missing after your edit, you broke it.
+# ======================================================================
 """
 Developer API Key System ΓÇö DynamoDB version.
 Keys prefixed with 'ai1st_', SHA-256 hashed storage, scopes, rate limiting.

@@ -1,3 +1,11 @@
+# ======================================================================
+# WARNING: SHARED FILE - DO NOT OVERWRITE WITHOUT PULLING FIRST
+# Owner: Troy (Dev 3) | Uses DynamoDB (NOT RDS)
+# BEFORE EDITING: git pull origin main
+# BEFORE PUSHING: git diff backend/webhook_api.py (verify no endpoints removed)
+# Key features: webhooks CRUD, Slack/email notifications, dispatch_event, webhook branding, answer.changed event
+# If any are missing after your edit, you broke it.
+# ======================================================================
 """
 Webhook API ΓÇö Register URLs to receive event notifications (DynamoDB version).
 Events: audit.created, geo_probe.created, content_brief.created, etc.

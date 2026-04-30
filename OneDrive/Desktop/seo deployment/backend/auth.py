@@ -1,4 +1,23 @@
 """
+╔══════════════════════════════════════════════════════════════════════╗
+║  WARNING: SHARED FILE — DO NOT OVERWRITE WITHOUT PULLING FIRST     ║
+║                                                                    ║
+║  Owner: Troy (Dev 3)                                               ║
+║  This file uses DynamoDB (NOT RDS). If you see 'from database      ║
+║  import', something has gone wrong.                                ║
+║                                                                    ║
+║  BEFORE EDITING: Run 'git pull origin main' to get the latest.     ║
+║  BEFORE PUSHING: Run 'git diff backend/auth.py' to verify you     ║
+║  are not removing existing endpoints (Stripe, tiers, etc).         ║
+║                                                                    ║
+║  Key features in this file:                                        ║
+║  - Cognito auth (require_auth, require_admin decorators)           ║
+║  - Subscription tier system (free/pro/admin with 7-day expiry)     ║
+║  - Stripe checkout, webhook, cancel, status endpoints              ║
+║  - Pro welcome email via SES                                       ║
+║  If any of these are missing after your edit, you broke it.        ║
+╚══════════════════════════════════════════════════════════════════════╝
+
 Authentication module for ai1stseo.com
 Uses AWS Cognito for user management + Secrets Manager for credentials
 """
