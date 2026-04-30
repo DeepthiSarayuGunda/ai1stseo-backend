@@ -5,9 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GEO Intelligence Dashboard — AI1stSEO</title>
 <link rel="stylesheet" href="/s3-pages/a11y-sports.css?v=2">
+<script>
+(function(){var t=localStorage.getItem('ai1stseo-theme');if(t==='light')document.documentElement.classList.add('light');})();
+function toggleTheme(){var h=document.documentElement;h.classList.toggle('light');var l=h.classList.contains('light');localStorage.setItem('ai1stseo-theme',l?'light':'dark');var b=document.getElementById('themeBtn');if(b)b.innerHTML=l?'&#x2600;&#xFE0F;':'&#x1F319;';}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;padding:0;-webkit-font-smoothing:antialiased}
+html.light body{background:#f5f7fa;color:#1a1a2e}
+html.light .wrap{color:#1a1a2e}
+html.light .nav a{color:#4a5568;background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08)}
+html.light .nav a:hover{background:rgba(88,166,255,.08);color:#1a6ed8}
+html.light .card{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08)}
+html.light .card:hover{border-color:rgba(0,0,0,.15);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+html.light .card h3{color:#1a1a2e}
+html.light .stat{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08)}
+html.light .stat:hover{border-color:rgba(88,166,255,.3)}
+html.light .stat .label{color:#6b7280}
+html.light .stat .sub{color:#9ca3af}
+html.light .section-title{color:#1a1a2e;border-bottom-color:rgba(0,0,0,.06)}
+html.light .metric-explain{background:#f0f4ff!important;border-color:rgba(59,130,246,.3)!important;border-left-color:#3b82f6!important;color:#374151!important}
+html.light .metric-explain strong{color:#1e40af!important}
+html.light table th{color:#6b7280;border-bottom-color:rgba(0,0,0,.08)}
+html.light table td{color:#374151;border-bottom-color:rgba(0,0,0,.04)}
+html.light tr:hover td{background:rgba(59,130,246,.03)}
+html.light .probe-card{background:rgba(255,255,255,.9);border-color:rgba(99,102,241,.2)}
+html.light .probe-card input,.light .probe-card textarea,.light .probe-card select{background:#fff;border-color:rgba(0,0,0,.12);color:#1a1a2e}
+html.light .rec{background:rgba(255,255,255,.8);border-color:rgba(0,0,0,.06)}
+html.light .rec .title{color:#1a1a2e}
+html.light .rec .desc{color:#6b7280}
+html.light .job-name{color:#1a1a2e}
+html.light .job-meta{color:#6b7280}
+html.light .bar{background:rgba(0,0,0,.06)}
+html.light .header-gradient{-webkit-text-fill-color:initial;background:none;color:#1a6ed8}
+html.light .up{color:#059669}
+html.light .down{color:#dc2626}
+html.light .stable{color:#d97706}
+html.light #meta-info{color:#9ca3af}
+.theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.06);background:rgba(18,20,26,.8);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s;padding:0}
+.theme-toggle:hover{border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.08)}
+html.light .theme-toggle{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08)}
 .wrap{max-width:1200px;margin:0 auto;padding:24px}
 
 /* Navigation */
@@ -143,6 +180,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
   <a href="/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
   <a href="#" onclick="downloadIntelPDF();return false" style="background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.25)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF</a>
   <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a>
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Switch light/dark mode">&#x1F319;</button>
+</nav>
 </nav>
 
 <!-- Live Probe Input -->
@@ -810,5 +849,6 @@ async function runLiveProbe(){
 }
 </script>
 <script src="/s3-pages/a11y-sports.js?v=2"></script>
+<script>var b=document.getElementById('themeBtn');if(b)b.innerHTML=document.documentElement.classList.contains('light')?'&#x2600;&#xFE0F;':'&#x1F319;';</script>
 </body>
 </html>
