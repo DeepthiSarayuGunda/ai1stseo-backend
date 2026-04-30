@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly GEO Score Tracker — AI1stSEO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.nav a{color:#c9d1d9;font-size:.82rem;padding:8px 18px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(18,20,26,.8);transition:all .2s}
+.nav a:hover{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.3);color:#58a6ff}
+h1{font-size:1.5rem;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#3fb950,#58a6ff,#22d3ee);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#7d8590;font-size:.84rem;margin-bottom:28px}
+.card{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;margin-bottom:20px}
+.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:14px;font-weight:700}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px;text-align:center}
+.stat .label{font-size:.65rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.stat .value{font-size:1.8rem;font-weight:800}
+.stat .sub{font-size:.72rem;color:#484f58;margin-top:4px}
+.up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;color:#7d8590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9}
+tr:hover td{background:rgba(88,166,255,.02)}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s}
+.bar-green{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-blue{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
+.bar-amber{background:linear-gradient(90deg,#d29922,#e3b341)}
+.pill{display:inline-flex;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:700}
+.pill-green{background:rgba(63,185,80,.1);color:#3fb950}
+.pill-red{background:rgba(248,81,73,.1);color:#f85149}
+.pill-amber{background:rgba(210,153,34,.1);color:#d29922}
+.trend-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:12px 0}
+.trend-bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#58a6ff,#1f6feb);min-width:20px;position:relative;transition:height .6s}
+.trend-bar:hover{opacity:.8}
+.trend-label{font-size:.6rem;color:#7d8590;text-align:center;margin-top:4px}
+.loading{text-align:center;padding:60px;color:#7d8590}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(255,255,255,.06);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tier-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700}
+.t1{background:rgba(248,81,73,.1);color:#f85149}
+.t2{background:rgba(210,153,34,.1);color:#d29922}
+.t3{background:rgba(88,166,255,.08);color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Weekly GEO Score Tracker</h1>
+<p class="subtitle">Track geo_score trends, top gainers/losers, competitor gaps & keyword performance</p>
+<nav class="nav">
+  <a href="/geo-scanner">Scanner</a>
+  <a href="/geo-scanner-intelligence">Intelligence</a>
+  <a href="/visibility-dashboard">Visibility</a>
+  <a href="/client-dashboard">Client Dashboard</a>
+  <a href="/">Home</a>
+</nav>
+
+<div id="loading" class="loading"><div class="spinner"></div><br>Loading GEO tracker data...</div>
+<div id="dash" style="display:none">
+  <div id="stats" class="stat-row"></div>
+
+  <div class="card"><h3>GEO Score Trend (Recent Probes)</h3><div id="trend-chart" class="trend-chart"></div><div id="trend-labels" style="display:flex;gap:6px"></div></div>
+
+  <div class="grid2">
+    <div class="card"><h3>Top Gainers This Period</h3><div id="gainers"></div></div>
+    <div class="card"><h3>Top Losers This Period</h3><div id="losers"></div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>Competitor Gap Analysis</h3><div id="comp-gap"></div></div>
+
+  <div class="card" style="margin-top:16px"><h3>Keyword-Level Breakdown</h3>
+    <div style="margin-bottom:12px;display:flex;gap:6px">
+      <button onclick="filterTier('all')" class="pill pill-green" style="cursor:pointer">All</button>
+      <button onclick="filterTier(1)" class="pill" style="cursor:pointer;background:rgba(248,81,73,.1);color:#f85149">Tier 1</button>
+      <button onclick="filterTier(2)" class="pill" style="cursor:pointer;background:rgba(210,153,34,.1);color:#d29922">Tier 2</button>
+      <button onclick="filterTier(3)" class="pill" style="cursor:pointer;background:rgba(88,166,255,.08);color:#58a6ff">Tier 3</button>
+    </div>
+    <div id="kw-table"></div>
+  </div>
+</div>
+</div>
+<script>
+const BASE='https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):''
+const pct=v=>Math.round((parseFloat(v)||0)*100);
+let allKeywords=[];
+
+async function load(){
+  try{
+    const [sumR,schedR]=await Promise.all([
+      fetch(BASE+'/api/m3/deepthi/scanner/intelligence-summary'),
+      fetch(BASE+'/api/m5/tiered-schedule'),
+    ]);
+    const summary=await sumR.json();
+    let schedule={};try{schedule=await schedR.json();}catch(e){}
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dash').style.display='block';
+    render(summary,schedule);
+  }catch(e){
+    document.getElementById('loading').innerHTML='<div style="color:#f85149">Failed: '+esc(e.message)+'</div>';
+  }
+}
+
+function render(d,schedule){
+  const brands=d.multi_brand_scores?.brands||[];
+  const primary=brands.find(b=>b.brand==='AI1stSEO')||brands[0]||{};
+  const gScore=pct(primary.geo_score);
+  const change=primary.change_vs_last_week||{};
+  const delta=change.delta||0;
+
+  // Stats
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="label">GEO Score</div><div class="value ${gScore>=50?'up':'stable'}">${gScore}%</div><div class="sub">${delta>0?'▲':'▼'} ${(delta*100).toFixed(1)}% vs last week</div></div>
+    <div class="stat"><div class="label">Keywords Tracked</div><div class="value up">${primary.keywords_probed||0}</div><div class="sub">${primary.keywords_cited||0} cited</div></div>
+    <div class="stat"><div class="label">Brands Monitored</div><div class="value up">${brands.length}</div><div class="sub">competitors</div></div>
+    <div class="stat"><div class="label">Avg Confidence</div><div class="value stable">${pct(primary.avg_confidence||0)}%</div><div class="sub">across all probes</div></div>`;
+
+  // Trend chart from brand scores
+  const trendEl=document.getElementById('trend-chart');
+  const labelsEl=document.getElementById('trend-labels');
+  let tH='',lH='';
+  brands.forEach(b=>{
+    const h=Math.max(pct(b.geo_score),5);
+    const color=b.brand==='AI1stSEO'?'linear-gradient(180deg,#3fb950,#238636)':'linear-gradient(180deg,#58a6ff,#1f6feb)';
+    tH+=`<div class="trend-bar" style="height:${h}%;background:${color}" title="${esc(b.brand)}: ${pct(b.geo_score)}%"><div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#c9d1d9;font-weight:700">${pct(b.geo_score)}%</div></div>`;
+    lH+=`<div class="trend-label" style="flex:1">${esc(b.brand)}</div>`;
+  });
+  trendEl.innerHTML=tH;labelsEl.innerHTML=lH;
+
+  // Gainers & Losers
+  const topKw=d.keyword_performance?.top_cited_keywords||[];
+  const gaps=d.keyword_performance?.competitor_beating_us||[];
+  let gH=topKw.length?'<table><tr><th>Keyword</th><th>Score</th></tr>':'<div style="color:#7d8590;padding:12px">No data yet</div>';
+  topKw.slice(0,5).forEach(k=>{gH+=`<tr><td>${esc(k.keyword)}</td><td class="up" style="font-weight:700">${pct(k.geo_score)}%</td></tr>`;});
+  if(topKw.length)gH+='</table>';
+  document.getElementById('gainers').innerHTML=gH;
+
+  let lH2=gaps.length?'<table><tr><th>Keyword</th><th>Competitor</th><th>Gap</th></tr>':'<div style="color:#3fb950;padding:12px">No losses — you lead on all keywords</div>';
+  gaps.slice(0,5).forEach(g=>{lH2+=`<tr><td>${esc(g.keyword)}</td><td style="color:#d29922">${esc(g.competitor)}</td><td class="down">-${pct(g.gap)}%</td></tr>`;});
+  if(gaps.length)lH2+='</table>';
+  document.getElementById('losers').innerHTML=lH2;
+
+  // Competitor gap
+  let cH='<table><tr><th>Brand</th><th>GEO Score</th><th>Gap vs You</th><th></th></tr>';
+  brands.forEach(b=>{
+    const g=pct(b.geo_score);
+    const gap=g-gScore;
+    cH+=`<tr><td style="font-weight:700;color:${b.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(b.brand)}</td><td>${g}%</td><td class="${gap>0?'down':gap<0?'up':'stable'}">${gap>0?'+':''}${gap}%</td><td style="width:40%"><div class="bar"><div class="bar-fill ${b.brand==='AI1stSEO'?'bar-green':'bar-blue'}" style="width:${g}%"></div></div></td></tr>`;
+  });
+  cH+='</table>';
+  document.getElementById('comp-gap').innerHTML=cH;
+
+  // Keyword table with tiers from schedule
+  const tiers=schedule.tiers||{};
+  const tierMap={};
+  Object.entries(tiers).forEach(([tk,tv])=>{
+    const tierNum=parseInt(tk.replace('tier_',''));
+    (tv.keywords||[]).forEach(k=>{tierMap[k.query]=tierNum;});
+  });
+
+  allKeywords=topKw.map(k=>({...k,tier:tierMap[k.keyword]||3}));
+  // Add gap keywords too
+  gaps.forEach(g=>{
+    if(!allKeywords.find(k=>k.keyword===g.keyword)){
+      allKeywords.push({keyword:g.keyword,geo_score:g.our_score||0,tier:tierMap[g.keyword]||3,competitor:g.competitor,gap:g.gap});
+    }
+  });
+  renderKeywords('all');
+}
+
+function renderKeywords(tier){
+  const filtered=tier==='all'?allKeywords:allKeywords.filter(k=>k.tier===tier);
+  let h='<table><tr><th>Keyword</th><th>GEO Score</th><th>Tier</th><th>Status</th></tr>';
+  filtered.forEach(k=>{
+    const g=pct(k.geo_score);
+    const tc=k.tier===1?'t1':k.tier===2?'t2':'t3';
+    h+=`<tr><td>${esc(k.keyword)}</td><td><span class="${g>=50?'up':'stable'}" style="font-weight:700">${g}%</span></td><td><span class="tier-pill ${tc}">Tier ${k.tier}</span></td><td>${k.competitor?'<span class="down">'+esc(k.competitor)+' leads</span>':'<span class="up">Leading</span>'}</td></tr>`;
+  });
+  h+='</table>';
+  document.getElementById('kw-table').innerHTML=h||'<div style="color:#7d8590;padding:12px">No keywords in this tier</div>';
+}
+function filterTier(t){renderKeywords(t);}
+load();
+</script>
+</body>
+</html>

@@ -4415,6 +4415,24 @@ def serve_geo_scanner_intelligence():
     return send_from_directory('.', 'geo-scanner-intelligence.html')
 
 
+@app.route('/visibility-dashboard')
+def serve_visibility_dashboard():
+    """Cross-Model Visibility Dashboard — brand visibility across all AI providers."""
+    return send_from_directory('.', 'visibility-dashboard.html')
+
+
+@app.route('/geo-tracker')
+def serve_geo_tracker():
+    """Weekly GEO Score Tracker — trends, gainers/losers, competitor gaps."""
+    return send_from_directory('.', 'geo-tracker.html')
+
+
+@app.route('/client-dashboard')
+def serve_client_dashboard():
+    """Executive Client Dashboard — single-page KPI view for client demos."""
+    return send_from_directory('.', 'client-dashboard.html')
+
+
 @app.route('/audit/')
 @app.route('/audit/<path:url>')
 def serve_audit(url=None):

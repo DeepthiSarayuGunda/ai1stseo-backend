@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross-Model Visibility Dashboard — AI1stSEO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.nav a{color:#c9d1d9;font-size:.82rem;text-decoration:none;padding:8px 18px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(18,20,26,.8);transition:all .2s}
+.nav a:hover{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.3);color:#58a6ff}
+h1{font-size:1.5rem;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#58a6ff,#3fb950,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#7d8590;font-size:.84rem;margin-bottom:28px}
+.card{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;margin-bottom:20px}
+.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:14px;font-weight:700}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px;text-align:center}
+.stat .label{font-size:.65rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.stat .value{font-size:1.8rem;font-weight:800}
+.stat .sub{font-size:.72rem;color:#484f58;margin-top:4px}
+.up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;color:#7d8590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9}
+tr:hover td{background:rgba(88,166,255,.02)}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s}
+.bar-blue{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
+.bar-green{background:linear-gradient(90deg,#238636,#3fb950)}
+.pill{display:inline-flex;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:700}
+.pill-green{background:rgba(63,185,80,.1);color:#3fb950}
+.pill-red{background:rgba(248,81,73,.1);color:#f85149}
+.pill-blue{background:rgba(88,166,255,.08);color:#58a6ff}
+.probe-box{background:rgba(18,20,26,.6);border:1px solid rgba(99,102,241,.15);border-radius:16px;padding:24px;margin-bottom:28px}
+.probe-box input,.probe-box textarea{width:100%;padding:10px 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem;font-family:inherit}
+.probe-box label{display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px}
+.btn{height:44px;width:100%;border:none;border-radius:10px;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#6366f1,#818cf8);margin-top:14px}
+.btn:disabled{opacity:.5;cursor:wait}
+.loading{text-align:center;padding:60px;color:#7d8590}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(255,255,255,.06);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Cross-Model Visibility Dashboard</h1>
+<p class="subtitle">Brand visibility across Claude, ChatGPT, Gemini, Perplexity, Groq, Nova Lite & Ollama</p>
+<nav class="nav">
+  <a href="/geo-scanner">Scanner</a>
+  <a href="/geo-scanner-intelligence">Intelligence</a>
+  <a href="/geo-tracker">GEO Tracker</a>
+  <a href="/client-dashboard">Client Dashboard</a>
+  <a href="/">Home</a>
+</nav>
+
+<div class="probe-box">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><label>Brand Name</label><input id="v-brand" placeholder="e.g. AI1stSEO, Ahrefs" value="AI1stSEO"></div>
+    <div><label>Competitors (comma-separated)</label><input id="v-comps" placeholder="Ahrefs, SEMrush, Moz" value="Ahrefs, SEMrush, Moz"></div>
+  </div>
+  <div style="margin-top:12px"><label>Keywords (one per line)</label>
+    <textarea id="v-kw" rows="3" placeholder="best seo tool&#10;ai seo optimization">best seo tool&#10;ai seo optimization&#10;best answer engine optimization tool</textarea>
+  </div>
+  <button class="btn" id="v-btn" onclick="runProbe()">Run Cross-Model Probe</button>
+  <div id="v-status" style="display:none;margin-top:12px;padding:12px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:8px;font-size:.82rem"></div>
+</div>
+
+<div id="v-loading" class="loading"><div class="spinner"></div><br>Loading visibility data...</div>
+<div id="v-dash" style="display:none">
+  <div id="v-stats" class="stat-row"></div>
+  <div class="grid2">
+    <div class="card"><h3>Per-Provider Breakdown</h3><div id="v-providers"></div></div>
+    <div class="card"><h3>Competitor Comparison</h3><div id="v-compare"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Keyword-Level Visibility</h3><div id="v-keywords"></div></div>
+</div>
+</div>
+<script>
+const BASE='https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):''
+const pct=v=>Math.round((parseFloat(v)||0)*100);
+
+async function loadDash(){
+  try{
+    const r=await fetch(BASE+'/api/m3/deepthi/scanner/intelligence-summary');
+    const d=await r.json();
+    document.getElementById('v-loading').style.display='none';
+    document.getElementById('v-dash').style.display='block';
+    renderDash(d);
+  }catch(e){
+    document.getElementById('v-loading').innerHTML='<div style="color:#f85149">Failed to load: '+esc(e.message)+'</div>';
+  }
+}
+
+function renderDash(d){
+  const brands=d.multi_brand_scores?.brands||[];
+  const primary=brands[0]||{};
+  const provScores=primary.provider_scores||{};
+  const providers=Object.keys(provScores);
+
+  // Stats
+  document.getElementById('v-stats').innerHTML=`
+    <div class="stat"><div class="label">Overall Visibility</div><div class="value ${pct(primary.geo_score)>=50?'up':'stable'}">${pct(primary.geo_score)}%</div><div class="sub">${primary.brand||'—'}</div></div>
+    <div class="stat"><div class="label">Providers Tested</div><div class="value up">${providers.length}</div><div class="sub">AI engines</div></div>
+    <div class="stat"><div class="label">Keywords Cited</div><div class="value up">${primary.keywords_cited||0}</div><div class="sub">of ${primary.keywords_probed||0}</div></div>
+    <div class="stat"><div class="label">Brands Tracked</div><div class="value up">${brands.length}</div><div class="sub">competitors</div></div>`;
+
+  // Provider breakdown
+  let ph='<table><tr><th>AI Provider</th><th>Citation Score</th><th></th></tr>';
+  Object.entries(provScores).sort((a,b)=>b[1]-a[1]).forEach(([p,s])=>{
+    const v=pct(s);
+    ph+=`<tr><td style="font-weight:700">${esc(p)}</td><td>${v}%</td><td style="width:50%"><div class="bar"><div class="bar-fill bar-blue" style="width:${v}%"></div></div></td></tr>`;
+  });
+  ph+='</table>';
+  document.getElementById('v-providers').innerHTML=ph;
+
+  // Competitor comparison
+  let ch='<table><tr><th>Brand</th><th>GEO Score</th><th>Keywords Cited</th><th></th></tr>';
+  brands.forEach(b=>{
+    const g=pct(b.geo_score);
+    ch+=`<tr><td style="font-weight:700;color:${b.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(b.brand)}</td><td>${g}%</td><td>${b.keywords_cited||0}/${b.keywords_probed||0}</td><td style="width:40%"><div class="bar"><div class="bar-fill ${g>=50?'bar-green':'bar-blue'}" style="width:${g}%"></div></div></td></tr>`;
+  });
+  ch+='</table>';
+  document.getElementById('v-compare').innerHTML=ch;
+
+  // Keywords
+  const winners=d.multi_brand_scores?.keyword_winners||{};
+  let kh='<table><tr><th>Keyword</th><th>Winner</th><th>Score</th></tr>';
+  Object.entries(winners).forEach(([kw,w])=>{
+    kh+=`<tr><td>${esc(kw)}</td><td style="color:${w.winning_brand==='AI1stSEO'?'#3fb950':'#d29922'};font-weight:700">${esc(w.winning_brand)}</td><td>${pct(w.geo_score)}%</td></tr>`;
+  });
+  kh+='</table>';
+  document.getElementById('v-keywords').innerHTML=kh||'<div style="color:#7d8590;padding:12px">No keyword data yet</div>';
+}
+
+async function runProbe(){
+  const brand=document.getElementById('v-brand').value.trim();
+  const kw=document.getElementById('v-kw').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  if(!brand||!kw.length){alert('Enter brand and keywords');return;}
+  const btn=document.getElementById('v-btn');
+  const status=document.getElementById('v-status');
+  btn.disabled=true;btn.textContent='Probing all AI engines...';
+  status.style.display='block';status.innerHTML='<span style="color:#8b949e">Running cross-model probe...</span>';
+  try{
+    const r=await fetch(BASE+'/api/geo-probe/batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand_name:brand,keywords:kw,provider:'nova'})});
+    const d=await r.json();
+    const g=Math.round((d.geo_score||0)*100);
+    status.innerHTML=`<span class="${g>=50?'up':'stable'}" style="font-size:1.2rem;font-weight:800">${g}%</span> GEO Score — ${d.cited_count||0}/${d.total_prompts||0} cited. <button onclick="loadDash()" style="margin-left:8px;padding:4px 12px;border:1px solid rgba(88,166,255,.3);border-radius:6px;background:transparent;color:#58a6ff;cursor:pointer;font-size:.78rem">Refresh Dashboard</button>`;
+  }catch(e){status.innerHTML='<span style="color:#f85149">Error: '+esc(e.message)+'</span>';}
+  finally{btn.disabled=false;btn.textContent='Run Cross-Model Probe';}
+}
+loadDash();
+</script>
+</body>
+</html>

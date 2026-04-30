@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executive Client Dashboard — AI1stSEO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 24px}
+.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.nav a{color:#c9d1d9;font-size:.82rem;padding:8px 18px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(18,20,26,.8);transition:all .2s}
+.nav a:hover{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.3);color:#58a6ff}
+.nav a.pdf{background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.25);color:#3fb950}
+.header{text-align:center;margin-bottom:36px}
+.header h1{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+.header .brand{font-size:2rem;background:linear-gradient(135deg,#58a6ff,#3fb950);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.header .date{color:#7d8590;font-size:.84rem;margin-top:6px}
+.hero-stat{text-align:center;padding:40px 20px;background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:20px;margin-bottom:28px;position:relative;overflow:hidden}
+.hero-stat::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#58a6ff,#3fb950,#818cf8)}
+.hero-stat .big{font-size:4rem;font-weight:900;line-height:1}
+.hero-stat .change{font-size:1.1rem;margin-top:8px;font-weight:600}
+.hero-stat .label{font-size:.85rem;color:#7d8590;margin-top:4px}
+.up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+@media(max-width:700px){.kpi-grid{grid-template-columns:1fr 1fr}}
+.kpi{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;text-align:center;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.kpi:nth-child(1)::after{background:linear-gradient(90deg,#58a6ff,#3fb950)}
+.kpi:nth-child(2)::after{background:linear-gradient(90deg,#3fb950,#22d3ee)}
+.kpi:nth-child(3)::after{background:linear-gradient(90deg,#d29922,#e3b341)}
+.kpi:nth-child(4)::after{background:linear-gradient(90deg,#f85149,#ff7b72)}
+.kpi:nth-child(5)::after{background:linear-gradient(90deg,#818cf8,#a78bfa)}
+.kpi:nth-child(6)::after{background:linear-gradient(90deg,#22d3ee,#06b6d4)}
+.kpi .val{font-size:2rem;font-weight:800;margin-bottom:4px}
+.kpi .lbl{font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.kpi .sub{font-size:.72rem;color:#484f58;margin-top:4px}
+.card{background:rgba(18,20,26,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;margin-bottom:20px}
+.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:14px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;color:#7d8590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.7rem;text-transform:uppercase;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px}
+.bar-green{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-blue{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
+.loading{text-align:center;padding:80px;color:#7d8590}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(255,255,255,.06);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer{text-align:center;padding:24px;font-size:.72rem;color:#484f58;margin-top:20px;border-top:1px solid rgba(255,255,255,.04)}
+@media print{body{background:#fff;color:#1a1a2e}.hero-stat,.kpi,.card{border-color:#e0e0e0;background:#fff}.up{color:#059669}.down{color:#dc2626}.stable{color:#d97706}th{color:#6b7280}td{color:#374151}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="nav">
+  <a href="/geo-scanner">Scanner</a>
+  <a href="/geo-scanner-intelligence">Intelligence</a>
+  <a href="/visibility-dashboard">Visibility</a>
+  <a href="/geo-tracker">GEO Tracker</a>
+  <a href="#" class="pdf" onclick="window.print();return false">📥 Export PDF</a>
+  <a href="/">Home</a>
+</nav>
+
+<div class="header">
+  <h1>AI Visibility Report</h1>
+  <div class="brand" id="c-brand">AI1stSEO</div>
+  <div class="date" id="c-date"></div>
+</div>
+
+<div id="loading" class="loading"><div class="spinner"></div><br>Generating executive report...</div>
+<div id="dash" style="display:none">
+  <div class="hero-stat">
+    <div class="big up" id="c-geo">—</div>
+    <div class="change" id="c-change"></div>
+    <div class="label">Overall GEO Score — AI Visibility Across All Engines</div>
+  </div>
+
+  <div class="kpi-grid" id="c-kpis"></div>
+
+  <div class="card"><h3>Competitive Position</h3><div id="c-ranking"></div></div>
+
+  <div class="card"><h3>Provider Performance</h3><div id="c-providers"></div></div>
+
+  <div class="footer" id="c-footer"></div>
+</div>
+</div>
+<script>
+const BASE='https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):''
+const pct=v=>Math.round((parseFloat(v)||0)*100);
+
+document.getElementById('c-date').textContent='Week of '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+async function load(){
+  try{
+    const [sumR,execR]=await Promise.all([
+      fetch(BASE+'/api/m3/deepthi/scanner/intelligence-summary'),
+      fetch(BASE+'/api/m5/executive-dashboard?brand=AI1stSEO'),
+    ]);
+    const summary=await sumR.json();
+    let exec={};try{exec=await execR.json();}catch(e){}
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dash').style.display='block';
+    render(summary,exec);
+  }catch(e){
+    document.getElementById('loading').innerHTML='<div style="color:#f85149">Failed: '+esc(e.message)+'</div>';
+  }
+}
+
+function render(d,exec){
+  const brands=d.multi_brand_scores?.brands||[];
+  const primary=brands.find(b=>b.brand==='AI1stSEO')||brands[0]||{};
+  const gScore=pct(primary.geo_score);
+  const change=primary.change_vs_last_week||{};
+  const delta=change.delta||0;
+  const dir=delta>0?'▲':delta<0?'▼':'—';
+
+  // Hero
+  document.getElementById('c-geo').textContent=gScore+'%';
+  document.getElementById('c-geo').className='big '+(gScore>=50?'up':'stable');
+  document.getElementById('c-change').innerHTML=`<span class="${delta>0?'up':delta<0?'down':'stable'}">${dir} ${Math.abs(delta*100).toFixed(1)}% vs last week</span>`;
+
+  // KPIs
+  const provScores=primary.provider_scores||{};
+  const avgVis=Object.values(provScores).length?Math.round(Object.values(provScores).reduce((a,b)=>a+b,0)/Object.values(provScores).length*100):0;
+  const debt=exec.technical_debt||{};
+  const eeat=exec.eeat_progress||{};
+  const content=exec.content_calendar||{};
+
+  document.getElementById('c-kpis').innerHTML=`
+    <div class="kpi"><div class="val ${avgVis>=50?'up':'stable'}">${avgVis}%</div><div class="lbl">Cross-Model Visibility</div><div class="sub">Avg across ${Object.keys(provScores).length} AI engines</div></div>
+    <div class="kpi"><div class="val up">${primary.keywords_cited||0}/${primary.keywords_probed||0}</div><div class="lbl">Keywords Cited</div><div class="sub">AI citation rate</div></div>
+    <div class="kpi"><div class="val ${(debt.resolution_pct||0)>=60?'up':'stable'}">${debt.resolution_pct||0}%</div><div class="lbl">Technical Debt Resolved</div><div class="sub">${debt.critical_resolved||0}/${debt.critical_total||0} critical fixed</div></div>
+    <div class="kpi"><div class="val ${(eeat.closure_pct||0)>=60?'up':'stable'}">${eeat.closure_pct||0}%</div><div class="lbl">E-E-A-T Gaps Closed</div><div class="sub">${eeat.gaps_closed||0} of ${eeat.total_gaps||0}</div></div>
+    <div class="kpi"><div class="val up">${content.published||0}</div><div class="lbl">Content Published</div><div class="sub">This month</div></div>
+    <div class="kpi"><div class="val up">${exec.overall_health||0}%</div><div class="lbl">Platform Health</div><div class="sub">All systems</div></div>`;
+
+  // Ranking
+  let rH='<table><tr><th>Rank</th><th>Brand</th><th>GEO Score</th><th></th></tr>';
+  brands.forEach((b,i)=>{
+    const g=pct(b.geo_score);
+    rH+=`<tr><td style="color:#7d8590">#${i+1}</td><td style="font-weight:700;color:${b.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(b.brand)}</td><td style="font-weight:700" class="${g>=50?'up':'stable'}">${g}%</td><td style="width:40%"><div class="bar"><div class="bar-fill ${b.brand==='AI1stSEO'?'bar-green':'bar-blue'}" style="width:${g}%"></div></div></td></tr>`;
+  });
+  rH+='</table>';
+  document.getElementById('c-ranking').innerHTML=rH;
+
+  // Providers
+  let pH='<table><tr><th>AI Engine</th><th>Citation Score</th><th></th></tr>';
+  Object.entries(provScores).sort((a,b)=>b[1]-a[1]).forEach(([p,s])=>{
+    const v=pct(s);
+    pH+=`<tr><td style="font-weight:700">${esc(p)}</td><td>${v}%</td><td style="width:50%"><div class="bar"><div class="bar-fill bar-blue" style="width:${v}%"></div></div></td></tr>`;
+  });
+  pH+='</table>';
+  document.getElementById('c-providers').innerHTML=pH;
+
+  document.getElementById('c-footer').textContent='AI1stSEO Executive Report · Generated '+new Date().toISOString().slice(0,10)+' · ai1stseo.com';
+}
+load();
+</script>
+</body>
+</html>
