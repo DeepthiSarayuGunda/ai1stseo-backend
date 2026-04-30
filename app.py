@@ -4162,6 +4162,40 @@ def outreach_update_status():
     return jsonify({'error': 'URL not found in outreach queue'}), 404
 
 
+@app.route('/api/outreach/from-mentions', methods=['POST'])
+def outreach_from_mentions():
+    """Fetch live mentions from Troy's API and generate outreach drafts.
+
+    Request (optional): { "auth_token": "cognito_jwt" }
+    Falls back to AI1STSEO_AUTH_TOKEN env var if not provided.
+    """
+    from services.outreach_generator import fetch_mentions_from_api, generate_outreach
+
+    data = request.get_json(silent=True) or {}
+    token = data.get('auth_token') or request.headers.get('Authorization', '').replace('Bearer ', '')
+
+    mentions = fetch_mentions_from_api(auth_token=token)
+
+    if not mentions:
+        return jsonify({
+            'status': 'warning',
+            'message': 'No mentions returned from API. Using AEO data as fallback.',
+            'source': 'aeo_fallback',
+        }), 200
+
+    # Filter to unlinked only
+    unlinked = [m for m in mentions if not m.get('has_backlink')]
+
+    try:
+        result = generate_outreach(mentions=unlinked if unlinked else None)
+        result['mention_source'] = 'mentions_api'
+        result['total_from_api'] = len(mentions)
+        result['unlinked_from_api'] = len(unlinked)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': f'Outreach generation failed: {str(e)}'}), 500
+
+
 # ============== AEO → OUTREACH FULL FLOW (Demo) ==============
 
 @app.route('/demo-flow')

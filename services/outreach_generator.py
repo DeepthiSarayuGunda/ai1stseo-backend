@@ -1,11 +1,13 @@
 """
 Outreach Generator — Converts unlinked brand mentions into outreach drafts.
 
-Reads mention data from AEO results or direct input, filters for unlinked
-mentions, and generates personalized outreach emails requesting backlinks.
+Reads mention data from AEO results, Troy's mentions API, or direct input,
+filters for unlinked mentions, and generates personalized outreach emails
+requesting backlinks.
 
 Usage:
-    from services.outreach_generator import generate_outreach, get_outreach_queue
+    from services.outreach_generator import generate_outreach, get_outreach_queue,
+                                            fetch_mentions_from_api
 
 No external paid services. Generation only — does not send emails.
 """
@@ -13,6 +15,7 @@ No external paid services. Generation only — does not send emails.
 import json
 import os
 import re
+import requests as http_requests
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
@@ -23,6 +26,10 @@ OUTREACH_FILE = os.path.join(DATA_DIR, "outreach_queue.json")
 
 BRAND = "ai1stseo"
 BRAND_DOMAIN = "ai1stseo.com"
+
+# Troy's mentions API (Lambda)
+MENTIONS_API_URL = "https://api.ai1stseo.com/api/mentions/scan"
+MENTIONS_HISTORY_URL = "https://api.ai1stseo.com/api/mentions/history"
 BRAND_URL = "https://www.ai1stseo.com"
 BRAND_PATTERNS = [
     re.compile(r"ai1stseo", re.I),
@@ -136,6 +143,44 @@ def extract_unlinked_mentions(mentions=None):
             unlinked.append(m)
 
     return unlinked
+
+
+def fetch_mentions_from_api(auth_token=None):
+    """Fetch unlinked brand mentions from Troy's mentions API.
+
+    Args:
+        auth_token: Cognito JWT token for authentication.
+
+    Returns:
+        List of mention dicts from Google News + Reddit, or empty list on failure.
+    """
+    if not auth_token:
+        auth_token = os.environ.get("AI1STSEO_AUTH_TOKEN", "")
+
+    if not auth_token:
+        return []
+
+    try:
+        resp = http_requests.post(
+            MENTIONS_API_URL,
+            json={"brand": "AI 1st SEO", "domain": "ai1stseo.com"},
+            headers={
+                "Authorization": f"Bearer {auth_token}",
+                "Content-Type": "application/json",
+            },
+            timeout=20,
+        )
+        if resp.status_code != 200:
+            return []
+
+        data = resp.json()
+        if data.get("status") != "success":
+            return []
+
+        return data.get("mentions", [])
+
+    except Exception:
+        return []
 
 
 def _load_mentions_from_aeo():
