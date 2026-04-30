@@ -121,9 +121,9 @@ tr:hover td{background:rgba(88,166,255,.02)}
 }
 
 /* Metric explanation boxes — prominent for lay users */
-.metric-explain{background:rgba(18,20,26,.8)!important;border:1px solid rgba(88,166,255,.2)!important;border-radius:12px;padding:16px 20px;margin-top:14px;margin-bottom:20px;font-size:.82rem;color:#c9d1d9;line-height:1.7;position:relative;border-left:3px solid #58a6ff!important}
-.metric-explain strong{display:block;font-size:.88rem;margin-bottom:6px}
-.metric-explain em{color:#e1e4e8;font-style:normal;font-weight:600}
+.metric-explain{background:#111827!important;border:2px solid rgba(88,166,255,.35)!important;border-radius:12px;padding:18px 22px!important;margin-top:16px!important;margin-bottom:24px!important;font-size:.84rem!important;color:#d1d5db!important;line-height:1.7!important;position:relative;border-left:4px solid #58a6ff!important;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.metric-explain strong{display:block;font-size:.92rem;margin-bottom:8px}
+.metric-explain em{color:#e5e7eb;font-style:normal;font-weight:600}
 </style>
 </head>
 <body>
@@ -183,8 +183,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
 
 <!-- Brand Score Cards -->
 <div id="brand-stats" class="stat-row"></div>
-<div class="metric-explain" id="brand-stats-explain" style="background:rgba(88,166,255,.04);border:1px solid rgba(88,166,255,.08);border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:.8rem;color:#8b949e;line-height:1.6">
-  <strong style="color:#58a6ff">What do these scores mean?</strong><br>
+<div class="metric-explain" id="brand-stats-explain">
+  <strong style="color:#58a6ff">📊 What do these scores mean?</strong><br>
   Each card shows a brand's <em>GEO Score</em> — the percentage of times AI models (like ChatGPT, Perplexity, or Amazon Nova) mention that brand when users ask industry-related questions. A higher score means better AI visibility. The trend arrow shows whether the score improved or declined compared to last week.
   <div id="brand-stats-ai-explain" style="margin-top:8px;display:none"></div>
 </div>
@@ -193,8 +193,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
 <div class="section" id="sec-geo">
   <div class="section-title"><div class="section-icon geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div> GEO Score Tracker — Multi-Brand</div>
   <div id="geo-table-wrap"></div>
-  <div class="metric-explain" style="background:rgba(63,185,80,.04);border:1px solid rgba(63,185,80,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#3fb950">Understanding the GEO Tracker</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#3fb950">📈 Understanding the GEO Tracker</strong><br>
     This table compares how often each brand is cited by AI search engines. <em>Visibility Score</em> counts total mentions across all probes. <em>Keywords Cited</em> shows how many of your tracked keywords triggered a brand mention. The <em>Providers</em> column breaks down scores per AI engine — useful for spotting which AI platforms favor your brand vs competitors. Keyword Winners highlight which brand leads for each specific search term.
     <div id="geo-ai-explain" style="margin-top:8px;display:none"></div>
   </div>
@@ -208,8 +208,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
     <div class="card"><h3>Competitor Wins — Where They Beat Us</h3><div id="kw-gaps"></div></div>
   </div>
   <div class="card" style="margin-top:16px"><h3>Which AI Engine Cites Each Brand Most</h3><div id="engine-brands"></div></div>
-  <div class="metric-explain" style="background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#ffd700">Understanding Keyword Performance</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#ffd700">🔑 Understanding Keyword Performance</strong><br>
     <em>Top Keywords</em> shows which search terms AI models most frequently associate with your brand — these are your strongest content areas. <em>Competitor Wins</em> reveals keywords where a competitor's brand is cited more often than yours — these are content gaps to prioritize. The <em>Engine Citations</em> table shows which AI platform favors which brand, helping you tailor optimization strategies per engine.
     <div id="kw-ai-explain" style="margin-top:8px;display:none"></div>
   </div>
@@ -220,8 +220,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
   <div class="section-title"><div class="section-icon comp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div> Competitor Visibility Matrix</div>
   <div id="comp-matrix"></div>
   <div class="card" style="margin-top:16px"><h3>Engine Preferences — Who Each AI Recommends</h3><div id="engine-prefs"></div></div>
-  <div class="metric-explain" style="background:rgba(248,81,73,.04);border:1px solid rgba(248,81,73,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#f85149">Understanding the Competitor Matrix</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#f85149">⚔️ Understanding the Competitor Matrix</strong><br>
     Brands are ranked by overall AI visibility. <em>WoW Change</em> (Week-over-Week) shows momentum — a rising brand is gaining AI mindshare. <em>Engine Preferences</em> reveals each AI platform's "favorite" brands. If a competitor ranks higher on a specific engine, that engine's training data or retrieval pipeline may favor their content structure. Use this to identify where to focus your GEO optimization efforts.
     <div id="comp-ai-explain" style="margin-top:8px;display:none"></div>
   </div>
@@ -231,8 +231,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
 <div class="section" id="sec-auto">
   <div class="section-title"><div class="section-icon auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div> Automation Status</div>
   <div class="card"><div id="auto-jobs"></div></div>
-  <div class="metric-explain" style="background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#818cf8">Understanding Automation Jobs</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#818cf8">⚙️ Understanding Automation Jobs</strong><br>
     These are background tasks that run automatically to keep your data fresh. A green dot means the job completed successfully on its last run. Amber means it's pending or had a warning. Grey means it hasn't run yet. More frequent runs = more data points = more accurate trend analysis. The total runs counter shows how much historical data has been collected.
   </div>
 </div>
@@ -244,8 +244,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
     <div class="card"><h3>Citation Rate by Brand</h3><div id="cite-rates"></div></div>
     <div class="card"><h3>Content Format Performance</h3><div id="cite-formats"></div></div>
   </div>
-  <div class="metric-explain" style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#22d3ee">Understanding Citation Intelligence</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#22d3ee">🔗 Understanding Citation Intelligence</strong><br>
     <em>Citation Rate</em> measures how often AI models reference a brand when answering relevant queries — think of it as your "AI search ranking." <em>Content Format Performance</em> shows which types of content (lists, paragraphs, tables, etc.) get cited most by AI engines. If "bullet_list" has a high citation rate, structuring your content as lists may improve your AI visibility. Use these insights to optimize your content format for AI consumption.
     <div id="cite-ai-explain" style="margin-top:8px;display:none"></div>
   </div>
@@ -255,8 +255,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
 <div class="section" id="sec-recs">
   <div class="section-title"><div class="section-icon rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div> Recommended Next Actions</div>
   <div id="recs-list"></div>
-  <div class="metric-explain" style="background:rgba(63,185,80,.04);border:1px solid rgba(63,185,80,.08);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.8rem;color:#8b949e;line-height:1.6">
-    <strong style="color:#3fb950">About Recommendations</strong><br>
+  <div class="metric-explain">
+    <strong style="color:#3fb950">✅ About Recommendations</strong><br>
     These actions are auto-generated based on your current data. <em>High priority</em> items address significant gaps where competitors outperform you. <em>Medium priority</em> items are optimization opportunities. The recommended content format is based on what AI engines cite most frequently. Acting on these suggestions should improve your GEO score over time.
   </div>
 </div>
