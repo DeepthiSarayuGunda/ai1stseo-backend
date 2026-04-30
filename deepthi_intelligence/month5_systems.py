@@ -1229,3 +1229,138 @@ def month5_status():
             'GET  /api/m5/status',
         ],
     })
+
+
+# =========================================================================
+# GEO INTELLIGENCE PDF REPORT
+# =========================================================================
+
+def _generate_geo_intelligence_pdf(brand: str, data: Dict) -> bytes:
+    """Generate a PDF report of the GEO Intelligence dashboard data."""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib import colors
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        import io
+
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(buf, pagesize=letter)
+        styles = getSampleStyleSheet()
+        elements = []
+
+        # Title
+        elements.append(Paragraph(
+            f"GEO Intelligence Report — {brand}",
+            styles['Title']
+        ))
+        elements.append(Spacer(1, 8))
+        elements.append(Paragraph(
+            f"Week: {data.get('week', _week())} · Generated: {_now()[:10]}",
+            styles['Normal']
+        ))
+        elements.append(Spacer(1, 16))
+
+        # Executive Summary
+        elements.append(Paragraph("Executive Summary", styles['Heading2']))
+        elements.append(Spacer(1, 6))
+        geo = data.get('geo_score_trend', {})
+        geo_pct = round((geo.get('current_score', 0)) * 100)
+        elements.append(Paragraph(
+            f"Overall GEO Score: <b>{geo_pct}%</b> · "
+            f"Probes Run: {geo.get('probe_count', 0)} · "
+            f"Avg Confidence: {round(geo.get('avg_confidence', 0) * 100)}% · "
+            f"Overall Health: {data.get('overall_health', 0)}%",
+            styles['Normal']
+        ))
+        elements.append(Spacer(1, 16))
+
+        # Competitive Position
+        comp = data.get('competitive_position', {})
+        ranking = comp.get('ranking', [])
+        if ranking:
+            elements.append(Paragraph("Competitive Position", styles['Heading2']))
+            elements.append(Spacer(1, 6))
+            header = ['Rank', 'Brand', 'GEO Score']
+            tdata = [header]
+            for i, r in enumerate(ranking[:5], 1):
+                tdata.append([str(i), r.get('brand', ''), f"{round(r.get('geo_score', 0) * 100)}%"])
+            t = Table(tdata, colWidths=[40, 200, 80])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a1a2e')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+                ('ALIGN', (2, 0), (2, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f4f8')]),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            elements.append(t)
+            elements.append(Spacer(1, 16))
+
+        # Technical Debt & E-E-A-T
+        debt = data.get('technical_debt', {})
+        eeat = data.get('eeat_progress', {})
+        elements.append(Paragraph("System Metrics", styles['Heading2']))
+        elements.append(Spacer(1, 6))
+        elements.append(Paragraph(
+            f"Technical Debt Resolution: <b>{debt.get('resolution_pct', 0)}%</b> "
+            f"({debt.get('critical_resolved', 0)}/{debt.get('critical_total', 0)} critical resolved)",
+            styles['Normal']
+        ))
+        elements.append(Paragraph(
+            f"E-E-A-T Gap Closure: <b>{eeat.get('closure_pct', 0)}%</b> "
+            f"({eeat.get('gaps_closed', 0)}/{eeat.get('total_gaps', 0)} gaps closed)",
+            styles['Normal']
+        ))
+        elements.append(Spacer(1, 16))
+
+        # Alerts
+        alerts = data.get('alerts', {})
+        elements.append(Paragraph("Alert Summary", styles['Heading2']))
+        elements.append(Spacer(1, 6))
+        elements.append(Paragraph(
+            f"Total Alerts: {alerts.get('total', 0)} · "
+            f"Critical: {alerts.get('critical', 0)} · "
+            f"High: {alerts.get('high', 0)}",
+            styles['Normal']
+        ))
+        elements.append(Spacer(1, 20))
+
+        # Footer
+        elements.append(Paragraph(
+            "Source: AI1stSEO GEO Intelligence Platform · ai1stseo.com",
+            styles['Normal']
+        ))
+
+        doc.build(elements)
+        return buf.getvalue()
+
+    except ImportError:
+        # Fallback plain text
+        content = f"GEO Intelligence Report — {brand}\n"
+        content += f"Week: {data.get('week', _week())}\n"
+        content += f"GEO Score: {round(data.get('geo_score_trend', {}).get('current_score', 0) * 100)}%\n"
+        content += f"Health: {data.get('overall_health', 0)}%\n"
+        return content.encode('utf-8')
+
+
+@month5_bp.route('/executive-dashboard/pdf', methods=['GET'])
+def executive_dashboard_pdf():
+    """Download the executive dashboard as a PDF report."""
+    from flask import Response
+    brand = request.args.get('brand', PRIMARY)
+    try:
+        data = ExecutiveDashboard().generate_weekly_report(brand)
+        pdf_bytes = _generate_geo_intelligence_pdf(brand, data)
+        filename = f"geo-intelligence-{brand}-{_week()}.pdf"
+        return Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        )
+    except Exception as e:
+        return jsonify({'error': f'PDF generation failed: {e}'}), 500

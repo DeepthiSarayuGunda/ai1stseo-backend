@@ -141,6 +141,7 @@ tr:hover td{background:rgba(88,166,255,.02)}
 <nav class="nav">
   <a href="/geo-scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Back to Scanner</a>
   <a href="/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+  <a href="#" onclick="downloadIntelPDF();return false" style="background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.25)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF</a>
   <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a>
 </nav>
 
@@ -751,6 +752,13 @@ async function loadAIExplanations(){
 }
 // Load AI explanations after main dashboard renders
 setTimeout(loadAIExplanations, 2000);
+
+function downloadRankingsPDF() {
+  window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
+}
+function downloadIntelPDF() {
+  window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
+}
 
 async function runLiveProbe(){
   const brand = document.getElementById('probe-brand').value.trim();
