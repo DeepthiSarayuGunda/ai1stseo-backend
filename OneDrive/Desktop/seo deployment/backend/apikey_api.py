@@ -52,6 +52,18 @@ def validate_api_key(required_scope='read'):
         requests_this_hour = row.get('requests_this_hour', 0)
         rate_limit = row.get('rate_limit_per_hour', 100)
 
+        # Credit metering (if credits field exists and is not unlimited)
+        credits_remaining = row.get('credits')
+        if credits_remaining is not None and credits_remaining != -1:
+            if credits_remaining <= 0:
+                return 'no_credits'
+            # Decrement credits
+            try:
+                update_item('ai1stseo-api-keys', {'key_hash': key_hash},
+                            {'credits': max(0, credits_remaining - 1)})
+            except Exception:
+                pass
+
         if hour_window:
             try:
                 hw = datetime.datetime.fromisoformat(hour_window) if isinstance(hour_window, str) else hour_window
@@ -90,6 +102,8 @@ def require_api_access(scope='read'):
             result = validate_api_key(scope)
             if result == 'rate_limited':
                 return jsonify({'status': 'error', 'message': 'Rate limit exceeded.'}), 429
+            if result == 'no_credits':
+                return jsonify({'status': 'error', 'message': 'API credits exhausted. Purchase more at /api/stripe/create-checkout.'}), 402
             if result is None:
                 return jsonify({'status': 'error', 'message': 'Valid API key or auth token required'}), 401
             request.api_key = result
@@ -117,11 +131,13 @@ def create_api_key():
     raw_key = _generate_key()
     key_hash = _hash_key(raw_key)
     key_prefix = raw_key[:12]
+    credits = d.get('credits', -1)  # -1 = unlimited, positive int = metered
     try:
         put_item('ai1stseo-api-keys', {
             'key_hash': key_hash, 'key_prefix': key_prefix,
             'project_id': DEFAULT_PROJECT_ID, 'label': label,
             'scopes': scopes, 'rate_limit_per_hour': rate_limit,
+            'credits': credits,
             'is_active': True, 'created_by': _get_user_id(),
             'requests_this_hour': 0,
         })
@@ -130,6 +146,7 @@ def create_api_key():
             'key': raw_key, 'prefix': key_prefix,
             'label': label, 'scopes': scopes,
             'rate_limit_per_hour': rate_limit,
+            'credits': credits,
             'warning': 'Save this key now. It cannot be retrieved again.',
         }), 201
     except Exception as e:

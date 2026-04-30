@@ -678,3 +678,70 @@ def stripe_config():
         'publishable_key': pk,
         'has_stripe': bool(pk),
     })
+
+
+@auth_bp.route('/api/stripe/subscription-status', methods=['GET'])
+@require_auth
+def subscription_status():
+    """Get the current user's full subscription details."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        u = items[0]
+        return jsonify({
+            'status': 'success',
+            'email': email,
+            'tier': u.get('subscription_tier', 'free'),
+            'role': u.get('role', 'member'),
+            'tier_updated_at': u.get('tier_updated_at', ''),
+            'created_at': u.get('created_at', ''),
+            'last_login': u.get('last_login', ''),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/api/stripe/cancel', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    """Downgrade the current user from pro back to free."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        table.update_item(
+            Key={'userId': items[0]['userId']},
+            UpdateExpression='SET subscription_tier = :tier, tier_updated_at = :now, cancellation_reason = :reason',
+            ExpressionAttributeValues={
+                ':tier': 'free',
+                ':now': datetime.now(timezone.utc).isoformat(),
+                ':reason': (request.get_json() or {}).get('reason', ''),
+            },
+        )
+        return jsonify({'status': 'success', 'tier': 'free', 'message': 'Subscription cancelled. You now have free tier access.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500

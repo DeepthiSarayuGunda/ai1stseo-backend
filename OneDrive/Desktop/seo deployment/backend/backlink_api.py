@@ -1977,3 +1977,174 @@ def brief_citation_probe():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== PROMPT-DEMAND RESEARCH =====================
+
+@backlink_bp.route('/api/prompts/research', methods=['POST'])
+@require_auth
+def prompt_demand_research():
+    """
+    Prompt-demand research v1 — the GEO equivalent of keyword research.
+    Aggregates existing probe data + citation frequency to rank prompts
+    by how often AI models cite sources for them.
+
+    Accepts a niche/topic and returns:
+    - Top prompts worth monitoring (ranked by citation frequency)
+    - Which domains get cited most for each prompt
+    - Suggested new prompts to track based on patterns
+    """
+    data = request.get_json() or {}
+    niche = data.get('niche', '').strip()
+    if not niche:
+        return jsonify({'status': 'error', 'message': 'niche required (e.g. "SEO", "ecommerce", "SaaS")'}), 400
+
+    try:
+        from collections import Counter, defaultdict
+
+        # Pull all citation authority probes for this niche
+        items = scan_table(BACKLINKS_TABLE, 500)
+        probes = [i for i in items if i.get('type') == 'citation_authority'
+                  and niche.lower() in (i.get('niche', '') or '').lower()]
+
+        # Also pull fingerprint probes
+        fingerprints = [i for i in items if i.get('type') == 'answer_fingerprint'
+                        and niche.lower() in (i.get('query', '') or '').lower()]
+
+        # Also pull brief citation probes
+        brief_probes = [i for i in items if i.get('type') == 'brief_citation_probe'
+                        and niche.lower() in (i.get('keyword', '') or '').lower()]
+
+        # Aggregate: which queries generate the most citations?
+        query_citation_count = Counter()
+        query_domains = defaultdict(Counter)
+        query_pages = defaultdict(Counter)
+
+        for probe in probes:
+            for result in probe.get('probe_results', []):
+                query = result.get('query', '')
+                if not query:
+                    continue
+                domains = result.get('domains_cited', [])
+                pages = result.get('pages_cited', [])
+                query_citation_count[query] += len(domains)
+                for d in domains:
+                    query_domains[query][d] += 1
+                for p in pages:
+                    query_pages[query][p] += 1
+
+        for fp in fingerprints:
+            query = fp.get('query', '')
+            domains = fp.get('cited_domains', [])
+            if query:
+                query_citation_count[query] += len(domains)
+                for d in domains:
+                    query_domains[query][d] += 1
+
+        for bp in brief_probes:
+            keyword = bp.get('keyword', '')
+            domains = bp.get('cited_domains', [])
+            if keyword:
+                query_citation_count[keyword] += len(domains)
+                for d in domains:
+                    query_domains[keyword][d] += 1
+
+        # Rank prompts by citation frequency
+        ranked_prompts = []
+        for query, count in query_citation_count.most_common(50):
+            top_domains = [{'domain': d, 'citations': c}
+                           for d, c in query_domains[query].most_common(5)]
+            top_pages = [{'url': p, 'citations': c}
+                         for p, c in query_pages[query].most_common(3)]
+            ranked_prompts.append({
+                'prompt': query,
+                'total_citations': count,
+                'unique_domains_cited': len(query_domains[query]),
+                'top_cited_domains': top_domains,
+                'top_cited_pages': top_pages,
+                'demand_score': min(100, count * 10),  # Simple demand proxy
+            })
+
+        # Generate suggested new prompts using AI
+        suggestions = []
+        if ranked_prompts:
+            try:
+                from ai_inference import generate
+                existing = ', '.join(p['prompt'][:50] for p in ranked_prompts[:5])
+                prompt = (
+                    'Given these AI search queries about {niche}: [{existing}], '
+                    'suggest 10 more queries that users would ask AI chatbots about this topic. '
+                    'Return only the queries, one per line, no numbering.'
+                ).format(niche=niche, existing=existing)
+                response = generate(prompt, max_tokens=512, temperature=0.7,
+                                    triggered_by='prompt_research')
+                suggestions = [line.strip() for line in response.strip().split('\n')
+                               if line.strip() and len(line.strip()) > 10][:10]
+            except Exception:
+                pass
+
+        # Store the research
+        research_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': research_id,
+            'type': 'prompt_research',
+            'niche': niche,
+            'ranked_prompts_count': len(ranked_prompts),
+            'suggestions_count': len(suggestions),
+            'total_probes_analyzed': len(probes) + len(fingerprints) + len(brief_probes),
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': research_id,
+            'niche': niche,
+            'ranked_prompts': ranked_prompts[:20],
+            'suggested_new_prompts': suggestions,
+            'data_sources': {
+                'citation_probes': len(probes),
+                'fingerprint_probes': len(fingerprints),
+                'brief_probes': len(brief_probes),
+            },
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/prompts/suggestions', methods=['POST'])
+@require_auth
+def prompt_suggestions():
+    """
+    Generate AI-powered prompt suggestions for a topic.
+    Uses LLM to brainstorm queries users would ask AI chatbots.
+    """
+    data = request.get_json() or {}
+    topic = data.get('topic', '').strip()
+    count = data.get('count', 10)
+    if not topic:
+        return jsonify({'status': 'error', 'message': 'topic required'}), 400
+
+    try:
+        from ai_inference import generate
+        prompt = (
+            'You are an AI search optimization expert. Generate {count} specific queries '
+            'that real users would type into ChatGPT, Gemini, or Perplexity about "{topic}". '
+            'Focus on queries where the AI would cite specific websites or tools. '
+            'Return only the queries, one per line, no numbering or bullets.'
+        ).format(count=count, topic=topic)
+
+        response = generate(prompt, max_tokens=512, temperature=0.7,
+                            triggered_by='prompt_suggestions')
+        suggestions = [line.strip() for line in response.strip().split('\n')
+                       if line.strip() and len(line.strip()) > 10][:count]
+
+        return jsonify({
+            'status': 'success',
+            'topic': topic,
+            'suggestions': suggestions,
+            'count': len(suggestions),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
