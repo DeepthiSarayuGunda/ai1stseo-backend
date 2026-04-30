@@ -262,6 +262,76 @@ tr:hover td{background:rgba(88,166,255,.02)}
   </div>
 </div>
 
+<!-- ═══════════════ MONTH 5 SECTIONS ═══════════════ -->
+
+<!-- 7. Alert Engine -->
+<div class="section" id="sec-alerts">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(248,81,73,.15),rgba(255,123,114,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#f85149" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div> Alert Engine — Automated Threat Detection</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Alert Summary</h3>
+      <div id="alert-summary">
+        <div style="color:#7d8590;font-size:.82rem;padding:12px">Loading alerts...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Active Alerts</h3>
+      <div id="alert-list" style="max-height:320px;overflow-y:auto">
+        <div style="color:#7d8590;font-size:.82rem;padding:12px">Loading...</div>
+      </div>
+    </div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#f85149">🚨 Understanding Alerts</strong><br>
+    The Alert Engine automatically scans your probe data for threats. <em>Critical</em> alerts mean your GEO score dropped significantly — investigate immediately. <em>High</em> alerts flag competitors overtaking you on specific keywords. <em>Medium</em> alerts indicate declining confidence — AI models are less certain about your brand. Each alert includes a recommended action.
+  </div>
+</div>
+
+<!-- 8. Tiered Monitoring -->
+<div class="section" id="sec-tiers">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(56,189,248,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div> Tiered Keyword Monitoring Schedule</div>
+  <div id="tier-cards" class="grid3"></div>
+  <div class="metric-explain">
+    <strong style="color:#22d3ee">📡 Understanding Tiered Monitoring</strong><br>
+    Keywords are monitored at different frequencies based on their commercial value. <em>Tier 1</em> (highest value) is checked every 2 days using Nova Lite for speed. <em>Tier 2</em> runs weekly. <em>Tier 3</em> (research keywords) runs bi-weekly using Ollama to save costs. This ensures your most important keywords get the freshest data.
+  </div>
+</div>
+
+<!-- 9. Experiments -->
+<div class="section" id="sec-experiments">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(192,132,252,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 3h6v2H9z"/><path d="M10 5v4l-3 8h10l-3-8V5"/><circle cx="12" cy="14" r="1"/></svg></div> Controlled Experiments</div>
+  <div id="experiment-list"></div>
+  <div class="metric-explain">
+    <strong style="color:#a855f7">🧪 Understanding Experiments</strong><br>
+    These are A/B tests for your content structure. Each experiment holds a keyword constant and varies the content format (e.g., FAQ vs paragraph, list vs table). After 4 weeks, we measure which format gets more AI citations. Ollama is used for exploratory tests (free), Nova Lite for production validation.
+  </div>
+</div>
+
+<!-- 10. Executive Dashboard -->
+<div class="section" id="sec-executive">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(245,158,11,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div> Executive Dashboard — Weekly Summary</div>
+  <div id="exec-stats" class="stat-row"></div>
+  <div class="grid2">
+    <div class="card"><h3>Competitive Position</h3><div id="exec-competitive"></div></div>
+    <div class="card"><h3>Alert Overview</h3><div id="exec-alerts"></div></div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#fbbf24">📋 Executive Summary</strong><br>
+    This is your single-page weekly overview for stakeholders. It pulls data from every system — GEO scores, citation velocity, technical debt resolution, E-E-A-T progress, content production, and competitive position. The <em>Overall Health</em> score is an aggregate of all system metrics.
+  </div>
+</div>
+
+<!-- 11. Systems Health -->
+<div class="section" id="sec-health">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(52,211,153,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div> Systems Health Dashboard</div>
+  <div id="health-overview" style="margin-bottom:16px"></div>
+  <div id="health-systems"></div>
+  <div class="metric-explain">
+    <strong style="color:#10b981">💚 Understanding Systems Health</strong><br>
+    Each of the 8 major systems is monitored for operational health. A <em>green</em> status means the system is running on cadence and producing outputs. <em>Amber</em> means degraded — some components may be unavailable. <em>Red</em> means the system needs immediate attention. The health score is the percentage of systems running healthy.
+  </div>
+</div>
+
 <div style="text-align:center;padding:20px;font-size:.72rem;color:#484f58" id="meta-info"></div>
 </div>
 </div>
@@ -470,6 +540,190 @@ function renderRecs(sl){
 }
 
 load();
+
+// ── Month 5: Load all new sections ──────────────────────────────────────────
+async function loadMonth5(){
+  await Promise.allSettled([
+    loadAlerts(),
+    loadTieredSchedule(),
+    loadExperiments(),
+    loadExecutiveDashboard(),
+    loadSystemsHealth(),
+  ]);
+}
+
+async function loadAlerts(){
+  try{
+    const r = await fetch(BASE+'/api/m5/alerts?brand=AI1stSEO');
+    const d = await r.json();
+    const sumEl = document.getElementById('alert-summary');
+    const total = d.total_alerts||0;
+    const crit = d.critical||0;
+    const high = d.high||0;
+    const med = d.medium||0;
+    sumEl.innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:2.2rem;font-weight:800;color:${crit>0?'#f85149':total>0?'#d29922':'#3fb950'}">${total}</div>
+        <div style="font-size:.75rem;color:#7d8590;margin-top:4px">Active Alerts</div>
+        <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+          <span class="pill pill-red">${crit} critical</span>
+          <span class="pill pill-amber">${high} high</span>
+          <span class="pill pill-blue">${med} medium</span>
+        </div>
+        <div style="margin-top:12px;font-size:.75rem;color:${d.action_required?'#f85149':'#3fb950'}">${d.action_required?'⚠ Action required':'✓ No immediate action needed'}</div>
+      </div>`;
+    const listEl = document.getElementById('alert-list');
+    const alerts = d.alerts||[];
+    if(!alerts.length){
+      listEl.innerHTML='<div style="color:#3fb950;font-size:.82rem;padding:12px;text-align:center">✓ No alerts — all systems nominal</div>';
+      return;
+    }
+    listEl.innerHTML = alerts.slice(0,8).map(a=>{
+      const sev = a.severity==='critical'?'pill-red':a.severity==='high'?'pill-amber':'pill-blue';
+      return `<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span class="pill ${sev}">${a.severity}</span>
+          <span style="font-size:.78rem;font-weight:600;color:#e1e4e8">${esc(a.type||'').replace(/_/g,' ')}</span>
+        </div>
+        <div style="font-size:.78rem;color:#c9d1d9">${esc(a.message||'')}</div>
+        <div style="font-size:.72rem;color:#58a6ff;margin-top:4px">→ ${esc(a.action||'')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('alert-summary').innerHTML='<div style="color:#7d8590;font-size:.82rem;padding:12px">Alert engine loading...</div>';
+  }
+}
+
+async function loadTieredSchedule(){
+  try{
+    const r = await fetch(BASE+'/api/m5/tiered-schedule');
+    const d = await r.json();
+    const tiers = d.tiers||{};
+    let h = '';
+    Object.entries(tiers).forEach(([key,t])=>{
+      const colors = {tier_1:'#f85149',tier_2:'#d29922',tier_3:'#58a6ff'};
+      const color = colors[key]||'#7d8590';
+      h += `<div class="card" style="border-top:3px solid ${color}">
+        <h3 style="color:${color}">${esc(t.label)}</h3>
+        <div style="font-size:2rem;font-weight:800;color:#e1e4e8;margin:8px 0">${t.keyword_count}</div>
+        <div style="font-size:.75rem;color:#7d8590">keywords</div>
+        <div style="margin-top:12px;font-size:.78rem;color:#c9d1d9">
+          <div>Interval: <strong>${esc(t.interval_human)}</strong></div>
+          <div>Provider: <strong>${esc(t.provider)}</strong></div>
+          <div>Status: <span class="pill pill-green">${t.status}</span></div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('tier-cards').innerHTML = h;
+  }catch(e){
+    document.getElementById('tier-cards').innerHTML='<div style="color:#7d8590;font-size:.82rem">Schedule loading...</div>';
+  }
+}
+
+async function loadExperiments(){
+  try{
+    const r = await fetch(BASE+'/api/m5/experiments/templates');
+    const d = await r.json();
+    const templates = d.templates||[];
+    let h = '<div class="grid2">';
+    templates.forEach(t=>{
+      h += `<div class="card">
+        <h3 style="font-size:.85rem">${esc(t.name)}</h3>
+        <div style="font-size:.78rem;color:#7d8590;margin:8px 0;line-height:1.5">${esc(t.hypothesis)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span class="pill pill-blue">${esc(t.variable)}</span>
+          <span class="pill pill-green">${t.duration_weeks} weeks</span>
+          <span class="pill pill-amber">${esc(t.provider)}</span>
+        </div>
+        <div style="margin-top:10px;font-size:.72rem;color:#484f58">
+          Control: ${esc(t.control)} · Treatment: ${esc(t.treatment)}
+        </div>
+      </div>`;
+    });
+    h += '</div>';
+    document.getElementById('experiment-list').innerHTML = h;
+  }catch(e){
+    document.getElementById('experiment-list').innerHTML='<div style="color:#7d8590;font-size:.82rem">Experiments loading...</div>';
+  }
+}
+
+async function loadExecutiveDashboard(){
+  try{
+    const r = await fetch(BASE+'/api/m5/executive-dashboard?brand=AI1stSEO');
+    const d = await r.json();
+    const geo = d.geo_score_trend||{};
+    const debt = d.technical_debt||{};
+    const eeat = d.eeat_progress||{};
+    const content = d.content_calendar||{};
+    document.getElementById('exec-stats').innerHTML = `
+      <div class="stat"><div class="label">Overall Health</div><div class="value ${d.overall_health>=70?'up':d.overall_health>=40?'stable':'down'}">${d.overall_health||0}%</div><div class="sub">Aggregate score</div></div>
+      <div class="stat"><div class="label">GEO Score</div><div class="value ${scoreCls(pct(geo.current_score))}">${pct(geo.current_score)}%</div><div class="sub">${geo.probe_count||0} probes</div></div>
+      <div class="stat"><div class="label">Tech Debt</div><div class="value ${debt.resolution_pct>=60?'up':'stable'}">${debt.resolution_pct||0}%</div><div class="sub">resolved</div></div>
+      <div class="stat"><div class="label">E-E-A-T</div><div class="value ${eeat.closure_pct>=60?'up':'stable'}">${eeat.closure_pct||0}%</div><div class="sub">${eeat.gaps_closed||0}/${eeat.total_gaps||0} gaps closed</div></div>
+      <div class="stat"><div class="label">Content</div><div class="value up">${content.published||0}</div><div class="sub">pages published</div></div>`;
+    const comp = d.competitive_position||{};
+    const ranking = comp.ranking||[];
+    let compH = ranking.length ? '<table><tr><th>Rank</th><th>Brand</th><th>GEO Score</th></tr>' : '<div style="color:#7d8590;font-size:.82rem">No data</div>';
+    ranking.forEach((r,i)=>{
+      const g = pct(r.geo_score);
+      compH += `<tr><td style="color:#7d8590">#${i+1}</td><td style="font-weight:700;color:${r.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(r.brand)}</td><td><span class="${scoreCls(g)}" style="font-weight:700">${g}%</span></td></tr>`;
+    });
+    if(ranking.length) compH += '</table>';
+    document.getElementById('exec-competitive').innerHTML = compH;
+    const alerts = d.alerts||{};
+    document.getElementById('exec-alerts').innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:1.6rem;font-weight:800;color:${alerts.critical>0?'#f85149':'#3fb950'}">${alerts.total||0} alerts</div>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:8px">
+          <span class="pill pill-red">${alerts.critical||0} critical</span>
+          <span class="pill pill-amber">${alerts.high||0} high</span>
+        </div>
+      </div>`;
+  }catch(e){
+    document.getElementById('exec-stats').innerHTML='<div class="stat"><div class="label">Loading</div><div class="value stable">...</div></div>';
+  }
+}
+
+async function loadSystemsHealth(){
+  try{
+    const r = await fetch(BASE+'/api/m5/systems-health');
+    const d = await r.json();
+    const score = d.health_score||0;
+    const cls = score>=80?'up':score>=50?'stable':'down';
+    document.getElementById('health-overview').innerHTML = `
+      <div class="card" style="text-align:center">
+        <div style="font-size:.75rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:8px">Platform Health Score</div>
+        <div style="font-size:2.4rem;font-weight:800" class="${cls}">${score}%</div>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:12px">
+          <span class="pill pill-green">${d.systems_healthy||0} healthy</span>
+          <span class="pill pill-amber">${d.systems_degraded||0} degraded</span>
+          <span class="pill pill-red">${d.systems_down||0} down</span>
+        </div>
+        <div class="bar" style="margin-top:12px;height:8px"><div class="bar-fill ${score>=80?'bar-green':score>=50?'bar-amber':'bar-red'}" style="width:${score}%"></div></div>
+      </div>`;
+    const systems = d.systems||[];
+    let h = '<div class="grid2">';
+    systems.forEach(s=>{
+      const dotCls = s.status==='healthy'?'dot-green':s.status==='degraded'?'dot-amber':'dot-grey';
+      h += `<div class="card">
+        <h3><div class="job-dot ${dotCls}" style="width:8px;height:8px"></div> ${esc(s.name)}</h3>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <span class="pill" style="background:rgba(${s.status==='healthy'?'63,185,80':s.status==='degraded'?'210,153,34':'248,81,73'},.1);color:${s.status==='healthy'?'#3fb950':s.status==='degraded'?'#d29922':'#f85149'}">${s.status}</span>
+          <span class="pill pill-blue">Month ${s.month}</span>
+          <span style="font-size:.68rem;color:#7d8590">${s.cadence}</span>
+        </div>
+        <div style="font-size:.72rem;color:#7d8590;line-height:1.6">${(s.components||[]).join(' · ')}</div>
+        ${s.issues?.length?'<div style="font-size:.72rem;color:#f85149;margin-top:6px">⚠ '+esc(s.issues[0])+'</div>':''}
+      </div>`;
+    });
+    h += '</div>';
+    document.getElementById('health-systems').innerHTML = h;
+  }catch(e){
+    document.getElementById('health-overview').innerHTML='<div style="color:#7d8590;font-size:.82rem;text-align:center;padding:16px">Health data loading...</div>';
+  }
+}
+
+setTimeout(loadMonth5, 1500);
 
 // ── AI-Generated Explanations (Amazon Bedrock / Nova) ────────────────────────
 async function loadAIExplanations(){

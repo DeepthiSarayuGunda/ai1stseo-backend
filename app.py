@@ -168,6 +168,12 @@ try:
 except Exception as e:
     print(f"ΓÜá Month 4 Systems API: {e}")
 
+try:
+    from deepthi_intelligence.month5_systems import month5_bp
+    app.register_blueprint(month5_bp)
+except Exception as e:
+    print(f"ΓÜá Month 5 Systems API: {e}")
+
 # ΓöÇΓöÇ Global JSON error handlers (prevent HTML error pages for API routes) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 # === Request Logging Middleware (Dev 3 - Troy) ===
