@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSIE — Predictive Search Intelligence Engine | AI1stSEO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#030712;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+        .glow{position:fixed;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 25% 35%,rgba(99,102,241,0.1) 0%,transparent 45%),radial-gradient(circle at 75% 65%,rgba(6,182,212,0.07) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(236,72,153,0.04) 0%,transparent 50%);animation:gd 25s ease-in-out infinite;z-index:0;pointer-events:none}
+        @keyframes gd{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-2%,1%) scale(1.02)}}
+        nav{position:relative;z-index:10;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(16px)}
+        .logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+        .nav-r a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.8rem;margin-left:20px;transition:color 0.2s}
+        .nav-r a:hover{color:#e2e8f0}
+        .wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:40px 20px}
+        .hero{text-align:center;margin-bottom:36px}
+        .badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(236,72,153,0.15));border:1px solid rgba(99,102,241,0.2);color:#a5b4fc;margin-bottom:14px}
+        .hero h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.8px;margin-bottom:10px;line-height:1.2}
+        .hero h1 span{background:linear-gradient(135deg,#06b6d4,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{color:rgba(255,255,255,0.38);font-size:0.9rem;max-width:600px;margin:0 auto;line-height:1.6}
+        .bar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;justify-content:center}
+        .bar input{flex:1;min-width:220px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#e2e8f0;font-size:0.92rem;outline:none;transition:border-color 0.3s,box-shadow 0.3s}
+        .bar input:focus{border-color:rgba(99,102,241,0.4);box-shadow:0 0 24px rgba(99,102,241,0.08)}
+        .btn{padding:14px 28px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:0.9rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;background:linear-gradient(135deg,#6366f1,#ec4899)}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(99,102,241,0.3)}
+        .btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+        .pred-box{text-align:center;padding:32px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;margin:24px 0;position:relative;overflow:hidden}
+        .pred-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#6366f1,#ec4899,#06b6d4)}
+        .pred-pos{font-size:4rem;font-weight:800;line-height:1}
+        .pred-label{font-size:0.72rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+        .pred-row{display:flex;justify-content:center;gap:32px;margin-top:20px}
+        .pred-stat{text-align:center}
+        .pred-stat strong{display:block;font-size:1.3rem;font-weight:700}
+        .pred-stat span{font-size:0.68rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.5px}
+        .card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:18px;margin-bottom:12px;transition:border-color 0.3s}
+        .card:hover{border-color:rgba(255,255,255,0.08)}
+        .card-t{font-weight:700;font-size:0.85rem;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+        .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .signal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        @media(max-width:640px){.signal-grid{grid-template-columns:1fr}}
+        .signal{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.015);transition:background 0.2s}
+        .signal:hover{background:rgba(255,255,255,0.03)}
+        .signal-name{flex:1;font-size:0.78rem;color:rgba(255,255,255,0.6)}
+        .signal-bar{width:80px;height:5px;border-radius:3px;background:rgba(255,255,255,0.04);overflow:hidden}
+        .signal-fill{height:100%;border-radius:3px;transition:width 1s ease}
+        .signal-val{font-size:0.72rem;font-weight:600;width:36px;text-align:right}
+        .opt{background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:16px;margin-bottom:8px;transition:border-color 0.3s}
+        .opt:hover{border-color:rgba(255,255,255,0.08)}
+        .opt-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+        .opt-name{font-weight:600;font-size:0.85rem}
+        .opt-impact{font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:20px}
+        .opt-action{font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.5}
+        .opt-meta{display:flex;gap:12px;margin-top:8px;font-size:0.7rem;color:rgba(255,255,255,0.3)}
+        .pri-critical{background:rgba(239,68,68,0.12);color:#f87171}
+        .pri-high{background:rgba(251,191,36,0.12);color:#fbbf24}
+        .pri-medium{background:rgba(99,102,241,0.12);color:#a5b4fc}
+        .ai-box{background:linear-gradient(135deg,rgba(99,102,241,0.05),rgba(236,72,153,0.03));border:1px solid rgba(99,102,241,0.1);border-radius:16px;padding:20px;margin:16px 0}
+        .ai-box h3{font-size:0.88rem;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,#a5b4fc,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .ai-box pre{white-space:pre-wrap;font-size:0.8rem;color:rgba(255,255,255,0.42);line-height:1.7;font-family:inherit}
+        .loading{text-align:center;padding:60px;color:rgba(255,255,255,0.3)}
+        .spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(255,255,255,0.05);border-top-color:#6366f1;border-radius:50%;animation:sp 0.8s linear infinite;margin-right:12px;vertical-align:middle}
+        @keyframes sp{to{transform:rotate(360deg)}}
+        .fade{animation:fi 0.5s ease}
+        @keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    </style>
+</head>
+<body>
+<div class="glow"></div>
+<nav><a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a><div class="nav-r"><a href="https://www.ai1stseo.com">Home</a><a href="https://www.ai1stseo.com/dashboard.html">Dashboard</a><a href="https://www.ai1stseo.com/template-benchmark.html">Benchmark</a><a href="https://www.ai1stseo.com/audit.html">Audit</a></div></nav>
+<div class="wrap">
+    <div class="hero fade">
+        <div class="badge">Predictive Search Intelligence</div>
+        <h1>Know your ranking <span>before you publish</span></h1>
+        <p>PSIE analyzes 12 ranking signals using machine learning to predict where your content will rank — and tells you exactly what to change to reach the top 3.</p>
+    </div>
+    <div class="bar fade">
+        <input type="text" id="url" placeholder="Enter URL to analyze..." />
+        <input type="text" id="kw" placeholder="Target keyword..." style="min-width:180px;max-width:240px;" />
+        <button class="btn" id="goBtn" onclick="run()">Predict Ranking</button>
+    </div>
+    <div id="out"></div>
+</div>
+<script>
+const API='https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+async function run(){
+    const url=document.getElementById('url').value.trim(),kw=document.getElementById('kw').value.trim(),btn=document.getElementById('goBtn'),out=document.getElementById('out');
+    if(!url){alert('Enter a URL');return}if(!kw){alert('Enter a target keyword');return}
+    btn.disabled=true;btn.textContent='Analyzing...';
+    out.innerHTML='<div class="loading"><span class="spinner"></span>Running predictive analysis on 12 ranking signals...</div>';
+    try{
+        const fu=url.startsWith('http')?url:'https://'+url;
+        const r=await fetch(API+'/api/psie/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:fu,keyword:kw})});
+        const d=await r.json();
+        if(d.status!=='success'){out.innerHTML='<div class="card" style="color:#f87171;">'+(d.error||'Error')+'</div>';btn.disabled=false;btn.textContent='Predict Ranking';return}
+        const p=d.prediction;let h='<div class="fade">';
+
+        // Prediction box
+        const posColor=p.current_position<=3?'#34d399':p.current_position<=10?'#a5b4fc':p.current_position<=20?'#fbbf24':'#f87171';
+        h+='<div class="pred-box"><div class="pred-pos" style="color:'+posColor+';">#'+p.current_position+'</div><div class="pred-label">Predicted SERP Position for "'+kw+'"</div>';
+        h+='<div class="pred-row">';
+        h+='<div class="pred-stat"><strong style="color:#34d399;">#'+p.potential_position+'</strong><span>After Optimization</span></div>';
+        h+='<div class="pred-stat"><strong style="color:#a5b4fc;">'+p.composite_score+'</strong><span>Composite Score</span></div>';
+        h+='<div class="pred-stat"><strong style="color:#f9a8d4;">'+p.confidence+'%</strong><span>Confidence</span></div>';
+        h+='<div class="pred-stat"><strong style="color:#fbbf24;">'+d.optimization_count+'</strong><span>Optimizations</span></div>';
+        h+='</div></div>';
+
+        // Signal breakdown
+        h+='<div class="card"><div class="card-t"><span class="dot" style="background:#6366f1;"></span>Ranking Signal Analysis (12 signals)</div><div class="signal-grid">';
+        const sigLabels={title_keyword_match:'Title Match',meta_keyword_match:'Meta Match',h1_keyword_match:'H1 Match',content_depth:'Content Depth',heading_structure:'Headings',schema_richness:'Schema',faq_density:'FAQ Density',answer_formatting:'Answer Format',eeat_signals:'E-E-A-T',internal_linking:'Internal Links',keyword_density:'Keyword Density',external_authority:'Authority Links'};
+        for(const[k,v]of Object.entries(d.signals)){
+            const pct=Math.round(v*100);const c=pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171';
+            h+='<div class="signal"><span class="signal-name">'+(sigLabels[k]||k)+'</span><div class="signal-bar"><div class="signal-fill" style="width:'+pct+'%;background:'+c+';"></div></div><span class="signal-val" style="color:'+c+';">'+pct+'%</span></div>';
+        }
+        h+='</div></div>';
+
+        // Optimizations
+        if(d.optimizations&&d.optimizations.length){
+            h+='<div class="card"><div class="card-t"><span class="dot" style="background:#ec4899;"></span>Optimization Roadmap ('+d.optimizations.length+' actions)</div>';
+            d.optimizations.forEach((o,i)=>{
+                const pc='pri-'+o.priority;
+                h+='<div class="opt"><div class="opt-h"><span class="opt-name">'+(i+1)+'. '+o.label+'</span><span class="opt-impact '+pc+'">'+o.predicted_position_change+'</span></div>';
+                h+='<div class="opt-action">'+o.action+'</div>';
+                h+='<div class="opt-meta"><span>Signal: '+o.current_score+'%</span><span>Gap: '+o.gap_percent+'%</span><span>Impact: +'+o.predicted_impact+' pts</span><span class="'+pc+'" style="padding:1px 8px;border-radius:10px;">'+o.priority+'</span></div></div>';
+            });
+            h+='</div>';
+        }
+
+        // AI strategy
+        if(d.ai_strategy){h+='<div class="ai-box"><h3>AI Strategic Action Plan</h3><pre>'+d.ai_strategy+'</pre></div>'}
+
+        h+='</div>';out.innerHTML=h;
+    }catch(e){out.innerHTML='<div class="card" style="color:#f87171;">'+e.message+'</div>'}
+    btn.disabled=false;btn.textContent='Predict Ranking';
+}
+</script>
+</body>
+</html>

@@ -3363,6 +3363,241 @@ Return as JSON with this structure:
         return jsonify({'error': f'Brand check failed: {str(e)}'}), 500
 
 
+# ============== PREDICTIVE SEARCH INTELLIGENCE ENGINE — PSIE (Dev 2) ==============
+
+def psie_analyze_page(url, soup, text, keyword):
+    """Core PSIE analysis — combines scoring signals into a ranking prediction."""
+    parsed = urlparse(url)
+    signals = {}
+
+    # Signal 1: Title keyword alignment
+    title = soup.find('title')
+    title_text = (title.string.strip() if title and title.string else '').lower()
+    kw_lower = keyword.lower()
+    signals['title_keyword_match'] = 1.0 if kw_lower in title_text else (0.5 if any(w in title_text for w in kw_lower.split()) else 0.0)
+
+    # Signal 2: Meta description keyword presence
+    meta = soup.find('meta', attrs={'name': 'description'})
+    desc = (meta.get('content', '').strip().lower() if meta else '')
+    signals['meta_keyword_match'] = 1.0 if kw_lower in desc else (0.5 if any(w in desc for w in kw_lower.split()) else 0.0)
+
+    # Signal 3: H1 keyword alignment
+    h1s = soup.find_all('h1')
+    h1_text = ' '.join(h.get_text().lower() for h in h1s)
+    signals['h1_keyword_match'] = 1.0 if kw_lower in h1_text else (0.5 if any(w in h1_text for w in kw_lower.split()) else 0.0)
+
+    # Signal 4: Content depth
+    word_count = len(text.split())
+    signals['content_depth'] = min(1.0, word_count / 2000)
+
+    # Signal 5: Heading structure quality
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    signals['heading_structure'] = min(1.0, (len(h2s) * 0.15 + len(h3s) * 0.1))
+
+    # Signal 6: Schema markup presence
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_text = ' '.join(s.string or '' for s in json_ld).lower()
+    schema_types = len(re.findall(r'"@type"\s*:\s*"(\w+)"', schema_text))
+    signals['schema_richness'] = min(1.0, schema_types * 0.25)
+
+    # Signal 7: FAQ/Q&A density (AEO signal)
+    questions = text.count('?')
+    has_faq_schema = 'faqpage' in schema_text
+    signals['faq_density'] = min(1.0, (questions * 0.1) + (0.3 if has_faq_schema else 0.0))
+
+    # Signal 8: Direct answer formatting (AEO signal)
+    has_definitions = bool(re.search(r'\b(is a|refers to|is defined as|means that)\b', text.lower()))
+    lists = soup.find_all(['ul', 'ol'])
+    tables = soup.find_all('table')
+    signals['answer_formatting'] = min(1.0, (0.3 if has_definitions else 0.0) + len(lists) * 0.08 + len(tables) * 0.15)
+
+    # Signal 9: E-E-A-T signals
+    has_author = bool(re.search(r'(author|written by|posted by|dr\.|phd)', text.lower()))
+    has_date = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text.lower()))
+    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text.lower()))
+    signals['eeat_signals'] = (0.35 if has_author else 0.0) + (0.35 if has_date else 0.0) + (0.3 if has_citations else 0.0)
+
+    # Signal 10: Internal linking
+    all_links = soup.find_all('a', href=True)
+    internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
+    signals['internal_linking'] = min(1.0, len(internal) * 0.1)
+
+    # Signal 11: Keyword density (not too low, not too high)
+    kw_count = text.lower().count(kw_lower)
+    kw_density = kw_count / max(word_count, 1) * 100
+    signals['keyword_density'] = 1.0 if 0.5 <= kw_density <= 2.5 else (0.5 if kw_density < 0.5 else 0.3)
+
+    # Signal 12: External authority links
+    external = [l for l in all_links if l.get('href', '').startswith('http') and parsed.netloc not in l.get('href', '')]
+    signals['external_authority'] = min(1.0, len(external) * 0.15)
+
+    # Weighted composite score (0-100)
+    weights = {
+        'title_keyword_match': 12, 'meta_keyword_match': 8, 'h1_keyword_match': 10,
+        'content_depth': 12, 'heading_structure': 8, 'schema_richness': 10,
+        'faq_density': 8, 'answer_formatting': 8, 'eeat_signals': 10,
+        'internal_linking': 5, 'keyword_density': 5, 'external_authority': 4
+    }
+    composite = sum(signals[k] * weights[k] for k in signals) / sum(weights.values()) * 100
+
+    # Predict SERP position (inverse of composite — higher score = lower position number = better rank)
+    if composite >= 85: predicted_position = max(1, round(11 - composite / 10))
+    elif composite >= 70: predicted_position = round(15 - composite / 8)
+    elif composite >= 50: predicted_position = round(30 - composite / 5)
+    elif composite >= 30: predicted_position = round(50 - composite / 3)
+    else: predicted_position = round(80 - composite / 2)
+    predicted_position = max(1, min(100, predicted_position))
+
+    # Confidence based on signal consistency
+    signal_values = list(signals.values())
+    avg_signal = sum(signal_values) / len(signal_values)
+    variance = sum((s - avg_signal) ** 2 for s in signal_values) / len(signal_values)
+    confidence = max(30, min(95, round(85 - variance * 100)))
+
+    return {
+        'signals': {k: round(v, 3) for k, v in signals.items()},
+        'composite_score': round(composite, 1),
+        'predicted_position': predicted_position,
+        'confidence': confidence,
+        'word_count': word_count,
+    }
+
+
+def psie_generate_optimizations(signals, keyword, composite, predicted_position):
+    """Generate ranked optimization recommendations based on signal gaps."""
+    optimizations = []
+    signal_labels = {
+        'title_keyword_match': ('Title Keyword Optimization', 'Include your target keyword in the page title within the first 60 characters'),
+        'meta_keyword_match': ('Meta Description Optimization', 'Add the target keyword naturally in the meta description within 120-160 characters'),
+        'h1_keyword_match': ('H1 Heading Alignment', 'Ensure the H1 heading contains the target keyword or a close semantic variant'),
+        'content_depth': ('Content Depth Expansion', 'Expand content to 2000+ words with comprehensive topic coverage and subtopics'),
+        'heading_structure': ('Heading Hierarchy', 'Add 4-6 H2 subheadings and 3-4 H3 sub-subheadings for clear content structure'),
+        'schema_richness': ('Structured Data Enhancement', 'Add JSON-LD schema markup: FAQPage, Article, BreadcrumbList, and industry-specific types'),
+        'faq_density': ('FAQ Section Addition', 'Add a FAQ section with 5+ questions using FAQPage schema for AI citation eligibility'),
+        'answer_formatting': ('Direct Answer Formatting', 'Add definition paragraphs, comparison tables, numbered lists, and bullet points for AI extraction'),
+        'eeat_signals': ('E-E-A-T Signal Strengthening', 'Add author attribution, publication date, source citations, and methodology references'),
+        'internal_linking': ('Internal Link Building', 'Add 5+ internal links to related content with descriptive anchor text'),
+        'keyword_density': ('Keyword Density Tuning', 'Adjust keyword usage to 1-2% density — natural mentions in intro, headings, and conclusion'),
+        'external_authority': ('Authority Link Addition', 'Link to 2-3 authoritative external sources like research papers, industry reports, or .gov/.edu sites'),
+    }
+
+    for signal_name, signal_value in sorted(signals.items(), key=lambda x: x[1]):
+        if signal_value < 0.8:
+            label, action = signal_labels.get(signal_name, (signal_name, ''))
+            gap = round((1.0 - signal_value) * 100)
+            impact = round((1.0 - signal_value) * 12 * (1.5 if signal_name in ['title_keyword_match', 'content_depth', 'schema_richness', 'h1_keyword_match'] else 1.0))
+            predicted_improvement = max(1, round(impact / 5))
+            optimizations.append({
+                'signal': signal_name,
+                'label': label,
+                'action': action,
+                'current_score': round(signal_value * 100),
+                'gap_percent': gap,
+                'predicted_impact': min(impact, 25),
+                'predicted_position_change': f'-{predicted_improvement} positions',
+                'priority': 'critical' if signal_value < 0.3 else ('high' if signal_value < 0.6 else 'medium'),
+            })
+
+    return sorted(optimizations, key=lambda x: x['predicted_impact'], reverse=True)
+
+
+@app.route('/api/psie/predict', methods=['POST'])
+def psie_predict():
+    """PSIE — Predict SERP ranking position for a URL + keyword combination."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        if not url or not keyword:
+            return jsonify({'error': 'Both url and keyword are required'}), 400
+        if not url.startswith('http'):
+            url = 'https://' + url
+
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        analysis = psie_analyze_page(url, soup, text, keyword)
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'keyword': keyword,
+            'predicted_position': analysis['predicted_position'],
+            'confidence': analysis['confidence'],
+            'composite_score': analysis['composite_score'],
+            'signals': analysis['signals'],
+            'word_count': analysis['word_count'],
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': f'PSIE prediction failed: {str(e)}'}), 500
+
+
+@app.route('/api/psie/optimize', methods=['POST'])
+def psie_optimize():
+    """PSIE — Predict ranking AND return ranked optimization recommendations."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        if not url or not keyword:
+            return jsonify({'error': 'Both url and keyword are required'}), 400
+        if not url.startswith('http'):
+            url = 'https://' + url
+
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        analysis = psie_analyze_page(url, soup, text, keyword)
+        optimizations = psie_generate_optimizations(
+            analysis['signals'], keyword, analysis['composite_score'], analysis['predicted_position']
+        )
+
+        # Calculate potential position after all optimizations
+        potential_improvement = sum(o['predicted_impact'] for o in optimizations[:5]) / 5
+        potential_position = max(1, analysis['predicted_position'] - round(potential_improvement))
+
+        # LLM-powered strategic recommendation
+        ai_strategy = None
+        if optimizations:
+            top_gaps = '\n'.join(f"- {o['label']}: currently {o['current_score']}% (gap: {o['gap_percent']}%)" for o in optimizations[:6])
+            prompt = f"""You are a search ranking strategist. A page targeting the keyword "{keyword}" is predicted to rank at position #{analysis['predicted_position']} with a composite score of {analysis['composite_score']}/100.
+
+Top signal gaps:
+{top_gaps}
+
+Provide a 5-step strategic action plan to move this page from position #{analysis['predicted_position']} to the top 3. Be specific about what content to add, what schema to implement, and what structural changes to make. Focus on AEO (AI Engine Optimization) signals first, then traditional SEO. Format as a numbered list."""
+            try:
+                ai_strategy = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'keyword': keyword,
+            'prediction': {
+                'current_position': analysis['predicted_position'],
+                'potential_position': potential_position,
+                'confidence': analysis['confidence'],
+                'composite_score': analysis['composite_score'],
+            },
+            'signals': analysis['signals'],
+            'optimizations': optimizations,
+            'optimization_count': len(optimizations),
+            'ai_strategy': ai_strategy,
+            'word_count': analysis['word_count'],
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': f'PSIE optimization failed: {str(e)}'}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""
@@ -4200,8 +4435,14 @@ def serve_admin():
 
 @app.route('/template-benchmark')
 def serve_template_benchmark():
-    """Template Benchmark Engine ΓÇö compare URL against perfect business templates."""
+    """Template Benchmark Engine — compare URL against perfect business templates."""
     return send_from_directory('.', 'template-benchmark.html')
+
+
+@app.route('/psie')
+def serve_psie():
+    """PSIE — Predictive Search Intelligence Engine."""
+    return send_from_directory('.', 'psie.html')
 
 
 @app.route('/directory')
