@@ -140,7 +140,7 @@
         </div>
         <div class="form-field" style="margin-bottom:16px">
             <label>What should AI say about you? (one query per line)</label>
-            <textarea id="f-queries" placeholder="best tools in your industry&#10;top companies like yours&#10;alternatives to your competitors"></textarea>
+            <textarea id="f-queries" placeholder="what is [your brand]&#10;best tools for [your industry]&#10;tell me about [your domain]"></textarea>
             <div class="form-hint">We'll ask each AI model these questions and check if they mention you.</div>
         </div>
         <button type="submit" class="btn-primary" id="btn-scan">Check My AI Visibility</button>
@@ -173,9 +173,9 @@ document.getElementById('scan-form').addEventListener('submit', async function(e
     if(!brand||!rawDomain) return;
     const domain = rawDomain.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0].toLowerCase();
     const queries = rawQ ? rawQ.split('\n').map(q=>q.trim()).filter(Boolean) : [
-        'best '+brand+' alternatives',
-        'top companies like '+domain,
-        'is '+domain+' recommended'
+        'what is '+brand,
+        'best tools for SEO and marketing',
+        'tell me about '+domain
     ];
     if(queries.length>20){alert('Maximum 20 queries.');return}
 
