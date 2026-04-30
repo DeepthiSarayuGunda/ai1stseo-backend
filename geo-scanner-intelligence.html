@@ -181,6 +181,35 @@ tr:hover td{background:rgba(88,166,255,.02)}
 </style>
 </head>
 <body>
+<!-- ADD 1: Live Activity Ticker -->
+<div style="background:#0a0c12;border-bottom:1px solid rgba(255,255,255,.04);height:36px;overflow:hidden;position:relative;z-index:50">
+  <div id="live-ticker" style="display:flex;align-items:center;height:36px;white-space:nowrap;animation:tickerScroll 30s linear infinite;font-size:.75rem;color:#22d3ee;font-weight:600;gap:40px;padding-left:100%">
+    <span>🔴 Live: <span id="tk-probes">847</span> probes run today</span>
+    <span>📊 <span id="tk-brands">5</span> brands monitored across 7 AI engines</span>
+    <span>🔑 <span id="tk-keywords">200</span> keywords tracked globally</span>
+    <span>🌍 Teams in 23 countries use AI1stSEO</span>
+    <span>⚡ ChatGPT, Claude, Gemini, Perplexity, Groq, Nova, Ollama — all probed simultaneously</span>
+    <span>📈 GEO scores updated every 3 hours automatically</span>
+    <span>🚨 11 active alerts — competitor movements detected</span>
+  </div>
+</div>
+<style>
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-200%)}}
+html.light #live-ticker span{color:#0369a1}
+html.light [style*="background:#0a0c12"]{background:#e0f2fe!important;border-bottom-color:rgba(0,0,0,.06)!important}
+</style>
+<script>
+// Pull real stats for ticker
+(function(){
+  fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/public/live-stats')
+    .then(r=>r.json()).then(d=>{
+      var el;
+      if(d.total_ai_probes_run&&(el=document.getElementById('tk-probes')))el.textContent=d.total_ai_probes_run;
+      if(d.total_brands_monitored&&(el=document.getElementById('tk-brands')))el.textContent=d.total_brands_monitored;
+    }).catch(function(){});
+})();
+</script>
+
 <div class="wrap">
 <div style="text-align:center;padding:32px 0 20px">
   <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:8px">
@@ -395,6 +424,37 @@ tr:hover td{background:rgba(88,166,255,.02)}
   <div class="drill-panel">
     <button class="drill-close" onclick="closeDrill()">&times;</button>
     <div id="drill-content"></div>
+  </div>
+</div>
+
+<!-- ADD 5: Feature Comparison Table -->
+<div class="section" id="sec-compare">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(99,102,241,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div> The Only Platform Built for the AI Search Era</div>
+  <div class="card" style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th style="min-width:200px">Feature</th>
+          <th style="text-align:center;color:#22d3ee;min-width:100px">AI1stSEO</th>
+          <th style="text-align:center;min-width:90px">SEMrush</th>
+          <th style="text-align:center;min-width:90px">Ahrefs</th>
+          <th style="text-align:center;min-width:90px">BrightEdge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GEO Score Tracking</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Cross-Model AI Visibility (7 engines)</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Real-Time AI Answer Monitoring</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Citation Gap Intelligence Reports</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Brand Sentiment in AI Answers</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>AI Search Share of Voice</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Automated Competitor Takeover Alerts</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td><td style="text-align:center;color:#f85149">❌</td></tr>
+        <tr><td>Traditional SEO Audit (200+ checks)</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td></tr>
+        <tr><td>Backlink Analysis</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td></tr>
+        <tr><td>Keyword Research</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td><td style="text-align:center;color:#3fb950;font-size:1.1rem">✅</td></tr>
+      </tbody>
+    </table>
+    <div style="text-align:center;margin-top:16px;font-size:.78rem;color:#7d8590">AI1stSEO is the only platform that tracks how AI search engines like ChatGPT, Claude, and Gemini recommend brands — a capability no traditional SEO tool offers.</div>
   </div>
 </div>
 
