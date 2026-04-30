@@ -1,16 +1,114 @@
-# AI 1st SEO — PostgreSQL Database Schema
+# AI 1st SEO — Database Schema (DynamoDB)
 
-## Connection Details
+> **NOTE:** This project migrated from RDS PostgreSQL to DynamoDB on April 1, 2026.
+> RDS has been deleted. Snapshot preserved: `ai1stseo-final-backup-20260401`.
+> All data now lives in DynamoDB tables below.
 
-- Instance: `ai1stseo-db`
-- Engine: PostgreSQL 15.12
-- Class: db.t3.micro (2 vCPU, 1GB RAM, 20GB storage)
-- Region: us-east-1
-- Database: `ai1stseo`
-- Username: `ai1stseo_admin`
-- Password: `Ai1stSEO_db2026!`
-- Port: 5432
-- Publicly Accessible: No (EC2 access only via security group)
+## Connection
+
+DynamoDB is accessed via `boto3` with IAM role authentication. No connection strings needed.
+
+```python
+import boto3
+ddb = boto3.resource('dynamodb', region_name='us-east-1')
+table = ddb.Table('ai1stseo-users')
+```
+
+Helper module: `backend/dynamodb_helper.py` provides `put_item`, `get_item`, `scan_table`, `query_index`, `update_item`, `delete_item`, `count_items`.
+
+## DynamoDB Tables (15)
+
+All tables use PAY_PER_REQUEST billing (no provisioned capacity, $0 at low scale).
+
+### Core Tables
+
+| Table | PK | GSI | Owner | Purpose |
+|-------|-----|-----|-------|---------|
+| ai1stseo-users | userId | email-index | Core | User accounts, roles, subscription tiers |
+| ai1stseo-audits | id | url-index | Dev 3 (Troy) | SEO audit scan results |
+| ai1stseo-documents | id | uploader-index | Dev 3 (Troy) | Document repository metadata |
+
+### GEO / AI Tables
+
+| Table | PK | GSI | Owner | Purpose |
+|-------|-----|-----|-------|---------|
+| ai1stseo-geo-probes | id | keyword-index | Dev 1 (Deepthi) | AI citation probe results |
+| ai1stseo-content-briefs | id | — | Dev 2 (Samar) | AI content brief output |
+| ai1stseo-social-posts | id | — | Dev 4 (Tabasum) | Scheduled social media posts |
+
+### Admin & Analytics Tables
+
+| Table | PK | GSI | Owner | Purpose |
+|-------|-----|-----|-------|---------|
+| ai1stseo-admin-metrics | metric_date | — | Dev 3 (Troy) | Daily aggregated metrics + white-label config |
+| ai1stseo-api-logs | id | endpoint-index | Dev 3 (Troy) | API request logs + AI usage + attribution events + inference cache |
+| ai1stseo-api-keys | key_hash | — | Dev 3 (Troy) | Developer API keys with scopes and rate limits |
+| ai1stseo-email-leads | id | — | Dev 3 (Troy) | Email lead collection |
+
+### Monitoring & Webhooks
+
+| Table | PK | GSI | Owner | Purpose |
+|-------|-----|-----|-------|---------|
+| ai1stseo-webhooks | id | — | Dev 3 (Troy) | Webhooks + Slack/email notification subscriptions |
+| ai1stseo-monitor | id | — | Monitor | Monitored sites + uptime checks + multi-site dashboard |
+| ai1stseo-competitors | id | — | Dev 3 (Troy) | Tracked competitor domains |
+
+### Backlink Intelligence
+
+| Table | PK | GSI | Owner | Purpose |
+|-------|-----|-----|-------|---------|
+| ai1stseo-backlinks | id | domain-index | Dev 3 (Troy) | Domain scores, link gaps, citation probes, fingerprints, sentiment, mention scans, reports |
+| ai1stseo-backlink-opportunities | id | — | Dev 3 (Troy) | Unified backlink opportunity queue |
+
+## Record Types in ai1stseo-api-logs
+
+This table stores multiple record types distinguished by the `type` or `log_type` field:
+
+| log_type / type | Purpose |
+|-----------------|---------|
+| (default) | API request log (endpoint, method, status, response time) |
+| ai_usage | AI inference call log (provider, model, tokens, cost, latency) |
+| inference_cache | Cached AI response (24h TTL, keyed by prompt hash) |
+| ai_referral | AI referral attribution event (source, landing page, session) |
+| ai_conversion | Conversion event tied to AI referral session |
+
+## Record Types in ai1stseo-backlinks
+
+| type | Purpose |
+|------|---------|
+| domain_score | Domain authority score (0-100) with signal breakdown |
+| link_gap | Link gap analysis result (your domain vs competitors) |
+| citation_authority | LLM citation probe result (which domains AI models cite) |
+| brand_sentiment | Brand sentiment probe (positive/neutral/negative + hallucination flags) |
+| answer_fingerprint | AI response hash + cited domains for change detection |
+| brief_citation_probe | Citation probe for content brief generator |
+| competitor_alert | Competitor DA change detection |
+| backlink_report | Comprehensive backlink report |
+| backlink_report_download | White-label HTML report with S3 presigned URL |
+| mention_scan | Google News + Reddit brand mention scan |
+| internal_link_analysis | Site-wide internal link graph analysis |
+| monitor_run | Scheduled backlink monitor execution summary |
+
+## Multi-Tenancy
+
+All records include `project_id` for account isolation:
+- Default: `24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2`
+- All queries should filter by project_id for multi-tenant support
+- S3 document storage partitioned by user email path
+
+## Backup & Recovery
+
+- Point-in-time recovery: ENABLED on all 15 tables (35-day retention)
+- RDS snapshot preserved: `ai1stseo-final-backup-20260401` (981 rows migrated)
+- Data exported to `rds-backup/` as JSON files
+
+---
+
+## Legacy RDS Schema (ARCHIVED — DO NOT USE)
+
+> The content below is the original RDS PostgreSQL schema, preserved for reference only.
+> RDS was deleted on April 2, 2026. All data now lives in DynamoDB.
+> Do NOT add `from database import` to any backend file.
 - Security Group: `sg-0859c7cfcb529b8ff` (ai1stseo-rds-sg)
 - Subnet Group: `ai1stseo-db-subnets` (us-east-1a, us-east-1b, us-east-1c)
 - Backup Retention: 7 days
