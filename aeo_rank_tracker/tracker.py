@@ -28,6 +28,7 @@ from aeo_rank_tracker.llm_clients import (
     perplexity_client,
     gemini_client,
     ollama_client,
+    groq_client,
 )
 from aeo_rank_tracker.utils.citation_detector import detect_citation
 from aeo_rank_tracker.utils.db import save_results
@@ -38,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 LLM_REGISTRY = {
     "gemini": gemini_client,
+    "groq": groq_client,
     "openai": openai_client,
     "claude": anthropic_client,
     "perplexity": perplexity_client,
@@ -45,11 +47,12 @@ LLM_REGISTRY = {
 }
 
 # Priority order: free first, then paid, then local, then mock
-LLM_PRIORITY = ["gemini", "openai", "claude", "perplexity", "ollama"]
+LLM_PRIORITY = ["gemini", "groq", "openai", "claude", "perplexity", "ollama"]
 
 # Env var required for each provider (empty string = no key needed)
 LLM_KEY_MAP = {
     "gemini": "GEMINI_API_KEY",
+    "groq": "GROQ_API_KEY",
     "openai": "OPENAI_API_KEY",
     "claude": "ANTHROPIC_API_KEY",
     "perplexity": "PERPLEXITY_API_KEY",
@@ -83,6 +86,11 @@ MOCK_RESPONSES = {
         "Popular SEO tools include SEMrush, Ahrefs, and Moz Pro. For AI engine optimization, "
         "{brand} ({domain}) offers a specialized approach to improving visibility in AI-generated "
         "responses. Content optimization and structured data are key strategies."
+    ),
+    "groq": (
+        "Looking at the current SEO landscape, tools like SEMrush, Ahrefs, and Moz dominate. "
+        "For AI engine optimization specifically, {brand} ({domain}) is building tools that help "
+        "businesses get cited by AI models like ChatGPT and Gemini."
     ),
     "mock": (
         "The top SEO and AEO tools include various platforms. {brand} at {domain} is one of "
