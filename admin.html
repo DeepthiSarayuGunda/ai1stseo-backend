@@ -192,6 +192,17 @@
                 <div class="stat-sub">Detailed site audit with recommendations</div>
             </div>
         </div>
+
+        <!-- Database Stats Panel -->
+        <div class="panel" id="db-stats-panel" style="margin-top:20px;">
+            <div class="panel-title">🗄️ Database Data Points</div>
+            <div class="stats-grid" id="db-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--text-muted);font-size:1.2rem;">Loading...</div>
+                    <div class="stat-label">Fetching database stats...</div>
+                </div>
+            </div>
+        </div>
 </div>
 </div>
 <script src="/assets/auth.js"></script>
@@ -469,6 +480,50 @@
 
     // ---- Init ----
     checkAdmin();
+    loadDbStats();
+
+    // ---- Database Stats ----
+    function loadDbStats() {
+        fetch(API + '/api/deepthi/db-stats').then(function(r) { return r.json(); }).then(function(d) {
+            var counts = d.counts || {};
+            var total = d.total_rows || 0;
+            var grid = document.getElementById('db-stats-grid');
+            if (!grid) return;
+
+            var TABLE_LABELS = {
+                'seo_scans': {icon: '📊', label: 'SEO Scans', color: '#00d4ff'},
+                'geo_probes': {icon: '🔬', label: 'GEO Probes', color: '#238636'},
+                'ai_visibility': {icon: '👁️', label: 'AI Visibility', color: '#8b5cf6'},
+                'content_briefs': {icon: '📝', label: 'Content Briefs', color: '#ff9800'},
+                'users': {icon: '👥', label: 'Users', color: '#00c853'},
+                'sports_matches': {icon: '⚽', label: 'Sports Matches', color: '#f44336'},
+                'sports_teams': {icon: '🏟️', label: 'Sports Teams', color: '#2196f3'},
+                'sports_rankings': {icon: '🏆', label: 'Sports Rankings', color: '#ffd700'},
+                'sports_news': {icon: '📰', label: 'Sports News', color: '#ff5722'},
+                'sports': {icon: '🎯', label: 'Sports Categories', color: '#9c27b0'},
+                'directory_categories': {icon: '📂', label: 'Directory Categories', color: '#607d8b'},
+                'directory_items': {icon: '📋', label: 'Directory Items', color: '#795548'},
+                'ai_usage_log': {icon: '🤖', label: 'AI Usage Logs', color: '#e91e63'},
+                'daily_metrics': {icon: '📅', label: 'Daily Metrics', color: '#3f51b5'},
+                'scan_errors': {icon: '⚠️', label: 'Scan Errors', color: '#ff5252'}
+            };
+
+            var html = statCard(fmtNum(total), 'Total Data Points', '#00d4ff', 'Across all tables');
+            Object.keys(counts).forEach(function(table) {
+                if (counts[table] === null) return;
+                var info = TABLE_LABELS[table] || {icon: '📦', label: table, color: 'var(--text-muted)'};
+                html += statCard(
+                    info.icon + ' ' + fmtNum(counts[table]),
+                    info.label,
+                    info.color
+                );
+            });
+            grid.innerHTML = html;
+        }).catch(function() {
+            var grid = document.getElementById('db-stats-grid');
+            if (grid) grid.innerHTML = '<div class="stat-card"><div class="stat-value" style="color:var(--text-faint);font-size:1rem;">—</div><div class="stat-label">Database stats unavailable</div></div>';
+        });
+    }
 })();
 </script>
 </body>

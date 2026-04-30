@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO Intelligence Dashboard — AI1stSEO</title>
+<link rel="stylesheet" href="/s3-pages/a11y-sports.css?v=2">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#08090d;color:#e1e4e8;padding:0;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+
+/* Navigation */
+.nav{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+.nav a{color:#c9d1d9;font-size:.82rem;text-decoration:none;padding:8px 18px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(18,20,26,.8);backdrop-filter:blur(8px);transition:all .2s;display:flex;align-items:center;gap:6px}
+.nav a:hover{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.3);color:#58a6ff}
+.nav a svg{width:14px;height:14px}
+
+/* Section titles with SVG icons */
+.section{margin-bottom:36px}
+.section-title{font-size:1.1rem;color:#e1e4e8;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+.section-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-icon svg{width:16px;height:16px}
+.section-icon.geo{background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(63,185,80,.15))}
+.section-icon.geo svg{color:#58a6ff}
+.section-icon.key{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,140,0,.12))}
+.section-icon.key svg{color:#ffd700}
+.section-icon.comp{background:linear-gradient(135deg,rgba(248,81,73,.12),rgba(210,153,34,.12))}
+.section-icon.comp svg{color:#f85149}
+.section-icon.auto{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(129,140,248,.12))}
+.section-icon.auto svg{color:#818cf8}
+.section-icon.cite{background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(88,166,255,.12))}
+.section-icon.cite svg{color:#22d3ee}
+.section-icon.rec{background:linear-gradient(135deg,rgba(63,185,80,.12),rgba(35,134,54,.12))}
+.section-icon.rec svg{color:#3fb950}
+
+/* Grids */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* Cards — glassmorphism */
+.card{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;position:relative;overflow:hidden;transition:all .25s}
+.card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(88,166,255,.3),transparent);opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
+.card h3{font-size:.88rem;color:#c9d1d9;margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* Stat row — premium look */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
+@media(max-width:900px){.stat-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr}}
+.stat{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px;text-align:center;position:relative;overflow:hidden;transition:all .25s}
+.stat:hover{border-color:rgba(88,166,255,.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.stat:nth-child(1)::after{background:linear-gradient(90deg,#58a6ff,#3fb950)}
+.stat:nth-child(2)::after{background:linear-gradient(90deg,#3fb950,#22d3ee)}
+.stat:nth-child(3)::after{background:linear-gradient(90deg,#d29922,#e3b341)}
+.stat:nth-child(4)::after{background:linear-gradient(90deg,#f85149,#ff7b72)}
+.stat:nth-child(5)::after{background:linear-gradient(90deg,#818cf8,#a78bfa)}
+.stat .label{font-size:.65rem;color:#7d8590;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+.stat .value{font-size:1.8rem;font-weight:800;line-height:1;letter-spacing:-.02em}
+.stat .sub{font-size:.72rem;color:#484f58;margin-top:6px}
+.up{color:#3fb950}.down{color:#f85149}.stable{color:#d29922}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:.68rem;font-weight:700}
+.pill-green{background:rgba(63,185,80,.1);color:#3fb950}
+.pill-red{background:rgba(248,81,73,.1);color:#f85149}
+.pill-amber{background:rgba(210,153,34,.1);color:#d29922}
+.pill-blue{background:rgba(88,166,255,.08);color:#58a6ff}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;color:#7d8590;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9}
+tr:hover td{background:rgba(88,166,255,.02)}
+
+/* Progress bars */
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.bar-green{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-amber{background:linear-gradient(90deg,#d29922,#e3b341)}
+.bar-red{background:linear-gradient(90deg,#da3633,#f85149)}
+.bar-blue{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
+
+/* Recommendation cards */
+.rec{background:rgba(13,15,20,.6);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:16px;margin-bottom:12px;border-left:3px solid transparent;transition:all .2s}
+.rec:hover{border-color:rgba(255,255,255,.08);background:rgba(13,15,20,.8)}
+.rec-high{border-left-color:#f85149}.rec-medium{border-left-color:#d29922}
+.rec .title{font-weight:700;font-size:.85rem;color:#e1e4e8;margin-bottom:6px}
+.rec .desc{font-size:.78rem;color:#7d8590;line-height:1.5;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* Loading */
+.loading{text-align:center;padding:80px;color:#7d8590;font-size:.9rem}
+.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid rgba(255,255,255,.06);border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Automation jobs */
+.job-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.job-row:hover{background:rgba(88,166,255,.02)}
+.job-row:last-child{border:none}
+.job-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px}
+.dot-green{background:#3fb950;box-shadow:0 0 8px rgba(63,185,80,.4)}
+.dot-amber{background:#d29922;box-shadow:0 0 8px rgba(210,153,34,.4)}
+.dot-grey{background:#484f58;box-shadow:none}
+.job-name{font-size:.84rem;font-weight:600;color:#c9d1d9;flex:1}
+.job-meta{font-size:.72rem;color:#7d8590;text-align:right;line-height:1.5}
+
+/* Animated gradient header */
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.header-gradient{background:linear-gradient(135deg,#58a6ff,#3fb950,#818cf8,#22d3ee);background-size:300% 300%;animation:gradientShift 8s ease infinite;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Probe card */
+.probe-card{background:rgba(18,20,26,.6);backdrop-filter:blur(12px);border:1px solid rgba(99,102,241,.15);border-radius:16px;padding:24px;margin-bottom:28px;position:relative;overflow:hidden}
+.probe-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#6366f1,#818cf8,#a78bfa)}
+
+/* Responsive */
+@media(max-width:768px){
+  .wrap{padding:16px}
+  .stat .value{font-size:1.4rem}
+}
+
+/* Metric explanation boxes — prominent for lay users */
+.metric-explain{background:#111827!important;border:2px solid rgba(88,166,255,.35)!important;border-radius:12px;padding:18px 22px!important;margin-top:16px!important;margin-bottom:24px!important;font-size:.84rem!important;color:#d1d5db!important;line-height:1.7!important;position:relative;border-left:4px solid #58a6ff!important;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.metric-explain strong{display:block;font-size:.92rem;margin-bottom:8px}
+.metric-explain em{color:#e5e7eb;font-style:normal;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div style="text-align:center;padding:32px 0 20px">
+  <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:8px">
+    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(63,185,80,.15));display:flex;align-items:center;justify-content:center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l6.5-3.5"/><circle cx="12" cy="12" r="3"/></svg>
+    </div>
+    <h1 style="font-size:1.6rem" class="header-gradient">GEO Intelligence Dashboard</h1>
+  </div>
+  <p style="color:#7d8590;font-size:.84rem;max-width:500px;margin:0 auto;line-height:1.5">Multi-brand AI visibility intelligence · Real-time probe data · Competitive analysis</p>
+</div>
+<nav class="nav">
+  <a href="/geo-scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Back to Scanner</a>
+  <a href="/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+  <a href="#" onclick="downloadIntelPDF();return false" style="background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.25)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF</a>
+  <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a>
+</nav>
+
+<!-- Live Probe Input -->
+<div class="probe-card">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.15));display:flex;align-items:center;justify-content:center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </div>
+    <div>
+      <h2 style="font-size:1rem;color:#e1e4e8;font-weight:700">Run a Live AI Visibility Probe</h2>
+      <p style="font-size:.75rem;color:#7d8590;margin-top:2px">Check how AI models mention your brand in real-time</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div>
+      <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Brand Name</label>
+      <input id="probe-brand" placeholder="e.g. Ahrefs, Shopify, your brand" style="width:100%;height:40px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem">
+    </div>
+    <div>
+      <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">AI Provider</label>
+      <select id="probe-provider" style="width:100%;height:40px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem">
+        <option value="nova">Nova Lite (Bedrock) — fast</option>
+        <option value="ollama">Ollama (qwen3:30b) — slower</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-top:12px">
+    <label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Keywords — one per line</label>
+    <textarea id="probe-keywords" rows="3" placeholder="best seo tool&#10;ai seo optimization&#10;keyword research tool" style="width:100%;padding:10px 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem;font-family:inherit;resize:vertical"></textarea>
+  </div>
+  <button id="probe-btn" onclick="runLiveProbe()" style="margin-top:14px;height:48px;width:100%;border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#6366f1,#818cf8);transition:all .2s;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Run Live AI Probe
+  </button>
+  <div id="probe-status" style="display:none;margin-top:12px;padding:12px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:8px;font-size:.82rem"></div>
+</div>
+
+<div id="loading" class="loading"><div class="spinner"></div><br>Loading intelligence data...</div>
+<div id="dashboard" style="display:none">
+
+<!-- Brand Score Cards -->
+<div id="brand-stats" class="stat-row"></div>
+<div class="metric-explain" id="brand-stats-explain">
+  <strong style="color:#58a6ff">📊 What do these scores mean?</strong><br>
+  Each card shows a brand's <em>GEO Score</em> — the percentage of times AI models (like ChatGPT, Perplexity, or Amazon Nova) mention that brand when users ask industry-related questions. A higher score means better AI visibility. The trend arrow shows whether the score improved or declined compared to last week.
+  <div id="brand-stats-ai-explain" style="margin-top:8px;display:none"></div>
+</div>
+
+<!-- 1. GEO Score Tracker -->
+<div class="section" id="sec-geo">
+  <div class="section-title"><div class="section-icon geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div> GEO Score Tracker — Multi-Brand</div>
+  <div id="geo-table-wrap"></div>
+  <div class="metric-explain">
+    <strong style="color:#3fb950">📈 Understanding the GEO Tracker</strong><br>
+    This table compares how often each brand is cited by AI search engines. <em>Visibility Score</em> counts total mentions across all probes. <em>Keywords Cited</em> shows how many of your tracked keywords triggered a brand mention. The <em>Providers</em> column breaks down scores per AI engine — useful for spotting which AI platforms favor your brand vs competitors. Keyword Winners highlight which brand leads for each specific search term.
+    <div id="geo-ai-explain" style="margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<!-- 2. Keyword Performance -->
+<div class="section" id="sec-kw">
+  <div class="section-title"><div class="section-icon key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div> Keyword Performance Register</div>
+  <div class="grid2">
+    <div class="card"><h3>Top Keywords — AI1stSEO Cited</h3><div id="kw-top"></div></div>
+    <div class="card"><h3>Competitor Wins — Where They Beat Us</h3><div id="kw-gaps"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Which AI Engine Cites Each Brand Most</h3><div id="engine-brands"></div></div>
+  <div class="metric-explain">
+    <strong style="color:#ffd700">🔑 Understanding Keyword Performance</strong><br>
+    <em>Top Keywords</em> shows which search terms AI models most frequently associate with your brand — these are your strongest content areas. <em>Competitor Wins</em> reveals keywords where a competitor's brand is cited more often than yours — these are content gaps to prioritize. The <em>Engine Citations</em> table shows which AI platform favors which brand, helping you tailor optimization strategies per engine.
+    <div id="kw-ai-explain" style="margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<!-- 3. Competitor Matrix -->
+<div class="section" id="sec-comp">
+  <div class="section-title"><div class="section-icon comp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div> Competitor Visibility Matrix</div>
+  <div id="comp-matrix"></div>
+  <div class="card" style="margin-top:16px"><h3>Engine Preferences — Who Each AI Recommends</h3><div id="engine-prefs"></div></div>
+  <div class="metric-explain">
+    <strong style="color:#f85149">⚔️ Understanding the Competitor Matrix</strong><br>
+    Brands are ranked by overall AI visibility. <em>WoW Change</em> (Week-over-Week) shows momentum — a rising brand is gaining AI mindshare. <em>Engine Preferences</em> reveals each AI platform's "favorite" brands. If a competitor ranks higher on a specific engine, that engine's training data or retrieval pipeline may favor their content structure. Use this to identify where to focus your GEO optimization efforts.
+    <div id="comp-ai-explain" style="margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<!-- 4. Automation Status -->
+<div class="section" id="sec-auto">
+  <div class="section-title"><div class="section-icon auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div> Automation Status</div>
+  <div class="card"><div id="auto-jobs"></div></div>
+  <div class="metric-explain">
+    <strong style="color:#818cf8">⚙️ Understanding Automation Jobs</strong><br>
+    These are background tasks that run automatically to keep your data fresh. A green dot means the job completed successfully on its last run. Amber means it's pending or had a warning. Grey means it hasn't run yet. More frequent runs = more data points = more accurate trend analysis. The total runs counter shows how much historical data has been collected.
+  </div>
+</div>
+
+<!-- 5. Citation Intelligence -->
+<div class="section" id="sec-cite">
+  <div class="section-title"><div class="section-icon cite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div> Citation Intelligence</div>
+  <div class="grid2">
+    <div class="card"><h3>Citation Rate by Brand</h3><div id="cite-rates"></div></div>
+    <div class="card"><h3>Content Format Performance</h3><div id="cite-formats"></div></div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#22d3ee">🔗 Understanding Citation Intelligence</strong><br>
+    <em>Citation Rate</em> measures how often AI models reference a brand when answering relevant queries — think of it as your "AI search ranking." <em>Content Format Performance</em> shows which types of content (lists, paragraphs, tables, etc.) get cited most by AI engines. If "bullet_list" has a high citation rate, structuring your content as lists may improve your AI visibility. Use these insights to optimize your content format for AI consumption.
+    <div id="cite-ai-explain" style="margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<!-- 6. Recommendations -->
+<div class="section" id="sec-recs">
+  <div class="section-title"><div class="section-icon rec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div> Recommended Next Actions</div>
+  <div id="recs-list"></div>
+  <div class="metric-explain">
+    <strong style="color:#3fb950">✅ About Recommendations</strong><br>
+    These actions are auto-generated based on your current data. <em>High priority</em> items address significant gaps where competitors outperform you. <em>Medium priority</em> items are optimization opportunities. The recommended content format is based on what AI engines cite most frequently. Acting on these suggestions should improve your GEO score over time.
+  </div>
+</div>
+
+<!-- ═══════════════ MONTH 5 SECTIONS ═══════════════ -->
+
+<!-- 7. Alert Engine -->
+<div class="section" id="sec-alerts">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(248,81,73,.15),rgba(255,123,114,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#f85149" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div> Alert Engine — Automated Threat Detection</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Alert Summary</h3>
+      <div id="alert-summary">
+        <div style="color:#7d8590;font-size:.82rem;padding:12px">Loading alerts...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Active Alerts</h3>
+      <div id="alert-list" style="max-height:320px;overflow-y:auto">
+        <div style="color:#7d8590;font-size:.82rem;padding:12px">Loading...</div>
+      </div>
+    </div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#f85149">🚨 Understanding Alerts</strong><br>
+    The Alert Engine automatically scans your probe data for threats. <em>Critical</em> alerts mean your GEO score dropped significantly — investigate immediately. <em>High</em> alerts flag competitors overtaking you on specific keywords. <em>Medium</em> alerts indicate declining confidence — AI models are less certain about your brand. Each alert includes a recommended action.
+  </div>
+</div>
+
+<!-- 8. Tiered Monitoring -->
+<div class="section" id="sec-tiers">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(56,189,248,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div> Tiered Keyword Monitoring Schedule</div>
+  <div id="tier-cards" class="grid3"></div>
+  <div class="metric-explain">
+    <strong style="color:#22d3ee">📡 Understanding Tiered Monitoring</strong><br>
+    Keywords are monitored at different frequencies based on their commercial value. <em>Tier 1</em> (highest value) is checked every 2 days using Nova Lite for speed. <em>Tier 2</em> runs weekly. <em>Tier 3</em> (research keywords) runs bi-weekly using Ollama to save costs. This ensures your most important keywords get the freshest data.
+  </div>
+</div>
+
+<!-- 9. Experiments -->
+<div class="section" id="sec-experiments">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(192,132,252,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 3h6v2H9z"/><path d="M10 5v4l-3 8h10l-3-8V5"/><circle cx="12" cy="14" r="1"/></svg></div> Controlled Experiments</div>
+  <div id="experiment-list"></div>
+  <div class="metric-explain">
+    <strong style="color:#a855f7">🧪 Understanding Experiments</strong><br>
+    These are A/B tests for your content structure. Each experiment holds a keyword constant and varies the content format (e.g., FAQ vs paragraph, list vs table). After 4 weeks, we measure which format gets more AI citations. Ollama is used for exploratory tests (free), Nova Lite for production validation.
+  </div>
+</div>
+
+<!-- 10. Executive Dashboard -->
+<div class="section" id="sec-executive">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(245,158,11,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div> Executive Dashboard — Weekly Summary</div>
+  <div id="exec-stats" class="stat-row"></div>
+  <div class="grid2">
+    <div class="card"><h3>Competitive Position</h3><div id="exec-competitive"></div></div>
+    <div class="card"><h3>Alert Overview</h3><div id="exec-alerts"></div></div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#fbbf24">📋 Executive Summary</strong><br>
+    This is your single-page weekly overview for stakeholders. It pulls data from every system — GEO scores, citation velocity, technical debt resolution, E-E-A-T progress, content production, and competitive position. The <em>Overall Health</em> score is an aggregate of all system metrics.
+  </div>
+</div>
+
+<!-- 11. Systems Health -->
+<div class="section" id="sec-health">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(52,211,153,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div> Systems Health Dashboard</div>
+  <div id="health-overview" style="margin-bottom:16px"></div>
+  <div id="health-systems"></div>
+  <div class="metric-explain">
+    <strong style="color:#10b981">💚 Understanding Systems Health</strong><br>
+    Each of the 8 major systems is monitored for operational health. A <em>green</em> status means the system is running on cadence and producing outputs. <em>Amber</em> means degraded — some components may be unavailable. <em>Red</em> means the system needs immediate attention. The health score is the percentage of systems running healthy.
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px;font-size:.72rem;color:#484f58" id="meta-info"></div>
+</div>
+</div>
+
+<script>
+const BASE = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+const pct = v => Math.round((parseFloat(v)||0)*100);
+const scoreCls = v => v>=60?'up':v>=30?'stable':'down';
+const pillCls = v => v>=0.6?'pill-green':v>=0.3?'pill-amber':'pill-red';
+const barCls = v => v>=60?'bar-green':v>=30?'bar-amber':'bar-red';
+const dir = d => d==='up'?'<span class="up">▲</span>':d==='down'?'<span class="down">▼</span>':'<span class="stable">—</span>';
+
+async function load(){
+  try{
+    const r = await fetch(BASE+'/api/m3/deepthi/scanner/intelligence-summary');
+    const d = await r.json();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    render(d);
+  }catch(e){
+    document.getElementById('loading').innerHTML='<div style="color:#f85149">Failed to load intelligence data: '+esc(e.message)+'</div>';
+  }
+}
+
+function render(d){
+  renderBrandStats(d.multi_brand_scores||{});
+  renderGeoTable(d.multi_brand_scores||{});
+  renderKeywords(d.keyword_performance||{});
+  renderCompMatrix(d.competitor_matrix||{});
+  renderAutomation(d.automation_status||{});
+  renderCitations(d.citation_intelligence||{});
+  renderRecs(d.self_learning_summary||{});
+  document.getElementById('meta-info').textContent='Generated: '+(d.generated_at||'')+' · Tables: '+(d._meta?.tables_read?.join(', ')||'');
+}
+
+function renderBrandStats(ms){
+  const brands=ms.brands||[];
+  document.getElementById('brand-stats').innerHTML=brands.map(b=>{
+    const g=pct(b.geo_score);
+    const c=scoreCls(g);
+    return `<div class="stat">
+      <div class="label">${esc(b.brand)}</div>
+      <div class="value ${c}">${g}%</div>
+      <div class="sub">${dir(b.change_vs_last_week?.direction)} ${b.change_vs_last_week?.delta>0?'+':''}${(b.change_vs_last_week?.delta*100||0).toFixed(1)}% vs last week</div>
+    </div>`;
+  }).join('');
+}
+
+function renderGeoTable(ms){
+  const brands=ms.brands||[];
+  const winners=ms.keyword_winners||{};
+  let h=`<table><tr><th>Brand</th><th>GEO Score</th><th>Visibility</th><th>Keywords Cited</th><th>Trend</th><th>Providers</th></tr>`;
+  brands.forEach(b=>{
+    const g=pct(b.geo_score);
+    h+=`<tr><td style="font-weight:700;color:${b.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(b.brand)}</td>
+      <td><span class="${scoreCls(g)}" style="font-weight:700">${g}%</span>
+        <div class="bar"><div class="bar-fill ${barCls(g)}" style="width:${g}%"></div></div></td>
+      <td>${b.visibility_score||0}</td>
+      <td>${b.keywords_cited||0}/${b.keywords_probed||0}</td>
+      <td>${dir(b.change_vs_last_week?.direction)}</td>
+      <td style="font-size:.72rem">${Object.entries(b.provider_scores||{}).map(([p,s])=>esc(p)+': '+pct(s)+'%').join(', ')}</td></tr>`;
+  });
+  h+=`</table>`;
+  if(Object.keys(winners).length){
+    h+=`<div style="margin-top:16px"><h3 style="font-size:.82rem;color:#7d8590;margin-bottom:8px">Keyword Winners</h3><div class="grid3">`;
+    Object.entries(winners).forEach(([kw,w])=>{
+      h+=`<div style="background:#0d0f14;border:1px solid rgba(255,255,255,.04);border-radius:8px;padding:10px">
+        <div style="font-size:.75rem;color:#7d8590">${esc(kw)}</div>
+        <div style="font-size:.85rem;font-weight:700;color:${w.winning_brand==='AI1stSEO'?'#3fb950':'#d29922'}">${esc(w.winning_brand)} <span style="font-size:.72rem;color:#484f58">${pct(w.geo_score)}%</span></div>
+      </div>`;
+    });
+    h+=`</div></div>`;
+  }
+  document.getElementById('geo-table-wrap').innerHTML=h;
+}
+
+function renderKeywords(kp){
+  const top=kp.top_cited_keywords||[];
+  let h1=`<table><tr><th>Keyword</th><th>GEO Score</th></tr>`;
+  top.forEach(k=>{
+    const g=pct(k.geo_score);
+    h1+=`<tr><td>${esc(k.keyword)}</td><td><span class="${scoreCls(g)}" style="font-weight:700">${g}%</span>
+      <div class="bar"><div class="bar-fill ${barCls(g)}" style="width:${g}%"></div></div></td></tr>`;
+  });
+  h1+=`</table>`;
+  document.getElementById('kw-top').innerHTML=h1;
+
+  const gaps=kp.competitor_beating_us||[];
+  let h2=gaps.length?`<table><tr><th>Keyword</th><th>Competitor</th><th>Their Score</th><th>Our Score</th><th>Gap</th></tr>`:'<div style="color:#3fb950;font-size:.82rem;padding:12px">No competitor gaps found — AI1stSEO leads on all tracked keywords.</div>';
+  gaps.forEach(g=>{
+    h2+=`<tr><td>${esc(g.keyword)}</td><td style="color:#d29922">${esc(g.competitor)}</td>
+      <td>${pct(g.competitor_score)}%</td><td>${pct(g.our_score)}%</td>
+      <td><span class="pill pill-red">-${pct(g.gap)}%</span></td></tr>`;
+  });
+  if(gaps.length)h2+=`</table>`;
+  document.getElementById('kw-gaps').innerHTML=h2;
+
+  const engines=kp.engine_brand_citations||{};
+  let h3=`<table><tr><th>AI Engine</th><th>Most Cited Brand</th><th>Brands</th></tr>`;
+  Object.entries(engines).forEach(([eng,data])=>{
+    const brandsStr=Object.entries(data.brands||{}).map(([b,d])=>`${esc(b)}: ${pct(d.citation_rate)}%`).join(', ');
+    h3+=`<tr><td style="font-weight:700">${esc(eng)}</td><td><span class="pill pill-blue">${esc(data.most_cited_brand)}</span></td><td style="font-size:.72rem">${brandsStr}</td></tr>`;
+  });
+  h3+=`</table>`;
+  document.getElementById('engine-brands').innerHTML=h3;
+}
+
+function renderCompMatrix(cm){
+  const matrix=cm.matrix||[];
+  let h=`<table><tr><th>Rank</th><th>Brand</th><th>GEO Score</th><th>Visibility</th><th>WoW Change</th><th>Provider Scores</th></tr>`;
+  matrix.forEach((b,i)=>{
+    const g=pct(b.geo_score);
+    h+=`<tr><td style="color:#7d8590">#${i+1}</td>
+      <td style="font-weight:700;color:${b.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(b.brand)}</td>
+      <td><span class="${scoreCls(g)}" style="font-weight:700">${g}%</span></td>
+      <td>${b.visibility_score||0}</td>
+      <td>${dir(b.wow_direction)} ${(b.wow_change*100).toFixed(1)}%</td>
+      <td style="font-size:.72rem">${Object.entries(b.provider_scores||{}).map(([p,s])=>esc(p)+': '+pct(s)+'%').join(', ')}</td></tr>`;
+  });
+  h+=`</table>`;
+  document.getElementById('comp-matrix').innerHTML=`<div class="card">${h}</div>`;
+
+  const prefs=cm.engine_preferences||{};
+  let h2='';
+  Object.entries(prefs).forEach(([eng,brands])=>{
+    h2+=`<div style="margin-bottom:12px"><div style="font-size:.78rem;font-weight:700;color:#58a6ff;margin-bottom:6px">${esc(eng)}</div>`;
+    brands.forEach((b,i)=>{
+      const w=pct(b.score);
+      h2+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:.72rem;color:#7d8590;width:16px">${i+1}.</span>
+        <span style="font-size:.78rem;width:90px;color:${b.brand==='AI1stSEO'?'#3fb950':'#c9d1d9'}">${esc(b.brand)}</span>
+        <div class="bar" style="flex:1"><div class="bar-fill bar-blue" style="width:${w}%"></div></div>
+        <span style="font-size:.72rem;color:#7d8590;width:36px;text-align:right">${w}%</span>
+      </div>`;
+    });
+    h2+=`</div>`;
+  });
+  document.getElementById('engine-prefs').innerHTML=h2;
+}
+
+function renderAutomation(as){
+  const jobs=as.jobs||[];
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <span style="font-size:.82rem;color:#7d8590">Total runs completed: <strong style="color:#58a6ff">${as.total_runs_completed||0}</strong></span></div>`;
+  jobs.forEach(j=>{
+    const dotCls=j.last_status==='complete'?'dot-green':j.last_status==='not_run'?'dot-grey':'dot-amber';
+    h+=`<div class="job-row">
+      <div class="job-dot ${dotCls}"></div>
+      <div class="job-name">${esc(j.name)}</div>
+      <div class="job-meta">${esc(j.interval)}<br>Last: ${j.last_run==='never'?'<span style="color:#484f58">never</span>':esc(j.last_run?.substring(0,16))}<br>Runs: ${j.runs_completed}</div>
+    </div>`;
+  });
+  document.getElementById('auto-jobs').innerHTML=h;
+}
+
+function renderCitations(ci){
+  const rates=ci.citation_rates_by_brand||{};
+  let h1=`<table><tr><th>Brand</th><th>Citation Rate</th><th>Cited/Total</th></tr>`;
+  Object.entries(rates).sort((a,b)=>b[1].citation_rate-a[1].citation_rate).forEach(([brand,d])=>{
+    const r=d.citation_rate_pct||0;
+    h1+=`<tr><td style="font-weight:700">${esc(brand)}</td>
+      <td><span class="${scoreCls(r)}" style="font-weight:700">${r}%</span>
+        <div class="bar"><div class="bar-fill ${barCls(r)}" style="width:${r}%"></div></div></td>
+      <td style="font-size:.75rem;color:#7d8590">${d.cited_count}/${d.total_probes}</td></tr>`;
+  });
+  h1+=`</table>`;
+  document.getElementById('cite-rates').innerHTML=h1;
+
+  const fmts=ci.content_format_performance||[];
+  let h2=`<table><tr><th>Format</th><th>Citation Rate</th><th>Seen</th></tr>`;
+  fmts.forEach(f=>{
+    const r=f.citation_rate_pct||0;
+    h2+=`<tr><td style="font-weight:700;text-transform:capitalize">${esc(f.format)}</td>
+      <td>${r>0?`<span class="${scoreCls(r)}" style="font-weight:700">${r}%</span>`:'<span style="color:#484f58">—</span>'}</td>
+      <td style="color:#7d8590">${f.total_seen||f.note||'—'}</td></tr>`;
+  });
+  h2+=`</table>`;
+  document.getElementById('cite-formats').innerHTML=h2;
+}
+
+function renderRecs(sl){
+  const recs=sl.recommended_actions||[];
+  let h='';
+  recs.forEach(r=>{
+    const cls=r.priority==='high'?'rec-high':'rec-medium';
+    const badge=r.priority==='high'?'pill-red':'pill-amber';
+    h+=`<div class="rec ${cls}">
+      <div class="title">${esc(r.action)}</div>
+      <div class="desc"><span class="pill ${badge}">${r.priority} priority</span> <span class="pill pill-blue">${esc(r.format)}</span></div>
+    </div>`;
+  });
+  if(sl.top_performing_templates?.length){
+    h+=`<div class="card" style="margin-top:16px"><h3>Top Performing Templates</h3><table><tr><th>Format</th><th>Citation Rate</th><th>Confidence</th><th>Recommendation</th></tr>`;
+    sl.top_performing_templates.forEach(t=>{
+      h+=`<tr><td style="font-weight:700;text-transform:capitalize">${esc(t.format)}</td>
+        <td>${pct(t.citation_rate)}%</td><td>${esc(t.confidence)}</td>
+        <td style="font-size:.75rem;color:#7d8590">${esc(t.recommendation)}</td></tr>`;
+    });
+    h+=`</table></div>`;
+  }
+  document.getElementById('recs-list').innerHTML=h;
+}
+
+load();
+
+// ── Month 5: Load all new sections ──────────────────────────────────────────
+async function loadMonth5(){
+  await Promise.allSettled([
+    loadAlerts(),
+    loadTieredSchedule(),
+    loadExperiments(),
+    loadExecutiveDashboard(),
+    loadSystemsHealth(),
+  ]);
+}
+
+async function loadAlerts(){
+  try{
+    const r = await fetch(BASE+'/api/m5/alerts?brand=AI1stSEO');
+    const d = await r.json();
+    const sumEl = document.getElementById('alert-summary');
+    const total = d.total_alerts||0;
+    const crit = d.critical||0;
+    const high = d.high||0;
+    const med = d.medium||0;
+    sumEl.innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:2.2rem;font-weight:800;color:${crit>0?'#f85149':total>0?'#d29922':'#3fb950'}">${total}</div>
+        <div style="font-size:.75rem;color:#7d8590;margin-top:4px">Active Alerts</div>
+        <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+          <span class="pill pill-red">${crit} critical</span>
+          <span class="pill pill-amber">${high} high</span>
+          <span class="pill pill-blue">${med} medium</span>
+        </div>
+        <div style="margin-top:12px;font-size:.75rem;color:${d.action_required?'#f85149':'#3fb950'}">${d.action_required?'⚠ Action required':'✓ No immediate action needed'}</div>
+      </div>`;
+    const listEl = document.getElementById('alert-list');
+    const alerts = d.alerts||[];
+    if(!alerts.length){
+      listEl.innerHTML='<div style="color:#3fb950;font-size:.82rem;padding:12px;text-align:center">✓ No alerts — all systems nominal</div>';
+      return;
+    }
+    listEl.innerHTML = alerts.slice(0,8).map(a=>{
+      const sev = a.severity==='critical'?'pill-red':a.severity==='high'?'pill-amber':'pill-blue';
+      return `<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span class="pill ${sev}">${a.severity}</span>
+          <span style="font-size:.78rem;font-weight:600;color:#e1e4e8">${esc(a.type||'').replace(/_/g,' ')}</span>
+        </div>
+        <div style="font-size:.78rem;color:#c9d1d9">${esc(a.message||'')}</div>
+        <div style="font-size:.72rem;color:#58a6ff;margin-top:4px">→ ${esc(a.action||'')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('alert-summary').innerHTML='<div style="color:#7d8590;font-size:.82rem;padding:12px">Alert engine loading...</div>';
+  }
+}
+
+async function loadTieredSchedule(){
+  try{
+    const r = await fetch(BASE+'/api/m5/tiered-schedule');
+    const d = await r.json();
+    const tiers = d.tiers||{};
+    let h = '';
+    Object.entries(tiers).forEach(([key,t])=>{
+      const colors = {tier_1:'#f85149',tier_2:'#d29922',tier_3:'#58a6ff'};
+      const color = colors[key]||'#7d8590';
+      h += `<div class="card" style="border-top:3px solid ${color}">
+        <h3 style="color:${color}">${esc(t.label)}</h3>
+        <div style="font-size:2rem;font-weight:800;color:#e1e4e8;margin:8px 0">${t.keyword_count}</div>
+        <div style="font-size:.75rem;color:#7d8590">keywords</div>
+        <div style="margin-top:12px;font-size:.78rem;color:#c9d1d9">
+          <div>Interval: <strong>${esc(t.interval_human)}</strong></div>
+          <div>Provider: <strong>${esc(t.provider)}</strong></div>
+          <div>Status: <span class="pill pill-green">${t.status}</span></div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('tier-cards').innerHTML = h;
+  }catch(e){
+    document.getElementById('tier-cards').innerHTML='<div style="color:#7d8590;font-size:.82rem">Schedule loading...</div>';
+  }
+}
+
+async function loadExperiments(){
+  try{
+    const r = await fetch(BASE+'/api/m5/experiments/templates');
+    const d = await r.json();
+    const templates = d.templates||[];
+    let h = '<div class="grid2">';
+    templates.forEach(t=>{
+      h += `<div class="card">
+        <h3 style="font-size:.85rem">${esc(t.name)}</h3>
+        <div style="font-size:.78rem;color:#7d8590;margin:8px 0;line-height:1.5">${esc(t.hypothesis)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span class="pill pill-blue">${esc(t.variable)}</span>
+          <span class="pill pill-green">${t.duration_weeks} weeks</span>
+          <span class="pill pill-amber">${esc(t.provider)}</span>
+        </div>
+        <div style="margin-top:10px;font-size:.72rem;color:#484f58">
+          Control: ${esc(t.control)} · Treatment: ${esc(t.treatment)}
+        </div>
+      </div>`;
+    });
+    h += '</div>';
+    document.getElementById('experiment-list').innerHTML = h;
+  }catch(e){
+    document.getElementById('experiment-list').innerHTML='<div style="color:#7d8590;font-size:.82rem">Experiments loading...</div>';
+  }
+}
+
+async function loadExecutiveDashboard(){
+  try{
+    const r = await fetch(BASE+'/api/m5/executive-dashboard?brand=AI1stSEO');
+    const d = await r.json();
+    const geo = d.geo_score_trend||{};
+    const debt = d.technical_debt||{};
+    const eeat = d.eeat_progress||{};
+    const content = d.content_calendar||{};
+    document.getElementById('exec-stats').innerHTML = `
+      <div class="stat"><div class="label">Overall Health</div><div class="value ${d.overall_health>=70?'up':d.overall_health>=40?'stable':'down'}">${d.overall_health||0}%</div><div class="sub">Aggregate score</div></div>
+      <div class="stat"><div class="label">GEO Score</div><div class="value ${scoreCls(pct(geo.current_score))}">${pct(geo.current_score)}%</div><div class="sub">${geo.probe_count||0} probes</div></div>
+      <div class="stat"><div class="label">Tech Debt</div><div class="value ${debt.resolution_pct>=60?'up':'stable'}">${debt.resolution_pct||0}%</div><div class="sub">resolved</div></div>
+      <div class="stat"><div class="label">E-E-A-T</div><div class="value ${eeat.closure_pct>=60?'up':'stable'}">${eeat.closure_pct||0}%</div><div class="sub">${eeat.gaps_closed||0}/${eeat.total_gaps||0} gaps closed</div></div>
+      <div class="stat"><div class="label">Content</div><div class="value up">${content.published||0}</div><div class="sub">pages published</div></div>`;
+    const comp = d.competitive_position||{};
+    const ranking = comp.ranking||[];
+    let compH = ranking.length ? '<table><tr><th>Rank</th><th>Brand</th><th>GEO Score</th></tr>' : '<div style="color:#7d8590;font-size:.82rem">No data</div>';
+    ranking.forEach((r,i)=>{
+      const g = pct(r.geo_score);
+      compH += `<tr><td style="color:#7d8590">#${i+1}</td><td style="font-weight:700;color:${r.brand==='AI1stSEO'?'#58a6ff':'#c9d1d9'}">${esc(r.brand)}</td><td><span class="${scoreCls(g)}" style="font-weight:700">${g}%</span></td></tr>`;
+    });
+    if(ranking.length) compH += '</table>';
+    document.getElementById('exec-competitive').innerHTML = compH;
+    const alerts = d.alerts||{};
+    document.getElementById('exec-alerts').innerHTML = `
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:1.6rem;font-weight:800;color:${alerts.critical>0?'#f85149':'#3fb950'}">${alerts.total||0} alerts</div>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:8px">
+          <span class="pill pill-red">${alerts.critical||0} critical</span>
+          <span class="pill pill-amber">${alerts.high||0} high</span>
+        </div>
+      </div>`;
+  }catch(e){
+    document.getElementById('exec-stats').innerHTML='<div class="stat"><div class="label">Loading</div><div class="value stable">...</div></div>';
+  }
+}
+
+async function loadSystemsHealth(){
+  try{
+    const r = await fetch(BASE+'/api/m5/systems-health');
+    const d = await r.json();
+    const score = d.health_score||0;
+    const cls = score>=80?'up':score>=50?'stable':'down';
+    document.getElementById('health-overview').innerHTML = `
+      <div class="card" style="text-align:center">
+        <div style="font-size:.75rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:8px">Platform Health Score</div>
+        <div style="font-size:2.4rem;font-weight:800" class="${cls}">${score}%</div>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:12px">
+          <span class="pill pill-green">${d.systems_healthy||0} healthy</span>
+          <span class="pill pill-amber">${d.systems_degraded||0} degraded</span>
+          <span class="pill pill-red">${d.systems_down||0} down</span>
+        </div>
+        <div class="bar" style="margin-top:12px;height:8px"><div class="bar-fill ${score>=80?'bar-green':score>=50?'bar-amber':'bar-red'}" style="width:${score}%"></div></div>
+      </div>`;
+    const systems = d.systems||[];
+    let h = '<div class="grid2">';
+    systems.forEach(s=>{
+      const dotCls = s.status==='healthy'?'dot-green':s.status==='degraded'?'dot-amber':'dot-grey';
+      h += `<div class="card">
+        <h3><div class="job-dot ${dotCls}" style="width:8px;height:8px"></div> ${esc(s.name)}</h3>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <span class="pill" style="background:rgba(${s.status==='healthy'?'63,185,80':s.status==='degraded'?'210,153,34':'248,81,73'},.1);color:${s.status==='healthy'?'#3fb950':s.status==='degraded'?'#d29922':'#f85149'}">${s.status}</span>
+          <span class="pill pill-blue">Month ${s.month}</span>
+          <span style="font-size:.68rem;color:#7d8590">${s.cadence}</span>
+        </div>
+        <div style="font-size:.72rem;color:#7d8590;line-height:1.6">${(s.components||[]).join(' · ')}</div>
+        ${s.issues?.length?'<div style="font-size:.72rem;color:#f85149;margin-top:6px">⚠ '+esc(s.issues[0])+'</div>':''}
+      </div>`;
+    });
+    h += '</div>';
+    document.getElementById('health-systems').innerHTML = h;
+  }catch(e){
+    document.getElementById('health-overview').innerHTML='<div style="color:#7d8590;font-size:.82rem;text-align:center;padding:16px">Health data loading...</div>';
+  }
+}
+
+setTimeout(loadMonth5, 1500);
+
+// ── AI-Generated Explanations (Amazon Bedrock / Nova) ────────────────────────
+async function loadAIExplanations(){
+  try{
+    const r = await fetch(BASE+'/api/deepthi/explain-dashboard');
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d.explanations){
+      const sections = {
+        'brand_scores': 'brand-stats-ai-explain',
+        'geo_tracker': 'geo-ai-explain',
+        'keyword_performance': 'kw-ai-explain',
+        'competitor_matrix': 'comp-ai-explain',
+        'citations': 'cite-ai-explain'
+      };
+      Object.entries(sections).forEach(([key, elId])=>{
+        const el = document.getElementById(elId);
+        if(el && d.explanations[key]){
+          el.innerHTML = '<span style="color:#a78bfa">🤖 AI Insight:</span> ' + esc(d.explanations[key]);
+          el.style.display = 'block';
+        }
+      });
+    }
+  }catch(e){ /* AI explanations are optional — fail silently */ }
+}
+// Load AI explanations after main dashboard renders
+setTimeout(loadAIExplanations, 2000);
+
+function downloadRankingsPDF() {
+  window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
+}
+function downloadIntelPDF() {
+  window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
+}
+
+async function runLiveProbe(){
+  const brand = document.getElementById('probe-brand').value.trim();
+  const kw = document.getElementById('probe-keywords').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  const provider = document.getElementById('probe-provider').value;
+  const btn = document.getElementById('probe-btn');
+  const status = document.getElementById('probe-status');
+
+  if(!brand){ status.style.display='block'; status.innerHTML='<span style="color:#f85149">Please enter a brand name.</span>'; return; }
+  if(!kw.length){ status.style.display='block'; status.innerHTML='<span style="color:#f85149">Please enter at least one keyword.</span>'; return; }
+
+  btn.disabled=true;
+  btn.textContent='🔄 Probing AI engines… this may take 30-60 seconds';
+  status.style.display='block';
+  status.innerHTML='<span style="color:#8b949e">Running batch probe for <strong>'+esc(brand)+'</strong> across '+kw.length+' keywords on '+esc(provider)+'…</span>';
+
+  try{
+    const r = await fetch(BASE+'/api/geo-probe/batch',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({brand_name:brand, keywords:kw, provider:provider})
+    });
+    const d = await r.json();
+    if(d.error){ status.innerHTML='<span style="color:#f85149">Error: '+esc(d.error)+'</span>'; return; }
+
+    const geoScore = Math.round((d.geo_score||0)*100);
+    const cited = d.cited_count||0;
+    const total = d.total_prompts||0;
+    const cls = geoScore>=60?'up':geoScore>=30?'stable':'down';
+
+    let html = '<div style="margin-bottom:12px"><span style="font-size:1.2rem;font-weight:800" class="'+cls+'">'+geoScore+'%</span> <span style="color:#7d8590">GEO Score for <strong style="color:#e1e4e8">'+esc(brand)+'</strong> — '+cited+'/'+total+' keywords cited</span></div>';
+
+    const results = d.results||[];
+    results.forEach(r=>{
+      const icon = (r.brand_present||r.cited)?'✅':'❌';
+      const conf = Math.round((r.confidence||0)*100);
+      html+='<div style="font-size:.78rem;padding:4px 0;color:#c9d1d9">'+icon+' <strong>'+esc(r.keyword||'')+'</strong>';
+      if(r.citation_context) html+=' — <span style="color:#7d8590">'+esc(r.citation_context.substring(0,120))+'</span>';
+      html+=' <span style="color:#484f58">('+conf+'% confidence)</span></div>';
+    });
+
+    html+='<div style="margin-top:12px;font-size:.78rem;color:#3fb950">✅ Results saved to database. Refresh the dashboard below to see updated scores.</div>';
+    html+='<button onclick="load();this.textContent=\'Refreshed!\';this.disabled=true" style="margin-top:8px;height:34px;padding:0 16px;border:none;border-radius:6px;background:#238636;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer">🔄 Refresh Dashboard</button>';
+
+    status.innerHTML=html;
+  }catch(e){
+    status.innerHTML='<span style="color:#f85149">Network error: '+esc(e.message)+'</span>';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='🔬 Run Live AI Probe';
+  }
+}
+</script>
+<script src="/s3-pages/a11y-sports.js?v=2"></script>
+</body>
+</html>

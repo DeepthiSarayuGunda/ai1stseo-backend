@@ -97,6 +97,8 @@ def require_auth(f):
             }
             # Look up role from DB
             request.cognito_user['role'] = _get_user_role(attrs.get('email', ''))
+            # Look up subscription tier
+            request.cognito_user['subscription_tier'] = _get_user_tier(attrs.get('email', ''))
             return f(*args, **kwargs)
         except client.exceptions.NotAuthorizedException:
             return jsonify({'error': 'Token expired or invalid'}), 401
@@ -144,34 +146,83 @@ def require_admin(f):
 
 
 def _get_user_role(email):
-    """Look up user role from RDS. Returns 'member' if not found."""
+    """Look up user role from DynamoDB. Returns 'admin' if any record for this email is admin."""
     try:
-        from database import query_one
-        row = query_one("SELECT role FROM users WHERE email = %s", (email,))
-        return row['role'] if row else 'member'
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+        )
+        items = resp.get('Items', [])
+        for item in items:
+            if item.get('role') == 'admin':
+                return 'admin'
+        return 'member' if not items else items[0].get('role', 'member')
     except Exception:
         return 'member'
 
 
-def _sync_user_to_db(email, cognito_sub, name=''):
-    """Upsert user to RDS on login — syncs Cognito data to local users table."""
+def _get_user_tier(email):
+    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'."""
     try:
-        from database import execute, query_one
-        existing = query_one("SELECT id, role FROM users WHERE email = %s", (email,))
-        if existing:
-            execute(
-                "UPDATE users SET last_login = NOW(), cognito_sub = %s, name = %s WHERE email = %s",
-                (cognito_sub, name, email),
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+        )
+        items = resp.get('Items', [])
+        for item in items:
+            if item.get('role') == 'admin':
+                return 'admin'
+            tier = item.get('subscription_tier', 'free')
+            if tier in ('pro', 'admin'):
+                return tier
+        return 'free'
+    except Exception:
+        return 'free'
+
+
+def _sync_user_to_db(email, cognito_sub, name=''):
+    """Upsert user to DynamoDB on login."""
+    try:
+        import boto3, uuid
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        now = datetime.now(timezone.utc).isoformat()
+        if items:
+            table.update_item(
+                Key={'userId': items[0]['userId']},
+                UpdateExpression='SET last_login = :ll, cognito_sub = :cs, #n = :nm',
+                ExpressionAttributeNames={'#n': 'name'},
+                ExpressionAttributeValues={':ll': now, ':cs': cognito_sub, ':nm': name},
             )
-            return existing['role']
+            # Return admin if any record is admin
+            for item in items:
+                if item.get('role') == 'admin':
+                    return 'admin'
+            return items[0].get('role', 'member')
         else:
-            # Default project
-            project_id = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
-            execute(
-                "INSERT INTO users (cognito_sub, email, name, role, project_id, last_login) "
-                "VALUES (%s, %s, %s, 'member', %s, NOW())",
-                (cognito_sub, email, name, project_id),
-            )
+            table.put_item(Item={
+                'userId': str(uuid.uuid4()),
+                'email': email, 'cognito_sub': cognito_sub, 'name': name,
+                'role': 'member', 'subscription_tier': 'free',
+                'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                'created_at': now, 'last_login': now,
+            })
             return 'member'
     except Exception as e:
         print("User sync failed: {}".format(e))
@@ -313,7 +364,7 @@ def login():
         # Decode the ID token to get user info
         id_payload = _decode_jwt_payload(auth_result['IdToken'])
 
-        # Sync user to RDS and get role
+        # Sync user to DynamoDB and get role
         user_email = id_payload.get('email', email)
         user_sub = id_payload.get('sub', '')
         user_name = id_payload.get('name', '')
@@ -480,3 +531,84 @@ def delete_account():
     except Exception as e:
         print(f"Account deletion error: {e}")
         return jsonify({'error': 'Account deletion failed. Please try again.'}), 500
+
+
+# ============== SUBSCRIPTION TIER ENDPOINTS ==============
+
+@auth_bp.route('/api/user/tier', methods=['GET'])
+@require_auth
+def get_user_tier():
+    """Get the current user's subscription tier."""
+    user = request.cognito_user
+    return jsonify({
+        'status': 'success',
+        'email': user.get('email', ''),
+        'tier': user.get('subscription_tier', 'free'),
+        'role': user.get('role', 'member'),
+    })
+
+
+@auth_bp.route('/api/webhooks/stripe', methods=['POST'])
+def stripe_webhook():
+    """
+    Stripe webhook endpoint. Updates user subscription_tier when payment succeeds.
+    Stripe sends checkout.session.completed events here.
+    """
+    import os
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature', '')
+    stripe_secret = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
+    # If no Stripe secret configured, accept the payload directly (dev mode)
+    if stripe_secret:
+        # In production, verify the Stripe signature
+        try:
+            import stripe
+            stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', '')
+            event = stripe.Webhook.construct_event(payload, sig_header, stripe_secret)
+        except Exception as e:
+            return jsonify({'error': 'Webhook signature verification failed: {}'.format(str(e))}), 400
+    else:
+        # Dev mode: parse JSON directly
+        event = request.get_json() or {}
+
+    event_type = event.get('type', '')
+
+    if event_type == 'checkout.session.completed':
+        session = event.get('data', {}).get('object', {})
+        customer_email = session.get('customer_email', '').strip().lower()
+
+        if not customer_email:
+            # Try to get email from customer details
+            customer_email = session.get('customer_details', {}).get('email', '').strip().lower()
+
+        if customer_email:
+            # Update user tier to 'pro'
+            try:
+                import boto3
+                from boto3.dynamodb.conditions import Key
+                ddb = boto3.resource('dynamodb', region_name='us-east-1')
+                table = ddb.Table('ai1stseo-users')
+                resp = table.query(
+                    IndexName='email-index',
+                    KeyConditionExpression=Key('email').eq(customer_email),
+                    Limit=1,
+                )
+                items = resp.get('Items', [])
+                if items:
+                    table.update_item(
+                        Key={'userId': items[0]['userId']},
+                        UpdateExpression='SET subscription_tier = :tier, tier_updated_at = :now',
+                        ExpressionAttributeValues={
+                            ':tier': 'pro',
+                            ':now': __import__('datetime').datetime.now(
+                                __import__('datetime').timezone.utc).isoformat(),
+                        },
+                    )
+                    print('Upgraded {} to pro tier'.format(customer_email))
+                else:
+                    print('Stripe webhook: user {} not found in DB'.format(customer_email))
+            except Exception as e:
+                print('Stripe webhook DB update failed: {}'.format(e))
+
+    return jsonify({'status': 'received'}), 200

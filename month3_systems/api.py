@@ -248,6 +248,21 @@ def geo_weekly():
     return jsonify(result)
 
 
+@m3_bp.route('/transform', methods=['POST'])
+def transform_probes():
+    """Bridge raw GEO probes → Month 3 intelligence tables.
+    Body: {"brand": "AI1stSEO", "competitors": ["Ahrefs", "Semrush"]}
+    """
+    from probe_to_intelligence import transform_probes_to_intelligence
+    data = request.get_json() or {}
+    brand = data.get('brand', '').strip()
+    if not brand:
+        return jsonify({'error': 'brand is required'}), 400
+    competitors = [c.strip() for c in data.get('competitors', []) if c.strip()]
+    result = transform_probes_to_intelligence(brand, competitors=competitors or None)
+    return jsonify(result)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 3.3 SEO FOUNDATION
 # ═══════════════════════════════════════════════════════════════════════════════

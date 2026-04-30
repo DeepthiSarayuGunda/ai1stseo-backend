@@ -1,6 +1,6 @@
 # Deployment — Linux Server (OpenShell/NVIDIA Layer)
 
-> **Last Updated:** March 26, 2026 — Dev 1 (Deepthi)
+> **Last Updated:** April 8, 2026 — Dev 1 (Deepthi)
 > **Target:** Linux server with Docker + NVIDIA GPU support
 
 ---
@@ -17,14 +17,18 @@
 Create a `.env` file (never commit this):
 
 ```env
-# RDS PostgreSQL
-DB_HOST=your-rds-endpoint.us-east-1.rds.amazonaws.com
-DB_PORT=5432
-DB_NAME=ai1stseo
-DB_USER=postgres
-DB_PASSWORD=your-password
+# Database mode — DynamoDB is default (no RDS needed)
+# Set USE_RDS=1 only if RDS PostgreSQL is running
+# USE_RDS=1
 
-# AWS (for Bedrock Nova Lite)
+# RDS PostgreSQL (only needed if USE_RDS=1)
+# DB_HOST=your-rds-endpoint.us-east-1.rds.amazonaws.com
+# DB_PORT=5432
+# DB_NAME=ai1stseo
+# DB_USER=postgres
+# DB_PASSWORD=your-password
+
+# AWS (for Bedrock Nova Lite + DynamoDB)
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=your-key
 AWS_SECRET_ACCESS_KEY=your-secret
@@ -151,3 +155,53 @@ curl http://localhost:5001/api/geo-scanner/agents
 | Ollama timeout | Model is large (30B params), allow 60-120s. Or use Nova Lite instead. |
 | Port 5001 in use | Change port: `docker run -p 8080:5001 ...` |
 | Static files 404 | Ensure `assets/` folder is in the same directory as `app.py` |
+| `psycopg2` build fails | See psycopg2 section below |
+| DynamoDB access denied | Ensure IAM credentials have `dynamodb:PutItem`, `dynamodb:Scan`, `dynamodb:GetItem` permissions |
+| Empty scan response | AI provider may have timed out. Try Nova Lite (faster) or reduce keywords. |
+
+## psycopg2 on Linux — Common Fixes
+
+`psycopg2-binary` is included in `requirements.txt` and works on most systems. If it fails:
+
+```bash
+# Option 1: Install system dependencies (Debian/Ubuntu)
+sudo apt-get install -y libpq-dev python3-dev gcc
+pip install psycopg2-binary
+
+# Option 2: Use pure-Python fallback (slower but no C compiler needed)
+pip install psycopg2-binary
+# If that still fails:
+pip install pg8000  # pure Python PostgreSQL driver
+
+# Option 3: Skip psycopg2 entirely (DynamoDB mode)
+# The app defaults to DynamoDB when USE_RDS is not set.
+# psycopg2 is only needed if you set USE_RDS=1 in .env
+# You can safely ignore psycopg2 install errors if using DynamoDB.
+
+# Option 4: Alpine Linux / Docker
+# Alpine needs musl-compatible build:
+apk add --no-cache postgresql-dev gcc musl-dev
+pip install psycopg2-binary
+```
+
+## Database Mode
+
+The backend supports two database modes:
+
+| Mode | When | Config |
+|------|------|--------|
+| DynamoDB (default) | RDS is stopped or unavailable | No `USE_RDS` env var (or `USE_RDS` not set) |
+| RDS PostgreSQL | RDS is running | Set `USE_RDS=1` + DB_HOST/DB_USER/DB_PASSWORD |
+
+DynamoDB tables are pre-provisioned in AWS (`ai1stseo-geo-probes`, `ai1stseo-content-briefs`). No setup needed beyond IAM credentials.
+
+## Team Setup — Step by Step
+
+1. Clone the repo: `git clone https://github.com/DeepthiSarayuGunda/ai1stseo-backend.git`
+2. Copy `.env.example` to `.env` and fill in your AWS credentials
+3. Install dependencies: `pip install -r requirements.txt`
+4. Run locally: `python app.py` (starts on port 5000)
+5. Open `http://localhost:5000/geo-scanner` to test the GEO Scanner
+6. Push to `main` branch — App Runner auto-deploys
+
+For production deployment, push to GitHub and App Runner handles the rest. Do NOT deploy directly via AWS Console.

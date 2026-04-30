@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI1stSEO Directory — Sports, AI Tools, Brands & More</title>
+<meta name="description" content="AI-powered directory of Sports leagues, AI Tools, Brands, SEO Tools, and Analytics platforms. Live data, trending rankings, and structured intelligence.">
+<link rel="stylesheet" href="a11y-sports.css?v=2">
+<style>
+:root{--bg:#0a0a0a;--text:#fff;--muted:rgba(255,255,255,0.6);--faint:rgba(255,255,255,0.3);--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#00d4ff;--green:#00ff88;--purple:#a855f7;--orange:#ff8c00;--red:#ff4757}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+
+/* Nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.3rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{color:var(--muted);font-size:.9rem;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* Page */
+.page{max-width:1200px;margin:0 auto;padding:24px 24px 60px}
+.page-header{text-align:center;margin-bottom:32px}
+.page-header h1{font-size:2rem;font-weight:800;margin-bottom:8px}
+.page-header p{color:var(--muted);font-size:.95rem}
+
+/* Category tabs */
+.cat-tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
+.cat-tab{padding:10px 22px;font-size:.9rem;font-weight:600;background:var(--card);border:1px solid var(--border);border-radius:24px;color:var(--muted);cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px}
+.cat-tab:hover{border-color:rgba(0,212,255,.4);color:var(--text);background:rgba(0,212,255,.06)}
+.cat-tab.active{background:rgba(0,212,255,.12);border-color:var(--accent);color:var(--accent)}
+.cat-tab .count{font-size:.72rem;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:10px}
+
+/* Search */
+.search-row{display:flex;gap:10px;max-width:700px;margin:0 auto 24px}
+.search-input{flex:1;padding:14px 20px;font-size:1rem;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none;transition:all .3s}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.15)}
+.search-input::placeholder{color:var(--faint)}
+.search-btn{padding:14px 24px;font-size:1rem;font-weight:600;background:linear-gradient(135deg,#7b2cbf,#00d4ff);color:#fff;border:none;border-radius:12px;cursor:pointer;transition:all .3s}
+.search-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,212,255,.3)}
+
+/* Sort & filter bar */
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}
+.toolbar-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar-right{color:var(--faint);font-size:.82rem}
+.sort-btn{padding:6px 14px;font-size:.8rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s}
+.sort-btn:hover,.sort-btn.active{background:rgba(0,212,255,.08);border-color:var(--accent);color:var(--accent)}
+
+/* Tag filters */
+.tag-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.tag-pill{padding:5px 14px;font-size:.78rem;background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--muted);cursor:pointer;transition:all .2s}
+.tag-pill:hover,.tag-pill.active{background:rgba(168,85,247,.1);border-color:var(--purple);color:var(--purple)}
+
+/* Cards grid */
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.item-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.item-rank{position:absolute;top:12px;right:14px;font-size:.72rem;font-weight:700;color:var(--accent);background:rgba(0,212,255,.1);padding:3px 10px;border-radius:8px}
+.item-name{font-size:1.15rem;font-weight:700;margin-bottom:6px;padding-right:60px}
+.item-desc{font-size:.84rem;color:var(--muted);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.item-rating{font-size:.85rem;color:var(--orange)}
+.item-reviews{font-size:.78rem;color:var(--faint)}
+.item-trending{font-size:.78rem;color:var(--green);display:flex;align-items:center;gap:3px}
+.item-tags{display:flex;gap:5px;flex-wrap:wrap}
+.item-tag{font-size:.7rem;padding:2px 8px;border-radius:6px;background:rgba(0,212,255,.06);color:var(--accent);border:1px solid rgba(0,212,255,.15)}
+.item-source{display:block;font-size:.72rem;color:var(--faint);margin-top:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-source:hover{color:var(--accent)}
+
+/* Trending section */
+.section-title{font-size:1.2rem;font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:8px}
+.section-title .badge{font-size:.72rem;background:rgba(0,255,136,.1);color:var(--green);padding:3px 10px;border-radius:8px}
+
+/* Loading / Error */
+.state-msg{text-align:center;padding:60px 20px;color:var(--muted)}
+.state-msg h3{color:var(--accent);margin-bottom:8px;font-size:1.2rem}
+.state-msg.error h3{color:var(--red)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Stats bar */
+.stats-bar{display:flex;gap:24px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-val{font-size:1.4rem;font-weight:800;color:var(--accent)}
+.stat-lbl{font-size:.72rem;color:var(--faint);margin-top:2px}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--faint);font-size:.8rem}
+
+/* Pagination */
+.pagination{display:flex;gap:8px;justify-content:center;margin-top:24px}
+.page-btn{padding:8px 16px;font-size:.85rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s}
+.page-btn:hover,.page-btn.active{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+.page-btn:disabled{opacity:.3;cursor:not-allowed}
+
+@media(max-width:768px){
+  nav{padding:12px 16px}
+  .items-grid{grid-template-columns:1fr}
+  .page-header h1{font-size:1.5rem}
+  .stats-bar{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://www.ai1stseo.com" class="nav-logo">AI1stSEO Directory</a>
+  <div class="nav-links">
+    <a href="https://www.ai1stseo.com">Homepage</a>
+    <a href="/directory-home.html">Home</a>
+    <a href="/directory">Top 10</a>
+    <a href="/directory-compare">Compare</a>
+    <a href="/directory-sports.html" style="color:var(--accent)">&#x1F3C6; Sports</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>AI1stSEO Directory</h1>
+    <p>Live data across Sports, AI Tools, Brands, SEO Tools & Analytics — ranked by trending score, ratings, and AI visibility.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item"><div class="stat-val" id="st-cats">-</div><div class="stat-lbl">Categories</div></div>
+    <div class="stat-item"><div class="stat-val" id="st-items">-</div><div class="stat-lbl">Total Items</div></div>
+    <div class="stat-item"><div class="stat-val" id="st-trending">-</div><div class="stat-lbl">Trending</div></div>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs" id="cat-tabs"></div>
+
+  <!-- Search -->
+  <div class="search-row">
+    <input type="text" class="search-input" id="search-q" placeholder="Search items across all categories..." aria-label="Search directory items">
+    <button class="search-btn" onclick="doSearch()">Search</button>
+  </div>
+
+  <!-- Sort bar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span style="font-size:.82rem;color:var(--faint)">Sort:</span>
+      <div class="sort-btn active" data-sort="ranking">Ranking</div>
+      <div class="sort-btn" data-sort="trending">Trending</div>
+      <div class="sort-btn" data-sort="rating">Rating</div>
+      <div class="sort-btn" data-sort="name">Name</div>
+    </div>
+    <div class="toolbar-right" id="result-count"></div>
+  </div>
+
+  <!-- Tag filters -->
+  <div class="tag-filters" id="tag-filters"></div>
+
+  <!-- Items -->
+  <div id="items-container">
+    <div class="state-msg"><div class="spinner"></div><h3>Loading directory...</h3></div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" id="pagination"></div>
+
+  <!-- Trending section -->
+  <div id="trending-section"></div>
+</div>
+
+<footer>&copy; 2026 AI1stSEO Directory. Real-time data for Sports, AI Tools, Brands, SEO & Analytics.</footer>
+
+<script>
+const API = window.location.origin + '/api/dir';
+</script>
+<script src="a11y-sports.js?v=2"></script>
+</body>
+</html>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let categories = [];
+let currentCat = null;   // null = all / trending view
+let currentSort = 'ranking';
+let currentTag = null;
+let currentPage = 0;
+const PAGE_SIZE = 20;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await Promise.all([loadStats(), loadCategories()]);
+  loadTrending();
+  // Default: load first category (Sports)
+  if (categories.length) selectCategory(categories[0].slug);
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/stats`);
+    const d = await r.json();
+    document.getElementById('st-cats').textContent = d.total_categories || 0;
+    document.getElementById('st-items').textContent = d.active_items || 0;
+    document.getElementById('st-trending').textContent = d.trending_items || 0;
+  } catch(e) { console.warn('Stats load failed', e); }
+}
+
+// ── Categories ───────────────────────────────────────────────────────────────
+async function loadCategories() {
+  try {
+    const r = await fetch(`${API}/categories`);
+    const d = await r.json();
+    categories = d.categories || [];
+    renderCatTabs();
+  } catch(e) {
+    console.error('Categories load failed', e);
+  }
+}
+
+function renderCatTabs() {
+  const el = document.getElementById('cat-tabs');
+  el.innerHTML = categories.map(c =>
+    `<div class="cat-tab${currentCat === c.slug ? ' active' : ''}" onclick="selectCategory('${c.slug}')">
+      ${c.name}
+      <span class="count">${c.item_count || 0}</span>
+    </div>`
+  ).join('');
+}
+
+function selectCategory(slug) {
+  currentCat = slug;
+  currentTag = null;
+  currentPage = 0;
+  renderCatTabs();
+  loadTags(slug);
+  loadItems();
+}
+
+// ── Tags ─────────────────────────────────────────────────────────────────────
+async function loadTags(catSlug) {
+  const el = document.getElementById('tag-filters');
+  try {
+    const r = await fetch(`${API}/tags?category=${catSlug || ''}`);
+    const d = await r.json();
+    const tags = d.tags || [];
+    if (!tags.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="tag-pill${!currentTag ? ' active' : ''}" onclick="filterTag(null)">All</div>` +
+      tags.map(t =>
+        `<div class="tag-pill${currentTag === t ? ' active' : ''}" onclick="filterTag('${t}')">${t}</div>`
+      ).join('');
+  } catch(e) { el.innerHTML = ''; }
+}
+
+function filterTag(tag) {
+  currentTag = tag;
+  currentPage = 0;
+  loadItems();
+  // Update active state
+  document.querySelectorAll('.tag-pill').forEach(p =>
+    p.classList.toggle('active', (!tag && p.textContent.trim() === 'All') || p.textContent.trim() === tag)
+  );
+}
+
+// ── Items ────────────────────────────────────────────────────────────────────
+async function loadItems() {
+  const container = document.getElementById('items-container');
+  container.innerHTML = '<div class="state-msg"><div class="spinner"></div><h3>Loading items...</h3></div>';
+
+  try {
+    let url = `${API}/categories/${currentCat}/items?sort=${currentSort}&limit=${PAGE_SIZE}&offset=${currentPage * PAGE_SIZE}`;
+    if (currentTag) url += `&tag=${encodeURIComponent(currentTag)}`;
+
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    const items = d.items || [];
+    const total = d.total || 0;
+
+    document.getElementById('result-count').textContent = `${total} item${total !== 1 ? 's' : ''}`;
+
+    if (!items.length) {
+      container.innerHTML = '<div class="state-msg"><h3>No items found</h3><p>Try a different category or clear filters.</p></div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = '<div class="items-grid">' + items.map((item, i) => renderCard(item, currentPage * PAGE_SIZE + i + 1)).join('') + '</div>';
+    renderPagination(total);
+  } catch(e) {
+    container.innerHTML = `<div class="state-msg error"><h3>Failed to load items</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function renderCard(item, rank) {
+  const stars = item.rating ? ('&#9733;'.repeat(Math.floor(item.rating)) + (item.rating % 1 >= 0.5 ? '&#189;' : '')) : '';
+  const tags = (item.tags || []).slice(0, 4).map(t => `<span class="item-tag">${t}</span>`).join('');
+  const trendIcon = item.trending_score > 70 ? '&#9650;' : (item.trending_score > 40 ? '&#9644;' : '');
+
+  return `
+    <div class="item-card" onclick="openItem('${currentCat}','${item.slug}')">
+      <div class="item-rank">#${item.ranking || rank}</div>
+      <div class="item-name">${esc(item.name)}</div>
+      <div class="item-desc">${esc(item.description || '')}</div>
+      <div class="item-meta">
+        ${item.rating ? `<span class="item-rating">${stars} ${item.rating}</span>` : ''}
+        ${item.review_count ? `<span class="item-reviews">(${item.review_count.toLocaleString()} reviews)</span>` : ''}
+        ${item.trending_score ? `<span class="item-trending">${trendIcon} ${item.trending_score} trending</span>` : ''}
+      </div>
+      <div class="item-tags">${tags}</div>
+      ${item.source_url ? `<a class="item-source" href="${esc(item.source_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(item.source_url)}</a>` : ''}
+    </div>`;
+}
+
+function openItem(catSlug, itemSlug) {
+  // Could navigate to a detail page — for now show alert with data
+  fetch(`${API}/categories/${catSlug}/items/${itemSlug}`)
+    .then(r => r.json())
+    .then(d => {
+      const meta = d.meta_json || {};
+      let info = `${d.name}\n\n${d.description || 'No description'}\n\nRating: ${d.rating || 'N/A'}\nTrending: ${d.trending_score || 0}\nTags: ${(d.tags || []).join(', ')}`;
+      if (Object.keys(meta).length) info += `\n\nMeta: ${JSON.stringify(meta, null, 2)}`;
+      if (d.source_url) info += `\n\nSource: ${d.source_url}`;
+      alert(info);
+    })
+    .catch(() => {});
+}
+
+// ── Pagination ───────────────────────────────────────────────────────────────
+function renderPagination(total) {
+  const el = document.getElementById('pagination');
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>&laquo; Prev</button>`;
+  for (let i = 0; i < pages && i < 10; i++) {
+    html += `<button class="page-btn${i === currentPage ? ' active' : ''}" onclick="goPage(${i})">${i + 1}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage >= pages - 1 ? 'disabled' : ''}>Next &raquo;</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  if (p < 0) return;
+  currentPage = p;
+  loadItems();
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+
+// ── Search ───────────────────────────────────────────────────────────────────
+async function doSearch() {
+  const q = document.getElementById('search-q').value.trim();
+  if (!q) { if (currentCat) loadItems(); return; }
+
+  const container = document.getElementById('items-container');
+  container.innerHTML = '<div class="state-msg"><div class="spinner"></div><h3>Searching...</h3></div>';
+
+  try {
+    let url = `${API}/search?q=${encodeURIComponent(q)}&limit=30`;
+    if (currentCat) url += `&category=${currentCat}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const items = d.items || [];
+
+    document.getElementById('result-count').textContent = `${d.count || 0} result${items.length !== 1 ? 's' : ''} for "${q}"`;
+    document.getElementById('pagination').innerHTML = '';
+
+    if (!items.length) {
+      container.innerHTML = '<div class="state-msg"><h3>No results</h3><p>Try different keywords.</p></div>';
+      return;
+    }
+    container.innerHTML = '<div class="items-grid">' + items.map((item, i) => renderCard(item, i + 1)).join('') + '</div>';
+  } catch(e) {
+    container.innerHTML = `<div class="state-msg error"><h3>Search failed</h3><p>${e.message}</p></div>`;
+  }
+}
+
+document.getElementById('search-q').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+// ── Sort ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentSort = btn.dataset.sort;
+    currentPage = 0;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadItems();
+  });
+});
+
+// ── Trending ─────────────────────────────────────────────────────────────────
+async function loadTrending() {
+  try {
+    const r = await fetch(`${API}/trending?limit=8`);
+    const d = await r.json();
+    const items = d.items || [];
+    if (!items.length) return;
+
+    const section = document.getElementById('trending-section');
+    section.innerHTML = `
+      <div class="section-title">Trending Now <span class="badge">${items.length} items</span></div>
+      <div class="items-grid">${items.map((item, i) => {
+        const catLabel = item.category_name || '';
+        return `
+          <div class="item-card" onclick="openItem('${item.category_slug || ''}','${item.slug}')">
+            <div class="item-rank" style="background:rgba(0,255,136,.1);color:var(--green)">&#9650; ${item.trending_score}</div>
+            <div class="item-name">${esc(item.name)}</div>
+            <div class="item-desc">${esc(item.description || '')}</div>
+            <div class="item-meta">
+              ${catLabel ? `<span class="item-tag" style="background:rgba(168,85,247,.1);color:var(--purple);border-color:rgba(168,85,247,.2)">${catLabel}</span>` : ''}
+              ${item.rating ? `<span class="item-rating">&#9733; ${item.rating}</span>` : ''}
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+  } catch(e) { console.warn('Trending load failed', e); }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+init();
+</script>

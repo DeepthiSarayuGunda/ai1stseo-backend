@@ -376,6 +376,43 @@ Response: {"status": "success", "url": "https://s3.amazonaws.com/...", "filename
 ### DELETE /api/admin/documents/:id *(admin only)*
 Delete a document and its S3 file.
 
+### GET /api/admin/api-usage *(admin only)*
+API key usage analytics — per-key request counts, rate limits, last used.
+```json
+Response: {"status": "success", "keys": [{"prefix": "ai1st_abc", "label": "My App", "requests_this_hour": 12, "rate_limit_per_hour": 100, ...}], "count": 3}
+```
+
+### GET /api/admin/api-usage/logs *(admin only)*
+Request log analytics with endpoint filtering. Query: `?endpoint=/api/analyze&limit=100`
+```json
+Response: {"status": "success", "logs": [...], "top_endpoints": [{"endpoint": "/api/analyze", "count": 45}], "total": 200}
+```
+
+### GET /api/admin/system-status *(auth required)*
+Real-time health check of all platform services (DynamoDB, Cognito, SES, S3, table counts).
+```json
+Response: {"status": "success", "overall": "healthy", "healthy_count": 5, "total_count": 5, "services": {"dynamodb": {"status": "healthy", "latency_ms": 45}, "cognito": {"status": "healthy"}, ...}}
+```
+
+### GET /api/admin/audit-history *(auth required)*
+Browse all SEO audits with search/filter. Query: `?url=example.com&min_score=50&max_score=100&limit=50`
+```json
+Response: {"status": "success", "audits": [...], "total": 14, "filters": {...}}
+```
+
+### GET /api/admin/white-label *(auth required)*
+Get current white-label branding configuration.
+```json
+Response: {"status": "success", "config": {"brand_name": "AI 1st SEO", "primary_color": "#00d4ff", "logo_url": "", ...}}
+```
+
+### PUT /api/admin/white-label *(admin only)*
+Update white-label configuration.
+```json
+Request:  {"brand_name": "My Agency", "primary_color": "#ff6600", "support_email": "help@agency.com"}
+Response: {"status": "success", "config": {...}}
+```
+
 ---
 
 ## Email Lead Collection
@@ -400,16 +437,172 @@ Response: {"status": "success", "message": "Message sent"}
 
 ---
 
+## Investor Inquiry
+
+### POST /api/invest *(no auth — public)*
+Send an investor inquiry via SES to gurbachan@ai1stseo.com.
+```json
+Request:  {"name": "Investor Name", "email": "investor@fund.com", "message": "Interested in...", "organization": "Fund LLC", "interest": "seed"}
+Response: {"status": "success", "message": "Inquiry sent"}
+```
+
+---
+
+## Content Freshness
+
+### POST /api/content-freshness *(no auth)*
+Record a content update timestamp for AI ranking freshness signals.
+```json
+Request:  {"url": "https://ai1stseo.com/page", "update_type": "content_refresh", "sections": ["faq", "pricing"]}
+Response: {"status": "success", "id": "uuid", "timestamp": "2026-04-28T..."}
+```
+
+### GET /api/content-freshness *(no auth)*
+Get content freshness history. Query: `?url=https://ai1stseo.com/page`
+```json
+Response: {"status": "success", "updates": [...]}
+```
+
+---
+
+## Notification Subscriptions *(auth required)*
+
+### POST /api/notifications/subscribe
+Subscribe to event notifications via Slack or email.
+```json
+Request:  {"channel": "slack", "target": "https://hooks.slack.com/services/...", "events": ["audit.created", "*"]}
+Request:  {"channel": "email", "target": "user@example.com", "events": ["uptime.down"]}
+Response: {"status": "success", "id": "uuid", "channel": "slack"}
+```
+
+### GET /api/notifications
+List notification subscriptions.
+```json
+Response: {"status": "success", "notifications": [...]}
+```
+
+---
+
+## Backlink Analysis *(auth required)*
+
+### POST /api/backlinks/score
+Score a domain's authority (0-100) using 10+ real-time signals.
+```json
+Request:  {"domain": "example.com"}
+Response: {"status": "success", "domain": "example.com", "da_score": 72, "signals": {"https": true, "response_time_ms": 340, "schema_markup": 3, ...}}
+```
+
+### POST /api/backlinks/analyze-toxic
+Classify backlinks as potentially toxic.
+```json
+Request:  {"backlinks": [{"source_url": "https://spam.xyz/page", "anchor_text": "buy cheap seo", "nofollow": false}]}
+Response: {"status": "success", "total": 1, "toxic_count": 1, "toxic_percentage": 100.0, "backlinks": [{...}]}
+```
+
+### POST /api/backlinks/link-gap
+Compare your domain against competitors to find backlink gaps.
+```json
+Request:  {"domain": "ai1stseo.com", "competitors": ["semrush.com", "ahrefs.com"]}
+Response: {"status": "success", "your_domain": {...}, "competitors": [...], "gaps": [...], "total_gaps": 2}
+```
+
+### POST /api/backlinks/citation-authority
+Probe AI models to discover which domains they cite for a topic (novel — no competitor has this).
+```json
+Request:  {"queries": ["What are the best SEO tools?", "How to improve search rankings?"], "niche": "SEO"}
+Response: {"status": "success", "total_domains_cited": 15, "top_cited": [{"domain": "moz.com", "citation_count": 4, "citation_frequency": 40.0}], "probes": [...]}
+```
+
+### GET /api/backlinks/citation-scores
+Get stored citation authority scores by niche. Query: `?niche=SEO`
+
+### POST /api/backlinks/velocity
+Detect link velocity anomalies for a domain.
+```json
+Request:  {"domain": "competitor.com"}
+Response: {"status": "success", "domain": "competitor.com", "trend": "improving", "anomaly": false, "total_change": 8}
+```
+
+### POST /api/backlinks/broken-links
+Scan a page for broken outbound links (reclaim opportunities).
+```json
+Request:  {"url": "https://high-da-site.com/resources"}
+Response: {"status": "success", "links_checked": 35, "broken_count": 3, "broken_links": [{...}]}
+```
+
+### POST /api/backlinks/wikipedia-gaps
+Find dead citations in Wikipedia articles as replacement opportunities.
+```json
+Request:  {"topic": "search engine optimization"}
+Response: {"status": "success", "articles_checked": 5, "gaps_found": 2, "gaps": [{...}]}
+```
+
+### POST /api/backlinks/competitor-alerts
+Check if a competitor gained or lost significant DA.
+```json
+Request:  {"competitor": "competitor.com", "your_domain": "ai1stseo.com"}
+Response: {"status": "success", "competitor": "competitor.com", "current_da": 65, "da_change": 8, "alert_type": "competitor_improving"}
+```
+
+### POST /api/backlinks/decay-predict
+Predict which backlinks are at risk of disappearing.
+```json
+Request:  {"domain": "ai1stseo.com"}
+Response: {"status": "success", "at_risk_count": 3, "at_risk": [{...}]}
+```
+
+### GET /api/backlinks/history
+Browse backlink analysis history. Query: `?type=domain_score&domain=example.com&limit=50`
+
+### GET /api/backlinks/opportunities
+List all backlink opportunities ranked by priority.
+
+### POST /api/backlinks/opportunities
+Manually add a backlink opportunity.
+
+### GET /api/backlinks/priority-queue
+Unified opportunity queue with composite scoring across all sources.
+
+### POST /api/backlinks/report
+Generate a comprehensive backlink report for a domain.
+```json
+Request:  {"domain": "ai1stseo.com", "competitors": ["semrush.com"]}
+Response: {"status": "success", "id": "uuid", "report": {"da_score": 45, "signals": {...}, "competitors": [...], "opportunities_count": 12}}
+```
+
+---
+
 ## Infrastructure
 
 | Component | Detail |
 |-----------|--------|
 | Runtime | Python 3.11, Flask, AWS Lambda via Mangum |
-| Database | Amazon DynamoDB (12 tables, PAY_PER_REQUEST) |
+| Database | Amazon DynamoDB (15 tables, PAY_PER_REQUEST) |
 | Auth | Amazon Cognito (`us-east-1_DVvth47zH`) |
 | Email | Amazon SES (`no-reply@ai1stseo.com`) |
-| Frontend | S3 + CloudFront (`ai1stseo.com`) |
+| Frontend | S3 + CloudFront (`ai1stseo.com`, distribution `E16GYTIVXY9IOU`) |
 | API Gateway | `cwb0hb27bf` with per-developer Lambda routing |
-| AI Models | Bedrock Nova Lite (primary) + Ollama qwen3:30b (fallback) |
-| Monitoring | Site monitor on Tailscale server (`100.108.196.117:8888`) |
+| AI Models | Bedrock Nova Lite (primary) + Ollama tiered: 8B fast, 30B standard, 235B deep |
+| Monitoring | Site monitor on Tailscale server (`100.108.196.118:8888`) |
 | Agent | OpenClaw Gateway on Tailscale server (port 18789) |
+| Deploy bucket | S3 `ai1stseo-lambda-deploy` |
+| Doc storage | S3 `ai1stseo-documents` |
+
+### DynamoDB Tables
+| Table | Purpose |
+|-------|---------|
+| ai1stseo-users | User accounts + roles (GSI: email-index) |
+| ai1stseo-audits | SEO audit results (GSI: url-index) |
+| ai1stseo-geo-probes | GEO citation probes (GSI: keyword-index) |
+| ai1stseo-content-briefs | Content briefs |
+| ai1stseo-social-posts | Social media posts |
+| ai1stseo-admin-metrics | Daily aggregated metrics + white-label config |
+| ai1stseo-api-logs | API request logs (GSI: endpoint-index) |
+| ai1stseo-webhooks | Webhooks + notification subscriptions |
+| ai1stseo-api-keys | Developer API keys |
+| ai1stseo-competitors | Tracked competitors |
+| ai1stseo-monitor | Monitored sites + uptime checks |
+| ai1stseo-email-leads | Email lead collection |
+| ai1stseo-documents | Document repository metadata |
+| ai1stseo-backlinks | Backlink scores, analyses, reports (GSI: domain-index) |
+| ai1stseo-backlink-opportunities | Backlink opportunity queue |

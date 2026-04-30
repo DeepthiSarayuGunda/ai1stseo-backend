@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Benchmark — AI1stSEO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#050510;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+        .bg-glow{position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(6,182,212,0.06) 0%,transparent 50%);animation:drift 20s ease-in-out infinite;z-index:0;pointer-events:none}
+        @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-3%,2%)}}
+        nav{position:relative;z-index:10;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(12px)}
+        .logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+        .nav-r a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.82rem;margin-left:20px;transition:color 0.2s}
+        .nav-r a:hover{color:#e2e8f0}
+        .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:40px 20px}
+        .hero{text-align:center;margin-bottom:32px}
+        .hero h1{font-size:2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px}
+        .hero h1 span{background:linear-gradient(135deg,#06b6d4,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{color:rgba(255,255,255,0.4);font-size:0.9rem;max-width:580px;margin:0 auto;line-height:1.6}
+        .bar{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;justify-content:center}
+        .bar input,.bar select{padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#e2e8f0;font-size:0.92rem;outline:none;transition:border-color 0.3s,box-shadow 0.3s}
+        .bar input{flex:1;min-width:260px}
+        .bar input:focus,.bar select:focus{border-color:rgba(6,182,212,0.5);box-shadow:0 0 20px rgba(6,182,212,0.08)}
+        .bar select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+        .bar select option{background:#0f0f23;color:#e2e8f0}
+        .btn{padding:14px 28px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:0.92rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;background:linear-gradient(135deg,#06b6d4,#8b5cf6)}
+        .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,0.25)}
+        .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+        .tabs{display:flex;gap:6px;justify-content:center;margin:20px 0;flex-wrap:wrap}
+        .tab{padding:10px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;color:rgba(255,255,255,0.45);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.25s}
+        .tab:hover{background:rgba(255,255,255,0.06);color:#e2e8f0}
+        .tab.on{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:#a5b4fc}
+        .scores{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:24px 0}
+        .sc{position:relative;text-align:center;width:110px;height:110px}
+        .sc svg{transform:rotate(-90deg)}
+        .sc-track{fill:none;stroke:rgba(255,255,255,0.04);stroke-width:5}
+        .sc-fill{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)}
+        .sc-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .sc-num{font-size:1.5rem;font-weight:800}
+        .sc-label{font-size:0.6rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+        .sc-grade{font-size:0.55rem;padding:2px 6px;border-radius:8px;margin-top:3px;font-weight:700}
+        .card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:18px;margin-bottom:12px;backdrop-filter:blur(8px);transition:border-color 0.3s}
+        .card:hover{border-color:rgba(255,255,255,0.1)}
+        .card-t{font-weight:700;font-size:0.88rem;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+        .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:768px){.grid2{grid-template-columns:1fr}}
+        .row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-size:0.8rem;transition:background 0.2s}
+        .row:hover{background:rgba(255,255,255,0.02)}
+        .row-i{width:18px;text-align:center;font-size:0.72rem;flex-shrink:0}
+        .row-n{flex:1;color:rgba(255,255,255,0.75)}
+        .row-v{font-size:0.72rem;max-width:200px;text-align:right}
+        .pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:0.66rem;font-weight:600}
+        .p-pass{background:rgba(16,185,129,0.12);color:#34d399}
+        .p-fail{background:rgba(239,68,68,0.12);color:#f87171}
+        .gap{background:rgba(239,68,68,0.03);border:1px solid rgba(239,68,68,0.08);border-radius:12px;padding:12px;margin-bottom:7px;transition:border-color 0.3s}
+        .gap:hover{border-color:rgba(239,68,68,0.18)}
+        .gap-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+        .gap-n{font-weight:600;font-size:0.83rem}
+        .gap-d{font-size:0.76rem;color:rgba(255,255,255,0.4);line-height:1.5}
+        .ai-box{background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(6,182,212,0.04));border:1px solid rgba(139,92,246,0.12);border-radius:16px;padding:18px;margin:14px 0}
+        .ai-box h3{font-size:0.88rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#a78bfa,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .ai-box pre{white-space:pre-wrap;font-size:0.8rem;color:rgba(255,255,255,0.45);line-height:1.7;font-family:inherit}
+        .tmpl-b{background:rgba(6,182,212,0.03);border:1px solid rgba(6,182,212,0.08);border-radius:10px;padding:12px;margin-bottom:7px}
+        .tmpl-b h4{font-size:0.8rem;color:#67e8f9;margin-bottom:3px;font-weight:600}
+        .tmpl-b p{font-size:0.76rem;color:rgba(255,255,255,0.4)}
+        .chip{display:inline-block;padding:3px 11px;border-radius:20px;font-size:0.7rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);margin:2px}
+        .info-bar{text-align:center;margin-bottom:16px}
+        .info-pill{display:inline-block;padding:5px 16px;border-radius:24px;font-size:0.76rem;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.12);color:rgba(255,255,255,0.55)}
+        .preview-frame{width:100%;height:500px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;background:#0a0a0a;margin-top:12px}
+        .brand-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+        .brand-name{font-weight:600;font-size:0.85rem}
+        .brand-like{padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700}
+        .like-high{background:rgba(16,185,129,0.12);color:#34d399}
+        .like-med{background:rgba(251,191,36,0.12);color:#fbbf24}
+        .like-low{background:rgba(239,68,68,0.12);color:#f87171}
+        .like-none{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3)}
+        .loading{text-align:center;padding:50px;color:rgba(255,255,255,0.35)}
+        .spinner{display:inline-block;width:24px;height:24px;border:3px solid rgba(255,255,255,0.06);border-top-color:#06b6d4;border-radius:50%;animation:sp 0.8s linear infinite;margin-right:10px;vertical-align:middle}
+        @keyframes sp{to{transform:rotate(360deg)}}
+        .fade{animation:fi 0.4s ease}
+        @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    </style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<nav><a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a><div class="nav-r"><a href="https://www.ai1stseo.com">Home</a><a href="https://www.ai1stseo.com/dashboard.html">Dashboard</a><a href="https://www.ai1stseo.com/audit.html">Audit</a></div></nav>
+<div class="wrap">
+    <div class="hero fade"><h1>Benchmark against the <span>perfect template</span></h1><p>Compare your page side-by-side with the ideal AEO/GEO/SEO structure. See what's missing, preview the perfect page, and check your AI platform visibility.</p></div>
+    <div class="bar fade"><input type="text" id="url" placeholder="Enter any URL to benchmark..." /><select id="type"><option value="">Select type</option><option value="service">Service Business</option><option value="manufacturing">Manufacturing</option><option value="ecommerce">E-Commerce</option><option value="saas">SaaS / Tech</option></select><button class="btn" id="goBtn" onclick="run()">Run Benchmark</button></div>
+    <div id="out"></div>
+</div>
+<script>
+const API='https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+let R=null;
+
+async function run(){
+    const url=document.getElementById('url').value.trim(),type=document.getElementById('type').value,btn=document.getElementById('goBtn'),out=document.getElementById('out');
+    if(!url){alert('Enter a URL');return}if(!type){alert('Select a business type');return}
+    btn.disabled=true;btn.textContent='Analyzing...';
+    out.innerHTML='<div class="loading"><span class="spinner"></span>Benchmarking against perfect template...</div>';
+    try{
+        const fu=url.startsWith('http')?url:'https://'+url;
+        const[bR,tR]=await Promise.all([fetch(API+'/api/template-benchmark',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:fu,business_type:type})}),fetch(API+'/api/template-perfect/'+type)]);
+        const d=await bR.json(),t=await tR.json();
+        if(d.status!=='success'){out.innerHTML='<div class="card" style="border-color:rgba(239,68,68,0.2);color:#f87171;">'+(d.error||'Error')+'</div>';btn.disabled=false;btn.textContent='Run Benchmark';return}
+        R={b:d,t:t.template,type:type};show('compare');
+    }catch(e){out.innerHTML='<div class="card" style="color:#f87171;">'+e.message+'</div>'}
+    btn.disabled=false;btn.textContent='Run Benchmark';
+}
+
+function show(v){
+    if(!R)return;const d=R.b,t=R.t,b=d.benchmark,o=document.getElementById('out');
+    let h='<div class="fade">';
+    h+='<div class="tabs"><div class="tab '+(v==='compare'?'on':'')+'" onclick="show(\'compare\')">Compare</div><div class="tab '+(v==='gaps'?'on':'')+'" onclick="show(\'gaps\')">Gap Analysis</div><div class="tab '+(v==='preview'?'on':'')+'" onclick="show(\'preview\')">Perfect Page Preview</div><div class="tab '+(v==='blueprint'?'on':'')+'" onclick="show(\'blueprint\')">Blueprint</div><div class="tab '+(v==='aicheck'?'on':'')+'" onclick="show(\'aicheck\')">AI Visibility</div></div>';
+    h+='<div class="scores">'+ring(b.overall_score,'Overall','#10b981')+ring(b.aeo_score,'AEO','#8b5cf6')+ring(b.seo_score,'SEO','#3b82f6')+ring(b.content_score,'Content','#f59e0b')+'</div>';
+    h+='<div class="info-bar"><span class="info-pill">'+d.template+' — <strong>'+b.total_gaps+' gaps</strong> — '+(100-b.overall_score)+' pts to perfect</span></div>';
+    if(v==='compare')h+=vCompare(b,d);else if(v==='gaps')h+=vGaps(b,d);else if(v==='preview')h+=vPreview();else if(v==='blueprint')h+=vBlueprint(t,d);else if(v==='aicheck')h+=vAIShell();
+    h+='</div>';o.innerHTML=h;
+    if(v==='aicheck')loadAICheck();
+}
+
+function vCompare(b,d){
+    let h='';const gaps=[...(b.gaps.aeo||[]),...(b.gaps.seo||[]),...(b.gaps.content||[])],pass=gP(b);
+    h+='<div class="grid2">';
+    h+='<div class="card" style="border-color:rgba(239,68,68,0.1);"><div class="card-t"><span class="dot" style="background:#f87171;"></span>Your Page</div>';
+    pass.forEach(c=>{h+=rw('✓','#34d399',c,'<span class="pill p-pass">Pass</span>')});
+    gaps.forEach(g=>{h+=rw('✗','#f87171',g.check,'<span class="row-v" style="color:#f87171;">'+g.current+'</span>')});
+    h+='</div><div class="card" style="border-color:rgba(16,185,129,0.1);"><div class="card-t"><span class="dot" style="background:#34d399;"></span>Perfect '+d.template+'</div>';
+    pass.forEach(c=>{h+=rw('✓','#34d399',c,'<span class="pill p-pass">Match</span>')});
+    gaps.forEach(g=>{h+=rw('✓','#34d399',g.check,'<span class="row-v" style="color:#34d399;">'+g.ideal+'</span>')});
+    h+='</div></div>';
+    h+='<div class="card"><div class="card-t"><span class="dot" style="background:#f59e0b;"></span>Content Sections</div><div class="grid2">';
+    b.content_sections.forEach(s=>{const f=!b.gaps.content.some(g=>g.check===s.heading);h+='<div class="row" style="background:'+(f?'rgba(16,185,129,0.03)':'rgba(239,68,68,0.03)')+';border-radius:8px;">'+rw(f?'✓':'✗',f?'#34d399':'#f87171',s.heading,'<span class="pill '+(f?'p-pass':'p-fail')+'">'+(f?'Found':'Missing')+'</span>').slice(21)});
+    h+='</div></div>';
+    if(d.ai_recommendations)h+='<div class="ai-box"><h3>AI Recommendations</h3><pre>'+d.ai_recommendations+'</pre></div>';
+    return h;
+}
+
+function vGaps(b,d){
+    let h='';const cats={aeo:{c:'#8b5cf6',l:'AEO Gaps'},seo:{c:'#3b82f6',l:'SEO Gaps'},content:{c:'#f59e0b',l:'Content Gaps'}};
+    for(const[k,m]of Object.entries(cats)){const g=b.gaps[k]||[];if(!g.length)continue;
+    h+='<div class="card"><div class="card-t"><span class="dot" style="background:'+m.c+';"></span>'+m.l+' <span style="font-size:0.7rem;color:rgba(255,255,255,0.25);font-weight:400;">('+g.length+')</span></div>';
+    g.sort((a,b)=>b.points-a.points).forEach(x=>{h+='<div class="gap"><div class="gap-h"><span class="gap-n">'+x.check+'</span><span class="pill p-fail">-'+x.points+' pts</span></div><div class="gap-d"><span style="color:#f87171;">'+x.current+'</span> → <span style="color:#34d399;">'+x.ideal+'</span></div></div>'});
+    h+='</div>'}
+    if(d.ai_recommendations)h+='<div class="ai-box"><h3>AI Recommendations</h3><pre>'+d.ai_recommendations+'</pre></div>';
+    return h;
+}
+
+function vPreview(){
+    return '<div class="card"><div class="card-t"><span class="dot" style="background:#06b6d4;"></span>What a perfect '+R.t.name+' page looks like</div><p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-bottom:12px;">This is a live preview of a page that meets every AEO, GEO, and SEO requirement for this business type.</p><iframe src="'+API+'/api/template-preview/'+R.type+'" class="preview-frame" title="Perfect template preview"></iframe></div>';
+}
+
+function vBlueprint(t,d){
+    if(!t)return'<div class="card">Template data unavailable.</div>';
+    let h='<div class="card"><div class="card-t"><span class="dot" style="background:#06b6d4;"></span>'+t.name+' Blueprint</div><p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-bottom:14px;">'+t.examples+'</p>';
+    h+='<div style="margin-bottom:16px;"><div style="font-weight:700;font-size:0.8rem;color:#60a5fa;margin-bottom:6px;">SEO Requirements</div>';
+    h+='<div class="tmpl-b"><h4>Title</h4><p>'+t.seo.title_format+'</p></div><div class="tmpl-b"><h4>Meta Description</h4><p>'+t.seo.meta_desc_format+'</p></div>';
+    h+='<div style="margin:6px 0;">'+['Min '+t.seo.min_word_count+' words',t.seo.internal_links_min+'+ internal links',t.seo.external_links_min+'+ external links'].map(x=>'<span class="chip">'+x+'</span>').join('')+'</div>';
+    h+='<div style="font-size:0.76rem;color:rgba(255,255,255,0.35);">Schema: <span style="color:#67e8f9;">'+t.seo.required_schema.join(', ')+'</span></div></div>';
+    h+='<div style="margin-bottom:16px;"><div style="font-weight:700;font-size:0.8rem;color:#a78bfa;margin-bottom:6px;">AEO Requirements</div>';
+    h+='<div style="margin:4px 0;">'+[t.aeo.min_faq_count+'+ FAQs',t.aeo.min_definitions+'+ definitions',t.aeo.min_lists+'+ lists'].map(x=>'<span class="chip">'+x+'</span>').join('')+'</div>';
+    h+='<div style="font-size:0.76rem;color:rgba(255,255,255,0.35);">Elements: <span style="color:#c4b5fd;">'+t.aeo.required_elements.join(', ')+'</span></div></div>';
+    h+='<div style="margin-bottom:16px;"><div style="font-weight:700;font-size:0.8rem;color:#fbbf24;margin-bottom:6px;">Content Sections ('+t.content_sections.length+')</div>';
+    t.content_sections.forEach((s,i)=>{h+='<div class="tmpl-b"><h4>'+(i+1)+'. '+s.heading+'</h4><p>'+s.purpose+' <span style="color:#67e8f9;">('+s.min_words+'+ words)</span></p></div>'});
+    h+='</div><div><div style="font-weight:700;font-size:0.8rem;color:#34d399;margin-bottom:6px;">GEO Requirements</div>';
+    h+=Object.entries(t.geo).filter(([k,v])=>v===true).map(([k])=>'<span class="chip" style="border-color:rgba(16,185,129,0.12);">'+k.replace(/_/g,' ')+'</span>').join('');
+    h+='</div></div>';return h;
+}
+
+function vAIShell(){
+    const url=document.getElementById('url').value.trim();
+    const query=url?(() => { try { return new URL(url.startsWith('http')?url:'https://'+url).hostname } catch(e) { return url } })():'AI First SEO';
+    return '<div class="card"><div class="card-t"><span class="dot" style="background:#8b5cf6;"></span>AI Platform Visibility Check</div><p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-bottom:12px;">Checking if "'+query+'" is mentioned or recommended by ChatGPT, Gemini, Claude, Perplexity, and Copilot.</p><div id="ai-results"><div class="loading"><span class="spinner"></span>Analyzing AI visibility for "'+query+'"...</div></div></div>';
+}
+
+async function loadAICheck(){
+    const box=document.getElementById('ai-results');
+    if(!box)return;
+    const url=document.getElementById('url').value.trim();
+    const query=url?(() => { try { return new URL(url.startsWith('http')?url:'https://'+url).hostname } catch(e) { return url } })():'AI First SEO';
+    try{
+        const r=await fetch(API+'/api/ai-brand-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query})});
+        const d=await r.json();
+        if(d.status==='success'){
+            const res=d.result;let h='';
+            h+='<div style="text-align:center;margin-bottom:16px;"><div class="sc-num" style="font-size:2.2rem;color:#8b5cf6;">'+res.visibility_score+'</div><div class="sc-label" style="font-size:0.75rem;">AI Visibility Score</div></div>';
+            (res.platforms||[]).forEach(p=>{
+                const lc=p.likelihood==='High'?'like-high':p.likelihood==='Medium'?'like-med':p.likelihood==='Low'?'like-low':'like-none';
+                h+='<div class="brand-card"><div><div class="brand-name">'+p.name+'</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:2px;">'+p.reason+'</div></div><span class="brand-like '+lc+'">'+p.likelihood+'</span></div>';
+            });
+            if(res.top_queries&&res.top_queries.length){h+='<div class="card" style="margin-top:12px;"><div class="card-t"><span class="dot" style="background:#06b6d4;"></span>Top queries where you\'d be cited</div>';res.top_queries.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#67e8f9;">→</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
+            if(res.improvements&&res.improvements.length){h+='<div class="card"><div class="card-t"><span class="dot" style="background:#34d399;"></span>How to improve AI visibility</div>';res.improvements.forEach(q=>{h+='<div class="row"><span class="row-i" style="color:#34d399;">+</span><span class="row-n">'+q+'</span></div>'});h+='</div>'}
+            box.innerHTML=h;
+        }else{box.innerHTML='<div style="color:#f87171;padding:20px;">'+(d.error||'Analysis failed')+'</div>'}
+    }catch(e){box.innerHTML='<div style="color:#f87171;padding:20px;">Connection error: '+e.message+'</div>'}
+}
+
+function ring(s,l,c){const r=44,ci=2*Math.PI*r,of=ci-(s/100)*ci,g=s>=90?'A+':s>=80?'A':s>=70?'B':s>=60?'C':s>=50?'D':'F',gc=s>=80?'rgba(16,185,129,0.15)':s>=60?'rgba(251,191,36,0.15)':'rgba(239,68,68,0.15)',gt=s>=80?'#34d399':s>=60?'#fbbf24':'#f87171';return '<div class="sc"><svg width="110" height="110"><circle cx="55" cy="55" r="'+r+'" class="sc-track"/><circle cx="55" cy="55" r="'+r+'" class="sc-fill" stroke="'+c+'" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'"/></svg><div class="sc-inner"><div class="sc-num" style="color:'+c+';">'+s+'</div><div class="sc-label">'+l+'</div><div class="sc-grade" style="background:'+gc+';color:'+gt+';">'+g+'</div></div></div>'}
+function rw(icon,color,name,val){return '<div class="row"><span class="row-i" style="color:'+color+';">'+icon+'</span><span class="row-n">'+name+'</span>'+val+'</div>'}
+function gP(b){const c=['Title Tag','Meta Description','Word Count','Heading Structure','Schema Markup','Internal Links','FAQ Section','Direct Definitions','Structured Lists','Data Tables','Statistics & Data','Source Citations'];const f=[...(b.gaps.aeo||[]),...(b.gaps.seo||[])].map(g=>g.check);return c.filter(x=>f.indexOf(x)===-1)}
+</script>
+</body>
+</html>

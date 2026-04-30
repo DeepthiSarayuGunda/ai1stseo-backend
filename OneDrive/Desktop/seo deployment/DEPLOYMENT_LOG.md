@@ -6,6 +6,96 @@ Check the latest entry below to understand the current state of all services bef
 
 ---
 
+## 2026-04-28 — App.py Merge + Full Lambda Sync + Backlink Doc Update (Troy)
+
+**Root cause fix:** Two separate `app.py` files (root vs `backend/`) have been causing deploy overwrites for weeks. Merged all Troy-unique routes into Samar's root `app.py` so there is now ONE authoritative app.py.
+
+**What was merged into root app.py:**
+- `backlink_bp` blueprint registration (14 endpoints)
+- Request logging middleware (`before_request` / `after_request` → DynamoDB)
+- `POST /api/contact` — contact form via SES
+- `POST /api/invest` — investor inquiry via SES
+- `POST /api/collect-email` — email lead collection
+- `POST/GET /api/content-freshness` — content freshness tracking
+- `GET /api/content-briefs/<brief_id>` — single brief detail
+
+**Lambda fully synced with git:**
+- `app.py` now pulled from `git show origin/main:app.py` during deploys (never from local OneDrive)
+- All 9 Troy DynamoDB module overlays deployed (admin_api, auth, webhook_api, apikey_api, ai_inference, admin_aggregation, dynamodb_helper, data_api_dynamo, backlink_api)
+- Samar's new directory/sports modules included (directory_api, directory_db, sports_api, sports_db, sports_fetcher, scheduler)
+- All endpoints verified: 0 404s, all admin routes returning 401 (auth required)
+
+**System status fix deployed:**
+- Cognito, SES, and DynamoDB table checks now gracefully degrade to "healthy" with a note when Lambda IAM role lacks detailed monitoring permissions (instead of showing "error")
+
+**Auth bugfix:** Fixed duplicate `except Exception` block in `auth.py` `_sync_user_to_db`
+
+**Backlink strategies document updated:** Added AWS service pairings for all 7 strategies (EventBridge, Bedrock, SQS, SES, SageMaker, Step Functions, SNS, Forecast). Generated `.docx` version.
+
+**Deploy pattern going forward:**
+- Root `app.py` is the ONLY app.py. `backend/app.py` is legacy — do not deploy it.
+- Safe deploy script pulls app.py from git, not local filesystem.
+- Module files (admin_api, auth, etc.) are overlaid from `backend/` directory.
+
+**Files changed:** `app.py` (root), `backend/admin_api.py`, `backend/auth.py`, `BACKLINK_STRATEGIES_DEMO.md`
+
+---
+
+## 2026-04-22 — Slack/Email Notifications + Content Freshness API (Troy)
+
+**New features deployed to Lambda:**
+
+**Slack + Email Notification Channels (WBS 6.3):**
+- `POST /api/notifications/subscribe` — subscribe to events via Slack webhook URL or email address
+  - Body: `{"channel": "slack", "target": "https://hooks.slack.com/...", "events": ["audit.created", "*"]}`
+  - Or: `{"channel": "email", "target": "user@example.com", "events": ["uptime.down"]}`
+- `GET /api/notifications` — list notification subscriptions
+- All `dispatch_event()` calls now trigger both webhook URLs AND Slack/email notifications
+- Slack messages include emoji per event type and formatted payload
+- Email notifications sent via SES from no-reply@ai1stseo.com
+
+**Content Freshness API (for AI ranking maintenance):**
+- `POST /api/content-freshness` — record a content update timestamp
+  - Body: `{"url": "https://ai1stseo.com/page", "update_type": "content_refresh", "sections": ["faq", "pricing"]}`
+- `GET /api/content-freshness?url=...` — get freshness history for a URL
+- Gurbachan emphasized that AI algorithms require regular timestamped updates to maintain rankings
+
+**Files changed:** `backend/webhook_api.py`, `backend/app.py`
+
+**Reminder:** Read `IMPORTANT_READ_BEFORE_PUSHING.md` before merging to main. Do NOT revert backend files to RDS imports.
+
+---
+
+## 2026-04-09 17:00 — Admin API Fix + Rate Limiting + Investor Endpoint (Troy)
+
+**Issue:** `admin_api.py` was reverted to the old RDS version by a team merge, causing all admin dashboard endpoints to fail (they tried to query the stopped RDS database).
+
+**Fix:** Restored the DynamoDB version of `admin_api.py` with all endpoints working against DynamoDB. Redeployed Lambda.
+
+**New endpoints deployed in this cycle:**
+- `GET /api/admin/api-usage` — API key rate limiting dashboard (per-key stats)
+- `GET /api/admin/api-usage/logs` — request log analytics with endpoint filtering
+- `POST /api/invest` — investor inquiry form, sends via SES to gurbachan@ai1stseo.com
+- `POST /api/admin/documents` — document upload (S3 + DynamoDB)
+- `GET /api/admin/documents` — list documents, filter by `?developer=dev1`
+- `GET /api/admin/documents/:id/download` — presigned S3 download URL
+- `DELETE /api/admin/documents/:id` — delete document (admin only)
+- `POST /api/collect-email` — email lead collection for PDF downloads
+- `invest.html` + `contact.html` — restyled to match main site design, live on S3
+
+**Infrastructure changes this week:**
+- DynamoDB migration complete — all 6 backend modules rewritten, 981 rows migrated, RDS deleted ($15/mo saved)
+- OpenClaw Gateway v2026.4.1 installed on seo-dev server (port 18789)
+- Local Ollama accelerator connected with tiered models (8B/30B/235B + embeddings)
+- 4 ClawHub skills installed (seo-geo-audit, site-monitor, seo-competitor-analysis, geo-seo-optimizer)
+- OpenShell CLI + Podman installed — blocked on LXC seccomp restriction for sandbox creation
+- Node.js upgraded to v22 on seo-dev
+- Investor link added to homepage footer
+
+**Reminder to all devs:** When merging branches to main, check the diff for `backend/*.py` files. If you see hundreds of deleted lines you didn't write, your merge is overwriting someone else's work. Always `git pull origin main` before pushing.
+
+---
+
 ## 2026-04-01 02:40 — RDS Shutdown + Data Export (Troy)
 
 **Per Gurbachan's directive:** Moving away from RDS PostgreSQL to individual DynamoDB tables per app.

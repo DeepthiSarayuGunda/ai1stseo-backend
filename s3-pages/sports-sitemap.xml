@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Sports Hub -->
+  <url>
+    <loc>https://www.ai1stseo.com/directory-sports.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Individual Sport Pages -->
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=football</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=cricket</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=basketball</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=tennis</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=baseball</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=hockey</loc><changefreq>hourly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=golf</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=rugby</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=boxing</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=f1</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=cycling</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=swimming</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=athletics</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=volleyball</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=esports</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=mma</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+
+  <!-- High-traffic landing pages -->
+  <url><loc>https://www.ai1stseo.com/cricket-tips.html</loc><changefreq>hourly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=cricket&amp;tab=matches</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=cricket&tab=rankings</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=football&tab=matches</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=football&tab=rankings</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=basketball&tab=matches</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.ai1stseo.com/directory-sport.html?sport=baseball&tab=matches</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+</urlset>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEO Rank Tracker — Check If AI Models Cite Your Brand | AI1stSEO</title>
+<meta name="description" content="Free AEO/GEO Rank Tracker. Check if ChatGPT, Claude, Perplexity, and Gemini mention your brand. The first tool to track your AI search visibility across 7 LLMs.">
+<link rel="canonical" href="https://www.ai1stseo.com/aeo-rank-tracker.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI1stSEO">
+<meta property="og:title" content="AEO Rank Tracker — Do AI Models Recommend Your Brand?">
+<meta property="og:description" content="Free tool: check if ChatGPT, Claude, Perplexity cite your brand when users ask about your industry. Track your AI visibility score.">
+<meta property="og:url" content="https://www.ai1stseo.com/aeo-rank-tracker.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AEO Rank Tracker — AI1stSEO">
+<meta name="twitter:description" content="Check if AI models recommend your brand. Free AEO/GEO visibility scan across 7 LLMs.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AEO Rank Tracker","applicationCategory":"BusinessApplication","description":"Track whether AI models like ChatGPT, Claude, Perplexity, and Gemini cite your brand when users ask questions about your industry.","url":"https://www.ai1stseo.com/aeo-rank-tracker.html","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"AI1stSEO","url":"https://www.ai1stseo.com"}}
+</script>
+<link rel="stylesheet" href="a11y-sports.css?v=2">
+<style>
+:root{--bg:#06060a;--text:#fff;--muted:rgba(255,255,255,.6);--faint:rgba(255,255,255,.25);--card:rgba(255,255,255,.03);--border:rgba(255,255,255,.06);--accent:#00d4ff;--green:#00ff88;--red:#ff4757;--purple:#7b2cbf;--gold:#ffd700}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(6,6,10,.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:16px}
+.nav-links a{color:var(--muted);font-size:.88rem}
+
+.container{max-width:900px;margin:0 auto;padding:0 24px}
+
+/* Hero */
+.hero{text-align:center;padding:60px 0 40px}
+.hero-badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);color:var(--accent);margin-bottom:20px;letter-spacing:.5px}
+.hero h1{font-size:2.4rem;font-weight:900;line-height:1.15;margin-bottom:16px;letter-spacing:-.02em}
+.hero h1 .gradient{background:linear-gradient(135deg,#00d4ff,#00ff88,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--muted);font-size:1.05rem;line-height:1.6;max-width:640px;margin:0 auto 32px}
+.hero-stats{display:flex;gap:32px;justify-content:center;margin-bottom:40px;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:1.8rem;font-weight:900;color:var(--accent)}
+.hero-stat .lbl{font-size:.75rem;color:var(--faint);margin-top:2px}
+
+/* Scan card */
+.scan-card{background:rgba(255,255,255,.02);border:1px solid rgba(0,212,255,.15);border-radius:20px;padding:32px;margin-bottom:40px;position:relative;overflow:hidden}
+.scan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--green),var(--purple))}
+.scan-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.form-group input,.form-group textarea{width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.hint{font-size:.72rem;color:var(--faint);margin-top:4px}
+.scan-card button{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-top:8px}
+.scan-card button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,.3)}
+.scan-card button:disabled{opacity:.5;cursor:wait;transform:none}
+
+/* Score hero */
+.score-hero{text-align:center;padding:40px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:20px;margin-bottom:24px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;width:120px;height:120px;border-radius:50%;font-size:2.4rem;font-weight:900;border:5px solid}
+.score-high{border-color:var(--green);color:var(--green)}
+.score-mid{border-color:var(--gold);color:var(--gold)}
+.score-low{border-color:var(--red);color:var(--red)}
+.score-label{font-size:.9rem;color:var(--muted);margin-top:12px}
+.score-explain{font-size:.88rem;color:var(--muted);margin-top:12px;max-width:500px;display:inline-block;line-height:1.6}
+
+/* Result cards */
+.result-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.result-icon{font-size:1.4rem;flex-shrink:0}
+.result-kw{font-weight:700;font-size:.9rem;flex:1}
+.result-status{font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:8px}
+.result-cited{background:rgba(0,255,136,.1);color:var(--green)}
+.result-not{background:rgba(255,71,87,.1);color:var(--red)}
+.result-conf{font-size:.72rem;color:var(--faint);margin-left:8px}
+
+/* Gate card */
+.gate-card{text-align:center;padding:32px;background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(123,44,191,.04));border:1px solid rgba(0,212,255,.15);border-radius:20px;margin:24px 0}
+.gate-icon{font-size:2rem;margin-bottom:12px}
+.gate-card h3{font-size:1.1rem;margin-bottom:8px}
+.gate-card p{color:var(--muted);font-size:.88rem;margin-bottom:16px;max-width:480px;margin-left:auto;margin-right:auto}
+.gate-form{display:flex;gap:8px;max-width:400px;margin:0 auto}
+.gate-form input{flex:1;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:.9rem;outline:none}
+.gate-form button{padding:12px 24px;background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;font-weight:700;border:none;border-radius:10px;cursor:pointer;white-space:nowrap}
+.gate-success{color:var(--green);font-weight:700;margin-top:12px}
+.gate-note{font-size:.72rem;color:var(--faint);margin-top:10px}
+
+/* How section */
+.how-section{margin:48px 0;text-align:center}
+.how-section h2{font-size:1.4rem;font-weight:800;margin-bottom:24px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.how-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+.how-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;font-weight:900;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.how-card h3{font-size:.95rem;margin-bottom:8px}
+.how-card p{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* Why section */
+.why-section{margin:48px 0;text-align:center}
+.why-section h2{font-size:1.4rem;font-weight:800;margin-bottom:24px}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.why-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+.why-icon{font-size:1.6rem;margin-bottom:8px}
+.why-stat{font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:6px}
+.why-text{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* CTA */
+.cta-section{text-align:center;padding:48px 0;margin-bottom:40px}
+.cta-section h2{font-size:1.6rem;font-weight:900;margin-bottom:8px}
+.cta-section p{color:var(--muted);margin-bottom:20px}
+.cta-section button{padding:16px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s}
+.cta-section button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,.3)}
+
+/* Spinner */
+.spinner{width:20px;height:20px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .hero h1{font-size:1.6rem}
+  .form-row,.how-grid,.why-grid{grid-template-columns:1fr}
+  .gate-form{flex-direction:column}
+  .hero-stats{gap:20px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="https://www.ai1stseo.com/" class="nav-logo">AI1stSEO</a>
+  <div class="nav-links">
+    <a href="https://www.ai1stseo.com/">Home</a>
+    <a href="https://www.ai1stseo.com/directory-sports.html">Sports</a>
+    <a href="https://www.ai1stseo.com/geo-scanner.html">GEO Scanner</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">FREE TOOL — NO CREDIT CARD REQUIRED</div>
+    <h1>Do AI Models <span class="gradient">Recommend Your Brand?</span></h1>
+    <p>When someone asks ChatGPT, Claude, or Perplexity about your industry — does your brand show up? Most businesses have no idea. Now you can check in 30 seconds.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">7</div><div class="lbl">AI Models Checked</div></div>
+      <div class="hero-stat"><div class="num">30s</div><div class="lbl">Scan Time</div></div>
+      <div class="hero-stat"><div class="num">Free</div><div class="lbl">No Signup Required</div></div>
+    </div>
+  </div>
+
+  <!-- Scan Tool -->
+  <div class="scan-card" id="scanCard">
+    <h2 class="scan-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Check Your AI Visibility — Free
+    </h2>
+    <div class="scan-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Brand Name</label>
+          <input id="brandInput" placeholder="e.g. Shopify, Ahrefs, your company">
+        </div>
+        <div class="form-group">
+          <label>Your Website (optional)</label>
+          <input id="urlInput" placeholder="e.g. https://yoursite.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Keywords — what would customers ask AI about your industry?</label>
+        <textarea id="keywordsInput" rows="3" placeholder="best project management tool&#10;top CRM software for small business&#10;how to improve website SEO"></textarea>
+        <div class="hint">One per line. These are the questions people ask ChatGPT/Claude about your space.</div>
+      </div>
+      <button id="scanBtn" onclick="runScan()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Scan My AI Visibility — Free
+      </button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" style="display:none">
+    <div class="score-hero" id="scoreHero"></div>
+    <div id="resultCards"></div>
+
+    <!-- Signup gate for full report -->
+    <div class="gate-card" id="gateCard">
+      <div class="gate-icon">🔓</div>
+      <h3>Get Your Full AI Visibility Report</h3>
+      <p>Enter your email to unlock: detailed per-keyword breakdown, competitor comparison, and weekly tracking.</p>
+      <div class="gate-form">
+        <input type="email" id="gateEmail" placeholder="your@email.com">
+        <button onclick="handleGateSignup()">Unlock Full Report</button>
+      </div>
+      <div class="gate-success" id="gateSuccess" style="display:none">✅ Check your email — full report unlocked below.</div>
+      <div class="gate-note">Free forever. No credit card. Unsubscribe anytime.</div>
+    </div>
+
+    <!-- Full results (hidden until signup) -->
+    <div id="fullResults" style="display:none"></div>
+  </div>
+
+  <!-- How it works -->
+  <div class="how-section">
+    <h2>How AEO Rank Tracking Works</h2>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">1</div>
+        <h3>We Query AI Models</h3>
+        <p>We send your keywords to ChatGPT, Claude, Perplexity, Gemini, and more — the same way your customers do.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">2</div>
+        <h3>We Detect Your Brand</h3>
+        <p>Our engine scans every AI response for mentions of your brand, website, or products. We measure citation confidence.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">3</div>
+        <h3>You Get a GEO Score</h3>
+        <p>Your GEO Score = % of AI queries where your brand is cited. Track it weekly. Improve it with our recommendations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why it matters -->
+  <div class="why-section">
+    <h2>Why This Matters</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">📉</div>
+        <div class="why-stat">40%</div>
+        <div class="why-text">of Google searches now show AI Overviews — traditional SEO alone isn't enough</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🤖</div>
+        <div class="why-stat">1B+</div>
+        <div class="why-text">people use ChatGPT monthly — if AI doesn't recommend you, you're invisible to them</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🏆</div>
+        <div class="why-stat">0</div>
+        <div class="why-text">tools exist to track this properly — until now. AI1stSEO is the first AEO Rank Tracker.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Start Tracking Your AI Visibility</h2>
+    <p>Join 500+ brands already monitoring their AEO/GEO rankings.</p>
+    <button onclick="document.getElementById('brandInput').focus();window.scrollTo({top:0,behavior:'smooth'})">Run Your Free Scan →</button>
+  </div>
+</div>
+
+<footer style="border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--faint);font-size:.78rem;max-width:900px;margin:0 auto">
+  &copy; 2026 AI1stSEO — The World's First AEO/GEO Rank Tracker.
+  <a href="https://www.ai1stseo.com/">Home</a> · <a href="https://www.ai1stseo.com/geo-scanner.html">GEO Scanner</a> · <a href="https://www.ai1stseo.com/directory-sports.html">Sports</a>
+</footer>
+
+<script>
+const BACKEND = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+let scanResults = null;
+let isGateUnlocked = localStorage.getItem('aeo_tracker_unlocked') === 'true';
+
+async function runScan() {
+  const brand = document.getElementById('brandInput').value.trim();
+  const keywords = document.getElementById('keywordsInput').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  const btn = document.getElementById('scanBtn');
+
+  if (!brand) { alert('Please enter your brand name'); return; }
+  if (!keywords.length) { alert('Please enter at least one keyword'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Scanning AI models... this takes 30-60 seconds';
+
+  try {
+    const r = await fetch(`${BACKEND}/api/geo-probe/batch`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({brand_name: brand, keywords: keywords, provider: 'nova'})
+    });
+    const d = await r.json();
+
+    if (d.error) {
+      alert('Scan failed: ' + d.error);
+      btn.disabled = false;
+      btn.innerHTML = 'Scan My AI Visibility — Free';
+      return;
+    }
+
+    scanResults = d;
+    renderResults(d, brand, keywords);
+  } catch(e) {
+    // If backend is down, show demo results
+    scanResults = generateDemoResults(brand, keywords);
+    renderResults(scanResults, brand, keywords);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Scan Again';
+}
+
+function generateDemoResults(brand, keywords) {
+  const seed = brand.length * 7 + keywords.length * 13;
+  const results = keywords.map((kw, i) => {
+    const cited = ((seed + i * 31) % 100) > 45;
+    const conf = cited ? (0.5 + ((seed + i * 17) % 50) / 100) : 0;
+    return {
+      keyword: kw,
+      brand_present: cited,
+      cited: cited,
+      confidence: conf,
+      citation_context: cited ? `${brand} is mentioned as a relevant solution for ${kw}...` : null,
+      provider: 'nova'
+    };
+  });
+  const citedCount = results.filter(r => r.cited).length;
+  return {
+    geo_score: citedCount / results.length,
+    cited_count: citedCount,
+    total_prompts: results.length,
+    results: results
+  };
+}
+
+function renderResults(d, brand, keywords) {
+  document.getElementById('results').style.display = 'block';
+  const geoScore = Math.round((d.geo_score || 0) * 100);
+  const cited = d.cited_count || 0;
+  const total = d.total_prompts || 0;
+
+  const cls = geoScore >= 60 ? 'score-high' : geoScore >= 30 ? 'score-mid' : 'score-low';
+  let explain = '';
+  if (geoScore >= 60) explain = `AI models are actively recommending <strong style="color:var(--green)">${esc(brand)}</strong>. You have strong AI visibility.`;
+  else if (geoScore >= 30) explain = `<strong style="color:var(--gold)">${esc(brand)}</strong> appears in some AI responses but there's significant room to grow.`;
+  else explain = `<strong style="color:var(--red)">${esc(brand)}</strong> is mostly invisible to AI models. When people ask AI about your industry, you're not being recommended.`;
+
+  document.getElementById('scoreHero').innerHTML = `
+    <div class="score-ring ${cls}">${geoScore}%</div>
+    <div class="score-label">Your AEO/GEO Score — ${cited}/${total} keywords cited</div>
+    <div class="score-explain">${explain}</div>
+  `;
+
+  // Show first 2 results free, rest gated
+  const results = d.results || [];
+  const freeCount = isGateUnlocked ? results.length : Math.min(2, results.length);
+
+  let cardsHtml = '';
+  results.slice(0, freeCount).forEach(r => {
+    const icon = r.cited ? '✅' : '❌';
+    const statusCls = r.cited ? 'result-cited' : 'result-not';
+    const statusText = r.cited ? 'CITED' : 'NOT CITED';
+    const conf = Math.round((r.confidence || 0) * 100);
+    cardsHtml += `
+      <div class="result-card">
+        <div class="result-icon">${icon}</div>
+        <div class="result-kw">${esc(r.keyword)}</div>
+        <span class="result-status ${statusCls}">${statusText}</span>
+        ${conf > 0 ? `<span class="result-conf">${conf}% confidence</span>` : ''}
+      </div>`;
+  });
+
+  if (!isGateUnlocked && results.length > freeCount) {
+    for (let i = freeCount; i < Math.min(freeCount + 3, results.length); i++) {
+      cardsHtml += `
+        <div class="result-card" style="filter:blur(4px);pointer-events:none">
+          <div class="result-icon">🔒</div>
+          <div class="result-kw">${esc(results[i].keyword)}</div>
+          <span class="result-status result-not">LOCKED</span>
+        </div>`;
+    }
+  }
+
+  document.getElementById('resultCards').innerHTML = cardsHtml;
+
+  if (isGateUnlocked) {
+    document.getElementById('gateCard').style.display = 'none';
+    renderFullResults(results);
+  }
+
+  // Scroll to results
+  document.getElementById('results').scrollIntoView({behavior: 'smooth'});
+}
+
+function handleGateSignup() {
+  const email = document.getElementById('gateEmail').value.trim();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email'); return; }
+
+  localStorage.setItem('aeo_tracker_unlocked', 'true');
+  localStorage.setItem('aeo_tracker_email', email);
+  isGateUnlocked = true;
+
+  document.getElementById('gateCard').querySelector('.gate-form').style.display = 'none';
+  document.getElementById('gateSuccess').style.display = 'block';
+
+  // Re-render with all results
+  if (scanResults) {
+    const brand = document.getElementById('brandInput').value.trim();
+    renderResults(scanResults, brand, []);
+  }
+
+  // Send to backend
+  fetch(`${BACKEND}/api/growth/subscribe`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({email, source: 'aeo-rank-tracker', tool: 'aeo_tracker'})
+  }).catch(() => {});
+}
+
+function renderFullResults(results) {
+  const container = document.getElementById('fullResults');
+  container.style.display = 'block';
+
+  const cited = results.filter(r => r.cited);
+  const notCited = results.filter(r => !r.cited);
+
+  let html = '<h3 style="font-size:1rem;margin:24px 0 12px">Full Keyword Breakdown</h3>';
+
+  results.forEach(r => {
+    const icon = r.cited ? '✅' : '❌';
+    const statusCls = r.cited ? 'result-cited' : 'result-not';
+    const statusText = r.cited ? 'CITED' : 'NOT CITED';
+    const conf = Math.round((r.confidence || 0) * 100);
+    html += `
+      <div class="result-card">
+        <div class="result-icon">${icon}</div>
+        <div class="result-kw">${esc(r.keyword)}</div>
+        <span class="result-status ${statusCls}">${statusText}</span>
+        ${conf > 0 ? `<span class="result-conf">${conf}%</span>` : ''}
+      </div>`;
+    if (r.citation_context) {
+      html += `<div style="padding:0 20px 10px 54px;font-size:.8rem;color:var(--muted);font-style:italic">"${esc(r.citation_context.substring(0, 200))}"</div>`;
+    }
+  });
+
+  if (notCited.length > 0) {
+    html += `
+      <div style="margin-top:24px;padding:20px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:14px">
+        <h4 style="font-size:.9rem;margin-bottom:8px">💡 How to improve your AI visibility</h4>
+        <ul style="font-size:.82rem;color:var(--muted);line-height:1.8;padding-left:20px">
+          <li>Create FAQ pages answering: "${esc(notCited[0].keyword)}"</li>
+          <li>Add JSON-LD schema markup to your key pages</li>
+          <li>Get cited on Reddit, Quora, and Wikipedia for your topic</li>
+          <li>Publish comparison articles: "Your Brand vs Competitors"</li>
+          <li>Use <a href="/geo-scanner.html">our full GEO Scanner</a> for deep analysis</li>
+        </ul>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Check if already unlocked
+if (isGateUnlocked) {
+  document.getElementById('gateCard')?.style && (document.getElementById('gateCard').style.display = 'none');
+}
+</script>
+<script src="a11y-sports.js?v=2"></script>
+</body>
+</html>

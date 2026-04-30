@@ -1,4 +1,4 @@
-"""
+﻿"""
 SEO Analyzer Backend - Flask API
 200 Comprehensive SEO Checks across 10 categories
 Based on SEMrush, Moz, Ahrefs, and industry best practices
@@ -29,7 +29,7 @@ import base64
 IS_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
 
-# ── Custom JSON provider to handle Decimal, date, UUID from PostgreSQL ────────
+# ΓöÇΓöÇ Custom JSON provider to handle Decimal, date, UUID from PostgreSQL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 class SafeJSONProvider(DefaultJSONProvider):
     def default(self, o):
         if isinstance(o, Decimal):
@@ -60,7 +60,7 @@ if not IS_LAMBDA:
         from dotenv import load_dotenv
         load_dotenv()
     except ImportError:
-        # python-dotenv not installed — load .env manually
+        # python-dotenv not installed ΓÇö load .env manually
         _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
         if os.path.exists(_env_path):
             with open(_env_path) as _f:
@@ -104,12 +104,111 @@ try:
 except Exception:
     pass
 
+# --- Generic Directory Module (Sports, Tools, Brands, etc.) ---
+try:
+    from directory.directory_api import register_directory_module
+    register_directory_module(app)
+except Exception as e:
+    print(f"⚠ Directory module: {e}")
+
+# --- Sports Module (matches, scores, rankings, news, teams) ---
+try:
+    from directory.sports_api import register_sports_module
+    register_sports_module(app)
+except Exception as e:
+    print(f"⚠ Sports module: {e}")
+
 # --- Month 3 Intelligence Systems API ---
 try:
     from month3_systems.api import m3_bp
     app.register_blueprint(m3_bp)
 except Exception as e:
-    print(f"⚠ Month 3 systems: {e}")
+    print(f"ΓÜá Month 3 systems: {e}")
+
+# --- Deepthi Intelligence Layer API ---
+try:
+    from deepthi_intelligence.api import deepthi_bp
+    app.register_blueprint(deepthi_bp)
+except Exception as e:
+    print(f"ΓÜá Deepthi Intelligence: {e}")
+
+try:
+    from deepthi_intelligence.benchmark_api import benchmark_bp
+    app.register_blueprint(benchmark_bp)
+except Exception as e:
+    print(f"ΓÜá Deepthi Benchmark API: {e}")
+
+try:
+    from deepthi_intelligence.deepthi_prod_api import deepthi_prod_bp
+    app.register_blueprint(deepthi_prod_bp)
+except Exception as e:
+    print(f"ΓÜá Deepthi Production API: {e}")
+
+try:
+    from deepthi_intelligence.public_stats_api import public_stats_bp
+    app.register_blueprint(public_stats_bp)
+except Exception as e:
+    print(f"ΓÜá Public Stats API: {e}")
+
+try:
+    from deepthi_intelligence.intelligence_summary_api import scanner_intel_bp
+    app.register_blueprint(scanner_intel_bp)
+except Exception as e:
+    print(f"ΓÜá Scanner Intelligence API: {e}")
+
+try:
+    from deepthi_intelligence.month3_completion import month3_bp
+    app.register_blueprint(month3_bp)
+except Exception as e:
+    print(f"ΓÜá Month 3 Completion API: {e}")
+
+try:
+    from deepthi_intelligence.month4_systems import month4_bp
+    app.register_blueprint(month4_bp)
+except Exception as e:
+    print(f"ΓÜá Month 4 Systems API: {e}")
+
+try:
+    from deepthi_intelligence.month5_systems import month5_bp
+    app.register_blueprint(month5_bp)
+except Exception as e:
+    print(f"ΓÜá Month 5 Systems API: {e}")
+
+# ΓöÇΓöÇ Global JSON error handlers (prevent HTML error pages for API routes) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+# === Request Logging Middleware (Dev 3 - Troy) ===
+import threading as _log_threading
+
+@app.before_request
+def _log_request_start():
+    import time as _t
+    request._start_time = _t.time()
+
+@app.after_request
+def _log_request(response):
+    import time as _t
+    path = request.path
+    if path.startswith('/assets/') or path == '/api/health' or request.method == 'OPTIONS':
+        return response
+    try:
+        elapsed = int((_t.time() - getattr(request, '_start_time', _t.time())) * 1000)
+        user_id = None
+        if hasattr(request, 'cognito_user') and request.cognito_user:
+            user_id = request.cognito_user.get('user_id')
+        def _insert(ep, method, uid, status, ms):
+            try:
+                from dynamodb_helper import put_item
+                put_item('ai1stseo-api-logs', {
+                    'endpoint': ep, 'method': method, 'user_id': uid,
+                    'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+                    'status_code': status, 'response_time_ms': ms,
+                })
+            except Exception:
+                pass
+        _log_threading.Thread(target=_insert, args=(path, request.method, user_id, response.status_code, elapsed), daemon=True).start()
+    except Exception:
+        pass
+    return response
 
 try:
     from visitor_tracking.tracker_api import register_blueprint as register_tracker
@@ -142,8 +241,8 @@ def handle_400(e):
         return jsonify({'error': 'Bad request', 'status': 'error'}), 400
     return e
 
-# ── Database initialization ────────────────────────────────────────────────────
-# RDS is stopped per Gurbachan/Troy directive — use DynamoDB directly.
+# ΓöÇΓöÇ Database initialization ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+# RDS is stopped per Gurbachan/Troy directive ΓÇö use DynamoDB directly.
 # Set USE_DYNAMODB=True to skip the RDS connection attempt (avoids 10s+ timeout on Lambda cold start).
 # To re-enable RDS: set env var USE_RDS=1
 USE_DYNAMODB = not bool(os.environ.get("USE_RDS"))
@@ -151,18 +250,18 @@ if not USE_DYNAMODB:
     try:
         from db import init_db
         init_db()
-        print("✓ RDS tables initialized (geo_probes, ai_visibility_history)")
+        print("Γ£ô RDS tables initialized (geo_probes, ai_visibility_history)")
     except Exception as e:
-        print(f"⚠ RDS init failed, switching to DynamoDB: {e}")
+        print(f"ΓÜá RDS init failed, switching to DynamoDB: {e}")
         USE_DYNAMODB = True
 
 if USE_DYNAMODB:
     try:
         from db_dynamo import init_db
         init_db()
-        print("✓ DynamoDB mode active")
+        print("Γ£ô DynamoDB mode active")
     except Exception as e2:
-        print(f"⚠ DynamoDB init also failed: {e2}")
+        print(f"ΓÜá DynamoDB init also failed: {e2}")
 
 # AWS Cognito Configuration
 COGNITO_USER_POOL_ID = 'us-east-1_DVvth47zH'
@@ -204,7 +303,7 @@ def send_welcome_email(email, name):
         print(f"SES not available - skipping welcome email for {email}")
         return False
     try:
-        subject = "Welcome to AI1stSEO — Your AI-First SEO Platform"
+        subject = "Welcome to AI1stSEO ΓÇö Your AI-First SEO Platform"
         html_body = f"""
         <html>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #ffffff; padding: 40px;">
@@ -212,23 +311,23 @@ def send_welcome_email(email, name):
                 <h1 style="background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; font-size: 2rem;">AISEO Master</h1>
                 <h2 style="color: #00d4ff; text-align: center;">Welcome, {name}!</h2>
                 <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
-                    Thank you for joining <strong>AI1stSEO</strong> — the AI-First SEO Platform. We're excited to have you on board!
+                    Thank you for joining <strong>AI1stSEO</strong> ΓÇö the AI-First SEO Platform. We're excited to have you on board!
                 </p>
                 <p style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
                     Here's what you can do with your account:
                 </p>
                 <ul style="color: rgba(255,255,255,0.8); line-height: 2; font-size: 1rem;">
-                    <li><strong>SEO Analyzer</strong> — Run comprehensive 180-point SEO audits on any website</li>
-                    <li><strong>9 Audit Categories</strong> — Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
-                    <li><strong>AI Optimization</strong> — Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
-                    <li><strong>Detailed Reports</strong> — Actionable recommendations with impact ratings</li>
+                    <li><strong>SEO Analyzer</strong> ΓÇö Run comprehensive 180-point SEO audits on any website</li>
+                    <li><strong>9 Audit Categories</strong> ΓÇö Technical, On-Page, Content, Mobile, Performance, Security, Social, Local, and GEO/AEO</li>
+                    <li><strong>AI Optimization</strong> ΓÇö Get insights for ChatGPT, Perplexity, Claude, and Gemini discovery</li>
+                    <li><strong>Detailed Reports</strong> ΓÇö Actionable recommendations with impact ratings</li>
                 </ul>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing →</a>
+                    <a href="https://ai1stseo.com" style="display: inline-block; padding: 14px 40px; background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem;">Start Analyzing ΓåÆ</a>
                 </div>
                 <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                     <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
-                        AI1stSEO — Optimize for AI Discovery<br>
+                        AI1stSEO ΓÇö Optimize for AI Discovery<br>
                         <a href="https://ai1stseo.com" style="color: #00d4ff; text-decoration: none;">ai1stseo.com</a>
                     </p>
                 </div>
@@ -1326,7 +1425,7 @@ def extract_primary_keyword(soup):
                   'than', 'too', 'very', 'just', 'about', 'up', 'out', 'if', 'then',
                   'that', 'this', 'these', 'those', 'it', 'its', 'how', 'what', 'which',
                   'who', 'whom', 'when', 'where', 'why', 'your', 'our', 'my', 'we', 'you',
-                  'i', 'me', 'he', 'she', 'they', 'them', 'his', 'her', 'their', 'us', '|', '-', '–'}
+                  'i', 'me', 'he', 'she', 'they', 'them', 'his', 'her', 'their', 'us', '|', '-', 'ΓÇô'}
     words = re.findall(r'\b[a-z]{3,}\b', all_text)
     meaningful = [w for w in words if w not in stop_words]
     
@@ -1493,7 +1592,7 @@ def analyze_citation_gap(url, soup, response, load_time):
     has_structure = len(headings) >= 3 and len(paragraphs) >= 5
     format_score = sum([has_summary, has_intro, has_structure])
     add_check(checks, 'AI-Preferred Format', 'pass' if format_score >= 2 else 'warning',
-              'Content format AI engines prefer to cite', f'{format_score}/3 (intro: {"✓" if has_intro else "✗"}, structure: {"✓" if has_structure else "✗"}, summary: {"✓" if has_summary else "✗"})',
+              'Content format AI engines prefer to cite', f'{format_score}/3 (intro: {"Γ£ô" if has_intro else "Γ£ù"}, structure: {"Γ£ô" if has_structure else "Γ£ù"}, summary: {"Γ£ô" if has_summary else "Γ£ù"})',
               'Include clear intro, structured body, and summary/takeaways', 'High', 'Gap Analysis')
     
     # ===== 16-20: Bridge Recommendations =====
@@ -1780,7 +1879,7 @@ def verify_token():
 # ============== ADDITIONAL AUTH FEATURES ==============
 
 def require_auth(f):
-    """Decorator to protect routes — expects JSON body with 'token' field"""
+    """Decorator to protect routes ΓÇö expects JSON body with 'token' field"""
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -1837,7 +1936,7 @@ def refresh_token():
 
 @app.route('/api/send-welcome', methods=['POST'])
 def send_welcome():
-    """Send welcome email — called by frontend after signup confirmation"""
+    """Send welcome email ΓÇö called by frontend after signup confirmation"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
     name = data.get('name', '') or email.split('@')[0]
@@ -1854,7 +1953,7 @@ def send_welcome():
 
 @app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
-    """Initiate password reset — sends code to email (direct HTTP)"""
+    """Initiate password reset ΓÇö sends code to email (direct HTTP)"""
     data = request.get_json()
     email = data.get('email', '').strip().lower()
 
@@ -1920,6 +2019,8 @@ def analyze_url():
             return jsonify({'error': 'Invalid or missing JSON body'}), 400
         url = data.get('url', '')
         categories = data.get('categories', ['technical', 'onpage', 'content', 'mobile', 'performance', 'security', 'social', 'local', 'geo', 'citationgap'])
+        if isinstance(categories, str):
+            categories = [c.strip() for c in categories.split(',') if c.strip()]
     except Exception:
         return jsonify({'error': 'Invalid request'}), 400
     
@@ -1987,7 +2088,7 @@ def health_check():
             'geo': 30,
             'citationgap': 20
         },
-        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/ai-recommendations', '/api/health', '/api/status']
+        'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/template-benchmark', '/api/template-types', '/api/ai-recommendations', '/api/health', '/api/status']
     })
 
 @app.route('/api/status')
@@ -2076,7 +2177,7 @@ Be specific and actionable. Include actual code examples where helpful."""
         }), 500
 
 def call_llm(prompt, model='qwen3:30b-a3b', timeout=120):
-    """Call LLM with fallback: Nova Lite (Bedrock) → Ollama homelab → Ollama fallback"""
+    """Call LLM with fallback: Nova Lite (Bedrock) ΓåÆ Ollama homelab ΓåÆ Ollama fallback"""
     # 1. Try Nova Lite via Bedrock (fast, cheap, always up)
     try:
         from bedrock_helper import invoke_llm
@@ -2375,7 +2476,7 @@ def generate_content_brief():
                 }
             }
             response_data['ai_generated'] = False
-            response_data['note'] = 'LLM unavailable — brief generated from SERP data analysis'
+            response_data['note'] = 'LLM unavailable ΓÇö brief generated from SERP data analysis'
         
         # Save brief to database (DynamoDB or RDS)
         try:
@@ -2425,6 +2526,20 @@ def list_content_briefs():
 
 
 # ============== CONTENT SCORING ENGINE (Phase 2) ==============
+
+@app.route('/api/content-briefs/<brief_id>', methods=['GET'])
+def get_content_brief_detail(brief_id):
+    """Get a single content brief with full details."""
+    try:
+        from db import get_content_brief_by_id
+        brief = get_content_brief_by_id(brief_id)
+        if not brief:
+            return jsonify({'status': 'error', 'message': 'Not found'}), 404
+        return jsonify({'status': 'success', 'brief': brief})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 def compute_readability_score(text):
     """Compute readability metrics: Flesch Reading Ease approximation."""
     words = text.split()
@@ -2539,7 +2654,7 @@ def compute_aeo_score(soup, text):
 
 @app.route('/api/content-score', methods=['POST'])
 def content_score():
-    """Content Scoring Engine — computes SEO score, AEO score, and readability for any URL."""
+    """Content Scoring Engine ΓÇö computes SEO score, AEO score, and readability for any URL."""
     data = request.get_json()
     url = (data or {}).get('url', '').strip()
     if not url:
@@ -2677,7 +2792,7 @@ def cluster_keywords_by_intent(keywords, seed_keyword=''):
 
 @app.route('/api/keyword-cluster', methods=['POST'])
 def keyword_cluster():
-    """Keyword Clustering & TF-IDF Engine — analyzes a URL or seed keyword,
+    """Keyword Clustering & TF-IDF Engine ΓÇö analyzes a URL or seed keyword,
     extracts keywords, groups them by search intent, and provides TF-IDF scores."""
     try:
         data = request.get_json(silent=True)
@@ -2710,10 +2825,10 @@ def keyword_cluster():
             prompt = f"""Generate a comprehensive list of 30 related keywords and phrases for the topic: "{seed_keyword}"
 
 Group them into these categories:
-1. INFORMATIONAL — questions and how-to queries people search
-2. COMMERCIAL — comparison and review queries  
-3. TRANSACTIONAL — purchase-intent queries
-4. LOCAL — location-based queries
+1. INFORMATIONAL ΓÇö questions and how-to queries people search
+2. COMMERCIAL ΓÇö comparison and review queries  
+3. TRANSACTIONAL ΓÇö purchase-intent queries
+4. LOCAL ΓÇö location-based queries
 
 Return ONLY a JSON object with this exact structure, no other text:
 {{"informational": ["keyword1", "keyword2"], "commercial": ["keyword1"], "transactional": ["keyword1"], "local": ["keyword1"]}}"""
@@ -2802,9 +2917,703 @@ Return ONLY a JSON object with this exact structure, no other text:
         return jsonify({'error': f'Keyword clustering failed: {str(e)}'}), 500
 
 
+# ============== TEMPLATE BENCHMARK ENGINE (Dev 2) ==============
+
+# Perfect templates for different business types ΓÇö these define what a 100% AEO/GEO/SEO page looks like
+BUSINESS_TEMPLATES = {
+    'service': {
+        'name': 'Service Business',
+        'examples': 'Dentist, Plumber, Lawyer, Accountant, Salon',
+        'seo': {
+            'title_format': '[Service] in [City] ΓÇö [Business Name] | Trusted [Industry] Services',
+            'meta_desc_format': '[Business Name] offers professional [service] in [City]. [Unique value prop]. Book your appointment today. Γÿà [Rating]/5 from [Count] reviews.',
+            'required_headings': ['h1:1', 'h2:4-8', 'h3:6-12'],
+            'min_word_count': 1500,
+            'required_schema': ['LocalBusiness', 'FAQPage', 'Service', 'AggregateRating', 'BreadcrumbList'],
+            'internal_links_min': 5,
+            'external_links_min': 2,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'statistics', 'source_citations', 'freshness_signals'],
+            'min_faq_count': 5,
+            'min_definitions': 3,
+            'min_lists': 4,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'nap_required': True,
+            'service_area': True,
+            'reviews_section': True,
+            'competitor_comparison': True,
+            'local_keywords': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Business Name]', 'purpose': 'BLUF summary with key differentiators', 'min_words': 150},
+            {'heading': 'Our [Service] Services', 'purpose': 'Detailed service list with descriptions', 'min_words': 300},
+            {'heading': 'Why Choose [Business Name]', 'purpose': 'Trust signals, credentials, experience', 'min_words': 200},
+            {'heading': 'Service Area', 'purpose': 'Geographic coverage with local keywords', 'min_words': 100},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ section for AI extraction', 'min_words': 400},
+            {'heading': 'Customer Reviews', 'purpose': 'Social proof with structured data', 'min_words': 150},
+            {'heading': 'Contact Us', 'purpose': 'NAP data, hours, booking CTA', 'min_words': 100},
+        ]
+    },
+    'manufacturing': {
+        'name': 'Manufacturing Business',
+        'examples': 'Factory, Supplier, Industrial Equipment, Parts Manufacturer',
+        'seo': {
+            'title_format': '[Product] Manufacturer ΓÇö [Business Name] | [Industry] Solutions',
+            'meta_desc_format': '[Business Name] manufactures high-quality [products]. [Capacity/certifications]. Request a quote for custom [product] solutions.',
+            'required_headings': ['h1:1', 'h2:5-10', 'h3:8-15'],
+            'min_word_count': 2000,
+            'required_schema': ['Organization', 'Product', 'FAQPage', 'BreadcrumbList', 'HowTo'],
+            'internal_links_min': 8,
+            'external_links_min': 3,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'statistics', 'source_citations', 'technical_specs'],
+            'min_faq_count': 8,
+            'min_definitions': 5,
+            'min_lists': 6,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'nap_required': True,
+            'service_area': True,
+            'certifications': True,
+            'supply_chain_info': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Business Name]', 'purpose': 'Company overview, history, mission', 'min_words': 200},
+            {'heading': 'Our Products', 'purpose': 'Product catalog with specs and use cases', 'min_words': 500},
+            {'heading': 'Manufacturing Process', 'purpose': 'How products are made ΓÇö builds trust with AI', 'min_words': 300},
+            {'heading': 'Quality & Certifications', 'purpose': 'ISO, industry standards, testing', 'min_words': 200},
+            {'heading': 'Industries We Serve', 'purpose': 'Target markets with specific examples', 'min_words': 200},
+            {'heading': 'Technical Specifications', 'purpose': 'Data tables for AI extraction', 'min_words': 300},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI citation', 'min_words': 500},
+            {'heading': 'Request a Quote', 'purpose': 'CTA with contact info', 'min_words': 100},
+        ]
+    },
+    'ecommerce': {
+        'name': 'E-Commerce / Retail',
+        'examples': 'Online Store, Boutique, Marketplace, D2C Brand',
+        'seo': {
+            'title_format': 'Buy [Product] Online ΓÇö [Business Name] | [Value Prop]',
+            'meta_desc_format': 'Shop [products] at [Business Name]. [Free shipping/discount]. Γÿà [Rating]/5 from [Count] reviews. [Unique selling point].',
+            'required_headings': ['h1:1', 'h2:4-8', 'h3:6-10'],
+            'min_word_count': 1200,
+            'required_schema': ['Product', 'Organization', 'FAQPage', 'BreadcrumbList', 'AggregateRating', 'Offer'],
+            'internal_links_min': 6,
+            'external_links_min': 2,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'data_tables', 'comparison_tables', 'statistics', 'reviews'],
+            'min_faq_count': 6,
+            'min_definitions': 2,
+            'min_lists': 5,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'shipping_info': True,
+            'return_policy': True,
+            'product_comparisons': True,
+        },
+        'content_sections': [
+            {'heading': 'About [Product/Brand]', 'purpose': 'Brand story and product overview', 'min_words': 200},
+            {'heading': 'Product Features', 'purpose': 'Detailed feature list with benefits', 'min_words': 300},
+            {'heading': 'How It Works', 'purpose': 'Step-by-step usage guide', 'min_words': 200},
+            {'heading': 'Customer Reviews', 'purpose': 'Social proof with ratings', 'min_words': 150},
+            {'heading': 'Shipping & Returns', 'purpose': 'Policy details for trust', 'min_words': 150},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI extraction', 'min_words': 400},
+        ]
+    },
+    'saas': {
+        'name': 'SaaS / Technology',
+        'examples': 'Software Platform, API Service, Cloud Tool, Tech Startup',
+        'seo': {
+            'title_format': '[Product Name] ΓÇö [One-line Value Prop] | [Company]',
+            'meta_desc_format': '[Product] helps [audience] [benefit]. [Social proof]. Start free today.',
+            'required_headings': ['h1:1', 'h2:5-10', 'h3:8-15'],
+            'min_word_count': 2000,
+            'required_schema': ['SoftwareApplication', 'Organization', 'FAQPage', 'HowTo', 'BreadcrumbList'],
+            'internal_links_min': 8,
+            'external_links_min': 3,
+        },
+        'aeo': {
+            'required_elements': ['direct_definitions', 'faq_section', 'structured_lists', 'comparison_tables', 'statistics', 'source_citations', 'use_cases', 'technical_docs'],
+            'min_faq_count': 8,
+            'min_definitions': 5,
+            'min_lists': 6,
+            'citation_targets': ['ChatGPT', 'Perplexity', 'Gemini', 'Claude'],
+        },
+        'geo': {
+            'pricing_transparency': True,
+            'integration_list': True,
+            'api_documentation': True,
+        },
+        'content_sections': [
+            {'heading': 'What is [Product]', 'purpose': 'Clear definition for AI extraction', 'min_words': 200},
+            {'heading': 'Key Features', 'purpose': 'Feature list with descriptions', 'min_words': 400},
+            {'heading': 'How It Works', 'purpose': 'Step-by-step workflow', 'min_words': 300},
+            {'heading': 'Use Cases', 'purpose': 'Industry-specific examples', 'min_words': 300},
+            {'heading': 'Pricing', 'purpose': 'Transparent pricing for AI answers', 'min_words': 150},
+            {'heading': 'Integrations', 'purpose': 'Compatible tools and platforms', 'min_words': 200},
+            {'heading': 'Frequently Asked Questions', 'purpose': 'FAQ for AI citation', 'min_words': 500},
+            {'heading': 'Getting Started', 'purpose': 'Onboarding CTA', 'min_words': 150},
+        ]
+    }
+}
+
+
+def benchmark_against_template(url, business_type, soup, text):
+    """Compare a page against the perfect template and return gap analysis."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return None
+    
+    gaps = {'seo': [], 'aeo': [], 'content': []}
+    scores = {'seo': 0, 'aeo': 0, 'content': 0}
+    max_scores = {'seo': 0, 'aeo': 0, 'content': 0}
+    
+    # SEO checks against template
+    t_seo = template['seo']
+    
+    # Title
+    max_scores['seo'] += 10
+    title = soup.find('title')
+    title_text = title.string.strip() if title and title.string else ''
+    if title_text and 30 <= len(title_text) <= 60:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Title Tag', 'current': title_text[:60] or 'Missing', 'ideal': t_seo['title_format'], 'points': 10})
+    
+    # Meta description
+    max_scores['seo'] += 10
+    meta = soup.find('meta', attrs={'name': 'description'})
+    desc = meta.get('content', '').strip() if meta else ''
+    if desc and 120 <= len(desc) <= 160:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Meta Description', 'current': f'{len(desc)} chars' if desc else 'Missing', 'ideal': t_seo['meta_desc_format'], 'points': 10})
+    
+    # Word count
+    max_scores['seo'] += 10
+    word_count = len(text.split())
+    if word_count >= t_seo['min_word_count']:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Word Count', 'current': f'{word_count} words', 'ideal': f'{t_seo["min_word_count"]}+ words', 'points': 10})
+    
+    # Headings
+    max_scores['seo'] += 10
+    h1s = soup.find_all('h1')
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    heading_ok = len(h1s) == 1 and len(h2s) >= 4 and len(h3s) >= 3
+    if heading_ok:
+        scores['seo'] += 10
+    else:
+        gaps['seo'].append({'check': 'Heading Structure', 'current': f'H1:{len(h1s)} H2:{len(h2s)} H3:{len(h3s)}', 'ideal': ', '.join(t_seo['required_headings']), 'points': 10})
+    
+    # Schema markup
+    max_scores['seo'] += 15
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_text = ' '.join(s.string or '' for s in json_ld).lower()
+    found_schemas = [s for s in t_seo['required_schema'] if s.lower() in schema_text]
+    schema_score = round(15 * len(found_schemas) / max(len(t_seo['required_schema']), 1))
+    scores['seo'] += schema_score
+    if schema_score < 15:
+        missing = [s for s in t_seo['required_schema'] if s.lower() not in schema_text]
+        gaps['seo'].append({'check': 'Schema Markup', 'current': f'{len(found_schemas)}/{len(t_seo["required_schema"])} types', 'ideal': ', '.join(missing) + ' missing', 'points': 15 - schema_score})
+    
+    # Internal links
+    max_scores['seo'] += 5
+    parsed = urlparse(url)
+    all_links = soup.find_all('a', href=True)
+    internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
+    if len(internal) >= t_seo['internal_links_min']:
+        scores['seo'] += 5
+    else:
+        gaps['seo'].append({'check': 'Internal Links', 'current': f'{len(internal)} links', 'ideal': f'{t_seo["internal_links_min"]}+ links', 'points': 5})
+    
+    # AEO checks against template
+    t_aeo = template['aeo']
+    
+    # FAQ section
+    max_scores['aeo'] += 15
+    faq_indicators = text.lower().count('?')
+    faq_schema = 'faqpage' in schema_text
+    if faq_indicators >= t_aeo['min_faq_count'] and faq_schema:
+        scores['aeo'] += 15
+    elif faq_indicators >= t_aeo['min_faq_count']:
+        scores['aeo'] += 8
+        gaps['aeo'].append({'check': 'FAQ Schema', 'current': f'{faq_indicators} questions found but no FAQPage schema', 'ideal': f'FAQPage schema with {t_aeo["min_faq_count"]}+ Q&As', 'points': 7})
+    else:
+        gaps['aeo'].append({'check': 'FAQ Section', 'current': f'{faq_indicators} questions', 'ideal': f'{t_aeo["min_faq_count"]}+ questions with FAQPage schema', 'points': 15})
+    
+    # Direct definitions
+    max_scores['aeo'] += 10
+    definition_patterns = len(re.findall(r'\b(is a|refers to|defined as|means|is the)\b', text.lower()))
+    if definition_patterns >= t_aeo['min_definitions']:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Direct Definitions', 'current': f'{definition_patterns} found', 'ideal': f'{t_aeo["min_definitions"]}+ clear definitions', 'points': 10})
+    
+    # Structured lists
+    max_scores['aeo'] += 10
+    lists = soup.find_all(['ul', 'ol'])
+    if len(lists) >= t_aeo['min_lists']:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Structured Lists', 'current': f'{len(lists)} lists', 'ideal': f'{t_aeo["min_lists"]}+ lists', 'points': 10})
+    
+    # Data tables
+    max_scores['aeo'] += 10
+    tables = soup.find_all('table')
+    if tables:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Data Tables', 'current': 'None', 'ideal': 'At least 1 comparison/data table', 'points': 10})
+    
+    # Statistics/data points
+    max_scores['aeo'] += 10
+    numbers = re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?%?\b', text)
+    if len(numbers) >= 5:
+        scores['aeo'] += 10
+    else:
+        gaps['aeo'].append({'check': 'Statistics & Data', 'current': f'{len(numbers)} data points', 'ideal': '5+ statistics for credibility', 'points': 10})
+    
+    # Source citations
+    max_scores['aeo'] += 5
+    citation_signals = len(re.findall(r'(according to|source:|study|research|survey|report)', text.lower()))
+    if citation_signals >= 2:
+        scores['aeo'] += 5
+    else:
+        gaps['aeo'].append({'check': 'Source Citations', 'current': f'{citation_signals} found', 'ideal': '2+ source citations', 'points': 5})
+    
+    # Content section coverage
+    for section in template['content_sections']:
+        max_scores['content'] += 10
+        heading_text = section['heading'].lower().replace('[business name]', '').replace('[product]', '').replace('[service]', '').strip()
+        heading_words = heading_text.split()
+        found = any(any(w in h.get_text().lower() for w in heading_words if len(w) > 3) for h in soup.find_all(['h2', 'h3']))
+        if found:
+            scores['content'] += 10
+        else:
+            gaps['content'].append({'check': section['heading'], 'current': 'Missing', 'ideal': section['purpose'], 'points': 10})
+    
+    # Calculate percentages
+    seo_pct = round(scores['seo'] / max(max_scores['seo'], 1) * 100)
+    aeo_pct = round(scores['aeo'] / max(max_scores['aeo'], 1) * 100)
+    content_pct = round(scores['content'] / max(max_scores['content'], 1) * 100)
+    overall = round(aeo_pct * 0.4 + seo_pct * 0.3 + content_pct * 0.3)
+    
+    return {
+        'overall_score': overall,
+        'aeo_score': aeo_pct,
+        'seo_score': seo_pct,
+        'content_score': content_pct,
+        'gaps': gaps,
+        'total_gaps': sum(len(g) for g in gaps.values()),
+        'template_name': template['name'],
+        'content_sections': template['content_sections'],
+    }
+
+
+@app.route('/api/template-benchmark', methods=['POST'])
+def template_benchmark():
+    """Template Benchmark Engine ΓÇö compares a URL against the perfect template for a business type."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid or missing JSON body'}), 400
+        
+        url = (data.get('url') or '').strip()
+        business_type = (data.get('business_type') or '').strip().lower()
+        
+        if not url:
+            return jsonify({'error': 'url is required'}), 400
+        if business_type not in BUSINESS_TEMPLATES:
+            return jsonify({
+                'error': f'Invalid business_type. Choose from: {", ".join(BUSINESS_TEMPLATES.keys())}',
+                'available_types': {k: {'name': v['name'], 'examples': v['examples']} for k, v in BUSINESS_TEMPLATES.items()}
+            }), 400
+        
+        if not url.startswith('http'):
+            url = 'https://' + url
+        
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        
+        result = benchmark_against_template(url, business_type, soup, text)
+        
+        # Generate AI recommendations for top gaps
+        top_gaps = []
+        for cat in ['aeo', 'seo', 'content']:
+            top_gaps.extend(result['gaps'][cat][:3])
+        
+        ai_recommendations = None
+        if top_gaps:
+            gap_text = '\n'.join(f"- {g['check']}: Current={g['current']}, Ideal={g['ideal']}" for g in top_gaps[:8])
+            prompt = f"""You are an AEO/SEO expert. A {BUSINESS_TEMPLATES[business_type]['name']} website scored {result['overall_score']}% against the perfect template.
+
+Top gaps:
+{gap_text}
+
+Give 5 specific, actionable fixes. Be concise. Focus on AEO (AI Engine Optimization) first, then SEO. Format as a numbered list."""
+            
+            try:
+                ai_recommendations = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+        
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'business_type': business_type,
+            'template': BUSINESS_TEMPLATES[business_type]['name'],
+            'benchmark': result,
+            'ai_recommendations': ai_recommendations,
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    
+    except Exception as e:
+        return jsonify({'error': f'Benchmark failed: {str(e)}'}), 500
+
+
+@app.route('/api/template-types', methods=['GET'])
+def template_types():
+    """List available business template types."""
+    return jsonify({
+        'types': {k: {'name': v['name'], 'examples': v['examples'], 'sections': len(v['content_sections'])} for k, v in BUSINESS_TEMPLATES.items()}
+    })
+
+
+@app.route('/api/template-perfect/<business_type>', methods=['GET'])
+def template_perfect_example(business_type):
+    """Return the perfect template definition for a business type ΓÇö used by frontend to render the ideal page."""
+    template = BUSINESS_TEMPLATES.get(business_type)
+    if not template:
+        return jsonify({'error': f'Unknown type. Choose from: {", ".join(BUSINESS_TEMPLATES.keys())}'}), 400
+    return jsonify({
+        'status': 'success',
+        'business_type': business_type,
+        'template': template
+    })
+
+
+@app.route('/api/template-preview/<business_type>', methods=['GET'])
+def template_preview_html(business_type):
+    """Serve the actual perfect HTML page for a business type."""
+    file_map = {
+        'service': 'templates-perfect/service-dentist.html',
+        'manufacturing': 'templates-perfect/manufacturing-parts.html',
+        'ecommerce': 'templates-perfect/ecommerce-store.html',
+        'saas': 'templates-perfect/saas-analytics.html',
+    }
+    filepath = file_map.get(business_type)
+    if not filepath:
+        return jsonify({'error': f'Unknown type. Choose from: {", ".join(file_map.keys())}'}), 400
+    try:
+        return send_from_directory('.', filepath)
+    except Exception:
+        return jsonify({'error': 'Template file not found'}), 404
+
+
+@app.route('/api/ai-brand-check', methods=['POST'])
+def ai_brand_check():
+    """Check where a brand/keyword is mentioned across AI platforms using LLM."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        query = (data.get('query') or data.get('keyword') or '').strip()
+        if not query:
+            return jsonify({'error': 'query is required'}), 400
+
+        prompt = f"""You are an AI search analyst. Check if "{query}" would be mentioned, recommended, or cited by major AI platforms.
+
+For each platform below, rate the likelihood (High/Medium/Low/None) that it would mention "{query}" in response to a relevant user query, and explain why in one sentence:
+
+1. ChatGPT (OpenAI)
+2. Gemini (Google)
+3. Claude (Anthropic)
+4. Perplexity
+5. Microsoft Copilot
+
+Also provide:
+- Overall AI visibility score (0-100)
+- Top 3 queries where "{query}" would most likely be cited
+- Top 3 improvements to increase AI citation likelihood
+
+Return as JSON with this structure:
+{{"platforms":[{{"name":"ChatGPT","likelihood":"Medium","reason":"..."}},...],"visibility_score":45,"top_queries":["..."],"improvements":["..."]}}"""
+
+        llm_response = call_llm(prompt, timeout=15)
+        if llm_response:
+            json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
+            if json_match:
+                try:
+                    result = json.loads(json_match.group())
+                    return jsonify({'status': 'success', 'query': query, 'result': result, 'source': 'ai_analysis'})
+                except json.JSONDecodeError:
+                    pass
+
+        return jsonify({
+            'status': 'success', 'query': query, 'source': 'fallback',
+            'result': {
+                'platforms': [
+                    {'name': 'ChatGPT', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable ΓÇö try again'},
+                    {'name': 'Gemini', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Claude', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Perplexity', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                    {'name': 'Copilot', 'likelihood': 'Unknown', 'reason': 'LLM analysis unavailable'},
+                ],
+                'visibility_score': 0, 'top_queries': [], 'improvements': []
+            }
+        })
+    except Exception as e:
+        return jsonify({'error': f'Brand check failed: {str(e)}'}), 500
+
+
+# ============== PREDICTIVE SEARCH INTELLIGENCE ENGINE — PSIE (Dev 2) ==============
+
+def psie_analyze_page(url, soup, text, keyword):
+    """Core PSIE analysis — combines scoring signals into a ranking prediction."""
+    parsed = urlparse(url)
+    signals = {}
+
+    # Signal 1: Title keyword alignment
+    title = soup.find('title')
+    title_text = (title.string.strip() if title and title.string else '').lower()
+    kw_lower = keyword.lower()
+    signals['title_keyword_match'] = 1.0 if kw_lower in title_text else (0.5 if any(w in title_text for w in kw_lower.split()) else 0.0)
+
+    # Signal 2: Meta description keyword presence
+    meta = soup.find('meta', attrs={'name': 'description'})
+    desc = (meta.get('content', '').strip().lower() if meta else '')
+    signals['meta_keyword_match'] = 1.0 if kw_lower in desc else (0.5 if any(w in desc for w in kw_lower.split()) else 0.0)
+
+    # Signal 3: H1 keyword alignment
+    h1s = soup.find_all('h1')
+    h1_text = ' '.join(h.get_text().lower() for h in h1s)
+    signals['h1_keyword_match'] = 1.0 if kw_lower in h1_text else (0.5 if any(w in h1_text for w in kw_lower.split()) else 0.0)
+
+    # Signal 4: Content depth
+    word_count = len(text.split())
+    signals['content_depth'] = min(1.0, word_count / 2000)
+
+    # Signal 5: Heading structure quality
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    signals['heading_structure'] = min(1.0, (len(h2s) * 0.15 + len(h3s) * 0.1))
+
+    # Signal 6: Schema markup presence
+    json_ld = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_text = ' '.join(s.string or '' for s in json_ld).lower()
+    schema_types = len(re.findall(r'"@type"\s*:\s*"(\w+)"', schema_text))
+    signals['schema_richness'] = min(1.0, schema_types * 0.25)
+
+    # Signal 7: FAQ/Q&A density (AEO signal)
+    questions = text.count('?')
+    has_faq_schema = 'faqpage' in schema_text
+    signals['faq_density'] = min(1.0, (questions * 0.1) + (0.3 if has_faq_schema else 0.0))
+
+    # Signal 8: Direct answer formatting (AEO signal)
+    has_definitions = bool(re.search(r'\b(is a|refers to|is defined as|means that)\b', text.lower()))
+    lists = soup.find_all(['ul', 'ol'])
+    tables = soup.find_all('table')
+    signals['answer_formatting'] = min(1.0, (0.3 if has_definitions else 0.0) + len(lists) * 0.08 + len(tables) * 0.15)
+
+    # Signal 9: E-E-A-T signals
+    has_author = bool(re.search(r'(author|written by|posted by|dr\.|phd)', text.lower()))
+    has_date = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text.lower()))
+    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text.lower()))
+    signals['eeat_signals'] = (0.35 if has_author else 0.0) + (0.35 if has_date else 0.0) + (0.3 if has_citations else 0.0)
+
+    # Signal 10: Internal linking
+    all_links = soup.find_all('a', href=True)
+    internal = [l for l in all_links if parsed.netloc in urljoin(url, l.get('href', ''))]
+    signals['internal_linking'] = min(1.0, len(internal) * 0.1)
+
+    # Signal 11: Keyword density (not too low, not too high)
+    kw_count = text.lower().count(kw_lower)
+    kw_density = kw_count / max(word_count, 1) * 100
+    signals['keyword_density'] = 1.0 if 0.5 <= kw_density <= 2.5 else (0.5 if kw_density < 0.5 else 0.3)
+
+    # Signal 12: External authority links
+    external = [l for l in all_links if l.get('href', '').startswith('http') and parsed.netloc not in l.get('href', '')]
+    signals['external_authority'] = min(1.0, len(external) * 0.15)
+
+    # Weighted composite score (0-100)
+    weights = {
+        'title_keyword_match': 12, 'meta_keyword_match': 8, 'h1_keyword_match': 10,
+        'content_depth': 12, 'heading_structure': 8, 'schema_richness': 10,
+        'faq_density': 8, 'answer_formatting': 8, 'eeat_signals': 10,
+        'internal_linking': 5, 'keyword_density': 5, 'external_authority': 4
+    }
+    composite = sum(signals[k] * weights[k] for k in signals) / sum(weights.values()) * 100
+
+    # Predict SERP position (inverse of composite — higher score = lower position number = better rank)
+    if composite >= 85: predicted_position = max(1, round(11 - composite / 10))
+    elif composite >= 70: predicted_position = round(15 - composite / 8)
+    elif composite >= 50: predicted_position = round(30 - composite / 5)
+    elif composite >= 30: predicted_position = round(50 - composite / 3)
+    else: predicted_position = round(80 - composite / 2)
+    predicted_position = max(1, min(100, predicted_position))
+
+    # Confidence based on signal consistency
+    signal_values = list(signals.values())
+    avg_signal = sum(signal_values) / len(signal_values)
+    variance = sum((s - avg_signal) ** 2 for s in signal_values) / len(signal_values)
+    confidence = max(30, min(95, round(85 - variance * 100)))
+
+    return {
+        'signals': {k: round(v, 3) for k, v in signals.items()},
+        'composite_score': round(composite, 1),
+        'predicted_position': predicted_position,
+        'confidence': confidence,
+        'word_count': word_count,
+    }
+
+
+def psie_generate_optimizations(signals, keyword, composite, predicted_position):
+    """Generate ranked optimization recommendations based on signal gaps."""
+    optimizations = []
+    signal_labels = {
+        'title_keyword_match': ('Title Keyword Optimization', 'Include your target keyword in the page title within the first 60 characters'),
+        'meta_keyword_match': ('Meta Description Optimization', 'Add the target keyword naturally in the meta description within 120-160 characters'),
+        'h1_keyword_match': ('H1 Heading Alignment', 'Ensure the H1 heading contains the target keyword or a close semantic variant'),
+        'content_depth': ('Content Depth Expansion', 'Expand content to 2000+ words with comprehensive topic coverage and subtopics'),
+        'heading_structure': ('Heading Hierarchy', 'Add 4-6 H2 subheadings and 3-4 H3 sub-subheadings for clear content structure'),
+        'schema_richness': ('Structured Data Enhancement', 'Add JSON-LD schema markup: FAQPage, Article, BreadcrumbList, and industry-specific types'),
+        'faq_density': ('FAQ Section Addition', 'Add a FAQ section with 5+ questions using FAQPage schema for AI citation eligibility'),
+        'answer_formatting': ('Direct Answer Formatting', 'Add definition paragraphs, comparison tables, numbered lists, and bullet points for AI extraction'),
+        'eeat_signals': ('E-E-A-T Signal Strengthening', 'Add author attribution, publication date, source citations, and methodology references'),
+        'internal_linking': ('Internal Link Building', 'Add 5+ internal links to related content with descriptive anchor text'),
+        'keyword_density': ('Keyword Density Tuning', 'Adjust keyword usage to 1-2% density — natural mentions in intro, headings, and conclusion'),
+        'external_authority': ('Authority Link Addition', 'Link to 2-3 authoritative external sources like research papers, industry reports, or .gov/.edu sites'),
+    }
+
+    for signal_name, signal_value in sorted(signals.items(), key=lambda x: x[1]):
+        if signal_value < 0.8:
+            label, action = signal_labels.get(signal_name, (signal_name, ''))
+            gap = round((1.0 - signal_value) * 100)
+            impact = round((1.0 - signal_value) * 12 * (1.5 if signal_name in ['title_keyword_match', 'content_depth', 'schema_richness', 'h1_keyword_match'] else 1.0))
+            predicted_improvement = max(1, round(impact / 5))
+            optimizations.append({
+                'signal': signal_name,
+                'label': label,
+                'action': action,
+                'current_score': round(signal_value * 100),
+                'gap_percent': gap,
+                'predicted_impact': min(impact, 25),
+                'predicted_position_change': f'-{predicted_improvement} positions',
+                'priority': 'critical' if signal_value < 0.3 else ('high' if signal_value < 0.6 else 'medium'),
+            })
+
+    return sorted(optimizations, key=lambda x: x['predicted_impact'], reverse=True)
+
+
+@app.route('/api/psie/predict', methods=['POST'])
+def psie_predict():
+    """PSIE — Predict SERP ranking position for a URL + keyword combination."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        if not url or not keyword:
+            return jsonify({'error': 'Both url and keyword are required'}), 400
+        if not url.startswith('http'):
+            url = 'https://' + url
+
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        analysis = psie_analyze_page(url, soup, text, keyword)
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'keyword': keyword,
+            'predicted_position': analysis['predicted_position'],
+            'confidence': analysis['confidence'],
+            'composite_score': analysis['composite_score'],
+            'signals': analysis['signals'],
+            'word_count': analysis['word_count'],
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': f'PSIE prediction failed: {str(e)}'}), 500
+
+
+@app.route('/api/psie/optimize', methods=['POST'])
+def psie_optimize():
+    """PSIE — Predict ranking AND return ranked optimization recommendations."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        if not url or not keyword:
+            return jsonify({'error': 'Both url and keyword are required'}), 400
+        if not url.startswith('http'):
+            url = 'https://' + url
+
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+        analysis = psie_analyze_page(url, soup, text, keyword)
+        optimizations = psie_generate_optimizations(
+            analysis['signals'], keyword, analysis['composite_score'], analysis['predicted_position']
+        )
+
+        # Calculate potential position after all optimizations
+        potential_improvement = sum(o['predicted_impact'] for o in optimizations[:5]) / 5
+        potential_position = max(1, analysis['predicted_position'] - round(potential_improvement))
+
+        # LLM-powered strategic recommendation
+        ai_strategy = None
+        if optimizations:
+            top_gaps = '\n'.join(f"- {o['label']}: currently {o['current_score']}% (gap: {o['gap_percent']}%)" for o in optimizations[:6])
+            prompt = f"""You are a search ranking strategist. A page targeting the keyword "{keyword}" is predicted to rank at position #{analysis['predicted_position']} with a composite score of {analysis['composite_score']}/100.
+
+Top signal gaps:
+{top_gaps}
+
+Provide a 5-step strategic action plan to move this page from position #{analysis['predicted_position']} to the top 3. Be specific about what content to add, what schema to implement, and what structural changes to make. Focus on AEO (AI Engine Optimization) signals first, then traditional SEO. Format as a numbered list."""
+            try:
+                ai_strategy = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+
+        return jsonify({
+            'status': 'success',
+            'url': url,
+            'keyword': keyword,
+            'prediction': {
+                'current_position': analysis['predicted_position'],
+                'potential_position': potential_position,
+                'confidence': analysis['confidence'],
+                'composite_score': analysis['composite_score'],
+            },
+            'signals': analysis['signals'],
+            'optimizations': optimizations,
+            'optimization_count': len(optimizations),
+            'ai_strategy': ai_strategy,
+            'word_count': analysis['word_count'],
+            'load_time': round(load_time, 2),
+            'analyzed_at': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': f'PSIE optimization failed: {str(e)}'}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
-    """GEO Monitoring Engine — multi-provider, direct AI calls."""
+    """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""
     from geo_probe_service import geo_probe as _geo_probe
 
     data = request.get_json() or {}
@@ -2833,7 +3642,7 @@ def geo_probe_models():
 
 @app.route('/api/geo-probe/batch', methods=['POST'])
 def geo_probe_batch():
-    """GEO/AEO batch analysis — multi-provider, direct AI calls."""
+    """GEO/AEO batch analysis ΓÇö multi-provider, direct AI calls."""
     from geo_probe_service import geo_probe_batch as _batch
 
     data = request.get_json() or {}
@@ -2856,7 +3665,7 @@ def geo_probe_batch():
 
 @app.route('/api/geo-probe/history', methods=['GET'])
 def geo_probe_history():
-    """Return probe history — batch summaries + individual probes from RDS."""
+    """Return probe history ΓÇö batch summaries + individual probes from RDS."""
     from geo_probe_service import get_history, get_stored_history
     brand = request.args.get('brand')
     ai_model = request.args.get('ai_model')
@@ -2985,7 +3794,7 @@ def brand_resolve():
 @app.route('/api/ai/citation-probe', methods=['POST'])
 def ai_citation_probe():
     """
-    AI Citation Probe — calls Bedrock/Ollama directly.
+    AI Citation Probe ΓÇö calls Bedrock/Ollama directly.
 
     Request:
         { "keyword": "best project management tools 2025",
@@ -3018,13 +3827,13 @@ def ai_citation_probe():
 @app.route('/api/ai/geo-monitor', methods=['POST'])
 def ai_geo_monitor():
     """
-    GEO Monitor — query all available AI models in parallel for a keyword.
+    GEO Monitor ΓÇö query all available AI models in parallel for a keyword.
 
     Request:
         {
           "keyword":   "best CRM software 2025",  (required)
-          "brand":     "HubSpot",                 (optional — tracked in scoring)
-          "providers": ["claude", "openai"]        (optional — defaults to all)
+          "brand":     "HubSpot",                 (optional ΓÇö tracked in scoring)
+          "providers": ["claude", "openai"]        (optional ΓÇö defaults to all)
         }
 
     Response:
@@ -3072,7 +3881,7 @@ def serve_uml_diagrams():
 
 @app.route('/api/aeo/analyze', methods=['POST'])
 def aeo_analyze():
-    """AEO analysis — scan a URL for AI engine optimization issues."""
+    """AEO analysis ΓÇö scan a URL for AI engine optimization issues."""
     from aeo_optimizer import analyze_aeo
 
     data = request.get_json() or {}
@@ -3282,12 +4091,11 @@ def llm_citation_probe():
     except Exception as e:
         return jsonify({'error': f'Citation probe failed: {str(e)}'}), 500
 
-# ── GEO Scanner Agent Orchestrator ────────────────────────────────────────────
+# ΓöÇΓöÇ GEO Scanner Agent Orchestrator ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo-scanner/scan', methods=['POST'])
-@app.route('/api/geo-scanner/scan', methods=['POST'])
 def geo_scanner_scan():
-    """Run a full GEO Scanner Agent scan — orchestrates all scanner agents."""
+    """Run a full GEO Scanner Agent scan ΓÇö orchestrates all scanner agents."""
     from geo_scanner_agent import run_full_scan
     data = request.get_json() or {}
     brand = (data.get('brand_name') or data.get('brand') or '').strip()
@@ -3337,7 +4145,7 @@ def _score_to_grade(score):
 
 @app.route('/api/geo-scanner/history', methods=['GET'])
 def geo_scanner_history():
-    """GET /api/geo-scanner/history — retrieve past GEO scanner scan results."""
+    """GET /api/geo-scanner/history ΓÇö retrieve past GEO scanner scan results."""
     brand = request.args.get('brand', request.args.get('brand_name', ''))
     limit = int(request.args.get('limit', 20))
     if not brand:
@@ -3358,7 +4166,7 @@ def geo_scanner_agents():
     return jsonify({'agents': get_available_scanners()})
 
 
-# ── Feature 1: AI Answer Fingerprinting ───────────────────────────────────────
+# ΓöÇΓöÇ Feature 1: AI Answer Fingerprinting ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo/fingerprint', methods=['POST'])
 def geo_fingerprint_save():
@@ -3394,7 +4202,7 @@ def geo_fingerprint_history(brand_name):
         return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
 
 
-# ── Feature 2: AI Model Disagreement Detector ─────────────────────────────────
+# ΓöÇΓöÇ Feature 2: AI Model Disagreement Detector ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo/model-comparison', methods=['POST'])
 def geo_model_comparison():
@@ -3425,7 +4233,7 @@ def geo_model_comparison_history():
         return jsonify({'error': f'History fetch failed: {str(e)}'}), 500
 
 
-# ── Feature 3: Multi-Language GEO Probing ─────────────────────────────────────
+# ΓöÇΓöÇ Feature 3: Multi-Language GEO Probing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo/scan/languages', methods=['POST'])
 def geo_multilang_scan():
@@ -3447,7 +4255,7 @@ def geo_multilang_scan():
         return jsonify({'error': f'Multi-language scan failed: {str(e)}'}), 500
 
 
-# ── Feature 5: AI Share of Voice ──────────────────────────────────────────────
+# ΓöÇΓöÇ Feature 5: AI Share of Voice ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo/share-of-voice', methods=['POST'])
 def geo_share_of_voice():
@@ -3481,7 +4289,7 @@ def geo_sov_latest(brand_name):
     return jsonify(result)
 
 
-# ── Feature 6: Prompt Injection Simulator ─────────────────────────────────────
+# ΓöÇΓöÇ Feature 6: Prompt Injection Simulator ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/geo/prompt-simulator', methods=['POST'])
 def geo_prompt_simulator():
@@ -3509,11 +4317,11 @@ def geo_prompt_simulator_history(brand_name):
     return jsonify({'brand': brand_name, 'history': history, 'count': len(history)})
 
 
-# ── RDS Data Persistence Endpoints ────────────────────────────────────────────
+# ΓöÇΓöÇ RDS Data Persistence Endpoints ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/data/geo-probes', methods=['GET'])
 def data_geo_probes_get():
-    """GET /api/data/geo-probes — retrieve GEO probe history."""
+    """GET /api/data/geo-probes ΓÇö retrieve GEO probe history."""
     if USE_DYNAMODB:
         from db_dynamo import get_probes
     else:
@@ -3530,7 +4338,7 @@ def data_geo_probes_get():
 
 @app.route('/api/data/geo-probes', methods=['POST'])
 def data_geo_probes():
-    """POST /api/data/geo-probes — persist GEO probe results."""
+    """POST /api/data/geo-probes ΓÇö persist GEO probe results."""
     if USE_DYNAMODB:
         from db_dynamo import insert_probe
     else:
@@ -3561,7 +4369,7 @@ def data_geo_probes():
 
 @app.route('/api/data/ai-visibility', methods=['GET'])
 def data_ai_visibility_get():
-    """GET /api/data/ai-visibility — retrieve visibility history."""
+    """GET /api/data/ai-visibility ΓÇö retrieve visibility history."""
     if USE_DYNAMODB:
         from db_dynamo import get_visibility_history
     else:
@@ -3577,7 +4385,7 @@ def data_ai_visibility_get():
 
 @app.route('/api/data/ai-visibility/trend', methods=['GET'])
 def data_ai_visibility_trend():
-    """GET /api/data/ai-visibility/trend — daily probe trend for a brand."""
+    """GET /api/data/ai-visibility/trend ΓÇö daily probe trend for a brand."""
     if USE_DYNAMODB:
         from db_dynamo import get_probe_trend
     else:
@@ -3595,7 +4403,7 @@ def data_ai_visibility_trend():
 
 @app.route('/api/data/ai-visibility', methods=['POST'])
 def data_ai_visibility():
-    """POST /api/data/ai-visibility — persist batch visibility results."""
+    """POST /api/data/ai-visibility ΓÇö persist batch visibility results."""
     if USE_DYNAMODB:
         from db_dynamo import insert_visibility_batch
     else:
@@ -3622,12 +4430,36 @@ def data_ai_visibility():
         return jsonify({'error': f'Failed to save visibility batch: {str(e)}'}), 500
 
 
-# ── GEO Scanner Dashboard Page ───────────────────────────────────────────────
+# ΓöÇΓöÇ GEO Scanner Dashboard Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/geo-scanner')
 def serve_geo_scanner():
     """Serve the GEO Scanner Agent dashboard."""
     return send_from_directory('.', 'geo-scanner.html')
+
+
+@app.route('/geo-scanner-intelligence')
+def serve_geo_scanner_intelligence():
+    """Serve the Deepthi GEO Intelligence Dashboard (post-scan)."""
+    return send_from_directory('.', 'geo-scanner-intelligence.html')
+
+
+@app.route('/visibility-dashboard')
+def serve_visibility_dashboard():
+    """Cross-Model Visibility Dashboard — brand visibility across all AI providers."""
+    return send_from_directory('.', 'visibility-dashboard.html')
+
+
+@app.route('/geo-tracker')
+def serve_geo_tracker():
+    """Weekly GEO Score Tracker — trends, gainers/losers, competitor gaps."""
+    return send_from_directory('.', 'geo-tracker.html')
+
+
+@app.route('/client-dashboard')
+def serve_client_dashboard():
+    """Executive Client Dashboard — single-page KPI view for client demos."""
+    return send_from_directory('.', 'client-dashboard.html')
 
 
 @app.route('/audit/')
@@ -3645,36 +4477,55 @@ def serve_dev1_dashboard():
 
 @app.route('/dashboard')
 def serve_dashboard_redirect():
-    """Short alias — /dashboard redirects to /dev1-dashboard"""
+    """Short alias ΓÇö /dashboard redirects to /dev1-dashboard"""
     return send_from_directory('.', 'dev1-dashboard.html')
 
 @app.route('/admin')
 def serve_admin():
-    """Admin dashboard — overview, users, usage, AI costs, errors, health."""
+    """Admin dashboard ΓÇö overview, users, usage, AI costs, errors, health."""
     return send_from_directory('.', 'admin.html')
+
+
+@app.route('/template-benchmark')
+def serve_template_benchmark():
+    """Template Benchmark Engine — compare URL against perfect business templates."""
+    return send_from_directory('.', 'template-benchmark.html')
+
+
+@app.route('/psie')
+def serve_psie():
+    """PSIE — Predictive Search Intelligence Engine."""
+    return send_from_directory('.', 'psie.html')
 
 
 @app.route('/directory')
 def serve_directory():
-    """AI Business Directory — Top 10 dentists in Ottawa."""
+    """AI Business Directory ΓÇö Top 10 dentists in Ottawa."""
     return render_template('directory_category.html')
+
+
+@app.route('/directory-home.html')
+@app.route('/directory-home')
+def serve_directory_home():
+    """AI Directory Hub — Sports, AI Tools, Brands, SEO Tools, Analytics."""
+    return render_template('directory_home.html')
 
 
 @app.route('/directory-listing.html')
 @app.route('/directory-listing')
 def serve_directory_listing():
-    """AI Business Directory — individual listing detail page."""
+    """AI Business Directory ΓÇö individual listing detail page."""
     return render_template('directory_listing.html')
 
 
 @app.route('/directory-compare.html')
 @app.route('/directory-compare')
 def serve_directory_compare():
-    """AI Business Directory — compare two businesses side by side."""
+    """AI Business Directory ΓÇö compare two businesses side by side."""
     return render_template('directory_compare.html')
 
 
-# ── Root-level AI crawler files (proxy to directory module) ───────────────────
+# ΓöÇΓöÇ Root-level AI crawler files (proxy to directory module) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/llms.txt')
 def serve_root_llms_txt():
@@ -3708,7 +4559,7 @@ def serve_root_sitemap_ai():
         return Response(f'<!-- Error: {e} -->', mimetype='application/xml'), 500
 
 
-# ── Month 1 Research API ──────────────────────────────────────────────────────
+# ΓöÇΓöÇ Month 1 Research API ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @app.route('/api/month1/keyword-universe', methods=['POST'])
 def month1_keyword_universe():
@@ -3720,7 +4571,7 @@ def month1_keyword_universe():
 
 @app.route('/api/month1/benchmark', methods=['POST'])
 def month1_benchmark():
-    """Run benchmark research — returns job_id for async polling."""
+    """Run benchmark research ΓÇö returns job_id for async polling."""
     from month1_api import api_benchmark
     data = request.get_json() or {}
     result, status = api_benchmark(data)
@@ -3728,7 +4579,7 @@ def month1_benchmark():
 
 @app.route('/api/month1/provider-behaviour', methods=['POST'])
 def month1_provider_behaviour():
-    """Analyze provider behaviour — returns job_id for async polling."""
+    """Analyze provider behaviour ΓÇö returns job_id for async polling."""
     from month1_api import api_provider_behaviour
     data = request.get_json() or {}
     result, status = api_provider_behaviour(data)
@@ -3744,7 +4595,7 @@ def month1_answer_taxonomy():
 
 @app.route('/api/month1/geo-baseline', methods=['POST'])
 def month1_geo_baseline():
-    """Generate Month 1 GEO baseline — returns job_id for async polling."""
+    """Generate Month 1 GEO baseline ΓÇö returns job_id for async polling."""
     from month1_api import api_geo_baseline
     data = request.get_json() or {}
     result, status = api_geo_baseline(data)
@@ -3776,7 +4627,7 @@ def month1_technical_debt():
 
 @app.route('/api/month1/run-all', methods=['POST'])
 def month1_run_all():
-    """Run all 8 Month 1 deliverables — returns job_id for async polling."""
+    """Run all 8 Month 1 deliverables ΓÇö returns job_id for async polling."""
     from month1_api import api_run_all
     data = request.get_json() or {}
     result, status = api_run_all(data)
@@ -3805,7 +4656,7 @@ def month1_results_by_type(deliverable):
     return jsonify(result), status
 
 
-# ── Social Scheduler (Dev 4 - Tabasum) ────────────────────────────────────
+# ΓöÇΓöÇ Social Scheduler (Dev 4 - Tabasum) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 import sqlite3
 
 SOCIAL_DB = os.path.join('/tmp' if IS_LAMBDA else os.path.dirname(os.path.abspath(__file__)), 'social_scheduler.db')
@@ -3973,7 +4824,153 @@ try:
     from growth import growth_bp
     app.register_blueprint(growth_bp)
 except Exception as e:
-    print(f"⚠ growth Blueprint: {e}")
+    print(f"ΓÜá growth Blueprint: {e}")
+
+# --- Backlink Analysis Module (Dev 3 - Troy) ---
+try:
+    from backlink_api import backlink_bp
+    app.register_blueprint(backlink_bp)
+except Exception as e:
+    print(f"\u26a0 Backlink API: {e}")
+
+# --- Multi-Site Dashboard API (Dev 3 - Troy) ---
+try:
+    from multisite_api import multisite_bp
+    app.register_blueprint(multisite_bp)
+except Exception as e:
+    print(f"\u26a0 Multi-Site API: {e}")
+
+# --- AI Referral Attribution API (Dev 3 - Troy) ---
+try:
+    from attribution_api import attribution_bp
+    app.register_blueprint(attribution_bp)
+except Exception as e:
+    print(f"\u26a0 Attribution API: {e}")
+
+
+
+
+
+
+
+# === Contact Form Endpoint (Dev 3 - Troy) ===
+@app.route('/api/contact', methods=['POST'])
+def contact_form():
+    """Send a contact form email via SES."""
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    message = data.get('message', '').strip()
+    if not name or not email or not message:
+        return jsonify({'status': 'error', 'message': 'name, email, and message required'}), 400
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': ['support@ai1stseo.com']},
+            Message={
+                'Subject': {'Data': 'Contact Form: {} ({})'.format(name, email)},
+                'Body': {'Text': {'Data': 'From: {} <{}>\n\n{}'.format(name, email, message)}}
+            },
+            ReplyToAddresses=[email],
+        )
+        return jsonify({'status': 'success', 'message': 'Message sent'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# === Investor Inquiry Endpoint (Dev 3 - Troy) ===
+@app.route('/api/invest', methods=['POST'])
+def investor_inquiry():
+    """Send an investor inquiry email via SES to Gurbachan."""
+    data = request.get_json() or {}
+    name = data.get('name', '').strip()
+    email = data.get('email', '').strip()
+    message = data.get('message', '').strip()
+    org = data.get('organization', '').strip()
+    interest = data.get('interest', 'general')
+    if not name or not email or not message:
+        return jsonify({'status': 'error', 'message': 'name, email, and message required'}), 400
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        subject = 'Investor Inquiry: {} ({})'.format(name, org or email)
+        body = 'From: {} <{}>\nOrganization: {}\nInterest: {}\n\n{}'.format(
+            name, email, org or 'N/A', interest, message)
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': ['gurbachan@ai1stseo.com']},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': body}}
+            },
+            ReplyToAddresses=[email],
+        )
+        return jsonify({'status': 'success', 'message': 'Inquiry sent'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# === Email Lead Collection (Dev 3 - Troy) ===
+@app.route('/api/collect-email', methods=['POST'])
+def collect_email():
+    """Collect email for PDF download gate. No auth required."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email or '@' not in email:
+        return jsonify({'status': 'error', 'message': 'Valid email required'}), 400
+    try:
+        from dynamodb_helper import put_item
+        from datetime import datetime, timezone
+        put_item('ai1stseo-email-leads', {
+            'email': email,
+            'source': data.get('source', 'pdf_download'),
+            'pdf_name': data.get('pdf_name', ''),
+            'collected_at': datetime.now(timezone.utc).isoformat(),
+        })
+        return jsonify({'status': 'success', 'message': 'Email collected'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# === Content Freshness API (Dev 3 - Troy) ===
+@app.route('/api/content-freshness', methods=['POST'])
+def update_content_freshness():
+    """Record a content update timestamp for AI ranking freshness signals."""
+    data = request.get_json() or {}
+    url = data.get('url', '').strip()
+    if not url:
+        return jsonify({'status': 'error', 'message': 'url required'}), 400
+    try:
+        from dynamodb_helper import put_item
+        from datetime import datetime, timezone
+        record_id = put_item('ai1stseo-audits', {
+            'url': url,
+            'content_type': data.get('content_type', 'page_update'),
+            'update_type': data.get('update_type', 'content_refresh'),
+            'updated_sections': data.get('sections', []),
+            'freshness_timestamp': datetime.now(timezone.utc).isoformat(),
+            'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
+        })
+        return jsonify({'status': 'success', 'id': record_id, 'timestamp': datetime.now(timezone.utc).isoformat()})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/content-freshness', methods=['GET'])
+def get_content_freshness():
+    """Get content freshness history for a URL."""
+    url = request.args.get('url', '')
+    try:
+        from dynamodb_helper import scan_table
+        items = scan_table('ai1stseo-audits', 100)
+        fresh = [i for i in items if i.get('update_type') == 'content_refresh' and (not url or i.get('url') == url)]
+        fresh.sort(key=lambda x: x.get('freshness_timestamp', ''), reverse=True)
+        return jsonify({'status': 'success', 'updates': fresh[:20]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 try:
     from social_publishing.api import register_blueprint as register_publish_bp
@@ -4015,20 +5012,20 @@ print("=" * 48 + "\n")
 def catch_all(path):
     if path.startswith('assets/'):
         return send_from_directory('.', path)
-    # Don't serve index.html for unknown paths — the real frontend is on S3/CloudFront
+    # Don't serve index.html for unknown paths ΓÇö the real frontend is on S3/CloudFront
     return jsonify({'error': 'Not found', 'message': 'This is the API backend. Visit https://www.ai1stseo.com for the website.'}), 404
 
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_SKIP_DOTENV', '1')
     app.run(host='0.0.0.0', port=5001, debug=False, load_dotenv=False)
 else:
-    # Running under gunicorn/App Runner — start background scheduler
+    # Running under gunicorn/App Runner ΓÇö start background scheduler
     try:
         from scheduler import start_scheduler
         start_scheduler()
-        print("✓ Background scheduler started (scraper 24h, GEO probes 6h)")
+        print("Γ£ô Background scheduler started (scraper 24h, GEO probes 6h)")
     except Exception as e:
-        print(f"⚠ Scheduler start failed: {e}")
+        print(f"ΓÜá Scheduler start failed: {e}")
 
 # === Lambda handler (Mangum) ===
 if IS_LAMBDA:
