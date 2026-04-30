@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEO Rank Tracker - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 0 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem; font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .subtitle { color: rgba(255,255,255,0.6); margin-top: 6px; font-size: 0.95rem; }
+        .back-link {
+            display: inline-block; margin-top: 12px;
+            color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.85rem;
+        }
+        .back-link:hover { color: #00d4ff; }
+
+        /* Provider status bar */
+        .provider-bar {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            margin-bottom: 28px; padding: 14px; border-radius: 12px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .provider-chip {
+            font-size: 0.78rem; padding: 4px 12px; border-radius: 20px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .provider-chip.active { background: rgba(0,230,118,0.12); color: #00e676; border: 1px solid rgba(0,230,118,0.25); }
+        .provider-chip.skipped { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.08); }
+        .provider-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .provider-chip.active .dot { background: #00e676; }
+        .provider-chip.skipped .dot { background: rgba(255,255,255,0.25); }
+
+        /* Scan form */
+        .scan-form {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 28px; margin-bottom: 32px;
+        }
+        .form-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group label {
+            display: block; font-size: 0.82rem; color: rgba(255,255,255,0.6);
+            margin-bottom: 6px; font-weight: 500;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 10px 14px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+            color: #fff; font-size: 0.92rem; font-family: inherit; outline: none;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: rgba(0,212,255,0.5);
+        }
+        .form-group textarea { resize: vertical; min-height: 70px; }
+        .form-hint { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px; }
+        .btn-scan {
+            padding: 12px 36px; border: none; border-radius: 10px; cursor: pointer;
+            font-size: 1rem; font-weight: 600; font-family: inherit;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf); color: #fff;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .btn-scan:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-scan:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* Metrics cards */
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px; margin-bottom: 28px;
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 22px; text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .metric-card:hover { border-color: rgba(0,212,255,0.4); transform: translateY(-2px); }
+        .metric-value { font-size: 2rem; font-weight: bold; margin-bottom: 4px; }
+        .metric-label { color: rgba(255,255,255,0.6); font-size: 0.82rem; }
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.2rem; font-weight: 600; margin: 28px 0 12px;
+            padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* LLM performance bars */
+        .bar-chart { display: flex; flex-direction: column; gap: 10px; max-width: 600px; margin-bottom: 24px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; }
+        .bar-label { width: 100px; font-size: 0.85rem; text-align: right; color: rgba(255,255,255,0.8); }
+        .bar-track { flex: 1; height: 22px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+        .bar-pct { position: absolute; right: 8px; top: 2px; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+
+        /* Results table */
+        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .results-table th {
+            text-align: left; padding: 10px 14px; font-size: 0.8rem; font-weight: 600;
+            color: rgba(255,255,255,0.5); border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .results-table td {
+            padding: 12px 14px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.85); vertical-align: top;
+        }
+        .results-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .results-table .snippet { color: rgba(255,255,255,0.45); font-size: 0.8rem; max-width: 320px; }
+
+        /* Badges */
+        .badge {
+            font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+            display: inline-block;
+        }
+        .badge-cited { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+        .badge-missed { background: rgba(255,82,82,0.12); color: #ff5252; border: 1px solid rgba(255,82,82,0.25); }
+        .badge-mock { background: rgba(255,171,0,0.12); color: #ffab00; border: 1px solid rgba(255,171,0,0.25); }
+        .badge-error { background: rgba(255,82,82,0.08); color: #ff8a80; border: 1px solid rgba(255,82,82,0.15); }
+        .badge-llm {
+            background: rgba(123,44,191,0.15); color: #ce93d8; border: 1px solid rgba(123,44,191,0.25);
+            font-size: 0.73rem; padding: 2px 8px;
+        }
+
+        /* Skipped / errors panel */
+        .info-panel {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
+        }
+        .info-panel h3 { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+        .info-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85rem; }
+        .info-row .reason { color: rgba(255,255,255,0.4); }
+
+        /* DB error banner */
+        .db-banner {
+            background: rgba(255,171,0,0.08); border: 1px solid rgba(255,171,0,0.2);
+            border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
+            font-size: 0.85rem; color: #ffab00; display: none;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 40px; height: 40px; margin: 0 auto 14px;
+            border: 3px solid rgba(255,255,255,0.15); border-top-color: #00d4ff;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay {
+            text-align: center; padding: 50px 0; display: none;
+        }
+        .loading-overlay p { color: rgba(255,255,255,0.5); font-size: 0.92rem; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 50px 20px; color: rgba(255,255,255,0.4);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-row { flex-direction: column; }
+            .results-table { font-size: 0.82rem; }
+            .results-table .snippet { max-width: 180px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo">AISEO Master</div>
+        <div class="subtitle">AEO Rank Tracker — Multi-LLM Citation Detection</div>
+        <a href="/" class="back-link">← Back to Home</a>
+    </header>
+
+    <!-- Provider status -->
+    <div class="provider-bar" id="provider-bar">
+        <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Checking providers…</span>
+    </div>
+
+    <!-- Scan form -->
+    <div class="scan-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="brand">Brand Name</label>
+                <input type="text" id="brand" placeholder="AI1stSEO" value="AI1stSEO">
+            </div>
+            <div class="form-group">
+                <label for="domain">Target Domain</label>
+                <input type="text" id="domain" placeholder="ai1stseo.com" value="ai1stseo.com">
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+            <label for="queries">Search Queries (one per line)</label>
+            <textarea id="queries" placeholder="best SEO tools&#10;top AI marketing platforms&#10;how to improve website ranking">best SEO tools
+top AI marketing platforms
+how to improve website ranking</textarea>
+            <div class="form-hint">1–20 queries. These are sent to each active LLM provider.</div>
+        </div>
+        <button class="btn-scan" id="btn-scan" onclick="runScan()">Run AEO Scan</button>
+    </div>
+
+    <!-- DB error banner -->
+    <div class="db-banner" id="db-banner"></div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <p id="loading-text">Scanning across LLM providers…</p>
+    </div>
+
+    <!-- Results (hidden until scan completes) -->
+    <div id="results-area" style="display:none;">
+
+        <!-- Metrics -->
+        <div class="metrics-grid" id="metrics"></div>
+
+        <!-- LLM Performance -->
+        <h2 class="section-title">Citation Rate by LLM</h2>
+        <div class="bar-chart" id="llm-bars"></div>
+
+        <!-- Query Performance -->
+        <h2 class="section-title">Citation Rate by Query</h2>
+        <div class="bar-chart" id="query-bars"></div>
+
+        <!-- Skipped / Errors -->
+        <div id="info-panels"></div>
+
+        <!-- Results table -->
+        <h2 class="section-title">Detailed Results</h2>
+        <div style="overflow-x:auto;">
+            <table class="results-table" id="results-table">
+                <thead>
+                    <tr>
+                        <th>Query</th>
+                        <th>LLM</th>
+                        <th>Cited</th>
+                        <th>Match</th>
+                        <th>Snippet</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-state">
+        <div class="icon">🔍</div>
+        <p>Enter your brand details and run a scan to see how LLMs cite your brand.</p>
+    </div>
+</div>
+
+<script>
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '' : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+
+// ── Load provider status on page load ──
+(async function loadProviders() {
+    try {
+        const res = await fetch(API_BASE + '/api/aeo-tracker/providers');
+        const data = await res.json();
+        renderProviders(data);
+    } catch (e) {
+        document.getElementById('provider-bar').innerHTML =
+            '<span style="color:#ff8a80;font-size:0.8rem;">Could not reach backend</span>';
+    }
+})();
+
+function renderProviders(data) {
+    const bar = document.getElementById('provider-bar');
+    const active = data.active || [];
+    const skipped = data.skipped || {};
+    const all = data.priority_order || ['gemini','openai','claude','perplexity','ollama','mock'];
+
+    let html = '';
+    for (const p of all) {
+        if (p === 'mock') continue;
+        const isActive = active.includes(p);
+        const cls = isActive ? 'active' : 'skipped';
+        const title = isActive ? 'Available' : (skipped[p] || 'Unavailable');
+        html += `<span class="provider-chip ${cls}" title="${esc(title)}"><span class="dot"></span>${esc(p)}</span>`;
+    }
+    if (active.includes('mock')) {
+        html += '<span class="provider-chip skipped" title="No real providers available"><span class="dot"></span>mock mode</span>';
+    }
+    bar.innerHTML = html;
+}
+
+// ── Run scan ──
+async function runScan() {
+    const brand = document.getElementById('brand').value.trim();
+    const domain = document.getElementById('domain').value.trim();
+    const raw = document.getElementById('queries').value.trim();
+    const queries = raw.split('\n').map(q => q.trim()).filter(Boolean);
+
+    if (!brand || !domain || !queries.length) {
+        alert('Please fill in brand name, domain, and at least one query.');
+        return;
+    }
+    if (queries.length > 20) {
+        alert('Maximum 20 queries per scan.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-scan');
+    const loading = document.getElementById('loading');
+    const resultsArea = document.getElementById('results-area');
+    const emptyState = document.getElementById('empty-state');
+    const dbBanner = document.getElementById('db-banner');
+
+    btn.disabled = true;
+    loading.style.display = 'block';
+    resultsArea.style.display = 'none';
+    emptyState.style.display = 'none';
+    dbBanner.style.display = 'none';
+
+    try {
+        const res = await fetch(API_BASE + '/api/aeo-tracker/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_name: brand, target_domain: domain, queries }),
+        });
+        const data = await res.json();
+
+        if (data.status !== 'ok') {
+            throw new Error(data.error || 'Scan failed');
+        }
+
+        loading.style.display = 'none';
+        resultsArea.style.display = 'block';
+        renderResults(data);
+
+        // Refresh provider bar with latest info
+        if (data.summary && data.summary.active_llms) {
+            renderProviders({
+                active: data.summary.active_llms,
+                skipped: data.summary.skipped_llms || {},
+                priority_order: ['gemini','openai','claude','perplexity','ollama','mock'],
+            });
+        }
+
+    } catch (e) {
+        loading.style.display = 'none';
+        emptyState.style.display = 'block';
+        emptyState.innerHTML = `<div class="icon">⚠️</div><p style="color:#ff8a80;">${esc(e.message)}</p>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ── Render results ──
+function renderResults(data) {
+    const summary = data.summary || {};
+    const results = data.results || [];
+
+    // DB error banner
+    if (summary.db_error || data.db_error) {
+        const banner = document.getElementById('db-banner');
+        banner.textContent = '⚠ Database unavailable — results shown but not persisted.';
+        banner.style.display = 'block';
+    }
+
+    // Metrics
+    const vis = summary.visibility_score || 0;
+    const visColor = vis >= 50 ? '#00e676' : vis > 0 ? '#ffab00' : '#ff5252';
+    document.getElementById('metrics').innerHTML = `
+        <div class="metric-card">
+            <div class="metric-value" style="color:${visColor}">${vis}%</div>
+            <div class="metric-label">Visibility Score</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${summary.total_scanned || 0}</div>
+            <div class="metric-label">Total Scanned</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" style="color:#00e676">${summary.total_cited || 0}</div>
+            <div class="metric-label">Citations Found</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${(summary.active_llms || []).length}</div>
+            <div class="metric-label">Active LLMs</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${summary.best_llm ? esc(summary.best_llm) : '—'}</div>
+            <div class="metric-label">Best LLM</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" style="font-size:1rem;line-height:2rem;">${summary.top_query ? esc(summary.top_query).substring(0,25) : '—'}</div>
+            <div class="metric-label">Top Query</div>
+        </div>
+    `;
+
+    // LLM performance bars
+    const llmPerf = summary.llm_performance || {};
+    document.getElementById('llm-bars').innerHTML = renderBars(llmPerf, llmBarColor);
+
+    // Query performance bars
+    const queryPerf = summary.query_performance || {};
+    document.getElementById('query-bars').innerHTML = renderBars(queryPerf, queryBarColor);
+
+    // Info panels (skipped + errors)
+    let panelsHtml = '';
+    const skipped = summary.skipped_llms || {};
+    if (Object.keys(skipped).length) {
+        panelsHtml += '<div class="info-panel"><h3>Skipped Providers</h3>';
+        for (const [llm, reason] of Object.entries(skipped)) {
+            panelsHtml += `<div class="info-row"><span>${esc(llm)}</span><span class="reason">${esc(reason)}</span></div>`;
+        }
+        panelsHtml += '</div>';
+    }
+    const errors = summary.errors_by_llm || {};
+    if (Object.keys(errors).length) {
+        panelsHtml += '<div class="info-panel" style="border-color:rgba(255,82,82,0.15);"><h3 style="color:#ff8a80;">Runtime Errors</h3>';
+        for (const [llm, errs] of Object.entries(errors)) {
+            panelsHtml += `<div class="info-row"><span>${esc(llm)}</span><span class="reason">${esc((errs[0]||'').substring(0,80))}</span></div>`;
+        }
+        panelsHtml += '</div>';
+    }
+    document.getElementById('info-panels').innerHTML = panelsHtml;
+
+    // Results table
+    let tbody = '';
+    for (const r of results) {
+        const cited = r.citation_found;
+        const citedBadge = cited
+            ? '<span class="badge badge-cited">Cited</span>'
+            : '<span class="badge badge-missed">Not cited</span>';
+        const mockBadge = r.mock ? ' <span class="badge badge-mock">mock</span>' : '';
+        const errorBadge = r.error ? ' <span class="badge badge-error">error</span>' : '';
+        const matchType = r.match_type ? esc(r.match_type.replace(/_/g, ' ')) : '—';
+        const snippet = r.error
+            ? `<span style="color:#ff8a80">${esc(r.error.substring(0,100))}</span>`
+            : esc((r.response_snippet || '').substring(0, 120)) + (r.response_snippet && r.response_snippet.length > 120 ? '…' : '');
+
+        tbody += `<tr>
+            <td>${esc(r.query)}</td>
+            <td><span class="badge badge-llm">${esc(r.llm)}</span>${mockBadge}${errorBadge}</td>
+            <td>${citedBadge}</td>
+            <td>${matchType}</td>
+            <td class="snippet">${snippet}</td>
+        </tr>`;
+    }
+    document.getElementById('results-body').innerHTML = tbody;
+}
+
+function renderBars(perfObj, colorFn) {
+    const entries = Object.entries(perfObj).sort((a, b) => b[1].rate - a[1].rate);
+    if (!entries.length) return '<p style="color:rgba(255,255,255,0.3);font-size:0.85rem;">No data</p>';
+    let html = '';
+    for (const [name, stats] of entries) {
+        const pct = stats.rate || 0;
+        const color = colorFn(pct);
+        html += `<div class="bar-row">
+            <span class="bar-label">${esc(name.length > 14 ? name.substring(0,14) + '…' : name)}</span>
+            <div class="bar-track">
+                <div class="bar-fill" style="width:${pct}%;background:${color};"></div>
+                <span class="bar-pct">${pct}% (${stats.cited}/${stats.total})</span>
+            </div>
+        </div>`;
+    }
+    return html;
+}
+
+function llmBarColor(pct) {
+    if (pct >= 60) return 'linear-gradient(90deg, #00e676, #00c853)';
+    if (pct >= 30) return 'linear-gradient(90deg, #ffab00, #ff9100)';
+    return 'linear-gradient(90deg, #ff5252, #d50000)';
+}
+function queryBarColor(pct) {
+    if (pct >= 60) return 'linear-gradient(90deg, #00d4ff, #7b2cbf)';
+    if (pct >= 30) return 'linear-gradient(90deg, #7b2cbf, #ce93d8)';
+    return 'linear-gradient(90deg, #ff5252, #ff8a80)';
+}
+
+function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+</script>
+</body>
+</html>
