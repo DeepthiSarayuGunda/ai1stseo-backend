@@ -1,0 +1,142 @@
+{
+  "semrush": {
+    "getKeywordData": {
+      "request": "getKeywordData('seo tools', 'us')",
+      "response": {
+        "provider": "semrush",
+        "keyword": "seo tools",
+        "searchVolume": 27100,
+        "cpc": 8.45,
+        "competition": 0.35,
+        "results": 1250000000,
+        "trend": "0.81,0.67,0.55,0.67,1.00,0.81,0.67,0.55,0.81,1.00,0.81,0.67",
+        "intent": "0,1",
+        "database": "us"
+      }
+    },
+    "getDomainOverview": {
+      "request": "getDomainOverview('example.com', 'us')",
+      "response": {
+        "provider": "semrush",
+        "domain": "example.com",
+        "authorityRank": 4523,
+        "organicKeywords": 18450,
+        "organicTraffic": 125000,
+        "organicCost": 245000.50,
+        "paidKeywords": 320,
+        "paidTraffic": 8500,
+        "paidCost": 12500.00,
+        "database": "us"
+      }
+    },
+    "getBacklinksOverview": {
+      "request": "getBacklinksOverview('example.com')",
+      "response": {
+        "provider": "semrush",
+        "target": "example.com",
+        "totalBacklinks": 2450000,
+        "referringDomains": 34500,
+        "referringUrls": 128000,
+        "referringIps": 22000,
+        "followLinks": 1850000,
+        "nofollowLinks": 600000
+      }
+    }
+  },
+  "pipeline": {
+    "runBlogPipeline": {
+      "request": "runBlogPipeline({ topic: 'seo tools', locale: 'us', author: 'AI1STSEO Team' })",
+      "response": {
+        "blog": {
+          "title": "Seo Tools: seo tools",
+          "slug": "seo-tools-seo-tools",
+          "author": "AI1STSEO Team",
+          "publishedAt": null,
+          "createdAt": "2026-04-30T12:00:00.000Z",
+          "seo": {
+            "primaryKeyword": "seo tools",
+            "searchVolume": 27100,
+            "competition": 0.35,
+            "cpc": 8.45,
+            "metaDescription": "Learn about seo tools and discover actionable strategies for seo tools. Data-driven insights to boost your results.",
+            "keywordVariations": [
+              "best seo tools",
+              "how to use seo tools",
+              "seo tools guide",
+              "seo tools tips and strategies",
+              "why seo tools matters"
+            ]
+          },
+          "content": {
+            "h1": "Seo Tools: seo tools",
+            "intro": "Seo Tools is one of the most important factors in seo tools today. In this guide, we break down everything you need to know about seo tools, backed by real search data and proven strategies.",
+            "sections": [
+              { "h2": "What Is Seo Tools?", "body": "Understanding seo tools is the first step..." },
+              { "h2": "Best Seo Tools", "body": "We compare the top options..." },
+              { "h2": "How To Use Seo Tools", "body": "A step-by-step walkthrough..." },
+              { "h2": "Seo Tools Guide", "body": "This comprehensive guide covers..." },
+              { "h2": "Seo Tools Tips And Strategies", "body": "Proven tips from industry experts..." },
+              { "h2": "Why Seo Tools Matters", "body": "Why investing delivers long-term ROI..." }
+            ],
+            "conclusion": "Seo Tools continues to evolve, and staying ahead means acting on data, not guesswork."
+          },
+          "schema": {
+            "@type": "BlogPosting",
+            "headline": "Seo Tools: seo tools",
+            "description": "Learn about seo tools and discover actionable strategies...",
+            "author": { "@type": "Person", "name": "AI1STSEO Team" },
+            "keywords": "seo tools, best seo tools, how to use seo tools, seo tools guide"
+          }
+        },
+        "seoData": {
+          "provider": "semrush",
+          "keyword": "seo tools",
+          "searchVolume": 27100,
+          "cpc": 8.45,
+          "competition": 0.35,
+          "results": 1250000000,
+          "trend": "0.81,0.67,0.55,0.67,1.00,0.81,0.67,0.55,0.81,1.00,0.81,0.67",
+          "intent": "0,1",
+          "database": "us"
+        },
+        "pipeline": {
+          "topic": "seo tools",
+          "locale": "us",
+          "steps": [
+            { "step": "getKeywordData", "status": "ok", "keyword": "seo tools" },
+            { "step": "extractSeoSignals", "status": "ok", "data": { "keyword": "seo tools", "searchVolume": 27100, "competition": 0.35, "cpc": 8.45 } },
+            { "step": "generateBlog", "status": "ok", "slug": "seo-tools-seo-tools" }
+          ],
+          "durationMs": 342
+        }
+      }
+    }
+  },
+  "ahrefs": {
+    "getKeywordData": {
+      "request": "getKeywordData('seo tools', 'us')",
+      "response": {
+        "provider": "ahrefs",
+        "keyword": "seo tools",
+        "searchVolume": 29000,
+        "difficulty": 78,
+        "cpc": 7.92,
+        "globalVolume": 112000,
+        "trafficPotential": 45000,
+        "country": "us"
+      }
+    },
+    "getDomainOverview": {
+      "request": "getDomainOverview('example.com')",
+      "response": {
+        "provider": "ahrefs",
+        "target": "example.com",
+        "domainRating": 82,
+        "organicKeywords": 21300,
+        "organicTraffic": 142000,
+        "backlinks": 2680000,
+        "referringDomains": 38200
+      }
+    }
+  }
+}

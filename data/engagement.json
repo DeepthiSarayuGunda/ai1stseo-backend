@@ -1,0 +1,134 @@
+[
+  {
+    "entryId": "3c41fbf1-e85b-4421-90b2-37182c1a64a8",
+    "postId": "f474cc2b-e2c7-4986-ad24-04f09acb6447",
+    "platform": "linkedin",
+    "likes": 12,
+    "comments": 3,
+    "shares": 2,
+    "clicks": 18,
+    "timestamp": "2026-04-30T08:01:03.935Z",
+    "totalEngagement": 35
+  },
+  {
+    "entryId": "748023c7-8f8d-451e-893a-f2fc353656f3",
+    "postId": "7d851cea-68f2-4f2e-8e31-e382871c4be9",
+    "platform": "twitter",
+    "likes": 8,
+    "comments": 1,
+    "shares": 5,
+    "clicks": 14,
+    "timestamp": "2026-04-30T08:01:03.938Z",
+    "totalEngagement": 28
+  },
+  {
+    "entryId": "eaa197c2-7f51-4808-87de-6a3ebe88598e",
+    "postId": "d61e2bbb-5fe7-4b64-86f8-543163d85261",
+    "platform": "linkedin",
+    "likes": 6,
+    "comments": 2,
+    "shares": 1,
+    "clicks": 9,
+    "timestamp": "2026-04-30T08:01:03.941Z",
+    "totalEngagement": 18
+  },
+  {
+    "entryId": "2fcffbf5-fe79-4e07-b89e-6a5c33b2af11",
+    "postId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+    "platform": "linkedin",
+    "likes": 15,
+    "comments": 5,
+    "shares": 5,
+    "clicks": 17,
+    "timestamp": "2026-04-30T13:19:44.913Z",
+    "totalEngagement": 42
+  },
+  {
+    "entryId": "30a9d7cf-185f-4fa3-8ec5-d24cf437d11d",
+    "postId": "48dd1ac5-801a-41e4-b1a1-c0a77c45cda4",
+    "platform": "twitter",
+    "likes": 7,
+    "comments": 1,
+    "shares": 7,
+    "clicks": 10,
+    "timestamp": "2026-04-30T13:19:44.918Z",
+    "totalEngagement": 25
+  },
+  {
+    "entryId": "59de8072-126c-42b0-b93d-783a481e40d9",
+    "postId": "a3a9d715-2356-46da-8e02-1a966d420ba8",
+    "platform": "caption",
+    "likes": 3,
+    "comments": 1,
+    "shares": 1,
+    "clicks": 3,
+    "timestamp": "2026-04-30T13:19:44.920Z",
+    "totalEngagement": 8
+  },
+  {
+    "entryId": "ffcead03-5f35-4cd7-af3b-d2608c32b36d",
+    "postId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+    "platform": "linkedin",
+    "likes": 22,
+    "comments": 5,
+    "shares": 4,
+    "clicks": 14,
+    "timestamp": "2026-04-30T13:19:44.923Z",
+    "totalEngagement": 45
+  },
+  {
+    "entryId": "f8650303-25d8-4ac3-b84e-f2ecd62429d1",
+    "postId": "10b1b2c8-e416-4978-91e2-614237eb1b1b",
+    "platform": "twitter",
+    "likes": 10,
+    "comments": 2,
+    "shares": 5,
+    "clicks": 10,
+    "timestamp": "2026-04-30T13:19:44.926Z",
+    "totalEngagement": 27
+  },
+  {
+    "entryId": "cb040a83-9ddb-47fb-919b-9da9b19bd586",
+    "postId": "2c0b1072-3047-4074-b83c-d461ac5fea9f",
+    "platform": "caption",
+    "likes": 11,
+    "comments": 2,
+    "shares": 1,
+    "clicks": 2,
+    "timestamp": "2026-04-30T13:19:44.930Z",
+    "totalEngagement": 16
+  },
+  {
+    "entryId": "9c83bccc-1a87-49ac-b49b-f03acd1961f9",
+    "postId": "fdd7575f-9c9d-4d4f-acf2-c4af1c2cdc68",
+    "platform": "linkedin",
+    "likes": 15,
+    "comments": 5,
+    "shares": 5,
+    "clicks": 9,
+    "timestamp": "2026-04-30T13:19:44.933Z",
+    "totalEngagement": 34
+  },
+  {
+    "entryId": "4d5b6ecb-8838-4f94-bb10-4753515b2727",
+    "postId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+    "platform": "twitter",
+    "likes": 12,
+    "comments": 3,
+    "shares": 8,
+    "clicks": 14,
+    "timestamp": "2026-04-30T13:19:44.937Z",
+    "totalEngagement": 37
+  },
+  {
+    "entryId": "7f1b6d96-334c-4b3d-bec3-3dc1398e158e",
+    "postId": "39bbd79a-10a0-4fcd-b481-38c553f3c5a3",
+    "platform": "caption",
+    "likes": 8,
+    "comments": 3,
+    "shares": 1,
+    "clicks": 2,
+    "timestamp": "2026-04-30T13:19:44.942Z",
+    "totalEngagement": 14
+  }
+]
