@@ -97,6 +97,8 @@ def require_auth(f):
             }
             # Look up role from DB
             request.cognito_user['role'] = _get_user_role(attrs.get('email', ''))
+            # Look up subscription tier
+            request.cognito_user['subscription_tier'] = _get_user_tier(attrs.get('email', ''))
             return f(*args, **kwargs)
         except client.exceptions.NotAuthorizedException:
             return jsonify({'error': 'Token expired or invalid'}), 401
@@ -144,8 +146,7 @@ def require_admin(f):
 
 
 def _get_user_role(email):
-    """Look up user role from DynamoDB (primary) or RDS (fallback). Returns 'member' if not found."""
-    # Try DynamoDB first (current architecture)
+    """Look up user role from DynamoDB. Returns 'admin' if any record for this email is admin."""
     try:
         import boto3
         from boto3.dynamodb.conditions import Key
@@ -154,25 +155,61 @@ def _get_user_role(email):
         resp = table.query(
             IndexName='email-index',
             KeyConditionExpression=Key('email').eq(email),
-            Limit=1,
         )
         items = resp.get('Items', [])
-        if items:
-            return items[0].get('role', 'member')
-    except Exception:
-        pass
-    # Fallback to RDS (if still available)
-    try:
-        from database import query_one
-        row = query_one("SELECT role FROM users WHERE email = %s", (email,))
-        return row['role'] if row else 'member'
+        for item in items:
+            if item.get('role') == 'admin':
+                return 'admin'
+        return 'member' if not items else items[0].get('role', 'member')
     except Exception:
         return 'member'
 
 
+def _get_user_tier(email):
+    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'.
+    Auto-expires pro trials after 7 days."""
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone, timedelta
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+        )
+        items = resp.get('Items', [])
+        for item in items:
+            if item.get('role') == 'admin':
+                return 'admin'
+            tier = item.get('subscription_tier', 'free')
+            if tier == 'pro':
+                # Check if trial has expired (7 days)
+                tier_updated = item.get('tier_updated_at', '')
+                if tier_updated:
+                    try:
+                        updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                        if datetime.now(timezone.utc) - updated_time > timedelta(days=7):
+                            # Trial expired — downgrade to free
+                            table.update_item(
+                                Key={'userId': item['userId']},
+                                UpdateExpression='SET subscription_tier = :tier, trial_expired = :exp',
+                                ExpressionAttributeValues={
+                                    ':tier': 'free',
+                                    ':exp': True,
+                                },
+                            )
+                            return 'free'
+                    except Exception:
+                        pass
+                return 'pro'
+        return 'free'
+    except Exception:
+        return 'free'
+
+
 def _sync_user_to_db(email, cognito_sub, name=''):
-    """Upsert user to DynamoDB (primary) or RDS (fallback) on login."""
-    # Try DynamoDB first
+    """Upsert user to DynamoDB on login."""
     try:
         import boto3, uuid
         from boto3.dynamodb.conditions import Key
@@ -193,38 +230,19 @@ def _sync_user_to_db(email, cognito_sub, name=''):
                 ExpressionAttributeNames={'#n': 'name'},
                 ExpressionAttributeValues={':ll': now, ':cs': cognito_sub, ':nm': name},
             )
+            # Return admin if any record is admin
+            for item in items:
+                if item.get('role') == 'admin':
+                    return 'admin'
             return items[0].get('role', 'member')
         else:
             table.put_item(Item={
                 'userId': str(uuid.uuid4()),
-                'email': email,
-                'cognito_sub': cognito_sub,
-                'name': name,
-                'role': 'member',
+                'email': email, 'cognito_sub': cognito_sub, 'name': name,
+                'role': 'member', 'subscription_tier': 'free',
                 'project_id': '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2',
-                'created_at': now,
-                'last_login': now,
+                'created_at': now, 'last_login': now,
             })
-            return 'member'
-    except Exception:
-        pass
-    # Fallback to RDS
-    try:
-        from database import execute, query_one
-        existing = query_one("SELECT id, role FROM users WHERE email = %s", (email,))
-        if existing:
-            execute(
-                "UPDATE users SET last_login = NOW(), cognito_sub = %s, name = %s WHERE email = %s",
-                (cognito_sub, name, email),
-            )
-            return existing['role']
-        else:
-            project_id = '24766ac2-1b1b-4c3a-bb4f-97f20ca78bf2'
-            execute(
-                "INSERT INTO users (cognito_sub, email, name, role, project_id, last_login) "
-                "VALUES (%s, %s, %s, 'member', %s, NOW())",
-                (cognito_sub, email, name, project_id),
-            )
             return 'member'
     except Exception as e:
         print("User sync failed: {}".format(e))
@@ -366,7 +384,7 @@ def login():
         # Decode the ID token to get user info
         id_payload = _decode_jwt_payload(auth_result['IdToken'])
 
-        # Sync user to RDS and get role
+        # Sync user to DynamoDB and get role
         user_email = id_payload.get('email', email)
         user_sub = id_payload.get('sub', '')
         user_name = id_payload.get('name', '')
@@ -533,3 +551,297 @@ def delete_account():
     except Exception as e:
         print(f"Account deletion error: {e}")
         return jsonify({'error': 'Account deletion failed. Please try again.'}), 500
+
+
+# ============== SUBSCRIPTION TIER ENDPOINTS ==============
+
+@auth_bp.route('/api/user/tier', methods=['GET'])
+@require_auth
+def get_user_tier():
+    """Get the current user's subscription tier with trial expiry info."""
+    user = request.cognito_user
+    tier = user.get('subscription_tier', 'free')
+    result = {
+        'status': 'success',
+        'email': user.get('email', ''),
+        'tier': tier,
+        'role': user.get('role', 'member'),
+    }
+    # Add trial expiry info for pro users
+    if tier == 'pro':
+        try:
+            import boto3
+            from boto3.dynamodb.conditions import Key
+            from datetime import datetime, timezone, timedelta
+            ddb = boto3.resource('dynamodb', region_name='us-east-1')
+            table = ddb.Table('ai1stseo-users')
+            resp = table.query(
+                IndexName='email-index',
+                KeyConditionExpression=Key('email').eq(user.get('email', '')),
+                Limit=1,
+            )
+            items = resp.get('Items', [])
+            if items:
+                tier_updated = items[0].get('tier_updated_at', '')
+                if tier_updated:
+                    updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                    expires_at = updated_time + timedelta(days=7)
+                    remaining = (expires_at - datetime.now(timezone.utc)).total_seconds()
+                    result['trial_expires_at'] = expires_at.isoformat()
+                    result['trial_days_remaining'] = max(0, round(remaining / 86400, 1))
+        except Exception:
+            pass
+    return jsonify(result)
+
+
+def _send_pro_welcome_email(email, name):
+    """Send a welcome/receipt email after Pro trial purchase via SES."""
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        user_name = name or email.split('@')[0]
+        subject = 'Welcome to AI 1st SEO Pro — Your 7-Day Trial is Active'
+        body = '''Hi {name},
+
+Thank you for purchasing the AI 1st SEO Pro Trial!
+
+Here's what you now have access to for the next 7 days:
+
+- Full SEO audits (236 checks across 10 categories)
+- GEO/AEO multi-model probing (ChatGPT, Gemini, Perplexity, Claude)
+- Backlink intelligence (domain scoring, link gaps, citation authority mapping)
+- Brand sentiment & hallucination monitoring
+- White-label report generation
+- Internal link analysis
+- Web mention scanning
+- Answer fingerprint change detection
+- Priority backlink opportunity queue
+- API access for integrations
+
+Your Pro access will expire 7 days from now. You can check your remaining time anytime at:
+https://www.ai1stseo.com/admin
+
+Receipt Details:
+- Amount: $5.00 USD
+- Plan: AI 1st SEO Pro Trial (7 days)
+- Email: {email}
+
+If you have any questions, reply to this email or reach out at support@ai1stseo.com.
+
+Happy optimizing,
+The AI 1st SEO Team
+https://www.ai1stseo.com
+'''.format(name=user_name, email=email)
+
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': [email]},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': body}},
+            },
+        )
+        print('Pro welcome email sent to {}'.format(email))
+    except Exception as e:
+        print('Pro welcome email failed (non-fatal): {}'.format(e))
+
+
+@auth_bp.route('/api/webhooks/stripe', methods=['POST'])
+def stripe_webhook():
+    """
+    Stripe webhook endpoint. Updates user subscription_tier when payment succeeds.
+    Stripe sends checkout.session.completed events here.
+    """
+    import os
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature', '')
+    stripe_secret = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
+    # If no Stripe secret configured, accept the payload directly (dev mode)
+    if stripe_secret:
+        # In production, verify the Stripe signature
+        try:
+            import stripe
+            stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', '')
+            event = stripe.Webhook.construct_event(payload, sig_header, stripe_secret)
+        except Exception as e:
+            return jsonify({'error': 'Webhook signature verification failed: {}'.format(str(e))}), 400
+    else:
+        # Dev mode: parse JSON directly
+        event = request.get_json() or {}
+
+    event_type = event.get('type', '')
+
+    if event_type == 'checkout.session.completed':
+        session = event.get('data', {}).get('object', {})
+        customer_email = session.get('customer_email', '').strip().lower()
+
+        if not customer_email:
+            # Try to get email from customer details
+            customer_email = session.get('customer_details', {}).get('email', '').strip().lower()
+
+        if customer_email:
+            # Update user tier to 'pro'
+            try:
+                import boto3
+                from boto3.dynamodb.conditions import Key
+                ddb = boto3.resource('dynamodb', region_name='us-east-1')
+                table = ddb.Table('ai1stseo-users')
+                resp = table.query(
+                    IndexName='email-index',
+                    KeyConditionExpression=Key('email').eq(customer_email),
+                    Limit=1,
+                )
+                items = resp.get('Items', [])
+                if items:
+                    table.update_item(
+                        Key={'userId': items[0]['userId']},
+                        UpdateExpression='SET subscription_tier = :tier, tier_updated_at = :now',
+                        ExpressionAttributeValues={
+                            ':tier': 'pro',
+                            ':now': __import__('datetime').datetime.now(
+                                __import__('datetime').timezone.utc).isoformat(),
+                        },
+                    )
+                    print('Upgraded {} to pro tier'.format(customer_email))
+                    # Send welcome/receipt email via SES
+                    _send_pro_welcome_email(customer_email, items[0].get('name', ''))
+                else:
+                    print('Stripe webhook: user {} not found in DB'.format(customer_email))
+            except Exception as e:
+                print('Stripe webhook DB update failed: {}'.format(e))
+
+    return jsonify({'status': 'received'}), 200
+
+
+# ============== STRIPE CHECKOUT ==============
+
+@auth_bp.route('/api/stripe/create-checkout', methods=['POST'])
+def create_checkout_session():
+    """
+    Create a Stripe Checkout Session for the $5 Pro trial.
+    Returns a URL that the frontend redirects to.
+    """
+    import os
+    stripe_key = os.environ.get('STRIPE_SECRET_KEY', '')
+    if not stripe_key:
+        return jsonify({'error': 'Stripe not configured'}), 503
+
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    success_url = data.get('success_url', 'https://www.ai1stseo.com/admin?upgraded=true')
+    cancel_url = data.get('cancel_url', 'https://www.ai1stseo.com/')
+
+    try:
+        import requests as http_requests
+        # Create a Checkout Session via Stripe API
+        resp = http_requests.post(
+            'https://api.stripe.com/v1/checkout/sessions',
+            auth=(stripe_key, ''),
+            data={
+                'mode': 'payment',
+                'payment_method_types[]': 'card',
+                'line_items[0][price_data][currency]': 'usd',
+                'line_items[0][price_data][product_data][name]': 'AI 1st SEO Pro Trial',
+                'line_items[0][price_data][product_data][description]': '7-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
+                'line_items[0][price_data][unit_amount]': '500',  # $5.00 in cents
+                'line_items[0][quantity]': '1',
+                'success_url': success_url,
+                'cancel_url': cancel_url,
+                'customer_email': email if email else None,
+            },
+            timeout=15,
+        )
+
+        if resp.status_code == 200:
+            session = resp.json()
+            return jsonify({
+                'status': 'success',
+                'checkout_url': session.get('url'),
+                'session_id': session.get('id'),
+            })
+        else:
+            error = resp.json().get('error', {}).get('message', 'Unknown error')
+            return jsonify({'status': 'error', 'message': error}), 400
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/api/stripe/config', methods=['GET'])
+def stripe_config():
+    """Return the publishable key for the frontend. No auth required."""
+    import os
+    pk = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+    return jsonify({
+        'status': 'success',
+        'publishable_key': pk,
+        'has_stripe': bool(pk),
+    })
+
+
+@auth_bp.route('/api/stripe/subscription-status', methods=['GET'])
+@require_auth
+def subscription_status():
+    """Get the current user's full subscription details."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        u = items[0]
+        return jsonify({
+            'status': 'success',
+            'email': email,
+            'tier': u.get('subscription_tier', 'free'),
+            'role': u.get('role', 'member'),
+            'tier_updated_at': u.get('tier_updated_at', ''),
+            'created_at': u.get('created_at', ''),
+            'last_login': u.get('last_login', ''),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/api/stripe/cancel', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    """Downgrade the current user from pro back to free."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        table.update_item(
+            Key={'userId': items[0]['userId']},
+            UpdateExpression='SET subscription_tier = :tier, tier_updated_at = :now, cancellation_reason = :reason',
+            ExpressionAttributeValues={
+                ':tier': 'free',
+                ':now': datetime.now(timezone.utc).isoformat(),
+                ':reason': (request.get_json() or {}).get('reason', ''),
+            },
+        )
+        return jsonify({'status': 'success', 'tier': 'free', 'message': 'Subscription cancelled. You now have free tier access.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
