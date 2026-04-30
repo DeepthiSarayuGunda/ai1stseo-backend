@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI1stSEO Content Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f1117;color:#e1e4e8;line-height:1.6}
+.hdr{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:2.5rem 1rem;text-align:center;border-bottom:3px solid #00d4aa}
+.hdr h1{font-size:2rem;color:#00d4aa;margin-bottom:.4rem}
+.hdr p{color:#8b949e;font-size:1rem}
+.bar{text-align:center;padding:1.2rem;background:#161b22;border-bottom:1px solid #21262d}
+.bar input{padding:.65rem 1rem;width:300px;border-radius:8px;border:1px solid #30363d;background:#0d1117;color:#e1e4e8;font-size:1rem;outline:none}
+.bar input:focus{border-color:#00d4aa}
+.bar button{padding:.65rem 1.8rem;border-radius:8px;border:none;background:#00d4aa;color:#0f1117;font-weight:700;font-size:1rem;cursor:pointer;margin-left:.5rem;transition:.2s}
+.bar button:hover{background:#00b894}
+.bar button:disabled{background:#30363d;color:#8b949e;cursor:wait}
+.wrap{max-width:1060px;margin:0 auto;padding:2rem 1rem}
+.sec{margin-bottom:2.5rem}
+.sec-t{font-size:1.15rem;color:#00d4aa;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #21262d}
+.sec-t .badge{font-size:.75rem;background:#1f6feb;color:#fff;padding:.15rem .5rem;border-radius:10px;margin-left:.5rem;vertical-align:middle}
+.card{background:#161b22;border:1px solid #21262d;border-radius:12px;padding:1.4rem;margin-bottom:1rem}
+.card h3{color:#58a6ff;font-size:1.05rem;margin-bottom:.5rem}
+.cap{white-space:pre-wrap;font-size:.92rem;line-height:1.75;color:#c9d1d9}
+.tags{margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.4rem}
+.tag{background:#1f2937;color:#00d4aa;padding:.2rem .65rem;border-radius:14px;font-size:.8rem;border:1px solid #21262d}
+.tabs{display:flex;gap:.5rem;margin-bottom:1rem}
+.tab{padding:.4rem 1.1rem;border-radius:8px;border:1px solid #30363d;background:transparent;color:#8b949e;cursor:pointer;font-size:.85rem;transition:.2s}
+.tab.on{background:#00d4aa;color:#0f1117;border-color:#00d4aa;font-weight:700}
+.imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.imgs div{position:relative;overflow:hidden;border-radius:10px;border:1px solid #21262d}
+.imgs img{width:100%;height:210px;object-fit:cover;display:block;transition:transform .3s}
+.imgs img:hover{transform:scale(1.03)}
+.imgs .lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#c9d1d9;font-size:.75rem;padding:.35rem .6rem;text-align:center}
+.vid-wrap{background:#161b22;border:1px solid #21262d;border-radius:12px;overflow:hidden}
+.vid-wrap video{width:100%;display:block;background:#000}
+.vid-info{padding:1.2rem}
+.vid-meta{display:flex;gap:1.5rem;margin-bottom:1rem;font-size:.85rem;color:#8b949e}
+.vid-meta span{display:flex;align-items:center;gap:.3rem}
+.scene{padding:.6rem 0;border-bottom:1px solid #21262d}
+.scene:last-child{border-bottom:none}
+.sn{color:#00d4aa;font-weight:700;font-size:.8rem;min-width:60px;display:inline-block}
+.st{color:#58a6ff;font-weight:500}
+.snar{color:#8b949e;font-size:.85rem;margin-top:.15rem}
+.no-vid{text-align:center;padding:2.5rem;color:#8b949e;background:#0d1117;border-radius:10px;border:1px dashed #30363d}
+.no-vid p{margin-top:.5rem;font-size:.85rem}
+.eml{background:#1c2333;border:1px solid #30363d;border-radius:12px;padding:1.6rem;font-family:Georgia,serif}
+.eml .to{color:#8b949e;font-size:.85rem;margin-bottom:.3rem}
+.eml .subj{color:#58a6ff;font-weight:600;font-size:1.05rem;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid #21262d}
+.eml .body{white-space:pre-wrap;font-size:.92rem;color:#c9d1d9;line-height:1.8}
+.hide{display:none}
+.ld{text-align:center;padding:3rem;color:#8b949e}
+.sp{display:inline-block;width:22px;height:22px;border:3px solid #30363d;border-top-color:#00d4aa;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.imgs{grid-template-columns:1fr}.bar input{width:200px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>AI1stSEO Content Demo</h1>
+<p>Content generation, images, video scripts, and outreach emails</p>
+</div>
+<div class="bar">
+<input id="topic" placeholder="Enter topic..." value="AI SEO Tips">
+<button id="btn" onclick="go()">Generate Demo Content</button>
+</div>
+<div class="wrap">
+<div id="ld" class="ld hide"><span class="sp"></span> Generating content...</div>
+<div id="out" class="hide"></div>
+</div>
+<script>
+var D={
+content:{
+engaging:{
+title:"AI SEO Tips \u2014 Tips That Actually Work",
+caption:"\ud83d\udcc8 AI SEO Tips just got easier \u2014 here\u2019s how\n\n\u23f0 Save 10+ hours per week with automation tools\n\ud83c\udfaf Focus on what actually moves the needle\n\ud83d\udcc8 Track results weekly and double down on winners\n\n\ud83d\udd14 Save this and share with someone who needs it \u2764\ufe0f",
+hashtags:["#SEOTips","#GrowthMindset","#SearchEngine","#LearnDaily","#HowTo","#OrganicTraffic","#AI","#MachineLearning"]
+},
+professional:{
+title:"AI SEO Tips: What the Research Shows",
+caption:"AI SEO Tips: what the research actually shows\n\n  - Automate keyword research to focus on high-intent terms\n  - Use data-driven content scoring to prioritize what works\n  - Implement structured reporting for stakeholder visibility\n  - Build repeatable workflows that scale with your team\n\nFollow for more insights on AI SEO Tips and digital growth.",
+hashtags:["#ArtificialIntelligence","#SEO","#SEOStrategy","#MachineLearning","#GoogleRanking","#DigitalMarketing"]
+}
+},
+images:[
+{url:"https://images.pexels.com/photos/267415/pexels-photo-267415.jpeg?auto=compress&cs=tinysrgb&w=600",desc:"Scrabble tiles spelling SEO Audit"},
+{url:"https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=600",desc:"Analytics dashboard on screen"},
+{url:"https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=600",desc:"Digital marketing concept"}
+],
+imgSrc:"PEXELS",
+video:{
+intro:"Stop scrolling \u2014 this changes everything about AI SEO Tips.",
+scenes:[
+{n:1,t:"Identify the Problem",txt:"The secret to AI SEO Tips? Start by identifying one core problem your audience faces.",dur:6},
+{n:2,t:"Build the Solution",txt:"Build one clear solution. Don\u2019t overcomplicate it \u2014 simplicity scales.",dur:5},
+{n:3,t:"Ship and Learn",txt:"Ship it fast. Learn from the data. Iterate. The best strategy is the one you actually execute.",dur:6}
+],
+outro:"Follow for more tips on AI SEO Tips. Link in bio.",
+dur:30,words:80,
+path:"output/video_f9a21b4e2130.mp4",
+url:"https://cdn.ai1stseo.com/videos/f9a21b4e2130.mp4"
+},
+email:{
+to:"Sarah Johnson",org:"GrowthCo Marketing",
+subj:"Collaboration Idea: SEO Growth for GrowthCo Marketing",
+body:"Hi Sarah Johnson,\n\nI\u2019ve been following GrowthCo Marketing\u2019s work and I think we could create something valuable together.\n\nWe specialize in AI-powered SEO \u2014 helping businesses rank higher, faster, with less manual effort. Our clients typically see 40-60% improvement in organic traffic within 90 days.\n\nI\u2019d love to explore how we could support GrowthCo Marketing:\n  \u2022 Free SEO health check for your website\n  \u2022 Custom content strategy powered by AI analysis\n  \u2022 Ongoing optimization with monthly performance reports\n\nNo pressure \u2014 just a quick conversation to see if there\u2019s a fit.\n\nLooking forward to hearing from you,\nThe AI1stSEO Team\nhttps://ai1stseo.com"
+}
+};
+var sty="engaging";
+function h(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function go(){
+var b=document.getElementById("btn"),l=document.getElementById("ld"),o=document.getElementById("out");
+b.disabled=true;b.textContent="Generating...";l.classList.remove("hide");o.classList.add("hide");
+setTimeout(function(){render();l.classList.add("hide");o.classList.remove("hide");b.disabled=false;b.textContent="Generate Demo Content"},1200);
+}
+function tab(s){
+sty=s;
+document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.s===s)});
+document.getElementById("cEng").classList.toggle("hide",s!=="engaging");
+document.getElementById("cPro").classList.toggle("hide",s!=="professional");
+}
+</script>
+<script>
+function render(){
+var o="",e=D.content.engaging,p=D.content.professional,v=D.video;
+
+// --- SECTION 1: CONTENT ---
+o+='<div class="sec"><div class="sec-t">\ud83d\udcdd Generated Content</div>';
+o+='<div class="tabs"><div class="tab on" data-s="engaging" onclick="tab(\'engaging\')">Engaging</div>';
+o+='<div class="tab" data-s="professional" onclick="tab(\'professional\')">Professional</div></div>';
+
+o+='<div id="cEng" class="card"><h3>'+h(e.title)+'</h3>';
+o+='<div class="cap">'+h(e.caption)+'</div><div class="tags">';
+e.hashtags.forEach(function(t){o+='<span class="tag">'+h(t)+'</span>'});
+o+='</div></div>';
+
+o+='<div id="cPro" class="card hide"><h3>'+h(p.title)+'</h3>';
+o+='<div class="cap">'+h(p.caption)+'</div><div class="tags">';
+p.hashtags.forEach(function(t){o+='<span class="tag">'+h(t)+'</span>'});
+o+='</div></div></div>';
+
+// --- SECTION 2: IMAGES ---
+o+='<div class="sec"><div class="sec-t">\ud83d\uddbc\ufe0f Images <span class="badge">'+h(D.imgSrc)+'</span></div>';
+o+='<div class="imgs">';
+D.images.forEach(function(im){
+o+='<div><img src="'+h(im.url)+'" alt="'+h(im.desc)+'" loading="lazy"><div class="lbl">'+h(im.desc)+'</div></div>';
+});
+o+='</div></div>';
+
+// --- SECTION 3: VIDEO ---
+o+='<div class="sec"><div class="sec-t">\ud83c\udfa5 Video</div>';
+o+='<div class="vid-wrap">';
+
+// Video player with empty src — filled dynamically by detectVideo()
+o+='<video id="vidPlayer" controls preload="metadata" style="width:100%;background:#000;display:none">';
+o+='<source id="vidSrc" src="" type="video/mp4">';
+o+='</video>';
+
+// Fallback shown when no video file is found
+o+='<div id="vidFallback" class="no-vid">';
+o+='<div style="font-size:2rem">\ud83c\udfa5</div>';
+o+='<p><strong>Video generation not available</strong></p>';
+o+='<p>Install gTTS + moviepy and run the demo to generate a real video file.</p>';
+o+='<p style="margin-top:.5rem;font-size:.8rem;color:#58a6ff">Expected: output/video_*.mp4</p>';
+o+='<p style="margin-top:.8rem;font-size:.8rem;color:#8b949e">If video does not load, serve files locally:<br><code style="color:#00d4aa">python -m http.server 8000</code> then open <code style="color:#00d4aa">http://localhost:8000/demo_preview.html</code></p>';
+o+='</div>';
+
+// Debug info + reload button
+o+='<div id="vidDebug" style="padding:.6rem 1.2rem;font-size:.8rem;color:#8b949e;display:flex;align-items:center;gap:.8rem;border-top:1px solid #21262d">';
+o+='<span>Video: <strong id="vidStatus" style="color:#f85149">DETECTING...</strong></span>';
+o+='<span id="vidPathInfo"></span>';
+o+='<button onclick="detectVideo()" style="margin-left:auto;padding:.3rem .8rem;border-radius:6px;border:1px solid #30363d;background:#161b22;color:#8b949e;cursor:pointer;font-size:.8rem">\u21bb Reload Video</button>';
+o+='</div>';
+
+o+='<div class="vid-info">';
+o+='<div class="vid-meta"><span>\u23f1 '+v.dur+'s</span><span>\ud83d\udcdd '+v.words+' words</span><span>\ud83c\udfa5 3 scenes</span></div>';
+o+='<div class="scene"><span class="sn">INTRO</span> <span class="snar">'+h(v.intro)+'</span></div>';
+v.scenes.forEach(function(s){
+o+='<div class="scene"><span class="sn">Scene '+s.n+'</span> <span class="st">'+h(s.t)+'</span> <span style="color:#8b949e;font-size:.8rem">('+s.dur+'s)</span>';
+o+='<div class="snar">'+h(s.txt)+'</div></div>';
+});
+o+='<div class="scene"><span class="sn">OUTRO</span> <span class="snar">'+h(v.outro)+'</span></div>';
+o+='</div></div></div>';
+
+// --- SECTION 4: EMAIL ---
+o+='<div class="sec"><div class="sec-t">\u2709\ufe0f Outreach Email</div>';
+o+='<div class="eml"><div class="to">To: '+h(D.email.to)+' at '+h(D.email.org)+'</div>';
+o+='<div class="subj">'+h(D.email.subj)+'</div>';
+o+='<div class="body">'+h(D.email.body)+'</div></div></div>';
+
+document.getElementById("out").innerHTML=o;
+
+// Auto-detect and load video
+detectVideo();
+}
+
+// --- Video auto-detection ---
+// Tries multiple known paths. The video generator writes to output/video_<hash>.mp4
+// We try the known hash from the data, plus common fallback names.
+function detectVideo(){
+var vid=document.getElementById("vidPlayer");
+var fb=document.getElementById("vidFallback");
+var st=document.getElementById("vidStatus");
+var pi=document.getElementById("vidPathInfo");
+if(!vid||!fb||!st)return;
+
+// Candidate paths to try (most specific first)
+var candidates=[
+D.video.path,
+"output/video_f9a21b4e2130.mp4",
+"output/video.mp4",
+"output/demo_video.mp4"
+];
+// Deduplicate
+var seen={};var paths=[];
+candidates.forEach(function(p){if(p&&!seen[p]){seen[p]=1;paths.push(p)}});
+
+st.textContent="DETECTING...";
+st.style.color="#f0ad4e";
+pi.textContent="Trying "+paths.length+" paths...";
+
+tryNextPath(paths,0,vid,fb,st,pi);
+}
+
+function tryNextPath(paths,idx,vid,fb,st,pi){
+if(idx>=paths.length){
+// None worked — show fallback
+vid.style.display="none";
+fb.style.display="";
+st.textContent="NOT FOUND";
+st.style.color="#f85149";
+pi.textContent="Checked "+paths.length+" paths";
+return;
+}
+var path=paths[idx];
+// Use a probe: try to fetch the file head to see if it exists
+var xhr=new XMLHttpRequest();
+xhr.open("HEAD",path,true);
+xhr.timeout=3000;
+xhr.onload=function(){
+if(xhr.status>=200&&xhr.status<400){
+// Found — load into player
+var src=document.getElementById("vidSrc");
+if(src)src.setAttribute("src",path);
+vid.load();
+vid.style.display="block";
+fb.style.display="none";
+st.textContent="FOUND";
+st.style.color="#3fb950";
+pi.textContent=path;
+}else{
+tryNextPath(paths,idx+1,vid,fb,st,pi);
+}
+};
+xhr.onerror=function(){tryNextPath(paths,idx+1,vid,fb,st,pi)};
+xhr.ontimeout=function(){tryNextPath(paths,idx+1,vid,fb,st,pi)};
+xhr.send();
+}
+</script>
+</body>
+</html>

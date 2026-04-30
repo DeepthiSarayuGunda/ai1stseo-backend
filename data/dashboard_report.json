@@ -1,0 +1,43 @@
+{
+  "summary": {
+    "total_users": 0,
+    "total_signups": 0,
+    "conversion_rate": "0%",
+    "engagement_score": 0
+  },
+  "kpis": {
+    "period": "last_30_days",
+    "totalSignups": 0,
+    "totalPageViews": 0,
+    "totalClicks": 0,
+    "totalEmailsSent": 0,
+    "totalEmailsFailed": 0,
+    "totalConversions": 0,
+    "conversionRate": 0,
+    "emailDeliveryRate": 100,
+    "engagementScore": 0,
+    "totalSubscribers": 0,
+    "social": {
+      "totalPosts": 3,
+      "totalScheduled": 9,
+      "totalPublished": 21,
+      "totalEngagement": 329,
+      "engagementRate": 15.67,
+      "breakdown": {
+        "likes": 129,
+        "comments": 33,
+        "shares": 45,
+        "clicks": 122
+      }
+    },
+    "calculatedAt": "2026-04-30T13:19:44.951Z"
+  },
+  "signupTrend": [],
+  "eventBreakdown": {
+    "social_post_created": 3,
+    "social_post_scheduled": 9,
+    "social_engagement": 12,
+    "social_post_published": 21
+  },
+  "generatedAt": "2026-04-30T13:19:44.952Z"
+}

@@ -1,0 +1,39 @@
+{
+  "total_posts_published": 9,
+  "total_posts_created": 9,
+  "total_engagement": 329,
+  "avg_engagement": 27.42,
+  "platforms": [
+    "LinkedIn",
+    "Twitter/X"
+  ],
+  "engagement_breakdown": {
+    "likes": 129,
+    "comments": 33,
+    "shares": 45,
+    "clicks": 122
+  },
+  "top_posts": [
+    {
+      "postId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+      "platform": "linkedin",
+      "total": 45
+    },
+    {
+      "postId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+      "platform": "linkedin",
+      "total": 42
+    },
+    {
+      "postId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+      "platform": "twitter",
+      "total": 37
+    }
+  ],
+  "kpi_snapshot": {
+    "social_posts": 3,
+    "social_published": 21,
+    "social_engagement": 329,
+    "social_engagement_rate": 15.67
+  }
+}
