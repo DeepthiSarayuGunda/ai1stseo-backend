@@ -45,6 +45,19 @@ html.light #meta-info{color:#9ca3af}
 .theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.06);background:rgba(18,20,26,.8);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s;padding:0}
 .theme-toggle:hover{border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.08)}
 html.light .theme-toggle{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08)}
+
+/* Clickable system cards */
+.sys-card{cursor:pointer;transition:all .25s}
+.sys-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.3);border-color:rgba(88,166,255,.25)}
+html.light .sys-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.1)}
+
+/* Drill-down modal */
+.drill-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.drill-overlay.open{display:flex}
+.drill-panel{background:#12141a;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
+html.light .drill-panel{background:#fff;border-color:rgba(0,0,0,.1);color:#1a1a2e}
+.drill-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#7d8590;font-size:1.4rem;cursor:pointer}
+.drill-close:hover{color:#e1e4e8}
 .wrap{max-width:1200px;margin:0 auto;padding:24px}
 
 /* Navigation */
@@ -173,7 +186,9 @@ tr:hover td{background:rgba(88,166,255,.02)}
     </div>
     <h1 style="font-size:1.6rem" class="header-gradient">GEO Intelligence Dashboard</h1>
   </div>
+  <div id="client-brand" style="font-size:1.1rem;font-weight:700;color:#58a6ff;margin-bottom:4px"></div>
   <p style="color:#7d8590;font-size:.84rem;max-width:500px;margin:0 auto;line-height:1.5">Multi-brand AI visibility intelligence · Real-time probe data · Competitive analysis</p>
+  <div id="last-updated" style="margin-top:8px;font-size:.72rem;color:#484f58"></div>
 </div>
 <nav class="nav">
   <a href="/geo-scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Back to Scanner</a>
@@ -372,6 +387,14 @@ tr:hover td{background:rgba(88,166,255,.02)}
   </div>
 </div>
 
+<!-- Drill-down Modal -->
+<div class="drill-overlay" id="drill-overlay" onclick="if(event.target===this)closeDrill()">
+  <div class="drill-panel">
+    <button class="drill-close" onclick="closeDrill()">&times;</button>
+    <div id="drill-content"></div>
+  </div>
+</div>
+
 <div style="text-align:center;padding:20px;font-size:.72rem;color:#484f58" id="meta-info"></div>
 </div>
 </div>
@@ -398,6 +421,12 @@ async function load(){
 }
 
 function render(d){
+  // Client branding + last updated
+  var brands = d.multi_brand_scores?.brands||[];
+  var primary = brands.find(b=>b.brand==='AI1stSEO')||brands[0]||{};
+  document.getElementById('client-brand').textContent = primary.brand||'AI1stSEO';
+  document.getElementById('last-updated').textContent = 'Last refreshed: ' + new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
   renderBrandStats(d.multi_brand_scores||{});
   renderGeoTable(d.multi_brand_scores||{});
   renderKeywords(d.keyword_performance||{});
@@ -742,11 +771,10 @@ async function loadSystemsHealth(){
     let h = '<div class="grid2">';
     systems.forEach(s=>{
       const dotCls = s.status==='healthy'?'dot-green':s.status==='degraded'?'dot-amber':'dot-grey';
-      h += `<div class="card">
+      h += `<div class="card sys-card" onclick="openDrill('${esc(s.id)}','${esc(s.name)}','${s.status}','${s.cadence}',${JSON.stringify(s.components||[]).replace(/'/g,"\\'")},'${esc(JSON.stringify(s.metrics||{}))}','${esc((s.issues||[])[0]||'')}','${esc(s.last_output||'')}')">
         <h3><div class="job-dot ${dotCls}" style="width:8px;height:8px"></div> ${esc(s.name)}</h3>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <span class="pill" style="background:rgba(${s.status==='healthy'?'63,185,80':s.status==='degraded'?'210,153,34':'248,81,73'},.1);color:${s.status==='healthy'?'#3fb950':s.status==='degraded'?'#d29922':'#f85149'}">${s.status}</span>
-          <span class="pill pill-blue">Month ${s.month}</span>
           <span style="font-size:.68rem;color:#7d8590">${s.cadence}</span>
         </div>
         <div style="font-size:.72rem;color:#7d8590;line-height:1.6">${(s.components||[]).join(' · ')}</div>
@@ -795,6 +823,32 @@ function downloadRankingsPDF() {
 function downloadIntelPDF() {
   window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
 }
+
+function openDrill(id,name,status,cadence,components,metricsJson,issue,lastOutput){
+  var metrics={};try{metrics=JSON.parse(metricsJson);}catch(e){}
+  var statusColor=status==='healthy'?'#3fb950':status==='degraded'?'#d29922':'#f85149';
+  var h=`<h2 style="font-size:1.1rem;margin-bottom:16px">${esc(name)}</h2>`;
+  h+=`<div style="display:flex;gap:10px;margin-bottom:16px">
+    <span class="pill" style="background:rgba(${status==='healthy'?'63,185,80':status==='degraded'?'210,153,34':'248,81,73'},.1);color:${statusColor};font-size:.78rem">${status}</span>
+    <span style="font-size:.78rem;color:#7d8590">Cadence: ${esc(cadence)}</span>
+  </div>`;
+  if(lastOutput){h+=`<div style="font-size:.78rem;color:#7d8590;margin-bottom:12px">Last run: ${esc(lastOutput.substring(0,19).replace('T',' '))}</div>`;}
+  h+=`<div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Components</div>`;
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">`;
+  (components||[]).forEach(c=>{h+=`<span class="pill pill-blue" style="font-size:.72rem">${esc(c)}</span>`;});
+  h+=`</div>`;
+  if(Object.keys(metrics).length){
+    h+=`<div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Live KPIs</div>`;
+    h+=`<table style="font-size:.8rem"><tbody>`;
+    Object.entries(metrics).forEach(([k,v])=>{h+=`<tr><td style="padding:6px 12px;color:#7d8590">${esc(k.replace(/_/g,' '))}</td><td style="padding:6px 12px;font-weight:700">${v}</td></tr>`;});
+    h+=`</tbody></table>`;
+  }
+  if(issue){h+=`<div style="margin-top:12px;padding:10px;background:rgba(248,81,73,.06);border:1px solid rgba(248,81,73,.15);border-radius:8px;font-size:.78rem;color:#f85149">⚠ ${esc(issue)}</div>`;}
+  document.getElementById('drill-content').innerHTML=h;
+  document.getElementById('drill-overlay').classList.add('open');
+}
+function closeDrill(){document.getElementById('drill-overlay').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrill();});
 
 async function runLiveProbe(){
   const brand = document.getElementById('probe-brand').value.trim();
