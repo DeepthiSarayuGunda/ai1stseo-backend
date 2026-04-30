@@ -4164,6 +4164,12 @@ def outreach_update_status():
 
 # ============== AEO → OUTREACH FULL FLOW (Demo) ==============
 
+@app.route('/demo-flow')
+def serve_demo_flow():
+    """Demo flow UI — AEO to Outreach pipeline visualization."""
+    return send_from_directory('.', 'demo-flow.html')
+
+
 @app.route('/api/demo/full-flow')
 def demo_full_flow():
     """End-to-end AEO → Outreach pipeline demo.
