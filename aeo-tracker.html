@@ -201,7 +201,12 @@ document.getElementById('scan-form').addEventListener('submit', async function(e
     }catch(err){
         loading.style.display='none';
         results.style.display='block';
-        results.innerHTML='<div style="text-align:center;padding:40px 0"><p style="color:#ff8a80;font-size:1rem">'+esc(err.message)+'</p><p style="color:#8b949e;font-size:.85rem;margin-top:8px">Please try again.</p></div>';
+        const msg = err.message || 'Something went wrong';
+        const isNoProvider = msg.toLowerCase().includes('no active llm');
+        results.innerHTML='<div style="text-align:center;padding:40px 0">' +
+            '<p style="color:#ff8a80;font-size:1rem">'+ esc(msg) +'</p>' +
+            (isNoProvider ? '<p style="color:#8b949e;font-size:.85rem;margin-top:8px">Contact the administrator to configure API keys.</p>' : '<p style="color:#8b949e;font-size:.85rem;margin-top:8px">Please try again.</p>') +
+            '</div>';
     }finally{
         btn.disabled=false;btn.textContent='Check My AI Visibility';
     }
@@ -225,6 +230,7 @@ function render(data,brand,domain){
         </div>
         <div class="score-label">AI Visibility Score for <strong>${esc(domain)}</strong></div>
         <div class="score-sub">${cited} of ${total} AI responses mentioned your brand</div>
+        <div style="margin-top:10px"><span style="display:inline-block;padding:4px 12px;border-radius:14px;font-size:.72rem;font-weight:600;background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">● Live AI Data</span></div>
     </div>`;
 
     // Stats
