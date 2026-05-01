@@ -271,3 +271,37 @@ def compare_brands():
     except Exception as e:
         logger.exception("Comparison failed")
         return jsonify({"error": str(e), "status": "error"}), 500
+
+
+# ── Scheduler endpoints ───────────────────────────────────────────────────── #
+
+from aeo_rank_tracker.scheduler import get_scheduler_status, start_scheduler, stop_scheduler
+
+
+@aeo_tracker_bp.route("/api/aeo-tracker/scheduler", methods=["GET"])
+def scheduler_status():
+    """Get the automated scan scheduler status."""
+    try:
+        return jsonify({"status": "ok", **get_scheduler_status()})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)[:200]})
+
+
+@aeo_tracker_bp.route("/api/aeo-tracker/scheduler/start", methods=["POST"])
+def scheduler_start():
+    """Start the automated scan scheduler."""
+    try:
+        start_scheduler()
+        return jsonify({"status": "ok", "message": "Scheduler started", **get_scheduler_status()})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)[:200]})
+
+
+@aeo_tracker_bp.route("/api/aeo-tracker/scheduler/stop", methods=["POST"])
+def scheduler_stop():
+    """Stop the automated scan scheduler."""
+    try:
+        stop_scheduler()
+        return jsonify({"status": "ok", "message": "Scheduler stopped", **get_scheduler_status()})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)[:200]})

@@ -5243,6 +5243,12 @@ try:
         else:
             _mode = "mixed"
         print(f"✓ AEO Rank Tracker ready — running in {_mode} mode (providers: {', '.join(_active)})")
+        # Start automated scan scheduler
+        try:
+            from aeo_rank_tracker.scheduler import start_scheduler
+            start_scheduler()
+        except Exception as _se:
+            print(f"⚠ AEO scheduler: {_se}")
     except Exception:
         print("✓ AEO Rank Tracker registered (provider detection deferred)")
 except Exception as e:
