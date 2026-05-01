@@ -198,3 +198,76 @@ def tracked_brands():
     except Exception as e:
         logger.warning("Failed to get brands: %s", e)
         return jsonify({"status": "ok", "count": 0, "brands": [], "db_error": str(e)[:200]})
+
+
+# ── Competitor Comparison endpoint ────────────────────────────────────────── #
+
+@aeo_tracker_bp.route("/api/aeo-tracker/compare", methods=["POST"])
+def compare_brands():
+    """Compare AI visibility of your brand vs competitors.
+
+    Body JSON:
+        {
+            "brands": [
+                {"name": "YourBrand", "domain": "yourbrand.com"},
+                {"name": "Competitor1", "domain": "competitor1.com"},
+                {"name": "Competitor2", "domain": "competitor2.com"}
+            ],
+            "queries": ["best SEO tools", "top marketing platforms"]
+        }
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "JSON body required"}), 400
+
+    brands = data.get("brands", [])
+    queries = data.get("queries", [])
+
+    if not brands or len(brands) < 2:
+        return jsonify({"error": "At least 2 brands required for comparison"}), 400
+    if len(brands) > 5:
+        return jsonify({"error": "Maximum 5 brands per comparison"}), 400
+    if not queries:
+        return jsonify({"error": "At least 1 query required"}), 400
+    if len(queries) > 10:
+        return jsonify({"error": "Maximum 10 queries per comparison"}), 400
+
+    try:
+        comparison = []
+        for brand_info in brands:
+            name = brand_info.get("name", "")
+            domain = brand_info.get("domain", "")
+            if not name or not domain:
+                continue
+
+            result = run_aeo_scan({
+                "brand_name": name,
+                "target_domain": domain,
+                "queries": queries,
+            }, store=True)
+
+            s = result.get("summary", {})
+            comparison.append({
+                "brand": name,
+                "domain": domain,
+                "visibility_score": s.get("visibility_score", 0),
+                "total_scanned": s.get("total_scanned", 0),
+                "total_cited": s.get("total_cited", 0),
+                "best_llm": s.get("best_llm"),
+                "llm_performance": s.get("llm_performance", {}),
+                "query_performance": s.get("query_performance", {}),
+                "results": result.get("results", []),
+            })
+
+        # Sort by visibility score descending
+        comparison.sort(key=lambda x: x["visibility_score"], reverse=True)
+
+        return jsonify({
+            "status": "ok",
+            "comparison": comparison,
+            "queries": queries,
+            "brand_count": len(comparison),
+        })
+    except Exception as e:
+        logger.exception("Comparison failed")
+        return jsonify({"error": str(e), "status": "error"}), 500

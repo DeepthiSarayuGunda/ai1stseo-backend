@@ -4121,6 +4121,11 @@ def serve_citation_velocity():
     """Citation Velocity Tracker — monitor AI citations over time."""
     return send_from_directory('.', 'citation-velocity.html')
 
+@app.route('/ai-compare')
+def serve_ai_compare():
+    """AI Visibility Comparison — compare brands head-to-head."""
+    return send_from_directory('.', 'ai-compare.html')
+
 
 # ============== OUTREACH GENERATOR (Unlinked Mentions) ==============
 

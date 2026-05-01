@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Visibility Comparison - AI1stSEO</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;min-height:100vh;color:#e6edf3}
+        .nav{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+        .nav-links{display:flex;gap:16px}
+        .nav-links a{color:#8b949e;text-decoration:none;font-size:.85rem}
+        .nav-links a:hover{color:#00d4ff}
+        .container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+
+        /* Hero */
+        .hero{text-align:center;padding:40px 0 32px}
+        .hero-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(123,44,191,0.1);color:#ce93d8;border:1px solid rgba(123,44,191,0.2);margin-bottom:14px}
+        .hero h1{font-size:1.8rem;font-weight:800;line-height:1.2;margin-bottom:8px}
+        .hero h1 span{background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:#8b949e;font-size:.92rem;max-width:520px;margin:0 auto}
+
+        /* Form */
+        .form-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;margin-bottom:32px}
+        .form-section-title{font-size:.85rem;font-weight:600;color:#00d4ff;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+        .brand-inputs{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+        .brand-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+        .brand-row .num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+        .brand-row.you .num{background:rgba(0,212,255,0.15);color:#00d4ff;border:1px solid rgba(0,212,255,0.25)}
+        .brand-row.comp .num{background:rgba(255,82,82,0.1);color:#ff8a80;border:1px solid rgba(255,82,82,0.15)}
+        .brand-row input{flex:1;min-width:140px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e6edf3;font-size:.88rem;font-family:inherit;outline:none}
+        .brand-row input:focus{border-color:#00d4ff}
+        .brand-row input::placeholder{color:#484f58}
+        .add-comp{background:none;border:1px dashed rgba(255,255,255,0.12);color:#8b949e;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.82rem;font-family:inherit;transition:all .2s}
+        .add-comp:hover{border-color:#00d4ff;color:#00d4ff}
+        .form-field{margin-bottom:16px}
+        .form-field label{display:block;font-size:.78rem;color:#8b949e;margin-bottom:5px}
+        .form-field textarea{width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e6edf3;font-size:.88rem;font-family:inherit;outline:none;resize:vertical;min-height:60px}
+        .form-field textarea:focus{border-color:#00d4ff}
+        .form-hint{font-size:.72rem;color:#484f58;margin-top:3px}
+        .btn-compare{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-size:1rem;font-weight:700;font-family:inherit;background:linear-gradient(90deg,#7b2cbf,#00d4ff);color:#fff;transition:opacity .2s;letter-spacing:.3px}
+        .btn-compare:hover{opacity:.9}
+        .btn-compare:disabled{opacity:.4;cursor:not-allowed}
+
+        /* Loading */
+        .loading{text-align:center;padding:50px 0;display:none}
+        .spinner{width:44px;height:44px;margin:0 auto 14px;border:3px solid rgba(255,255,255,0.1);border-top-color:#7b2cbf;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Results */
+        .results{display:none}
+
+        /* Podium */
+        .podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin:32px 0;min-height:220px;flex-wrap:wrap}
+        .podium-item{text-align:center;width:180px;transition:transform .2s}
+        .podium-item:hover{transform:translateY(-4px)}
+        .podium-bar{border-radius:12px 12px 0 0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px 16px 16px;min-height:80px}
+        .podium-rank{font-size:1.8rem;font-weight:800;margin-bottom:4px}
+        .podium-brand{font-size:.9rem;font-weight:600;margin-bottom:2px}
+        .podium-domain{font-size:.72rem;color:rgba(255,255,255,0.5)}
+        .podium-score{font-size:.78rem;margin-top:8px;padding:3px 10px;border-radius:10px;font-weight:600}
+
+        .podium-1 .podium-bar{background:linear-gradient(180deg,rgba(0,230,118,0.15),rgba(0,230,118,0.05));border:1px solid rgba(0,230,118,0.2);min-height:180px}
+        .podium-1 .podium-rank{color:#00e676}
+        .podium-1 .podium-score{background:rgba(0,230,118,0.12);color:#00e676;border:1px solid rgba(0,230,118,0.2)}
+
+        .podium-2 .podium-bar{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);min-height:130px}
+        .podium-2 .podium-rank{color:#8b949e}
+        .podium-2 .podium-score{background:rgba(255,255,255,0.06);color:#8b949e;border:1px solid rgba(255,255,255,0.1)}
+
+        .podium-3 .podium-bar{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);min-height:90px}
+        .podium-3 .podium-rank{color:#484f58}
+        .podium-3 .podium-score{background:rgba(255,255,255,0.04);color:#484f58;border:1px solid rgba(255,255,255,0.06)}
+
+        /* Comparison grid */
+        .comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px}
+        .comp-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;text-align:center;transition:border-color .2s}
+        .comp-card:hover{border-color:rgba(0,212,255,0.2)}
+        .comp-card-brand{font-size:.85rem;font-weight:600;margin-bottom:4px}
+        .comp-card-domain{font-size:.72rem;color:#8b949e;margin-bottom:12px}
+        .comp-card-score{font-size:2rem;font-weight:800;margin-bottom:2px}
+        .comp-card-label{font-size:.72rem;color:#8b949e}
+        .comp-card-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.06);margin-top:12px;overflow:hidden}
+        .comp-card-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+        /* Head to head table */
+        .h2h-section{margin-bottom:28px}
+        .sec-title{font-size:1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+        .h2h-table{width:100%;border-collapse:collapse;font-size:.85rem}
+        .h2h-table th{text-align:left;padding:10px 12px;color:#8b949e;font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .h2h-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .h2h-table tr:hover td{background:rgba(255,255,255,0.02)}
+        .winner{color:#00e676;font-weight:600}
+        .loser{color:#ff5252}
+        .pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600}
+        .pill-win{background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2)}
+        .pill-lose{background:rgba(255,82,82,0.08);color:#ff5252;border:1px solid rgba(255,82,82,0.15)}
+        .pill-tie{background:rgba(255,255,255,0.05);color:#8b949e;border:1px solid rgba(255,255,255,0.08)}
+
+        /* CTA */
+        .cta-box{text-align:center;padding:28px;background:linear-gradient(135deg,rgba(123,44,191,0.06),rgba(0,212,255,0.06));border:1px solid rgba(255,255,255,0.06);border-radius:16px;margin-top:28px}
+        .cta-box h3{font-size:1.05rem;font-weight:700;margin-bottom:6px}
+        .cta-box p{color:#8b949e;font-size:.85rem;margin-bottom:14px}
+        .btn-cta{display:inline-block;padding:11px 28px;border-radius:10px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;text-decoration:none;font-size:.9rem;font-weight:600;transition:opacity .2s;margin:0 6px}
+        .btn-cta:hover{opacity:.85}
+
+        .footer{text-align:center;padding:24px;color:#484f58;font-size:.72rem;border-top:1px solid rgba(255,255,255,0.04);margin-top:40px}
+
+        @media(max-width:600px){
+            .hero h1{font-size:1.4rem}
+            .podium{flex-direction:column;align-items:center}
+            .podium-item{width:100%;max-width:280px}
+            .podium-1 .podium-bar,.podium-2 .podium-bar,.podium-3 .podium-bar{min-height:auto;padding:16px}
+            .comp-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="/" class="nav-logo">AI1stSEO</a>
+    <div class="nav-links">
+        <a href="/aeo-tracker">Visibility Checker</a>
+        <a href="/citation-velocity">Velocity Tracker</a>
+        <a href="/">Home</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="hero">
+        <span class="hero-badge">Competitive Intelligence</span>
+        <h1>Who Does AI <span>Recommend More?</span></h1>
+        <p>Compare your brand against competitors to see who AI models cite more often.</p>
+    </div>
+
+    <div class="form-card">
+        <div class="form-section-title">Your Brand</div>
+        <div class="brand-inputs" id="brand-inputs">
+            <div class="brand-row you">
+                <span class="num">You</span>
+                <input type="text" placeholder="Brand name" class="b-name" value="">
+                <input type="text" placeholder="domain.com" class="b-domain" value="">
+            </div>
+        </div>
+        <div class="form-section-title" style="margin-top:16px;">Competitors</div>
+        <div class="brand-inputs" id="comp-inputs">
+            <div class="brand-row comp">
+                <span class="num">1</span>
+                <input type="text" placeholder="Competitor name" class="b-name">
+                <input type="text" placeholder="domain.com" class="b-domain">
+            </div>
+            <div class="brand-row comp">
+                <span class="num">2</span>
+                <input type="text" placeholder="Competitor name" class="b-name">
+                <input type="text" placeholder="domain.com" class="b-domain">
+            </div>
+        </div>
+        <button class="add-comp" onclick="addComp()">+ Add Competitor</button>
+
+        <div class="form-field" style="margin-top:20px;">
+            <label>Industry queries (one per line)</label>
+            <textarea id="f-queries" placeholder="best tools in your industry&#10;top companies for [service]"></textarea>
+            <div class="form-hint">Same queries are asked about every brand. Leave empty for auto-generated queries.</div>
+        </div>
+        <button class="btn-compare" id="btn-compare" onclick="runCompare()">Compare AI Visibility</button>
+    </div>
+
+    <div class="loading" id="loading"><div class="spinner"></div><p style="color:#8b949e;font-size:.9rem;">Scanning all brands across AI models…</p><p style="color:#484f58;font-size:.78rem;margin-top:4px;">This may take 15-30 seconds</p></div>
+
+    <div class="results" id="results"></div>
+</div>
+
+<div class="footer">AI1stSEO — AI-First SEO Platform · AEO · GEO · SEO</div>
+
+<script>
+const API_BASE=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'':'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const LLM_NAMES={openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',groq:'Groq AI'};
+const COLORS=['#00d4ff','#ff5252','#ffab00','#ce93d8','#00e676'];
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+let compCount=2;
+function addComp(){
+    if(compCount>=4)return;
+    compCount++;
+    const div=document.createElement('div');
+    div.className='brand-row comp';
+    div.innerHTML='<span class="num">'+compCount+'</span><input type="text" placeholder="Competitor name" class="b-name"><input type="text" placeholder="domain.com" class="b-domain">';
+    document.getElementById('comp-inputs').appendChild(div);
+    if(compCount>=4)document.querySelector('.add-comp').style.display='none';
+}
+
+async function runCompare(){
+    // Gather brands
+    const brands=[];
+    const youRow=document.querySelector('#brand-inputs .brand-row');
+    const yName=youRow.querySelector('.b-name').value.trim();
+    const yDomain=youRow.querySelector('.b-domain').value.trim().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+    if(!yName||!yDomain){alert('Enter your brand name and domain.');return}
+    brands.push({name:yName,domain:yDomain});
+
+    document.querySelectorAll('#comp-inputs .brand-row').forEach(row=>{
+        const n=row.querySelector('.b-name').value.trim();
+        const d=row.querySelector('.b-domain').value.trim().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+        if(n&&d) brands.push({name:n,domain:d});
+    });
+    if(brands.length<2){alert('Add at least one competitor.');return}
+
+    const rawQ=document.getElementById('f-queries').value.trim();
+    const queries=rawQ?rawQ.split('\n').map(q=>q.trim()).filter(Boolean):['best '+yName+' alternatives','top tools like '+yDomain,'what is '+yName];
+
+    const btn=document.getElementById('btn-compare');
+    const loading=document.getElementById('loading');
+    const results=document.getElementById('results');
+    btn.disabled=true;btn.textContent='Comparing…';
+    loading.style.display='block';results.style.display='none';
+    loading.scrollIntoView({behavior:'smooth',block:'center'});
+
+    try{
+        const r=await fetch(API_BASE+'/api/aeo-tracker/compare',{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({brands,queries})
+        });
+        const d=await r.json();
+        if(d.status!=='ok')throw new Error(d.error||'Comparison failed');
+        loading.style.display='none';
+        results.style.display='block';
+        renderComparison(d);
+        results.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(e){
+        loading.style.display='none';
+        results.style.display='block';
+        results.innerHTML='<div style="text-align:center;padding:40px"><p style="color:#ff8a80">'+esc(e.message)+'</p></div>';
+    }finally{
+        btn.disabled=false;btn.textContent='Compare AI Visibility';
+    }
+}
+</script>
+<script>
+function renderComparison(data){
+    const comp=data.comparison||[];
+    const queries=data.queries||[];
+    let h='';
+
+    // Podium
+    h+='<div class="podium">';
+    for(let i=0;i<Math.min(comp.length,3);i++){
+        const b=comp[i];
+        const rank=i+1;
+        const medals=['🥇','🥈','🥉'];
+        h+=`<div class="podium-item podium-${rank}">
+            <div class="podium-bar">
+                <div class="podium-rank">${medals[i]}</div>
+                <div class="podium-brand">${esc(b.brand)}</div>
+                <div class="podium-domain">${esc(b.domain)}</div>
+                <div class="podium-score">${b.visibility_score}% visibility</div>
+            </div>
+        </div>`;
+    }
+    h+='</div>';
+
+    // Score cards
+    h+='<div class="comp-grid">';
+    for(let i=0;i<comp.length;i++){
+        const b=comp[i];
+        const color=COLORS[i%COLORS.length];
+        const sc=b.visibility_score>=50?'#00e676':b.visibility_score>0?'#ffab00':'#ff5252';
+        h+=`<div class="comp-card">
+            <div class="comp-card-brand">${esc(b.brand)}</div>
+            <div class="comp-card-domain">${esc(b.domain)}</div>
+            <div class="comp-card-score" style="color:${sc}">${b.visibility_score}%</div>
+            <div class="comp-card-label">${b.total_cited}/${b.total_scanned} citations</div>
+            <div class="comp-card-bar"><div class="comp-card-fill" style="width:${b.visibility_score}%;background:${color}"></div></div>
+        </div>`;
+    }
+    h+='</div>';
+
+    // Head-to-head by query
+    h+='<div class="h2h-section"><div class="sec-title">🔍 Head-to-Head by Query</div>';
+    h+='<div style="overflow-x:auto"><table class="h2h-table"><thead><tr><th>Query</th>';
+    for(const b of comp) h+='<th>'+esc(b.brand)+'</th>';
+    h+='</tr></thead><tbody>';
+
+    for(const q of queries){
+        h+='<tr><td>'+esc(q)+'</td>';
+        let bestRate=-1;
+        const rates=comp.map(b=>{
+            const qp=b.query_performance[q];
+            return qp?qp.rate:0;
+        });
+        bestRate=Math.max(...rates);
+
+        for(let i=0;i<comp.length;i++){
+            const qp=comp[i].query_performance[q];
+            const rate=qp?qp.rate:0;
+            const cited=qp?qp.cited:0;
+            const total=qp?qp.total:0;
+            const isWin=rate===bestRate&&rate>0;
+            const cls=isWin?'pill-win':(rate>0?'pill-tie':'pill-lose');
+            h+=`<td><span class="pill ${cls}">${rate}%</span> <span style="color:#484f58;font-size:.72rem">(${cited}/${total})</span></td>`;
+        }
+        h+='</tr>';
+    }
+    h+='</tbody></table></div></div>';
+
+    // Head-to-head by LLM
+    const allLlms=new Set();
+    for(const b of comp) Object.keys(b.llm_performance).forEach(k=>allLlms.add(k));
+
+    if(allLlms.size>0){
+        h+='<div class="h2h-section"><div class="sec-title">🤖 Head-to-Head by AI Model</div>';
+        h+='<div style="overflow-x:auto"><table class="h2h-table"><thead><tr><th>AI Model</th>';
+        for(const b of comp) h+='<th>'+esc(b.brand)+'</th>';
+        h+='</tr></thead><tbody>';
+
+        for(const llm of allLlms){
+            const name=LLM_NAMES[llm]||llm;
+            h+='<tr><td>'+esc(name)+'</td>';
+            let bestRate=-1;
+            const rates=comp.map(b=>{
+                const lp=b.llm_performance[llm];
+                return lp?lp.rate:0;
+            });
+            bestRate=Math.max(...rates);
+
+            for(let i=0;i<comp.length;i++){
+                const lp=comp[i].llm_performance[llm];
+                const rate=lp?lp.rate:0;
+                const cited=lp?lp.cited:0;
+                const total=lp?lp.total:0;
+                const isWin=rate===bestRate&&rate>0;
+                const cls=isWin?'pill-win':(rate>0?'pill-tie':'pill-lose');
+                h+=`<td><span class="pill ${cls}">${rate}%</span> <span style="color:#484f58;font-size:.72rem">(${cited}/${total})</span></td>`;
+            }
+            h+='</tr>';
+        }
+        h+='</tbody></table></div></div>';
+    }
+
+    // CTA
+    h+=`<div class="cta-box">
+        <h3>Want to Improve Your AI Ranking?</h3>
+        <p>Run a detailed scan or track your visibility over time.</p>
+        <a href="/aeo-tracker" class="btn-cta">Full AI Scan →</a>
+        <a href="/citation-velocity" class="btn-cta" style="background:linear-gradient(90deg,#7b2cbf,#ce93d8)">Track Over Time →</a>
+    </div>`;
+
+    document.getElementById('results').innerHTML=h;
+}
+</script>
+</body>
+</html>
