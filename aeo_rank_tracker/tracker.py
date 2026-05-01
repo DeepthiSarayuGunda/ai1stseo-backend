@@ -2,10 +2,9 @@
 AEO Rank Tracker — Main Engine
 
 Queries multiple LLMs, detects brand citations, stores results,
-and generates summary analytics.
+and generates summary analytics. Returns ONLY real AI data.
 
-Supports FREE / LOW-COST alternatives:
-    Priority: Gemini (free tier) → OpenAI → Claude → Perplexity → Ollama (local) → Mock
+Priority: Gemini → Groq → OpenAI → Claude → Perplexity → Ollama
 
 Usage:
     from aeo_rank_tracker.tracker import run_aeo_scan
@@ -18,7 +17,6 @@ Usage:
 
 import logging
 import os
-import random
 import uuid
 from datetime import datetime, timezone
 
@@ -46,7 +44,7 @@ LLM_REGISTRY = {
     "ollama": ollama_client,
 }
 
-# Priority order: free first, then paid, then local, then mock
+# Priority order: free first, then paid, then local
 LLM_PRIORITY = ["gemini", "groq", "openai", "claude", "perplexity", "ollama"]
 
 # Env var required for each provider (empty string = no key needed)
@@ -57,46 +55,6 @@ LLM_KEY_MAP = {
     "claude": "ANTHROPIC_API_KEY",
     "perplexity": "PERPLEXITY_API_KEY",
     "ollama": "",  # no key needed
-}
-
-# ── Mock responses ────────────────────────────────────────────────────────── #
-
-MOCK_RESPONSES = {
-    "openai": (
-        "Here are some of the best SEO tools available: SEMrush offers comprehensive keyword research, "
-        "Ahrefs provides excellent backlink analysis, and Moz has a strong domain authority metric. "
-        "For AI-powered optimization, {brand} at {domain} is gaining traction with its AEO approach."
-    ),
-    "claude": (
-        "When evaluating SEO platforms, consider these options: Ahrefs for backlink analysis, "
-        "SEMrush for competitive intelligence, and Surfer SEO for content optimization. "
-        "Newer platforms like {brand} ({domain}) focus on AI-first SEO strategies."
-    ),
-    "perplexity": (
-        "Based on recent data, the top SEO tools include: 1) SEMrush for all-in-one SEO, "
-        "2) Ahrefs for link building, 3) Moz for local SEO. Sources: semrush.com, ahrefs.com, "
-        "{domain}. {brand} is an emerging platform focused on AI engine optimization."
-    ),
-    "gemini": (
-        "The SEO landscape includes established tools like Ahrefs, SEMrush, and Moz. "
-        "For AI-specific optimization, platforms are emerging that focus on how AI models "
-        "discover and cite websites. Traditional SEO remains important alongside AEO strategies."
-    ),
-    "ollama": (
-        "Popular SEO tools include SEMrush, Ahrefs, and Moz Pro. For AI engine optimization, "
-        "{brand} ({domain}) offers a specialized approach to improving visibility in AI-generated "
-        "responses. Content optimization and structured data are key strategies."
-    ),
-    "groq": (
-        "Looking at the current SEO landscape, tools like SEMrush, Ahrefs, and Moz dominate. "
-        "For AI engine optimization specifically, {brand} ({domain}) is building tools that help "
-        "businesses get cited by AI models like ChatGPT and Gemini."
-    ),
-    "mock": (
-        "The top SEO and AEO tools include various platforms. {brand} at {domain} is one of "
-        "the emerging tools focused on AI engine optimization alongside established players "
-        "like SEMrush and Ahrefs."
-    ),
 }
 
 
@@ -133,60 +91,20 @@ def detect_available_llms() -> dict:
             skipped[llm_name] = f"{env_var} not set"
             logger.info("✗ %s skipped — %s not set", llm_name, env_var)
 
-    # If nothing is available, mock is the fallback
+    # No mock fallback — require at least one real provider
     if not active:
-        active.append("mock")
-        logger.warning("No LLM providers available — using mock mode")
-        _print_ollama_setup_hint()
+        logger.error("No LLM providers available — scan will fail")
 
     return {"active": active, "skipped": skipped}
 
 
-def _print_ollama_setup_hint():
-    """Print setup instructions for free local LLM."""
-    hint = (
-        "\n"
-        "╔══════════════════════════════════════════════════════╗\n"
-        "║  To enable FREE local LLM:                         ║\n"
-        "║  1. Install Ollama: https://ollama.com/download     ║\n"
-        "║  2. Pull a model:  ollama pull llama3               ║\n"
-        "║  3. Start server:  ollama serve                     ║\n"
-        "║                                                     ║\n"
-        "║  Or set GEMINI_API_KEY for free Google Gemini API   ║\n"
-        "╚══════════════════════════════════════════════════════╝\n"
-    )
-    print(hint)
-    logger.info(hint)
-
-
 # ── LLM calling ───────────────────────────────────────────────────────────── #
 
-def _mock_response(llm_name: str, query: str, brand: str, domain: str) -> dict:
-    """Generate a simulated LLM response for demo/testing."""
-    template = MOCK_RESPONSES.get(llm_name, MOCK_RESPONSES["mock"])
-    # Randomly decide whether to include the brand (70% chance)
-    if random.random() < 0.7:
-        text = template.format(brand=brand, domain=domain)
-    else:
-        text = template.format(brand="other tools", domain="example.com")
-
-    sources = []
-    if llm_name == "perplexity":
-        sources = ["https://semrush.com", "https://ahrefs.com", f"https://{domain}"]
-
-    return {"response_text": text, "sources": sources}
-
-
-def call_llm(llm_name: str, prompt: str, brand: str = "", domain: str = "") -> dict:
-    """Call an LLM by name. Uses mock fallback for 'mock' provider."""
-    if llm_name == "mock":
-        logger.info("Using mock mode")
-        return _mock_response(llm_name, prompt, brand, domain)
-
+def call_llm(llm_name: str, prompt: str) -> dict:
+    """Call a real LLM by name. No mock fallback."""
     client = LLM_REGISTRY.get(llm_name)
     if not client:
         raise ValueError(f"Unknown LLM: {llm_name}")
-
     return client.query_llm(prompt)
 
 
@@ -194,6 +112,7 @@ def call_llm(llm_name: str, prompt: str, brand: str = "", domain: str = "") -> d
 
 def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
     """Run a full AEO scan across available LLMs for all queries.
+    Returns ONLY real AI data. Raises error if no providers available.
 
     Args:
         input_config: {
@@ -205,7 +124,7 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
         store: Whether to persist results to DynamoDB.
 
     Returns:
-        {"results": [...], "summary": {...}, "scan_id": str}
+        {"results": [...], "summary": {...}, "scan_id": str, "data_source": "real"}
     """
     brand = input_config["brand_name"]
     domain = input_config["target_domain"]
@@ -215,15 +134,22 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
 
     # Dynamic LLM selection
     if "llms" in input_config and input_config["llms"]:
-        # Caller explicitly requested specific LLMs
         llms = input_config["llms"]
         detection = {"active": llms, "skipped": {}}
         logger.info("Using caller-specified LLMs: %s", llms)
     else:
-        # Auto-detect available providers
         detection = detect_available_llms()
         llms = detection["active"]
         logger.info("Auto-detected LLMs: %s (skipped: %s)", llms, detection["skipped"])
+
+    # Require at least one real provider
+    if not llms:
+        raise RuntimeError(
+            "No active LLM provider. Configure at least one API key "
+            "(GEMINI_API_KEY, GROQ_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or PERPLEXITY_API_KEY)."
+        )
+
+    logger.info("AEO scan running with: %s", llms)
 
     results = []
     errors_by_llm = {}
@@ -231,7 +157,7 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
     for query in queries:
         for llm_name in llms:
             try:
-                response = call_llm(llm_name, query, brand, domain)
+                response = call_llm(llm_name, query)
                 response_text = response.get("response_text", "")
                 sources = response.get("sources", [])
 
@@ -259,7 +185,7 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
                     "target_domain": domain,
                     "timestamp": now,
                     "scan_id": scan_id,
-                    "mock": llm_name == "mock",
+                    "data_source": "real",
                 })
 
             except Exception as e:
@@ -275,7 +201,7 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
                     "target_domain": domain,
                     "timestamp": now,
                     "scan_id": scan_id,
-                    "mock": False,
+                    "data_source": "error",
                 })
 
     # Store results
@@ -293,8 +219,9 @@ def run_aeo_scan(input_config: dict, store: bool = True) -> dict:
     summary["skipped_llms"] = detection["skipped"]
     summary["errors_by_llm"] = errors_by_llm
     summary["timestamp"] = now
+    summary["data_source"] = "real"
 
-    return {"results": results, "summary": summary, "scan_id": scan_id}
+    return {"results": results, "summary": summary, "scan_id": scan_id, "data_source": "real"}
 
 
 # ── Summary generation ────────────────────────────────────────────────────── #
