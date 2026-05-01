@@ -112,21 +112,25 @@ def lambda_handler(event=None, context=None):
 
     # ── Step 6: Publish to Postiz ─────────────────────────────────────── #
     try:
-        from content_pipeline.publisher import publish_to_postiz
-        from content_pipeline.storage import get_image_url
+        from content_pipeline.publisher import publish_to_postiz, schedule_posts_throughout_day, is_configured
         logger.info("Step 6: Publishing to Postiz...")
 
-        for i, post in enumerate(social_posts):
-            img_url = None
-            if i < len(s3_keys["images"]) and s3_keys["images"][i]:
-                img_url = get_image_url(s3_keys["images"][i])
+        if not is_configured():
+            logger.warning("Postiz not configured — skipping publishing")
+            results["postiz_results"].append({"success": False, "error": "POSTIZ_API_KEY not set"})
+        else:
+            # Collect image bytes for each post
+            img_list = []
+            for i in range(len(social_posts)):
+                if i < len(image_keys) and image_keys[i].get("bytes"):
+                    img_list.append(image_keys[i]["bytes"])
+                else:
+                    img_list.append(None)
 
-            pub_result = publish_to_postiz(post, image_url=img_url)
-            results["postiz_results"].append({
-                "article": post.get("article_title", "")[:50],
-                "success": pub_result.get("success", False),
-                "error": pub_result.get("error"),
-            })
+            # Schedule posts spread across the day
+            pub_results = schedule_posts_throughout_day(social_posts, img_list)
+            results["postiz_results"] = pub_results
+            logger.info("Published %d posts to Postiz", len(pub_results))
     except Exception as e:
         logger.error("Postiz publishing failed: %s", e)
         results["errors"].append(f"postiz: {str(e)[:200]}")
