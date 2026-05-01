@@ -4116,6 +4116,11 @@ def serve_aeo_tracker():
     """AEO Rank Tracker — Multi-LLM citation detection UI."""
     return send_from_directory('.', 'aeo-tracker.html')
 
+@app.route('/citation-velocity')
+def serve_citation_velocity():
+    """Citation Velocity Tracker — monitor AI citations over time."""
+    return send_from_directory('.', 'citation-velocity.html')
+
 
 # ============== OUTREACH GENERATOR (Unlinked Mentions) ==============
 

@@ -12,7 +12,7 @@ import logging
 from flask import Blueprint, jsonify, request
 
 from aeo_rank_tracker.tracker import run_aeo_scan, generate_summary, detect_available_llms
-from aeo_rank_tracker.utils.db import get_history
+from aeo_rank_tracker.utils.db import get_history, get_velocity_data, get_tracked_brands
 
 logger = logging.getLogger(__name__)
 
@@ -156,3 +156,45 @@ def provider_status():
     except Exception as e:
         logger.exception("Failed to detect providers")
         return jsonify({"error": str(e), "status": "error"}), 500
+
+
+# ── Citation Velocity Tracker endpoints ───────────────────────────────────── #
+
+@aeo_tracker_bp.route("/api/aeo-tracker/velocity", methods=["GET"])
+def citation_velocity():
+    """Get citation velocity data for a brand over time.
+
+    Query params: brand (required), limit (default 500)
+
+    Returns daily citation rates, per-LLM trends, per-query trends, and totals.
+    """
+    brand = request.args.get("brand")
+    if not brand:
+        return jsonify({"error": "brand parameter is required"}), 400
+
+    try:
+        limit = int(request.args.get("limit", 500))
+        data = get_velocity_data(brand=brand, limit=limit)
+        return jsonify({"status": "ok", "brand": brand, **data})
+    except Exception as e:
+        logger.warning("Failed to get velocity data: %s", e)
+        return jsonify({
+            "status": "ok",
+            "brand": brand,
+            "daily": [],
+            "by_llm": {},
+            "by_query": {},
+            "totals": {"total": 0, "cited": 0, "rate": 0, "scans": 0},
+            "db_error": str(e)[:200],
+        })
+
+
+@aeo_tracker_bp.route("/api/aeo-tracker/brands", methods=["GET"])
+def tracked_brands():
+    """Get all brands that have been scanned with their stats."""
+    try:
+        brands = get_tracked_brands(limit=int(request.args.get("limit", 50)))
+        return jsonify({"status": "ok", "count": len(brands), "brands": brands})
+    except Exception as e:
+        logger.warning("Failed to get brands: %s", e)
+        return jsonify({"status": "ok", "count": 0, "brands": [], "db_error": str(e)[:200]})

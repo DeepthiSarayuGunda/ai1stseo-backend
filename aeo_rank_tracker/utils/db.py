@@ -108,3 +108,141 @@ def get_history(query: str = None, llm: str = None, brand: str = None,
     rows = [_deserialize(i) for i in resp.get("Items", [])]
     rows.sort(key=lambda r: r.get("timestamp", ""), reverse=True)
     return rows[:limit]
+
+
+def get_velocity_data(brand: str, limit: int = 500) -> dict:
+    """Aggregate scan results into daily velocity metrics for a brand.
+
+    Returns:
+        {
+            "daily": [{"date": "2026-05-01", "total": 6, "cited": 3, "rate": 50.0}, ...],
+            "by_llm": {"gemini": [{"date": ..., "total": ..., "cited": ..., "rate": ...}], ...},
+            "by_query": {"what is X": [{"date": ..., "total": ..., "cited": ..., "rate": ...}], ...},
+            "totals": {"total": 20, "cited": 8, "rate": 40.0, "scans": 5, "first_scan": "...", "last_scan": "..."},
+        }
+    """
+    table = _get_table()
+    scan_kwargs = {"Limit": min(limit * 3, 1500)}
+    if brand:
+        scan_kwargs["FilterExpression"] = Attr("brand_name").eq(brand)
+
+    resp = table.scan(**scan_kwargs)
+    rows = [_deserialize(i) for i in resp.get("Items", [])]
+
+    if not rows:
+        return {"daily": [], "by_llm": {}, "by_query": {}, "totals": {"total": 0, "cited": 0, "rate": 0, "scans": 0}}
+
+    # Sort by timestamp
+    rows.sort(key=lambda r: r.get("timestamp", ""))
+
+    # Aggregate by date
+    from collections import defaultdict
+    daily = defaultdict(lambda: {"total": 0, "cited": 0})
+    by_llm = defaultdict(lambda: defaultdict(lambda: {"total": 0, "cited": 0}))
+    by_query = defaultdict(lambda: defaultdict(lambda: {"total": 0, "cited": 0}))
+    scan_ids = set()
+
+    for r in rows:
+        ts = r.get("timestamp", "")
+        date_str = ts[:10] if len(ts) >= 10 else "unknown"
+        llm = r.get("llm", "unknown")
+        query = r.get("query", "unknown")
+        cited = r.get("citation_found", False)
+
+        daily[date_str]["total"] += 1
+        if cited:
+            daily[date_str]["cited"] += 1
+
+        by_llm[llm][date_str]["total"] += 1
+        if cited:
+            by_llm[llm][date_str]["cited"] += 1
+
+        by_query[query][date_str]["total"] += 1
+        if cited:
+            by_query[query][date_str]["cited"] += 1
+
+        if r.get("scan_id"):
+            scan_ids.add(r["scan_id"])
+
+    # Format daily
+    daily_list = []
+    for date_str in sorted(daily.keys()):
+        d = daily[date_str]
+        rate = round((d["cited"] / d["total"]) * 100, 1) if d["total"] else 0
+        daily_list.append({"date": date_str, "total": d["total"], "cited": d["cited"], "rate": rate})
+
+    # Format by_llm
+    llm_data = {}
+    for llm, dates in by_llm.items():
+        llm_data[llm] = []
+        for date_str in sorted(dates.keys()):
+            d = dates[date_str]
+            rate = round((d["cited"] / d["total"]) * 100, 1) if d["total"] else 0
+            llm_data[llm].append({"date": date_str, "total": d["total"], "cited": d["cited"], "rate": rate})
+
+    # Format by_query
+    query_data = {}
+    for query, dates in by_query.items():
+        query_data[query] = []
+        for date_str in sorted(dates.keys()):
+            d = dates[date_str]
+            rate = round((d["cited"] / d["total"]) * 100, 1) if d["total"] else 0
+            query_data[query].append({"date": date_str, "total": d["total"], "cited": d["cited"], "rate": rate})
+
+    # Totals
+    total = len(rows)
+    cited = sum(1 for r in rows if r.get("citation_found"))
+    rate = round((cited / total) * 100, 1) if total else 0
+    timestamps = [r.get("timestamp", "") for r in rows if r.get("timestamp")]
+
+    return {
+        "daily": daily_list,
+        "by_llm": llm_data,
+        "by_query": query_data,
+        "totals": {
+            "total": total,
+            "cited": cited,
+            "rate": rate,
+            "scans": len(scan_ids),
+            "first_scan": min(timestamps) if timestamps else None,
+            "last_scan": max(timestamps) if timestamps else None,
+        },
+    }
+
+
+def get_tracked_brands(limit: int = 100) -> list[dict]:
+    """Get all brands that have been scanned, with their latest stats."""
+    table = _get_table()
+    resp = table.scan(Limit=min(limit * 10, 1000))
+    rows = [_deserialize(i) for i in resp.get("Items", [])]
+
+    from collections import defaultdict
+    brands = defaultdict(lambda: {"total": 0, "cited": 0, "last_scan": "", "domain": ""})
+
+    for r in rows:
+        b = r.get("brand_name", "")
+        if not b:
+            continue
+        brands[b]["total"] += 1
+        if r.get("citation_found"):
+            brands[b]["cited"] += 1
+        ts = r.get("timestamp", "")
+        if ts > brands[b]["last_scan"]:
+            brands[b]["last_scan"] = ts
+        if r.get("target_domain"):
+            brands[b]["domain"] = r["target_domain"]
+
+    result = []
+    for name, stats in brands.items():
+        rate = round((stats["cited"] / stats["total"]) * 100, 1) if stats["total"] else 0
+        result.append({
+            "brand": name,
+            "domain": stats["domain"],
+            "total": stats["total"],
+            "cited": stats["cited"],
+            "rate": rate,
+            "last_scan": stats["last_scan"],
+        })
+
+    result.sort(key=lambda x: x["last_scan"], reverse=True)
+    return result[:limit]
