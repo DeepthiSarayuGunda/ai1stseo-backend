@@ -1,6 +1,7 @@
 """
 Bedrock LLM clients for the content pipeline.
-Uses Nova for long-form articles and Haiku for summaries/social content.
+Uses Nova for all content generation (articles, summaries, social).
+Claude/Haiku will be added in 3rd week of May for quality comparison.
 """
 
 import json
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 REGION = os.environ.get("BEDROCK_REGION", os.environ.get("AWS_REGION", "us-east-1"))
 NOVA_MODEL = os.environ.get("NOVA_MODEL", "us.amazon.nova-lite-v1:0")
-HAIKU_MODEL = os.environ.get("HAIKU_MODEL", "anthropic.claude-3-haiku-20240307-v1:0")
+NOVA_PRO_MODEL = os.environ.get("NOVA_PRO_MODEL", "amazon.nova-pro-v1:0")
 
 _client = None
 
@@ -27,7 +28,24 @@ def _get_client():
 
 
 def generate_with_nova(prompt: str, max_tokens: int = 4096) -> str:
-    """Generate long-form content using Amazon Nova."""
+    """Generate long-form content using Amazon Nova Pro."""
+    client = _get_client()
+    body = json.dumps({
+        "messages": [{"role": "user", "content": [{"text": prompt}]}],
+        "inferenceConfig": {"maxTokens": max_tokens, "temperature": 0.7},
+    })
+    resp = client.invoke_model(
+        modelId=NOVA_PRO_MODEL,
+        contentType="application/json",
+        accept="application/json",
+        body=body,
+    )
+    result = json.loads(resp["body"].read())
+    return result["output"]["message"]["content"][0]["text"]
+
+
+def generate_with_haiku(prompt: str, max_tokens: int = 1024) -> str:
+    """Generate summaries and social content using Nova Lite (Haiku replacement until May week 3)."""
     client = _get_client()
     body = json.dumps({
         "messages": [{"role": "user", "content": [{"text": prompt}]}],
@@ -41,21 +59,3 @@ def generate_with_nova(prompt: str, max_tokens: int = 4096) -> str:
     )
     result = json.loads(resp["body"].read())
     return result["output"]["message"]["content"][0]["text"]
-
-
-def generate_with_haiku(prompt: str, max_tokens: int = 1024) -> str:
-    """Generate summaries and social content using Claude Haiku."""
-    client = _get_client()
-    body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}],
-    })
-    resp = client.invoke_model(
-        modelId=HAIKU_MODEL,
-        contentType="application/json",
-        accept="application/json",
-        body=body,
-    )
-    result = json.loads(resp["body"].read())
-    return result["content"][0]["text"]
