@@ -54,15 +54,42 @@ textarea::placeholder{color:rgba(255,255,255,0.25)}
 .tab:hover{border-color:rgba(236,72,153,0.2)}
 .tab .elapsed{font-size:0.65rem;color:rgba(255,255,255,0.25);margin-left:6px}
 
-.result-panel{display:none;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;position:relative}
+.result-panel{display:none;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;padding-top:52px;position:relative}
 .result-panel.active{display:block}
 .result-panel pre{white-space:pre-wrap;font-size:0.84rem;color:rgba(255,255,255,0.6);line-height:1.7;font-family:inherit}
 .result-panel .json-view{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:rgba(255,255,255,0.5);line-height:1.6}
 .copy-btn{padding:6px 14px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:all 0.2s}
 .copy-btn:hover{background:rgba(236,72,153,0.1);border-color:rgba(236,72,153,0.3);color:#f9a8d4}
-.panel-actions{position:absolute;top:12px;right:12px;display:flex;gap:8px}
+.panel-actions{position:absolute;top:12px;right:12px;display:flex;gap:8px;z-index:2}
 .publish-btn{padding:6px 14px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);color:#c4b5fd;transition:all 0.2s}
 .publish-btn:hover{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:#e9d5ff}
+
+/* Platform preview cards */
+.plat-preview{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin-top:4px}
+.plat-preview .plat-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.plat-preview .plat-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.plat-preview .plat-user{font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.7)}
+.plat-preview .plat-handle{font-size:0.72rem;color:rgba(255,255,255,0.3)}
+.plat-preview .plat-body{font-size:0.85rem;color:rgba(255,255,255,0.6);line-height:1.65;white-space:pre-wrap}
+.plat-preview .plat-hashtags{margin-top:10px;font-size:0.78rem;color:#818cf8;line-height:1.5;word-break:break-all}
+.plat-preview .plat-meta{margin-top:10px;font-size:0.7rem;color:rgba(255,255,255,0.25);display:flex;gap:16px}
+
+/* Thread view */
+.thread-item{background:rgba(255,255,255,0.02);border-left:2px solid rgba(139,92,246,0.3);padding:10px 14px;margin:8px 0;border-radius:0 8px 8px 0;font-size:0.82rem;color:rgba(255,255,255,0.55);line-height:1.55}
+.thread-num{font-size:0.68rem;font-weight:700;color:#8b5cf6;margin-bottom:4px}
+
+/* Email preview */
+.email-preview{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden}
+.email-subject{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:700;font-size:0.88rem;color:rgba(255,255,255,0.7)}
+.email-preview-text{padding:6px 16px;font-size:0.75rem;color:rgba(255,255,255,0.3);border-bottom:1px solid rgba(255,255,255,0.04)}
+.email-body{padding:16px;font-size:0.84rem;color:rgba(255,255,255,0.55);line-height:1.65;white-space:pre-wrap}
+.email-cta{margin:12px 16px 16px;display:inline-block;padding:10px 24px;border-radius:8px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;font-weight:700;font-size:0.82rem}
+.email-ps{padding:0 16px 16px;font-size:0.78rem;color:rgba(255,255,255,0.35);font-style:italic}
+
+/* Video script */
+.script-section{margin:8px 0;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.02);border-left:3px solid var(--sc,#8b5cf6)}
+.script-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sc,#8b5cf6);margin-bottom:4px}
+.script-text{font-size:0.84rem;color:rgba(255,255,255,0.55);line-height:1.55}
 
 .meta-bar{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:0.72rem;color:rgba(255,255,255,0.3)}
 .meta-bar span{display:flex;align-items:center;gap:4px}
@@ -217,21 +244,81 @@ if(r.status==='error'){
 panel.innerHTML='<pre style="color:#f87171;">Error: '+r.error+'</pre>';
 }else{
 const content=r.content;
-let display='';
-if(typeof content==='string'){
-display=content;
-}else if(typeof content==='object'&&content!==null){
-display=JSON.stringify(content,null,2);
+let textForCopy='';
+let html='';
+
+if(key==='linkedin'||key==='facebook'){
+// Simple text post preview
+const text=typeof content==='string'?content:JSON.stringify(content);
+textForCopy=text;
+html=`<div class="plat-preview">
+<div class="plat-header"><div class="plat-avatar">You</div><div><div class="plat-user">Your Brand</div><div class="plat-handle">${key==='linkedin'?'LinkedIn Post':'Facebook Post'} · Just now</div></div></div>
+<div class="plat-body">${escHtml(text)}</div>
+<div class="plat-meta"><span>👍 Like</span><span>💬 Comment</span><span>🔄 Share</span></div>
+</div>`;
+}else if(key==='twitter'){
+const parsed=typeof content==='object'?content:tryParse(content);
+const tweet=parsed?.single_tweet||String(content);
+const thread=parsed?.thread||[];
+textForCopy=tweet+(thread.length?'\n\n---THREAD---\n'+thread.join('\n'):'');
+html=`<div class="plat-preview">
+<div class="plat-header"><div class="plat-avatar">You</div><div><div class="plat-user">Your Brand</div><div class="plat-handle">@yourbrand · now</div></div></div>
+<div class="plat-body">${escHtml(tweet)}</div>
+<div class="plat-meta"><span>💬 Reply</span><span>🔄 Repost</span><span>❤️ Like</span></div>
+</div>`;
+if(thread.length){
+html+='<div style="margin-top:12px;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);">Thread version:</div>';
+thread.forEach((t,i)=>{html+=`<div class="thread-item"><div class="thread-num">${i+1}/${thread.length}</div>${escHtml(t)}</div>`});
 }
-const textForCopy = typeof content==='string' ? content : JSON.stringify(content,null,2);
-const preClass = typeof content==='object'&&content!==null ? 'json-view' : '';
-panel.innerHTML=`
-<div class="panel-actions">
-  <button class="copy-btn" onclick="copyPanel('${key}')">Copy</button>
-  <button class="publish-btn" onclick="confirmPublish('${key}')">📤 Publish to ${r.platform}</button>
-</div>
-<pre class="${preClass}">${escHtml(display)}</pre>
-`;
+}else if(key==='instagram'){
+const parsed=typeof content==='object'?content:tryParse(content);
+const caption=parsed?.caption||String(content);
+const hashtags=parsed?.hashtags||'';
+textForCopy=caption+(hashtags?'\n\n'+hashtags:'');
+html=`<div class="plat-preview">
+<div style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:0.8rem;color:rgba(255,255,255,0.6);">📸 Your image here</div>
+<div class="plat-header"><div class="plat-avatar">You</div><div><div class="plat-user">yourbrand</div><div class="plat-handle">Instagram</div></div></div>
+<div class="plat-body">${escHtml(caption)}</div>
+${hashtags?'<div class="plat-hashtags">'+escHtml(hashtags)+'</div>':''}
+</div>`;
+}else if(key==='email'){
+const parsed=typeof content==='object'?content:tryParse(content);
+const subj=parsed?.subject_line||'Subject';
+const preview=parsed?.preview_text||'';
+const body=parsed?.body||String(content);
+const cta=parsed?.cta_text||'';
+const ps=parsed?.ps_line||'';
+textForCopy=`Subject: ${subj}\n\n${body}${cta?'\n\n['+cta+']':''}${ps?'\n\n'+ps:''}`;
+html=`<div class="email-preview">
+<div class="email-subject">📧 ${escHtml(subj)}</div>
+${preview?'<div class="email-preview-text">'+escHtml(preview)+'</div>':''}
+<div class="email-body">${escHtml(body)}</div>
+${cta?'<div><span class="email-cta">'+escHtml(cta)+'</span></div>':''}
+${ps?'<div class="email-ps">'+escHtml(ps)+'</div>':''}
+</div>`;
+}else if(key==='video'){
+const parsed=typeof content==='object'?content:tryParse(content);
+const sections=[
+{label:'HOOK (0-5s)',text:parsed?.hook,color:'#ec4899'},
+{label:'PROBLEM (5-15s)',text:parsed?.problem,color:'#f59e0b'},
+{label:'SOLUTION (15-40s)',text:parsed?.solution,color:'#8b5cf6'},
+{label:'PROOF (40-50s)',text:parsed?.proof,color:'#06b6d4'},
+{label:'CTA (50-60s)',text:parsed?.cta,color:'#34d399'},
+];
+textForCopy=sections.map(s=>s.label+':\n'+s.text).join('\n\n');
+if(parsed?.speaker_notes)textForCopy+='\n\nSPEAKER NOTES:\n'+parsed.speaker_notes;
+html='<div style="font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);margin-bottom:8px;">🎬 60-Second Video Script</div>';
+sections.forEach(s=>{
+if(s.text)html+=`<div class="script-section" style="--sc:${s.color}"><div class="script-label" style="color:${s.color}">${s.label}</div><div class="script-text">${escHtml(s.text)}</div></div>`;
+});
+if(parsed?.speaker_notes)html+=`<div style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:0.78rem;color:rgba(255,255,255,0.35);"><strong style="color:rgba(255,255,255,0.5);">Speaker Notes:</strong> ${escHtml(parsed.speaker_notes)}</div>`;
+}else{
+const text=typeof content==='string'?content:JSON.stringify(content,null,2);
+textForCopy=text;
+html=`<pre>${escHtml(text)}</pre>`;
+}
+
+panel.innerHTML=`<div class="panel-actions"><button class="copy-btn" onclick="copyPanel('${key}')">Copy</button><button class="publish-btn" onclick="confirmPublish('${key}')">📤 Publish to ${r.platform}</button></div>${html}`;
 panel.dataset.text=textForCopy;
 }
 panelsEl.appendChild(panel);
@@ -246,6 +333,8 @@ metaEl.innerHTML=`
 `;
 document.getElementById('results').style.display='block';
 }
+
+function tryParse(v){if(typeof v==='object'&&v!==null)return v;try{return JSON.parse(v)}catch(e){return null}}
 
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
