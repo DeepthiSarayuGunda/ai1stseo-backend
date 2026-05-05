@@ -635,40 +635,46 @@ async function load(){
   }catch(e){
     document.getElementById('loading').style.display='none';
     document.getElementById('dashboard').style.display='block';
-    // Render with demo data so sections aren't empty
+    // Render with demo data matching the exact structure render() expects
     render({
       multi_brand_scores:{brands:[
-        {brand:'AI1stSEO',geo_score:0.67,visibility_score:71,trend:'up',keywords_cited:14,total_keywords:20},
-        {brand:'SEMrush',geo_score:0.82,visibility_score:85,trend:'stable',keywords_cited:17,total_keywords:20},
-        {brand:'Ahrefs',geo_score:0.73,visibility_score:76,trend:'up',keywords_cited:15,total_keywords:20}
+        {brand:'AI1stSEO',geo_score:0.67,visibility_score:71,keywords_cited:14,keywords_probed:20,change_vs_last_week:{direction:'up',delta:0.08},provider_scores:{nova:0.75,claude:0.60,perplexity:0.70,groq:0.55,gemini:0.62}},
+        {brand:'SEMrush',geo_score:0.82,visibility_score:85,keywords_cited:17,keywords_probed:20,change_vs_last_week:{direction:'stable',delta:0.01},provider_scores:{nova:0.80,claude:0.85,perplexity:0.78,groq:0.72,gemini:0.80}},
+        {brand:'Ahrefs',geo_score:0.73,visibility_score:76,keywords_cited:15,keywords_probed:20,change_vs_last_week:{direction:'up',delta:0.05},provider_scores:{nova:0.70,claude:0.75,perplexity:0.80,groq:0.65,gemini:0.68}}
+      ],keyword_winners:{'best seo tool':{winning_brand:'SEMrush',geo_score:0.9},'ai seo optimization':{winning_brand:'AI1stSEO',geo_score:0.85},'keyword research':{winning_brand:'Ahrefs',geo_score:0.88},'geo optimization':{winning_brand:'AI1stSEO',geo_score:0.92},'content optimization':{winning_brand:'AI1stSEO',geo_score:0.78}}},
+      keyword_performance:{top_cited_keywords:[
+        {keyword:'ai seo optimization',geo_score:0.85},{keyword:'geo optimization tool',geo_score:0.92},{keyword:'aeo rank tracking',geo_score:0.78},{keyword:'ai visibility checker',geo_score:0.71},{keyword:'content optimization ai',geo_score:0.65}
+      ],competitor_beating_us:[
+        {keyword:'backlink checker',competitor:'Ahrefs',competitor_score:0.9,our_score:0.45,gap:0.45},
+        {keyword:'site audit tool',competitor:'SEMrush',competitor_score:0.85,our_score:0.55,gap:0.30}
+      ],engine_brand_citations:{
+        'Nova Lite':{most_cited_brand:'AI1stSEO',brands:{'AI1stSEO':{citation_rate:0.75},'SEMrush':{citation_rate:0.60},'Ahrefs':{citation_rate:0.55}}},
+        'Claude':{most_cited_brand:'SEMrush',brands:{'SEMrush':{citation_rate:0.85},'AI1stSEO':{citation_rate:0.60},'Ahrefs':{citation_rate:0.75}}},
+        'Perplexity':{most_cited_brand:'AI1stSEO',brands:{'AI1stSEO':{citation_rate:0.70},'Ahrefs':{citation_rate:0.80},'SEMrush':{citation_rate:0.65}}}
+      }},
+      competitor_matrix:{matrix:[
+        {brand:'SEMrush',geo_score:0.82,visibility_score:85,wow_direction:'stable',wow_change:0.01,provider_scores:{nova:0.80,claude:0.85,perplexity:0.78}},
+        {brand:'Ahrefs',geo_score:0.73,visibility_score:76,wow_direction:'up',wow_change:0.05,provider_scores:{nova:0.70,claude:0.75,perplexity:0.80}},
+        {brand:'AI1stSEO',geo_score:0.67,visibility_score:71,wow_direction:'up',wow_change:0.08,provider_scores:{nova:0.75,claude:0.60,perplexity:0.70}},
+        {brand:'Moz',geo_score:0.45,visibility_score:48,wow_direction:'down',wow_change:-0.03,provider_scores:{nova:0.40,claude:0.50,perplexity:0.42}}
+      ],engine_preferences:{
+        'Nova Lite':[{brand:'AI1stSEO',score:0.75},{brand:'SEMrush',score:0.70},{brand:'Ahrefs',score:0.65}],
+        'Claude':[{brand:'SEMrush',score:0.85},{brand:'Ahrefs',score:0.75},{brand:'AI1stSEO',score:0.60}],
+        'Perplexity':[{brand:'Ahrefs',score:0.80},{brand:'AI1stSEO',score:0.70},{brand:'SEMrush',score:0.65}]
+      }},
+      automation_status:{jobs:[
+        {name:'Weekly GEO Score',status:'healthy',cadence:'Every 7 days',last_run:'2026-05-04T10:00:00Z',total_runs:12,components:['Batch Probe','Score Calc','DB Write']},
+        {name:'Competitor Monitor',status:'healthy',cadence:'Every 3 days',last_run:'2026-05-03T14:00:00Z',total_runs:24,components:['Multi-brand Probe','Gap Analysis']},
+        {name:'Citation Velocity',status:'healthy',cadence:'Daily',last_run:'2026-05-04T02:00:00Z',total_runs:45,components:['Trend Calc','Alert Check']},
+        {name:'Content Freshness',status:'degraded',cadence:'Weekly',last_run:'2026-04-28T08:00:00Z',total_runs:8,components:['Page Scan','Decay Detection']}
       ]},
-      keyword_performance:{top_keywords:[
-        {keyword:'best seo tool',brand:'AI1stSEO',geo_score:0.85,providers:['nova','claude','perplexity']},
-        {keyword:'ai seo optimization',brand:'AI1stSEO',geo_score:0.71,providers:['nova','groq']},
-        {keyword:'keyword research tool',brand:'AI1stSEO',geo_score:0.57,providers:['nova']}
-      ],competitor_wins:[
-        {keyword:'backlink checker',winner:'Ahrefs',score:0.9},
-        {keyword:'site audit tool',winner:'SEMrush',score:0.85}
-      ],engine_brands:{'Nova Lite':'AI1stSEO','Claude':'SEMrush','Perplexity':'AI1stSEO','Groq':'Ahrefs'}},
-      competitor_matrix:[
-        {brand:'SEMrush',visibility_score:85,wow_change:2,engine_pref:'Claude'},
-        {brand:'Ahrefs',visibility_score:76,wow_change:5,engine_pref:'Perplexity'},
-        {brand:'AI1stSEO',visibility_score:71,wow_change:8,engine_pref:'Nova Lite'},
-        {brand:'Moz',visibility_score:45,wow_change:-3,engine_pref:'Gemini'}
-      ],
-      automation_jobs:[
-        {name:'Weekly GEO Score',status:'healthy',cadence:'Every 7 days',last_run:'2026-05-04T10:00:00Z',total_runs:12},
-        {name:'Competitor Monitor',status:'healthy',cadence:'Every 3 days',last_run:'2026-05-03T14:00:00Z',total_runs:24},
-        {name:'Citation Velocity',status:'healthy',cadence:'Daily',last_run:'2026-05-04T02:00:00Z',total_runs:45}
-      ],
-      citations:{rates:[{brand:'AI1stSEO',rate:67},{brand:'SEMrush',rate:82},{brand:'Ahrefs',rate:73}],formats:[{format:'FAQ/Q&A',rate:78},{format:'Comparison Table',rate:65},{format:'Bullet List',rate:58},{format:'Paragraph',rate:42}]},
-      recommendations:[
-        {priority:'high',title:'Create FAQ schema for "best seo tool"',description:'This keyword has high search volume but your FAQ coverage is missing.'},
-        {priority:'high',title:'Publish comparison: AI1stSEO vs SEMrush',description:'Competitor wins on 3 keywords where comparison content exists.'},
-        {priority:'medium',title:'Add structured data to pricing page',description:'AI models cite pricing pages with schema 2x more often.'}
-      ],
-      alerts:[{severity:'high',message:'Ahrefs gained +5% visibility this week on "backlink tool"'},{severity:'medium',message:'Your brand disappeared from Gemini for "seo audit"'}],
-      executive:{overall_health:78,geo_trend:'up',citations_placed:5,content_published:3,tech_debt_resolved:67}
+      citation_intelligence:{citation_rates:[{brand:'AI1stSEO',rate:67},{brand:'SEMrush',rate:82},{brand:'Ahrefs',rate:73}],content_format_performance:[{format:'FAQ / Q&A',citation_rate:78},{format:'Comparison Table',citation_rate:65},{format:'Bullet List',citation_rate:58},{format:'Long Paragraph',citation_rate:42}]},
+      self_learning_summary:{recommendations:[
+        {priority:'high',action:'Create FAQ schema for "best seo tool"',reason:'High search volume keyword with missing FAQ coverage — competitors have this.'},
+        {priority:'high',action:'Publish comparison: AI1stSEO vs SEMrush',reason:'Competitor wins on 3 keywords where comparison content exists.'},
+        {priority:'medium',action:'Add structured data to pricing page',reason:'AI models cite pricing pages with schema 2x more often.'},
+        {priority:'low',action:'Expand content on "geo optimization" topic cluster',reason:'Strong position (92%) — reinforce with supporting content.'}
+      ]}
     });
   }
 }
