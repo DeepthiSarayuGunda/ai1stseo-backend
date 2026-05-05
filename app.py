@@ -754,6 +754,69 @@ def analyze_content_seo(url, soup, response, load_time):
     add_check(checks, 'Contact Information', 'pass' if contact_info else 'info',
               'Contact details', 'Found' if contact_info else 'Not found', 'Provide contact information', 'Medium', 'E-E-A-T')
     
+    # 21-30: AI Readiness & Advanced Content Signals
+    # 21. Image alt text coverage
+    images = soup.find_all('img')
+    imgs_with_alt = [i for i in images if i.get('alt', '').strip()]
+    alt_pct = (len(imgs_with_alt) / len(images) * 100) if images else 100
+    add_check(checks, 'Image Alt Text', 'pass' if alt_pct >= 90 else ('warning' if alt_pct >= 50 else 'fail'),
+              'Alt text coverage', f'{alt_pct:.0f}% ({len(imgs_with_alt)}/{len(images)})', 'Add descriptive alt text to all images', 'High', 'AI Readiness')
+
+    # 22. Structured headings (H2/H3 hierarchy)
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    heading_depth = len(h2s) + len(h3s)
+    add_check(checks, 'Heading Hierarchy', 'pass' if len(h2s) >= 2 and heading_depth >= 4 else 'warning',
+              'Content structure depth', f'{len(h2s)} H2s, {len(h3s)} H3s', 'Use 3+ H2s with nested H3s for clear structure', 'High', 'AI Readiness')
+
+    # 23. FAQ / Q&A content (AI engines love this)
+    faq_signals = len(re.findall(r'(?:what|how|why|when|where|who|which|can|does|is)\s.+\?', text.lower()))
+    add_check(checks, 'FAQ Content', 'pass' if faq_signals >= 3 else ('warning' if faq_signals >= 1 else 'info'),
+              'Question-answer patterns', f'{faq_signals} Q&A patterns', 'Add FAQ sections for AI snippet eligibility', 'High', 'AI Readiness')
+
+    # 24. List content (ordered/unordered)
+    lists = soup.find_all(['ul', 'ol'])
+    list_items = soup.find_all('li')
+    add_check(checks, 'List Content', 'pass' if len(lists) >= 2 else 'info',
+              'Structured lists', f'{len(lists)} lists, {len(list_items)} items', 'Use lists for scannable, AI-friendly content', 'Medium', 'AI Readiness')
+
+    # 25. Table data (comparison/structured data)
+    tables = soup.find_all('table')
+    add_check(checks, 'Table Data', 'pass' if tables else 'info',
+              'Data tables', f'{len(tables)} tables', 'Add comparison tables for rich snippet eligibility', 'Medium', 'AI Readiness')
+
+    # 26. Schema/JSON-LD markup
+    schemas = soup.find_all('script', type='application/ld+json')
+    add_check(checks, 'Schema Markup', 'pass' if schemas else 'warning',
+              'Structured data', f'{len(schemas)} schema blocks', 'Add JSON-LD schema for AI discoverability', 'High', 'AI Readiness')
+
+    # 27. Multimedia content (video/audio embeds)
+    videos = soup.find_all(['video', 'iframe'])
+    video_embeds = [v for v in videos if 'youtube' in str(v).lower() or 'vimeo' in str(v).lower() or v.name == 'video']
+    add_check(checks, 'Multimedia Content', 'pass' if video_embeds else 'info',
+              'Video/media embeds', f'{len(video_embeds)} media elements', 'Embed videos for engagement and dwell time', 'Low', 'AI Readiness')
+
+    # 28. Content freshness signals
+    freshness_signals = re.findall(r'\b20(?:2[3-9]|[3-9]\d)\b', text)
+    add_check(checks, 'Content Freshness', 'pass' if freshness_signals else 'warning',
+              'Recent date references', f'{len(freshness_signals)} recent dates', 'Reference current year/dates for freshness signals', 'Medium', 'AI Readiness')
+
+    # 29. CTA (Call-to-Action) presence
+    cta_patterns = re.findall(r'(?:sign up|get started|try free|learn more|contact us|book|subscribe|download|start)', text.lower())
+    cta_buttons = soup.find_all(['button', 'a'], class_=re.compile(r'btn|button|cta', re.I))
+    has_cta = len(cta_patterns) > 0 or len(cta_buttons) > 0
+    add_check(checks, 'Call-to-Action', 'pass' if has_cta else 'warning',
+              'CTA elements', f'{len(cta_patterns)} text CTAs, {len(cta_buttons)} buttons', 'Include clear calls-to-action', 'Medium', 'Conversion')
+
+    # 30. Readability score (Flesch-Kincaid approximation)
+    syllable_count = sum(max(1, len(re.findall(r'[aeiouy]+', w.lower()))) for w in words[:500])
+    words_sample = min(len(words), 500)
+    sents_sample = max(1, len([s for s in re.split(r'[.!?]+', ' '.join(words[:500])) if len(s.split()) > 2]))
+    fk_grade = 0.39 * (words_sample / sents_sample) + 11.8 * (syllable_count / words_sample) - 15.59 if words_sample else 0
+    fk_grade = max(0, min(20, fk_grade))
+    add_check(checks, 'Readability Grade', 'pass' if 6 <= fk_grade <= 12 else 'warning',
+              'Flesch-Kincaid grade level', f'Grade {fk_grade:.1f}', 'Aim for grade 8-10 for broad accessibility', 'Medium', 'Conversion')
+
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
 
@@ -2084,18 +2147,19 @@ def analyze_url():
 def health_check():
     return jsonify({
         'status': 'ok', 
-        'totalChecks': 200,
+        'totalChecks': 246,
         'categories': {
             'technical': 35,
             'onpage': 25,
-            'content': 20,
+            'content': 30,
             'mobile': 15,
             'performance': 18,
             'security': 12,
             'social': 10,
             'local': 15,
             'geo': 30,
-            'citationgap': 20
+            'citationgap': 20,
+            'ai_readiness': 10
         },
         'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/template-benchmark', '/api/template-types', '/api/ai-recommendations', '/api/health', '/api/status']
     })
