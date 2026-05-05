@@ -272,8 +272,18 @@ thread.forEach((t,i)=>{html+=`<div class="thread-item"><div class="thread-num">$
 }
 }else if(key==='instagram'){
 const parsed=typeof content==='object'?content:tryParse(content);
-const caption=parsed?.caption||String(content);
+let caption=parsed?.caption||String(content);
 const hashtags=parsed?.hashtags||'';
+// Remove duplicate hashtags from caption if they exist separately
+if(hashtags&&caption.includes('#')){
+const hashStart=caption.lastIndexOf('\n#');
+if(hashStart>0)caption=caption.substring(0,hashStart).trim();
+else{
+const lines=caption.split('\n');
+const nonHash=lines.filter(l=>!l.trim().startsWith('#')||l.trim().split('#').length<4);
+caption=nonHash.join('\n').trim();
+}
+}
 textForCopy=caption+(hashtags?'\n\n'+hashtags:'');
 html=`<div class="plat-preview">
 <div style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);height:200px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:0.8rem;color:rgba(255,255,255,0.6);">📸 Your image here</div>
@@ -285,14 +295,17 @@ ${hashtags?'<div class="plat-hashtags">'+escHtml(hashtags)+'</div>':''}
 const parsed=typeof content==='object'?content:tryParse(content);
 const subj=parsed?.subject_line||'Subject';
 const preview=parsed?.preview_text||'';
-const body=parsed?.body||String(content);
+let body=parsed?.body||String(content);
 const cta=parsed?.cta_text||'';
 const ps=parsed?.ps_line||'';
-textForCopy=`Subject: ${subj}\n\n${body}${cta?'\n\n['+cta+']':''}${ps?'\n\n'+ps:''}`;
+// If body contains HTML tags, render them; otherwise treat as plain text
+const hasHtml=/<[a-z][\s\S]*>/i.test(body);
+const bodyHtml=hasHtml?sanitizeHtml(body):`<div style="white-space:pre-wrap">${escHtml(body)}</div>`;
+textForCopy=`Subject: ${subj}\n\n${body.replace(/<[^>]+>/g,'')}${cta?'\n\n['+cta+']':''}${ps?'\n\n'+ps:''}`;
 html=`<div class="email-preview">
 <div class="email-subject">📧 ${escHtml(subj)}</div>
 ${preview?'<div class="email-preview-text">'+escHtml(preview)+'</div>':''}
-<div class="email-body">${escHtml(body)}</div>
+<div class="email-body">${bodyHtml}</div>
 ${cta?'<div><span class="email-cta">'+escHtml(cta)+'</span></div>':''}
 ${ps?'<div class="email-ps">'+escHtml(ps)+'</div>':''}
 </div>`;
@@ -335,6 +348,14 @@ document.getElementById('results').style.display='block';
 }
 
 function tryParse(v){if(typeof v==='object'&&v!==null)return v;try{return JSON.parse(v)}catch(e){return null}}
+
+function sanitizeHtml(html){
+// Allow safe tags only, strip scripts and event handlers
+return html.replace(/<script[\s\S]*?<\/script>/gi,'')
+.replace(/on\w+="[^"]*"/gi,'')
+.replace(/on\w+='[^']*'/gi,'')
+.replace(/<iframe[\s\S]*?<\/iframe>/gi,'');
+}
 
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
