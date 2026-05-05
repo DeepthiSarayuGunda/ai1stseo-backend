@@ -4038,6 +4038,166 @@ def council_status():
         return jsonify({'status': 'error', 'error': str(e)[:200]}), 500
 
 
+# ── Council Live Mode — one endpoint per agent so the frontend can fire all 5 in parallel
+# and reveal each result as it comes back. Each response is timed so the UI can
+# render agent response latencies, badges, and a real-time console feed.
+
+def _run_live_agent(kind, data):
+    """Shared plumbing for every live-mode agent route."""
+    import time as _time
+    t0 = _time.time()
+    url = (data.get('url') or '').strip()
+    keyword = (data.get('keyword') or '').strip()
+    if not url:
+        return jsonify({'error': 'url is required'}), 400
+    if not url.startswith('http'):
+        url = 'https://' + url
+
+    try:
+        resp, soup, load_time = fetch_website(url)
+        text = soup.get_text(separator=' ', strip=True)
+    except Exception as e:
+        return jsonify({'error': f'fetch failed: {str(e)}'}), 500
+
+    # Build fallback (rule-based) so every response is safe even if the LLM fails
+    fallback_map = {
+        'aeo':        lambda: council_aeo_agent(soup, text, keyword),
+        'seo':        lambda: council_seo_agent(url, soup, text, keyword),
+        'content':    lambda: council_content_agent(text, soup),
+        'competitor': lambda: council_competitor_agent(url, soup, text, keyword),
+        'geo':        lambda: council_geo_agent(soup, text, url),
+    }
+    if kind not in fallback_map:
+        return jsonify({'error': f'unknown agent: {kind}'}), 400
+    fallback = fallback_map[kind]()
+
+    # Try the LLM-powered version
+    try:
+        from council_agents import (
+            run_aeo_agent, run_seo_agent, run_content_agent,
+            run_competitor_agent, run_geo_agent,
+        )
+        ctx = _build_council_context(url, soup, text, keyword)
+        runner = {
+            'aeo':        run_aeo_agent,
+            'seo':        run_seo_agent,
+            'content':    run_content_agent,
+            'competitor': run_competitor_agent,
+            'geo':        run_geo_agent,
+        }[kind]
+        agent = runner(ctx, fallback)
+    except Exception as e:
+        app.logger.warning("Live agent %s fell back: %s", kind, e)
+        agent = fallback
+
+    elapsed = round(_time.time() - t0, 2)
+    return jsonify({
+        'status': 'success',
+        'agent_key': kind,
+        'agent': agent,
+        'elapsed': elapsed,
+        'url': url,
+        'keyword': keyword or '(not specified)',
+        'analyzed_at': datetime.utcnow().isoformat(),
+    })
+
+
+@app.route('/api/council/live/aeo', methods=['POST'])
+def council_live_aeo():
+    """Live mode — AEO agent (Claude 3.5 Haiku via Bedrock)."""
+    return _run_live_agent('aeo', request.get_json(silent=True) or {})
+
+
+@app.route('/api/council/live/seo', methods=['POST'])
+def council_live_seo():
+    """Live mode — SEO agent (Nova Lite via Bedrock)."""
+    return _run_live_agent('seo', request.get_json(silent=True) or {})
+
+
+@app.route('/api/council/live/content', methods=['POST'])
+def council_live_content():
+    """Live mode — Content Quality agent (GPT-4o-mini)."""
+    return _run_live_agent('content', request.get_json(silent=True) or {})
+
+
+@app.route('/api/council/live/competitor', methods=['POST'])
+def council_live_competitor():
+    """Live mode — Competitor Intelligence agent (Gemini 1.5 Flash)."""
+    return _run_live_agent('competitor', request.get_json(silent=True) or {})
+
+
+@app.route('/api/council/live/geo', methods=['POST'])
+def council_live_geo():
+    """Live mode — GEO/Local agent (Nova Lite via Bedrock)."""
+    return _run_live_agent('geo', request.get_json(silent=True) or {})
+
+
+@app.route('/api/council/live/moderator', methods=['POST'])
+def council_live_moderator():
+    """Live mode — synthesizer. Accepts the 5 agent reports, returns the unified plan."""
+    import time as _time
+    data = request.get_json(silent=True) or {}
+    agents = data.get('agents') or []
+    keyword = (data.get('keyword') or '').strip()
+
+    if not isinstance(agents, list) or len(agents) == 0:
+        return jsonify({'error': 'agents array required'}), 400
+
+    # Weighted overall score matches the main council endpoint
+    weights = {'AEO Specialist': 0.30, 'SEO Specialist': 0.25,
+               'Content Quality Analyst': 0.20, 'Competitor Intelligence': 0.15,
+               'GEO/Local Specialist': 0.10}
+    overall = 0
+    total_weight = 0
+    for a in agents:
+        w = weights.get(a.get('agent'), 0.20)
+        overall += a.get('score', 0) * w
+        total_weight += w
+    overall = round(overall / total_weight) if total_weight else 0
+
+    t0 = _time.time()
+    summary = None
+    try:
+        from council_agents import run_moderator, AGENT_MODEL_LABELS
+        summary = run_moderator(agents, keyword, overall)
+        moderator_model = AGENT_MODEL_LABELS.get('moderator')
+    except Exception as e:
+        app.logger.warning("Live moderator failed: %s", e)
+        moderator_model = None
+
+    # Fallback summary path — uses the existing call_llm() helper
+    if not summary:
+        all_recs = []
+        for a in agents:
+            all_recs.extend([(a.get('agent', 'Agent'), r) for r in a.get('top_recommendations', [])[:2]])
+        if all_recs:
+            recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
+            prompt = (
+                f'You are the moderator of an AI Council analyzing a webpage for "{keyword or "the target page"}". '
+                f'Five specialist agents have reviewed the page. Overall score: {overall}/100.\n\n'
+                f'Agent findings:\n{recs_text}\n\n'
+                'As the council moderator, produce:\n'
+                '1. A 2-sentence executive summary of the page\'s strengths and weaknesses\n'
+                '2. The top 5 priority actions ranked by impact, resolving any conflicts between agents\n'
+                '3. One bold strategic recommendation that would have the biggest single impact\n\n'
+                'Be concise and actionable. Format as a numbered list.'
+            )
+            try:
+                summary = call_llm(prompt, timeout=15)
+            except Exception:
+                pass
+
+    elapsed = round(_time.time() - t0, 2)
+    return jsonify({
+        'status': 'success',
+        'overall_score': overall,
+        'council_summary': summary,
+        'moderator_model': moderator_model,
+        'elapsed': elapsed,
+        'agent_count': len(agents),
+    })
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""
@@ -5113,6 +5273,17 @@ def serve_psie():
 def serve_council():
     """AI Council — Multi-Agent Analysis System."""
     return send_from_directory('.', 'council.html')
+
+
+@app.route('/council-live')
+def serve_council_live():
+    """AI Council Live Mode — real-time streaming multi-LLM analysis."""
+    return send_from_directory('.', 'council-live.html')
+
+
+@app.route('/council-live.html')
+def serve_council_live_html():
+    return send_from_directory('.', 'council-live.html')
 
 
 @app.route('/directory')
