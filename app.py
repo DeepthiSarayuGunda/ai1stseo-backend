@@ -5275,17 +5275,6 @@ def serve_council():
     return send_from_directory('.', 'council.html')
 
 
-@app.route('/council-live')
-def serve_council_live():
-    """AI Council Live Mode — real-time streaming multi-LLM analysis."""
-    return send_from_directory('.', 'council-live.html')
-
-
-@app.route('/council-live.html')
-def serve_council_live_html():
-    return send_from_directory('.', 'council-live.html')
-
-
 @app.route('/directory')
 def serve_directory():
     """AI Business Directory ΓÇö Top 10 dentists in Ottawa."""
