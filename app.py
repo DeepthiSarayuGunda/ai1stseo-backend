@@ -3806,15 +3806,133 @@ def council_geo_agent(soup, text, url):
     }
 
 
+def _build_council_context(url, soup, text, keyword):
+    """Pre-extract structural signals once so each agent gets a focused, cheap prompt."""
+    # Structural
+    h1s = soup.find_all('h1')
+    h2s = [h.get_text(strip=True) for h in soup.find_all('h2')]
+    h3s = [h.get_text(strip=True) for h in soup.find_all('h3')]
+    images = soup.find_all('img')
+    imgs_with_alt = [i for i in images if i.get('alt', '').strip()]
+    alt_pct = round((len(imgs_with_alt) / len(images) * 100), 1) if images else 100.0
+    lists = soup.find_all(['ul', 'ol'])
+    tables = soup.find_all('table')
+    a_tags = soup.find_all('a', href=True)
+    parsed = urlparse(url)
+    host = parsed.netloc.lower()
+    internal = [a for a in a_tags if host in a['href'] or a['href'].startswith('/')]
+    external = [a for a in a_tags if a['href'].startswith('http') and host not in a['href']]
+
+    # Schema
+    json_ld_blocks = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_types = []
+    for s in json_ld_blocks:
+        try:
+            obj = json.loads(s.string or '{}')
+            candidates = obj if isinstance(obj, list) else [obj]
+            for c in candidates:
+                t = c.get('@type') if isinstance(c, dict) else None
+                if isinstance(t, str):
+                    schema_types.append(t)
+                elif isinstance(t, list):
+                    schema_types.extend([str(x) for x in t])
+        except Exception:
+            pass
+    schema_dump = ' '.join((s.string or '') for s in json_ld_blocks).lower()
+
+    # Meta
+    title_tag = soup.find('title')
+    title = title_tag.get_text(strip=True) if title_tag else ''
+    meta_desc_tag = soup.find('meta', attrs={'name': 'description'})
+    meta_desc = meta_desc_tag.get('content', '').strip() if meta_desc_tag else ''
+    canonical_tag = soup.find('link', attrs={'rel': 'canonical'})
+    has_canonical = bool(canonical_tag and canonical_tag.get('href'))
+
+    # Content signals
+    text_lower = text.lower()
+    word_count = len(text.split())
+    has_author = bool(re.search(r'(author|written by|posted by|dr\.|phd)', text_lower))
+    has_freshness = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text_lower))
+    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text_lower))
+    faq_count = len(re.findall(r'(?:what|how|why|when|where|who|which|can|does|is)\s[^?]{3,}\?', text_lower))
+    # Direct-answer heuristic: short paragraphs starting with a definition cue
+    direct_answers = len(re.findall(r'(?:^|\n)(?:[A-Z][^\n]{20,200}(?:\sis\s|\sare\s|\smeans\s|refers to))', text))
+
+    # Local signals
+    has_address = bool(re.search(r'\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd)\b', text_lower))
+    has_phone = bool(re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', text))
+    has_hours = bool(re.search(r'(monday|tuesday|wednesday|thursday|friday|saturday|sunday|\bhours\b|\bopen\b)', text_lower))
+    has_local_schema = 'localbusiness' in schema_dump
+    has_geo_coords = 'geocoordinates' in schema_dump
+    has_local_keywords = bool(re.search(r'(ottawa|toronto|vancouver|montreal|canada|near me|local|nearby)', text_lower))
+    service_areas = re.findall(r'(?:serving|service area|we serve)\s+([A-Z][a-zA-Z ,]{2,40})', text)[:5]
+
+    # Readability
+    try:
+        readability = compute_readability_score(text)
+    except Exception:
+        readability = {'score': 0, 'grade': 'n/a'}
+
+    return {
+        'url': url,
+        'keyword': keyword,
+        'text': text,
+        'title': title,
+        'meta_desc': meta_desc,
+        'has_canonical': has_canonical,
+        'h1_count': len(h1s),
+        'h2_count': len(h2s),
+        'h3_count': len(h3s),
+        'h2s': h2s,
+        'h3s': h3s,
+        'word_count': word_count,
+        'readability_grade': readability.get('grade', 'n/a'),
+        'readability_score': readability.get('score', 0),
+        'alt_pct': alt_pct,
+        'image_count': len(images),
+        'list_count': len(lists),
+        'table_count': len(tables),
+        'internal_links': len(internal),
+        'external_links': len(external),
+        'schema_types': sorted(set(schema_types)),
+        'schema_count': len(schema_types),
+        'faq_count': faq_count,
+        'direct_answers': direct_answers,
+        'has_author': has_author,
+        'has_freshness': has_freshness,
+        'has_citations': has_citations,
+        'has_address': has_address,
+        'has_phone': has_phone,
+        'has_hours': has_hours,
+        'has_local_schema': has_local_schema,
+        'has_geo_coords': has_geo_coords,
+        'has_local_keywords': has_local_keywords,
+        'service_areas': service_areas,
+    }
+
+
 @app.route('/api/council/analyze', methods=['POST'])
 def council_analyze():
-    """AI Council — 5 specialized agents analyze a URL and produce a unified action plan."""
+    """AI Council — 5 specialized agents from 4 different companies produce a unified action plan.
+
+    Each agent is powered by a dedicated Bedrock model:
+      AEO        → Claude 3.5 Haiku      (Anthropic)
+      SEO        → Nova Lite             (Amazon)
+      Content    → Llama 4 Maverick      (Meta)
+      Competitor → Mistral Large         (Mistral AI)
+      GEO        → Nova Lite             (Amazon)
+      Moderator  → Claude Sonnet 4       (Anthropic)
+
+    Rule-based scoring is computed first and passed as a fallback so the Council
+    always returns a result, even if one or more LLM calls fail.
+    """
     try:
         data = request.get_json(silent=True)
         if not data:
             return jsonify({'error': 'Invalid JSON'}), 400
         url = (data.get('url') or '').strip()
         keyword = (data.get('keyword') or '').strip()
+        use_llm = data.get('use_llm', True)  # Allow forcing rule-based for testing
         if not url:
             return jsonify({'error': 'url is required'}), 400
         if not url.startswith('http'):
@@ -3823,8 +3941,8 @@ def council_analyze():
         resp, soup, load_time = fetch_website(url)
         text = soup.get_text(separator=' ', strip=True)
 
-        # Run all 5 agents
-        agents = [
+        # Step 1 — compute rule-based agent outputs (cheap, deterministic, always succeed)
+        rb_agents = [
             council_aeo_agent(soup, text, keyword),
             council_seo_agent(url, soup, text, keyword),
             council_content_agent(text, soup),
@@ -3832,19 +3950,52 @@ def council_analyze():
             council_geo_agent(soup, text, url),
         ]
 
-        # Overall council score (weighted: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%)
+        # Step 2 — upgrade each agent via its assigned Bedrock model (with fallback)
+        if use_llm:
+            try:
+                from council_agents import (
+                    run_aeo_agent, run_seo_agent, run_content_agent,
+                    run_competitor_agent, run_geo_agent, run_moderator,
+                    AGENT_MODEL_LABELS,
+                )
+                ctx = _build_council_context(url, soup, text, keyword)
+                agents = [
+                    run_aeo_agent(ctx, rb_agents[0]),
+                    run_seo_agent(ctx, rb_agents[1]),
+                    run_content_agent(ctx, rb_agents[2]),
+                    run_competitor_agent(ctx, rb_agents[3]),
+                    run_geo_agent(ctx, rb_agents[4]),
+                ]
+            except Exception as e:
+                app.logger.warning("Council LLM path failed, using rule-based: %s", e)
+                agents = rb_agents
+                run_moderator = None
+                AGENT_MODEL_LABELS = {}
+        else:
+            agents = rb_agents
+            run_moderator = None
+            AGENT_MODEL_LABELS = {}
+
+        # Weighted overall score: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%
         weights = [0.30, 0.25, 0.20, 0.15, 0.10]
         overall = round(sum(a['score'] * w for a, w in zip(agents, weights)))
 
-        # Council moderator — LLM synthesizes all agent findings
+        # Step 3 — Moderator (Claude Sonnet 4) synthesizes the 5 reports
         council_summary = None
-        all_recs = []
-        for a in agents:
-            all_recs.extend([(a['agent'], r) for r in a['top_recommendations'][:2]])
-        
-        if all_recs:
-            recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
-            prompt = f"""You are the moderator of an AI Council analyzing a webpage for "{keyword or url}". Five specialist agents have reviewed the page. Overall score: {overall}/100.
+        if use_llm and run_moderator:
+            try:
+                council_summary = run_moderator(agents, keyword, overall)
+            except Exception as e:
+                app.logger.warning("Moderator failed, falling back to simple LLM: %s", e)
+
+        # Fallback summary path if moderator couldn't run
+        if not council_summary:
+            all_recs = []
+            for a in agents:
+                all_recs.extend([(a['agent'], r) for r in a.get('top_recommendations', [])[:2]])
+            if all_recs:
+                recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
+                prompt = f"""You are the moderator of an AI Council analyzing a webpage for "{keyword or url}". Five specialist agents have reviewed the page. Overall score: {overall}/100.
 
 Agent findings:
 {recs_text}
@@ -3855,10 +4006,10 @@ As the council moderator, produce:
 3. One bold strategic recommendation that would have the biggest single impact
 
 Be concise and actionable. Format as a numbered list."""
-            try:
-                council_summary = call_llm(prompt, timeout=15)
-            except Exception:
-                pass
+                try:
+                    council_summary = call_llm(prompt, timeout=15)
+                except Exception:
+                    pass
 
         return jsonify({
             'status': 'success',
@@ -3867,10 +4018,13 @@ Be concise and actionable. Format as a numbered list."""
             'overall_score': overall,
             'agents': agents,
             'council_summary': council_summary,
+            'moderator_model': AGENT_MODEL_LABELS.get('moderator') if use_llm else None,
+            'powered_by': 'Multi-LLM AI Council' if use_llm else 'Rule-based Council',
             'load_time': round(load_time, 2),
             'analyzed_at': datetime.utcnow().isoformat()
         })
     except Exception as e:
+        app.logger.exception("Council analysis failed")
         return jsonify({'error': f'Council analysis failed: {str(e)}'}), 500
 
 

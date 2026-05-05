@@ -49,6 +49,9 @@
         .check-icon{width:14px;text-align:center;font-size:0.7rem;flex-shrink:0}
         .recs{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04)}
         .rec{font-size:0.76rem;color:rgba(255,255,255,0.45);padding:3px 0;padding-left:12px;border-left:2px solid rgba(139,92,246,0.3)}
+        .agent-model{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:6px;display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)}
+        .agent-model-chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.66rem;font-weight:600;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);color:#c4b5fd}
+        .powered-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(6,182,212,0.1));border:1px solid rgba(139,92,246,0.2);color:#a5b4fc;margin-top:8px}
         .council-full{grid-column:1/-1}
         .ai-box{background:linear-gradient(135deg,rgba(139,92,246,0.05),rgba(6,182,212,0.03));border:1px solid rgba(139,92,246,0.1);border-radius:16px;padding:20px;margin:16px 0}
         .ai-box h3{font-size:0.88rem;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -63,9 +66,9 @@
 <nav><a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a><div class="nav-r"><a href="https://www.ai1stseo.com">Home</a><a href="https://www.ai1stseo.com/psie.html">PSIE</a><a href="https://www.ai1stseo.com/template-benchmark.html">Benchmark</a><a href="https://www.ai1stseo.com/audit.html">Audit</a></div></nav>
 <div class="wrap">
     <div class="hero" data-aos="fade-up">
-        <div class="badge">Multi-Agent Intelligence</div>
+        <div class="badge">Multi-LLM Intelligence · 4 Companies</div>
         <h1>Your website, reviewed by <span>5 AI specialists</span></h1>
-        <p>The AI Council runs 5 specialized agents in parallel — AEO, SEO, Content, Competitor, and GEO — then a moderator synthesizes their findings into one unified action plan.</p>
+        <p>Five agents powered by four different AI companies — Amazon, Anthropic, Meta, Mistral — analyse your page in parallel. A senior moderator from a different model family synthesises their findings into one unified action plan. No model judges its own work.</p>
     </div>
     <div class="bar" data-aos="fade-up" data-aos-delay="100">
         <input type="text" id="url" placeholder="Enter URL to analyze..." />
@@ -97,7 +100,9 @@ async function run(){
 
         // Overall score
         const oc=d.overall_score>=70?'#34d399':d.overall_score>=40?'#fbbf24':'#f87171';
-        h+='<div class="overall" data-aos="zoom-in"><div class="overall-score" style="color:'+oc+';">'+d.overall_score+'</div><div class="overall-label">Council Consensus Score</div></div>';
+        h+='<div class="overall" data-aos="zoom-in"><div class="overall-score" style="color:'+oc+';">'+d.overall_score+'</div><div class="overall-label">Council Consensus Score</div>';
+        if(d.powered_by){h+='<div class="powered-badge">⚡ '+d.powered_by+'</div>';}
+        h+='</div>';
 
         // Agent cards
         h+='<div class="agents">';
@@ -118,13 +123,17 @@ async function run(){
             // Recommendations
             if(a.top_recommendations&&a.top_recommendations.length){h+='<div class="recs">';a.top_recommendations.slice(0,2).forEach(r=>{h+='<div class="rec">'+r+'</div>'});h+='</div>'}
 
+            // Model that powered this agent
+            if(a.model){h+='<div class="agent-model">Powered by <span class="agent-model-chip">'+a.model+'</span></div>'}
+
             h+='</div>';
         });
         h+='</div>';
 
         // Council moderator summary
         if(d.council_summary){
-            h+='<div class="ai-box" data-aos="fade-up"><h3>Council Moderator — Unified Action Plan</h3><pre>'+d.council_summary+'</pre></div>';
+            const modelLine = d.moderator_model ? ' <span class="agent-model-chip" style="margin-left:8px;font-size:0.62rem;">'+d.moderator_model+'</span>' : '';
+            h+='<div class="ai-box" data-aos="fade-up"><h3>Council Moderator — Unified Action Plan'+modelLine+'</h3><pre>'+d.council_summary+'</pre></div>';
         }
 
         out.innerHTML=h;
