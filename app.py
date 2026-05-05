@@ -4198,6 +4198,67 @@ def council_live_moderator():
     })
 
 
+# ============== CONTENT REPURPOSING ENGINE (Dev 2) ==============
+
+@app.route('/api/content-repurpose', methods=['POST'])
+def content_repurpose():
+    """Content Repurposing Engine — transform a blog post into 6 platform-specific formats.
+
+    Body JSON:
+        {
+            "content": "full blog post text OR leave empty if url is provided",
+            "url": "https://example.com/blog-post (optional — will extract text)",
+            "keyword": "target audience/keyword (optional)",
+            "platforms": ["linkedin", "twitter", "facebook", "instagram", "email", "video"] (optional — default all)
+        }
+    """
+    from content_repurposer import repurpose_content
+
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid JSON'}), 400
+
+        content = (data.get('content') or '').strip()
+        url = (data.get('url') or '').strip()
+        keyword = (data.get('keyword') or '').strip()
+        platforms = data.get('platforms')
+
+        # If URL provided and no content, fetch and extract text
+        if url and not content:
+            if not url.startswith('http'):
+                url = 'https://' + url
+            try:
+                resp, soup, _ = fetch_website(url)
+                # Try to get article body, fall back to full text
+                article = soup.find('article') or soup.find('main') or soup.find('body')
+                # Remove nav, footer, sidebar noise
+                for tag in (article or soup).find_all(['nav', 'footer', 'aside', 'header', 'script', 'style']):
+                    tag.decompose()
+                content = (article or soup).get_text(separator='\n', strip=True)
+            except Exception as e:
+                return jsonify({'error': f'Failed to fetch URL: {str(e)}'}), 400
+
+        if not content or len(content.split()) < 50:
+            return jsonify({'error': 'Content too short — provide at least 50 words of blog text or a valid URL'}), 400
+
+        result = repurpose_content(
+            content=content,
+            keyword=keyword,
+            platforms=platforms,
+            call_llm_fn=call_llm,
+        )
+
+        return jsonify({
+            'status': 'success',
+            'url': url or None,
+            **result,
+        })
+    except Exception as e:
+        app.logger.exception("Content repurpose failed")
+        return jsonify({'error': f'Repurposing failed: {str(e)}'}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""
@@ -5273,6 +5334,12 @@ def serve_psie():
 def serve_council():
     """AI Council — Multi-Agent Analysis System."""
     return send_from_directory('.', 'council.html')
+
+
+@app.route('/repurpose')
+def serve_repurpose():
+    """Content Repurposing Engine — blog to 6 formats."""
+    return send_from_directory('.', 'repurpose.html')
 
 
 @app.route('/directory')

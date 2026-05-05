@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Repurposing Engine — Blog to 6 Formats | AI1stSEO</title>
+<meta name="description" content="Transform any blog post into LinkedIn, Twitter, Facebook, Instagram, Email, and Video Script — powered by AI. One click, six platforms.">
+<link rel="canonical" href="https://www.ai1stseo.com/repurpose.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#030712;color:#e2e8f0;min-height:100vh}
+.glow{position:fixed;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 30% 40%,rgba(236,72,153,0.1) 0%,transparent 40%),radial-gradient(circle at 70% 60%,rgba(139,92,246,0.08) 0%,transparent 40%);animation:gd 20s ease-in-out infinite;z-index:0;pointer-events:none}
+@keyframes gd{0%,100%{transform:translate(0,0)}50%{transform:translate(-1.5%,1%)}}
+
+nav{position:relative;z-index:10;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(16px)}
+.logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-r a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.8rem;margin-left:20px;transition:color 0.2s}
+.nav-r a:hover{color:#e2e8f0}
+
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+.hero{text-align:center;margin-bottom:28px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,rgba(236,72,153,0.12),rgba(139,92,246,0.12));border:1px solid rgba(236,72,153,0.25);color:#f9a8d4;margin-bottom:12px}
+.hero h1{font-size:2rem;font-weight:800;letter-spacing:-0.7px;margin-bottom:8px}
+.hero h1 span{background:linear-gradient(135deg,#ec4899,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:rgba(255,255,255,0.4);font-size:0.9rem;max-width:620px;margin:0 auto;line-height:1.55}
+
+/* Input section */
+.input-section{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;margin-bottom:24px}
+.input-section label{display:block;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.input-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.input-row input{flex:1;min-width:200px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e2e8f0;font-size:0.9rem;outline:none;transition:border-color 0.3s}
+.input-row input:focus{border-color:rgba(236,72,153,0.4)}
+textarea{width:100%;min-height:180px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e2e8f0;font-size:0.88rem;font-family:inherit;outline:none;resize:vertical;line-height:1.6;transition:border-color 0.3s}
+textarea:focus{border-color:rgba(236,72,153,0.4)}
+textarea::placeholder{color:rgba(255,255,255,0.25)}
+.or-divider{text-align:center;color:rgba(255,255,255,0.25);font-size:0.75rem;margin:10px 0;font-weight:600}
+
+.platforms-select{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.plat-chip{padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.5);transition:all 0.2s;user-select:none}
+.plat-chip.active{border-color:rgba(236,72,153,0.4);background:rgba(236,72,153,0.1);color:#f9a8d4}
+.plat-chip:hover{border-color:rgba(236,72,153,0.3)}
+
+.btn{padding:14px 32px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:0.9rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;background:linear-gradient(135deg,#ec4899,#8b5cf6);width:100%;margin-top:14px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,72,153,0.3)}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Results */
+.results{display:none;margin-top:24px}
+.result-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:12px}
+.tab{padding:8px 16px;border-radius:10px;font-size:0.78rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);transition:all 0.2s}
+.tab.active{color:#f9a8d4;background:rgba(236,72,153,0.1);border-color:rgba(236,72,153,0.3)}
+.tab.error{color:#f87171;border-color:rgba(248,113,113,0.2)}
+.tab:hover{border-color:rgba(236,72,153,0.2)}
+.tab .elapsed{font-size:0.65rem;color:rgba(255,255,255,0.25);margin-left:6px}
+
+.result-panel{display:none;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;position:relative}
+.result-panel.active{display:block}
+.result-panel pre{white-space:pre-wrap;font-size:0.84rem;color:rgba(255,255,255,0.6);line-height:1.7;font-family:inherit}
+.result-panel .json-view{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:rgba(255,255,255,0.5);line-height:1.6}
+.copy-btn{position:absolute;top:12px;right:12px;padding:6px 14px;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:all 0.2s}
+.copy-btn:hover{background:rgba(236,72,153,0.1);border-color:rgba(236,72,153,0.3);color:#f9a8d4}
+
+.meta-bar{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:0.72rem;color:rgba(255,255,255,0.3)}
+.meta-bar span{display:flex;align-items:center;gap:4px}
+
+.loading{text-align:center;padding:40px;color:rgba(255,255,255,0.3);display:none}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid rgba(255,255,255,0.05);border-top-color:#ec4899;border-radius:50%;animation:sp 0.8s linear infinite;margin-right:10px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<nav>
+<a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a>
+<div class="nav-r">
+<a href="https://www.ai1stseo.com">Home</a>
+<a href="https://www.ai1stseo.com/council.html">Council</a>
+<a href="https://www.ai1stseo.com/psie.html">PSIE</a>
+<a href="https://www.ai1stseo.com/audit.html">Audit</a>
+</div>
+</nav>
+<div class="wrap">
+<div class="hero">
+<div class="badge">Content Intelligence</div>
+<h1>One blog post → <span>6 platforms</span></h1>
+<p>Paste your blog content or enter a URL. The engine transforms it into platform-perfect formats for LinkedIn, Twitter, Facebook, Instagram, Email, and Video — each tailored to that platform's style and limits.</p>
+</div>
+
+<div class="input-section">
+<label>Blog URL (we'll extract the content)</label>
+<div class="input-row">
+<input type="text" id="urlInput" placeholder="https://yourblog.com/post-title" />
+<input type="text" id="kwInput" placeholder="Target keyword (optional)" style="max-width:240px" />
+</div>
+<div class="or-divider">— OR paste content directly —</div>
+<label>Blog Content</label>
+<textarea id="contentInput" placeholder="Paste your full blog post here..."></textarea>
+
+<label style="margin-top:14px">Platforms (click to toggle — default: all)</label>
+<div class="platforms-select" id="platSelect"></div>
+
+<button class="btn" id="goBtn" onclick="repurpose()">Repurpose Content</button>
+</div>
+
+<div class="loading" id="loading"><span class="spinner"></span>Generating 6 platform versions...</div>
+
+<div class="results" id="results">
+<div class="result-tabs" id="tabs"></div>
+<div id="panels"></div>
+<div class="meta-bar" id="metaBar"></div>
+</div>
+</div>
+
+<script>
+const API='https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
+const PLATFORMS=[
+{key:'linkedin',label:'LinkedIn',icon:'💼'},
+{key:'twitter',label:'Twitter/X',icon:'𝕏'},
+{key:'facebook',label:'Facebook',icon:'📘'},
+{key:'instagram',label:'Instagram',icon:'📸'},
+{key:'email',label:'Email',icon:'✉️'},
+{key:'video',label:'Video Script',icon:'🎬'}
+];
+
+let selectedPlatforms=new Set(PLATFORMS.map(p=>p.key));
+
+// Render platform chips
+function renderChips(){
+const el=document.getElementById('platSelect');
+el.innerHTML='';
+PLATFORMS.forEach(p=>{
+const chip=document.createElement('span');
+chip.className='plat-chip'+(selectedPlatforms.has(p.key)?' active':'');
+chip.textContent=p.icon+' '+p.label;
+chip.onclick=()=>{
+if(selectedPlatforms.has(p.key)){selectedPlatforms.delete(p.key)}else{selectedPlatforms.add(p.key)}
+renderChips();
+};
+el.appendChild(chip);
+});
+}
+renderChips();
+
+async function repurpose(){
+const url=document.getElementById('urlInput').value.trim();
+const content=document.getElementById('contentInput').value.trim();
+const keyword=document.getElementById('kwInput').value.trim();
+const btn=document.getElementById('goBtn');
+
+if(!url&&!content){alert('Enter a URL or paste blog content');return}
+if(content&&content.split(/\s+/).length<50){alert('Content too short — need at least 50 words');return}
+
+btn.disabled=true;btn.textContent='Generating...';
+document.getElementById('loading').style.display='block';
+document.getElementById('results').style.display='none';
+
+const body={keyword};
+if(content)body.content=content;
+if(url)body.url=url;
+if(selectedPlatforms.size<6)body.platforms=[...selectedPlatforms];
+
+try{
+const r=await fetch(API+'/api/content-repurpose',{
+method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+});
+const d=await r.json();
+document.getElementById('loading').style.display='none';
+
+if(d.status!=='success'){
+alert(d.error||'Failed');btn.disabled=false;btn.textContent='Repurpose Content';return;
+}
+renderResults(d);
+}catch(e){
+document.getElementById('loading').style.display='none';
+alert('Network error: '+e.message);
+}
+btn.disabled=false;btn.textContent='Repurpose Content';
+}
+
+function renderResults(data){
+const tabsEl=document.getElementById('tabs');
+const panelsEl=document.getElementById('panels');
+const metaEl=document.getElementById('metaBar');
+tabsEl.innerHTML='';panelsEl.innerHTML='';
+
+const results=data.results;
+const keys=Object.keys(results);
+let first=true;
+
+keys.forEach(key=>{
+const r=results[key];
+const p=PLATFORMS.find(x=>x.key===key)||{icon:'',label:key};
+
+// Tab
+const tab=document.createElement('div');
+tab.className='tab'+(first?' active':'')+(r.status==='error'?' error':'');
+tab.dataset.key=key;
+tab.innerHTML=p.icon+' '+r.platform+'<span class="elapsed">'+r.elapsed+'s</span>';
+tab.onclick=()=>{
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.result-panel').forEach(p=>p.classList.remove('active'));
+tab.classList.add('active');
+document.getElementById('panel-'+key).classList.add('active');
+};
+tabsEl.appendChild(tab);
+
+// Panel
+const panel=document.createElement('div');
+panel.className='result-panel'+(first?' active':'');
+panel.id='panel-'+key;
+
+if(r.status==='error'){
+panel.innerHTML='<pre style="color:#f87171;">Error: '+r.error+'</pre>';
+}else{
+const content=r.content;
+let display='';
+if(typeof content==='string'){
+display=content;
+}else if(typeof content==='object'&&content!==null){
+display=JSON.stringify(content,null,2);
+panel.innerHTML='<button class="copy-btn" onclick="copyPanel(\''+key+'\')">Copy</button><pre class="json-view">'+escHtml(display)+'</pre>';
+}
+if(typeof content==='string'){
+panel.innerHTML='<button class="copy-btn" onclick="copyPanel(\''+key+'\')">Copy</button><pre>'+escHtml(display)+'</pre>';
+}
+}
+panelsEl.appendChild(panel);
+first=false;
+});
+
+metaEl.innerHTML=`
+<span>⏱ Total: ${data.total_time}s</span>
+<span>📝 Source: ${data.source_word_count} words</span>
+<span>✅ Generated: ${data.platforms_generated}/${data.platforms_generated+data.platforms_failed}</span>
+<span>🎯 Keyword: ${data.keyword}</span>
+`;
+document.getElementById('results').style.display='block';
+}
+
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function copyPanel(key){
+const panel=document.getElementById('panel-'+key);
+const pre=panel.querySelector('pre');
+navigator.clipboard.writeText(pre.textContent).then(()=>{
+const btn=panel.querySelector('.copy-btn');
+btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);
+});
+}
+</script>
+</body>
+</html>
