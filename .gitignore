@@ -14,9 +14,6 @@ build/
 .DS_Store
 *.log
 /OneDrive/Documents/NetBeansProjects/usermanager/target/
-.vscode/
-*.db
-social_scheduler.db
-directory/directory.db
-output/
-image.png
+
+# Don't let backend repo serve a homepage — production frontend lives on S3/CloudFront
+index.html

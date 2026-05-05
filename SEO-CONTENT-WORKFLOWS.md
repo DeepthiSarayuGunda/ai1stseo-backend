@@ -2,7 +2,7 @@
 
 > **Author:** Dev 1 (Deepthi)  
 > **Last Updated:** April 8, 2026  
-> **Purpose:** Document the end-to-end SEO and content analysis workflows, capturing the process, value-add steps, and data flow for the AI1STSEO platform.
+> **Purpose:** Document the end-to-end SEO and content analysis workflows, capturing the process, value-add steps, data ingestion, and backend architecture for the AI1STSEO platform.
 
 ---
 
