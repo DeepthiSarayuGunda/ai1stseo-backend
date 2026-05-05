@@ -247,6 +247,26 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
     </div>
   </div>
 
+  <!-- ADD 2: Competitor Comparison Input -->
+  <div class="row2" style="margin-top:12px">
+    <div>
+      <label for="s-competitor">Compare against competitor (optional) <span class="tip" title="Enter a competitor brand name to see a side-by-side comparison of AI visibility.">ⓘ</span></label>
+      <input id="s-competitor" placeholder="e.g. competitor brand name">
+    </div>
+    <!-- ADD 3: Language Selector -->
+    <div>
+      <label for="s-lang">Language <span class="tip" title="Probe AI models in different languages to check global visibility.">ⓘ</span></label>
+      <select id="s-lang">
+        <option value="en" selected>English</option>
+        <option value="es">Spanish</option>
+        <option value="hi">Hindi</option>
+        <option value="ar">Arabic</option>
+        <option value="fr">French</option>
+        <option value="pt">Portuguese</option>
+      </select>
+    </div>
+  </div>
+
   <button class="btn-scan" onclick="runScan()" id="scan-btn">🔍 Run Full AI Visibility Scan</button>
   <div id="scan-error" style="color:#f85149;font-size:.82rem;margin-top:10px;display:none;text-align:center"></div>
 </div>
@@ -284,6 +304,21 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <div class="rds-status" id="rds-status"></div>
   <div class="elapsed" id="elapsed"></div>
 </div>
+
+<!-- ═══ ADD 1: VIDEO DEMO ═══ -->
+<div style="text-align:center;margin:40px 0;padding:32px;background:rgba(255,255,255,.02);border:1px solid rgba(0,212,255,.08);border-radius:16px">
+  <h2 style="color:#58a6ff;font-size:1.2rem;margin-bottom:16px">🎬 See It In Action — 60 Seconds</h2>
+  <div style="position:relative;max-width:800px;margin:0 auto;aspect-ratio:16/9;background:#0d0f14;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)">
+    <iframe id="demo-video" width="100%" height="100%" src="" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
+    <div id="video-overlay" onclick="playDemo()" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(123,44,191,.05))">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#00ff88);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,212,255,.3)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+    </div>
+  </div>
+  <p style="color:rgba(255,255,255,.4);font-size:.82rem;margin-top:12px">No signup needed — <a href="#" onclick="document.getElementById('s-brand').focus();window.scrollTo({top:200,behavior:'smooth'});return false" style="color:#00d4ff">scroll up to try it free ↑</a></p>
+</div>
+<script>function playDemo(){var f=document.getElementById('demo-video');f.src=f.dataset.src;f.style.display='block';document.getElementById('video-overlay').style.display='none';}</script>
 
 <!-- ═══ CORE TOOLS ═══ -->
 <h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>⚡</span> Core Features</h2>
@@ -2043,6 +2078,40 @@ async function m1RunAll() {
 }
 </script>
 </div><!-- /page-wrap -->
+
+<!-- ADD 4: Competitor Comparison Table -->
+<div style="max-width:900px;margin:48px auto;padding:0 24px">
+  <h2 style="text-align:center;color:#e1e4e8;font-size:1.4rem;font-weight:800;margin-bottom:8px">Why AI1stSEO Beats $250-$400/month Competitors</h2>
+  <p style="text-align:center;color:#7d8590;font-size:.88rem;margin-bottom:24px">The only platform with hallucination detection, sentiment analysis, AND a free plan.</p>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr>
+        <th style="text-align:left;padding:10px 12px;color:#7d8590;font-size:.72rem;text-transform:uppercase;border-bottom:1px solid #21262d;min-width:160px">Feature</th>
+        <th style="text-align:center;padding:10px 12px;color:#00d4ff;font-weight:700;border-bottom:1px solid #21262d;background:rgba(0,212,255,.03);border-radius:8px 8px 0 0">AI1stSEO</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Scrunch ($250/mo)</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Profound ($399/mo)</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Peec AI</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Free plan</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅ Yes</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">AI models</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">7</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">4</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">10</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">5</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Hallucination Detection</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Sentiment Analysis</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#00ff88">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">ROI Calculator</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Action Plan</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Multilingual</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#00ff88">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="text-align:center;color:#484f58;font-size:.75rem;margin-top:14px">AI1stSEO is the only platform that combines GEO monitoring, hallucination detection, sentiment analysis, and actionable recommendations — for free.</p>
+</div>
+
+<!-- ADD 5: Bottom CTA Banner -->
+<div style="max-width:900px;margin:32px auto 48px;padding:48px 24px;text-align:center;background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,255,136,.04));border:1px solid rgba(0,212,255,.12);border-radius:20px">
+  <h2 style="font-size:1.6rem;font-weight:900;color:#e1e4e8;margin-bottom:8px">Start Scanning Your Brand Free</h2>
+  <p style="color:#7d8590;font-size:.95rem;margin-bottom:24px">No credit card. 30 seconds. 7 AI engines.</p>
+  <button onclick="document.getElementById('s-brand').focus();window.scrollTo({top:200,behavior:'smooth'})" style="padding:16px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,#00d4ff,#00ff88);color:#000;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s">Run Free Scan →</button>
+</div>
 
 <script src="/s3-pages/a11y-sports.js?v=2"></script>
 <script>var b=document.getElementById('themeBtn');if(b)b.innerHTML=document.documentElement.classList.contains('light')?'&#x2600;&#xFE0F;':'&#x1F319;';</script>
