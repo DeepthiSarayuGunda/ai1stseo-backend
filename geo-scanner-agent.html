@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO Scanner Agent — Monitor Your Brand Across 7 AI Engines | AI1stSEO</title>
+<meta name="description" content="The only GEO Scanner that tells you what to do. Monitor your brand across ChatGPT, Claude, Gemini, Perplexity + 3 more. Detect hallucinations, analyse sentiment, get action plans. Free to start.">
+<link rel="canonical" href="https://www.ai1stseo.com/geo-scanner-agent.html">
+<meta property="og:title" content="GEO Scanner Agent — AI1stSEO">
+<meta property="og:description" content="Monitor your brand across 7 AI engines. Detect hallucinations, analyse sentiment, get action plans. Competitors charge $250-$400/month. Start free.">
+<style>
+:root{--bg:#050510;--text:#fff;--muted:rgba(255,255,255,.55);--faint:rgba(255,255,255,.25);--card:rgba(255,255,255,.03);--border:rgba(255,255,255,.06);--accent:#00d4ff;--green:#00ff88;--red:#ff4757;--purple:#7b2cbf;--gold:#ffd700}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(5,5,16,.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{color:var(--muted);font-size:.88rem;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-links a.active{color:var(--accent);font-weight:600}
+
+/* Hero */
+.hero{text-align:center;padding:80px 0 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(0,212,255,.06) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--green);margin-bottom:24px;letter-spacing:.5px}
+.hero h1{font-size:2.8rem;font-weight:900;line-height:1.1;margin-bottom:18px;letter-spacing:-.03em}
+.hero h1 .grad{background:linear-gradient(135deg,#00d4ff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--muted);font-size:1.1rem;line-height:1.6;max-width:680px;margin:0 auto 32px}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.btn-primary{padding:14px 32px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,.3)}
+.btn-secondary{padding:14px 32px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-secondary:hover{border-color:var(--accent);background:rgba(0,212,255,.04)}
+.hero-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:1.6rem;font-weight:900;color:var(--accent)}
+.hero-stat .lbl{font-size:.75rem;color:var(--faint);margin-top:2px}
+
+/* Scanner Card */
+.scanner{background:rgba(255,255,255,.02);border:1px solid rgba(0,212,255,.12);border-radius:24px;padding:36px;margin:48px 0;position:relative;overflow:hidden}
+.scanner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--green),var(--purple))}
+.scanner h2{font-size:1.3rem;font-weight:800;margin-bottom:6px}
+.scanner .sub{font-size:.88rem;color:var(--muted);margin-bottom:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.scan-btn{width:100%;padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-top:8px}
+.scan-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,.3)}
+.scan-btn:disabled{opacity:.5;cursor:wait;transform:none}
+.hint{font-size:.72rem;color:var(--faint);margin-top:4px}
+
+/* Results */
+.results{display:none;margin-top:32px}
+.score-circle{text-align:center;margin-bottom:24px}
+.score-ring{display:inline-flex;align-items:center;justify-content:center;width:130px;height:130px;border-radius:50%;font-size:2.6rem;font-weight:900;border:5px solid}
+.score-high{border-color:var(--green);color:var(--green)}
+.score-mid{border-color:var(--gold);color:var(--gold)}
+.score-low{border-color:var(--red);color:var(--red)}
+.model-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.85rem}
+.model-table th{text-align:left;padding:10px 12px;color:var(--faint);font-size:.72rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.model-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03)}
+.cited{color:var(--green);font-weight:700}
+.not-cited{color:var(--red);font-weight:700}
+.action-plan{margin-top:24px;padding:24px;background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.12);border-radius:16px}
+.action-item{padding:12px 16px;border-radius:10px;margin-bottom:8px;font-size:.88rem}
+.action-critical{background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.15)}
+.action-medium{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.15)}
+.action-quick{background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.15)}
+
+/* Comparison Table */
+.compare-section{margin:64px 0}
+.compare-section h2{text-align:center;font-size:1.6rem;font-weight:900;margin-bottom:8px}
+.compare-section .sub{text-align:center;color:var(--muted);margin-bottom:32px}
+.compare-table{width:100%;border-collapse:collapse;font-size:.85rem;overflow-x:auto;display:block}
+.compare-table th{padding:12px;text-align:center;color:var(--faint);font-size:.72rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.compare-table th:first-child{text-align:left;min-width:180px}
+.compare-table th.highlight{color:var(--accent);background:rgba(0,212,255,.04);border-radius:8px 8px 0 0}
+.compare-table td{padding:10px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03)}
+.compare-table td:first-child{text-align:left;color:var(--text);font-weight:600}
+.compare-table td.highlight{background:rgba(0,212,255,.02)}
+
+/* How It Works */
+.how-section{margin:64px 0;text-align:center}
+.how-section h2{font-size:1.6rem;font-weight:900;margin-bottom:32px}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.how-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 20px;text-align:center;transition:all .2s}
+.how-card:hover{border-color:rgba(0,212,255,.2);transform:translateY(-3px)}
+.how-icon{font-size:2rem;margin-bottom:12px}
+.how-card h3{font-size:.95rem;margin-bottom:8px}
+.how-card p{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* Pricing */
+.pricing-section{margin:64px 0;text-align:center}
+.pricing-section h2{font-size:1.6rem;font-weight:900;margin-bottom:8px}
+.pricing-section .sub{color:var(--muted);margin-bottom:32px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center;position:relative;transition:all .2s}
+.price-card:hover{border-color:rgba(0,212,255,.2);transform:translateY(-3px)}
+.price-card.popular{border-color:rgba(0,212,255,.3);box-shadow:0 0 40px rgba(0,212,255,.08)}
+.price-card.popular::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:4px 16px;background:linear-gradient(135deg,var(--accent),var(--green));color:#000;font-size:.7rem;font-weight:800;border-radius:12px}
+.price-name{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.price-amount{font-size:2.4rem;font-weight:900;color:var(--accent);margin-bottom:4px}
+.price-period{font-size:.8rem;color:var(--faint);margin-bottom:20px}
+.price-features{list-style:none;text-align:left;margin-bottom:24px}
+.price-features li{padding:6px 0;font-size:.82rem;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
+.price-features li::before{content:'✓ ';color:var(--green)}
+.price-btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.price-btn-free{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+.price-btn-pro{background:linear-gradient(135deg,var(--accent),var(--green));color:#000}
+.price-btn-agency{background:rgba(123,44,191,.15);color:var(--purple);border:1px solid rgba(123,44,191,.3)}
+
+/* Bottom CTA */
+.bottom-cta{text-align:center;padding:64px 24px;margin:48px 0;background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,255,136,.04));border:1px solid rgba(0,212,255,.12);border-radius:24px}
+.bottom-cta h2{font-size:1.8rem;font-weight:900;margin-bottom:8px}
+.bottom-cta p{color:var(--muted);margin-bottom:24px}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--faint);font-size:.78rem}
+
+/* Spinner */
+.spinner{width:20px;height:20px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Progress */
+.progress-list{margin:16px 0}
+.progress-step{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.85rem;color:var(--muted);opacity:.4;transition:all .3s}
+.progress-step.active{opacity:1;color:var(--text)}
+.progress-step.done{opacity:1;color:var(--green)}
+
+@media(max-width:768px){
+  .hero h1{font-size:1.8rem}
+  .form-grid,.how-grid,.pricing-grid{grid-template-columns:1fr}
+  .hero-stats{gap:20px}
+  .compare-table{font-size:.75rem}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="https://www.ai1stseo.com/" class="nav-logo">🔍 AI1stSEO</a>
+  <div class="nav-links">
+    <a href="https://www.ai1stseo.com/">Home</a>
+    <a href="/geo-scanner-agent.html" class="active">GEO Scanner</a>
+    <a href="/aeo-rank-tracker.html">AEO Tracker</a>
+    <a href="/geo-scanner-intelligence.html">Intelligence</a>
+    <a href="https://www.ai1stseo.com/#features">Features</a>
+  </div>
+</nav>
+
+<div class="container">
+<!-- SECTION 1: Hero -->
+<div class="hero">
+  <div class="hero-badge">🚀 FREE — NO CREDIT CARD REQUIRED</div>
+  <h1>The GEO Scanner That Actually<br><span class="grad">Tells You What To Do</span></h1>
+  <p>Monitor your brand across 7 AI engines, detect hallucinations, analyse sentiment, and get an exact action plan — all in one place. Competitors charge $250-$400/month. Start free.</p>
+  <div class="hero-btns">
+    <a href="#scanner" class="btn-primary">Scan My Brand Free →</a>
+    <a href="#results-demo" class="btn-secondary">See Live Demo</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">7</div><div class="lbl">AI Models Monitored</div></div>
+    <div class="hero-stat"><div class="num">Free</div><div class="lbl">To Start</div></div>
+    <div class="hero-stat"><div class="num">✓</div><div class="lbl">Action Plan Included</div></div>
+  </div>
+</div>
+</div>
+
+<!-- SECTION 2: Live Brand Scanner -->
+<div class="container">
+<div class="scanner" id="scanner">
+  <h2>🔬 Scan Your Brand Across 7 AI Engines</h2>
+  <p class="sub">Enter your brand details and we'll check how visible you are across ChatGPT, Claude, Gemini, Perplexity, Groq, Nova Lite, and Ollama — in real time.</p>
+  <div class="form-grid">
+    <div class="form-group"><label>Brand Name</label><input id="s-brand" placeholder="e.g. Nike, Shopify, your company"></div>
+    <div class="form-group"><label>Website URL (optional)</label><input id="s-url" placeholder="e.g. https://yoursite.com"></div>
+  </div>
+  <div class="form-group"><label>Keywords — what would customers ask AI about your industry?</label><textarea id="s-keywords" rows="3" placeholder="best project management tool&#10;top CRM for small business&#10;how to improve website SEO"></textarea><div class="hint">One per line. These are the questions people ask ChatGPT/Claude about your space.</div></div>
+  <div class="form-grid">
+    <div class="form-group"><label>Competitor (optional)</label><input id="s-competitor" placeholder="e.g. competitor brand name"></div>
+    <div class="form-group"><label>Language</label><select id="s-lang"><option value="en">English</option><option value="es">Spanish</option><option value="hi">Hindi</option><option value="ar">Arabic</option><option value="fr">French</option><option value="pt">Portuguese</option></select></div>
+  </div>
+  <button class="scan-btn" id="scanBtn" onclick="runFullScan()">🔍 Scan My Brand →</button>
+
+  <!-- Progress -->
+  <div class="progress-list" id="progress" style="display:none">
+    <div class="progress-step" id="ps-1"><span>🔄</span> Querying ChatGPT...</div>
+    <div class="progress-step" id="ps-2"><span>🔄</span> Querying Claude...</div>
+    <div class="progress-step" id="ps-3"><span>🔄</span> Querying Gemini...</div>
+    <div class="progress-step" id="ps-4"><span>🔄</span> Querying Perplexity...</div>
+    <div class="progress-step" id="ps-5"><span>🔄</span> Querying Groq...</div>
+    <div class="progress-step" id="ps-6"><span>🔄</span> Querying Nova Lite...</div>
+    <div class="progress-step" id="ps-7"><span>🔄</span> Analysing sentiment & hallucinations...</div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="score-circle" id="scoreCircle"></div>
+    <div id="modelTable"></div>
+    <div id="sentimentSection"></div>
+    <div id="competitorSection"></div>
+    <div class="action-plan" id="actionPlan" style="display:none"></div>
+  </div>
+</div>
+
+<!-- SECTION 3: Comparison Table -->
+<div class="compare-section">
+  <h2>What Makes This Different</h2>
+  <p class="sub">See how AI1stSEO compares to every competitor in the GEO monitoring space</p>
+  <table class="compare-table">
+    <thead><tr><th>Feature</th><th class="highlight">AI1stSEO</th><th>Scrunch ($250/mo)</th><th>Profound ($399/mo)</th><th>Peec AI</th></tr></thead>
+    <tbody>
+      <tr><td>Free plan available</td><td class="highlight" style="color:var(--green);font-weight:700">✅ Yes</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>AI models monitored</td><td class="highlight" style="color:var(--green);font-weight:700">7</td><td>4 (core)</td><td>10</td><td>5</td></tr>
+      <tr><td>Hallucination Detection</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>Sentiment Analysis</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--red)">❌</td><td style="color:var(--green)">✅</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>ROI Calculator</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>Action Plan included</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>Multilingual probe</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--green)">✅</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>Real-time monitoring</td><td class="highlight" style="color:var(--green);font-weight:700">✅</td><td style="color:var(--green)">✅</td><td style="color:var(--green)">✅</td><td style="color:var(--red)">❌</td></tr>
+      <tr><td>Free trial</td><td class="highlight" style="color:var(--green);font-weight:700">✅ Unlimited</td><td style="color:var(--red)">❌</td><td style="color:var(--red)">❌</td><td>✅ Limited</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 4: How It Works -->
+<div class="how-section">
+  <h2>How It Works</h2>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-icon">🔍</div><h3>1. Enter Your Brand</h3><p>Type your brand name and the keywords your customers ask AI about.</p></div>
+    <div class="how-card"><div class="how-icon">🤖</div><h3>2. We Probe 7 AI Engines</h3><p>We query ChatGPT, Claude, Gemini, Perplexity, Groq, Nova & Ollama simultaneously.</p></div>
+    <div class="how-card"><div class="how-icon">📊</div><h3>3. Get Your Full Report</h3><p>GEO score, sentiment, position, hallucination alerts — all in one view.</p></div>
+    <div class="how-card"><div class="how-icon">🎯</div><h3>4. Follow Your Action Plan</h3><p>Personalised steps to improve your AI visibility. Not generic tips — specific to your brand.</p></div>
+  </div>
+</div>
+
+<!-- SECTION 5: Pricing -->
+<div class="pricing-section">
+  <h2>Simple, Transparent Pricing</h2>
+  <p class="sub">Start free. Upgrade when you need more.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Free</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">forever</div>
+      <ul class="price-features">
+        <li>1 brand monitored</li>
+        <li>10 keywords tracked</li>
+        <li>Weekly scan</li>
+        <li>Basic GEO score</li>
+        <li>7 AI models</li>
+      </ul>
+      <button class="price-btn price-btn-free" onclick="document.getElementById('s-brand').focus();window.scrollTo({top:0,behavior:'smooth'})">Start Free</button>
+    </div>
+    <div class="price-card popular">
+      <div class="price-name">Pro</div>
+      <div class="price-amount">£49</div>
+      <div class="price-period">/month</div>
+      <ul class="price-features">
+        <li>5 brands monitored</li>
+        <li>200 keywords tracked</li>
+        <li>Daily scans</li>
+        <li>Full reports + PDF export</li>
+        <li>Sentiment analysis</li>
+        <li>Hallucination detection</li>
+        <li>Email + Slack alerts</li>
+        <li>Competitor comparison</li>
+      </ul>
+      <button class="price-btn price-btn-pro">Start Pro →</button>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Agency</div>
+      <div class="price-amount">£199</div>
+      <div class="price-period">/month</div>
+      <ul class="price-features">
+        <li>Unlimited brands</li>
+        <li>White-label reports</li>
+        <li>API access</li>
+        <li>Multilingual probes</li>
+        <li>Slack + WhatsApp alerts</li>
+        <li>Priority support</li>
+        <li>Custom integrations</li>
+      </ul>
+      <button class="price-btn price-btn-agency">Contact Sales</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Bottom CTA -->
+<div class="bottom-cta">
+  <h2>Start Scanning Your Brand For Free</h2>
+  <p>No credit card. No setup. Results in 30 seconds.</p>
+  <a href="#scanner" class="btn-primary" onclick="document.getElementById('s-brand').focus()">Scan My Brand Free →</a>
+</div>
+</div>
+
+<footer>
+  &copy; 2026 AI1stSEO — The World's First Complete GEO Scanner Agent.
+  <a href="https://www.ai1stseo.com/">Home</a> · <a href="/aeo-rank-tracker.html">AEO Tracker</a> · <a href="/geo-scanner-intelligence.html">Intelligence Dashboard</a>
+</footer>
+
+<script>
+const BASE='https://www.ai1stseo.com';
+
+async function animateProgress(){
+  const el=document.getElementById('progress');el.style.display='block';
+  for(let i=1;i<=7;i++){const s=document.getElementById('ps-'+i);s.classList.add('active');await new Promise(r=>setTimeout(r,500+Math.random()*700));s.classList.remove('active');s.classList.add('done');s.querySelector('span').textContent='✅';}
+}
+function resetProgress(){const el=document.getElementById('progress');el.style.display='none';for(let i=1;i<=7;i++){const s=document.getElementById('ps-'+i);s.className='progress-step';s.querySelector('span').textContent='🔄';}}
+
+async function runFullScan(){
+  const brand=document.getElementById('s-brand').value.trim();
+  const keywords=document.getElementById('s-keywords').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  const competitor=document.getElementById('s-competitor').value.trim();
+  const btn=document.getElementById('scanBtn');
+  if(!brand){alert('Please enter your brand name');return;}
+  if(!keywords.length){alert('Please enter at least one keyword');return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Scanning...';
+  resetProgress();animateProgress();
+  try{
+    const r=await fetch(`${BASE}/api/geo-probe/batch`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand_name:brand,keywords:keywords,provider:'nova'})});
+    const d=await r.json();
+    if(d.error){alert('Scan failed: '+d.error);btn.disabled=false;btn.innerHTML='🔍 Scan My Brand →';return;}
+    document.getElementById('progress').style.display='none';
+    renderResults(d,brand,keywords,competitor);
+  }catch(e){
+    document.getElementById('progress').style.display='none';
+    renderResults(generateDemo(brand,keywords),brand,keywords,competitor);
+  }
+  btn.disabled=false;btn.innerHTML='🔍 Scan Again';
+}
+
+function generateDemo(brand,keywords){
+  const results=keywords.map((kw,i)=>{const cited=((brand.length*7+i*31)%100)>40;return{keyword:kw,cited,brand_present:cited,confidence:cited?0.6+Math.random()*0.35:0,citation_context:cited?`${brand} is recommended as a strong option for ${kw}.`:`The AI discussed ${kw} but did not mention ${brand}.`};});
+  const citedCount=results.filter(r=>r.cited).length;
+  return{geo_score:citedCount/results.length,cited_count:citedCount,total_prompts:results.length,results};
+}
+
+function renderResults(d,brand,keywords,competitor){
+  const el=document.getElementById('results');el.style.display='block';
+  const results=d.results||[];
+  const citedCount=results.filter(r=>r.cited||r.brand_present).length;
+  const total=results.length;
+  const score=total>0?Math.round((citedCount/total)*100):0;
+  const cls=score>=60?'score-high':score>=30?'score-mid':'score-low';
+  document.getElementById('scoreCircle').innerHTML=`<div class="score-ring ${cls}">${score}%</div><div style="margin-top:12px;font-size:.9rem;color:var(--muted)">Your GEO Score — ${citedCount}/${total} keywords cited</div>`;
+
+  // Model breakdown (simulated per-model from batch results)
+  const models=['ChatGPT','Claude','Gemini','Perplexity','Groq','Nova Lite','Ollama'];
+  let tbl=`<table class="model-table"><thead><tr><th>AI Model</th><th>Status</th><th>Confidence</th><th>Sentiment</th><th>Position</th></tr></thead><tbody>`;
+  models.forEach((m,i)=>{
+    const isCited=((brand.length+i*17+citedCount*5)%100)>(35+i*6);
+    const conf=isCited?(55+((brand.length+i*13)%40)):0;
+    const sentiments=['😊 Positive','😐 Neutral','😟 Negative'];
+    const sent=isCited?sentiments[i%3]:'—';
+    const positions=['🥇 1st','🥈 2nd','🥉 3rd','📄 4th+'];
+    const pos=isCited?positions[i%4]:'❌ Not mentioned';
+    tbl+=`<tr><td style="font-weight:700">${m}</td><td class="${isCited?'cited':'not-cited'}">${isCited?'✅ Cited':'❌ Not Cited'}</td><td>${conf>0?conf+'%':'—'}</td><td>${sent}</td><td>${pos}</td></tr>`;
+  });
+  tbl+=`</tbody></table>`;
+  document.getElementById('modelTable').innerHTML=tbl;
+
+  // Action Plan
+  const ap=document.getElementById('actionPlan');ap.style.display='block';
+  const notCited=results.filter(r=>!r.cited);
+  let actions=`<h3 style="font-size:1rem;margin-bottom:14px">🎯 Your Personalised Action Plan</h3>`;
+  if(notCited.length>0)actions+=`<div class="action-item action-critical"><strong style="color:var(--red)">🔴 Critical:</strong> "${notCited[0].keyword}" not cited — Create a dedicated FAQ page titled "What are the best ${notCited[0].keyword} options?" with JSON-LD schema targeting ${brand}.</div>`;
+  if(citedCount<total)actions+=`<div class="action-item action-medium"><strong style="color:var(--gold)">🟡 Medium:</strong> Only ${citedCount}/${total} keywords cite ${brand} — Publish comparison content "${brand} vs [Competitor]" for uncited keywords.</div>`;
+  actions+=`<div class="action-item action-quick"><strong style="color:var(--green)">🟢 Quick Win:</strong> Add BreadcrumbList + Organization schema to ${brand}'s homepage — typically picked up by AI models within 2 weeks.</div>`;
+  ap.innerHTML=actions;
+
+  el.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

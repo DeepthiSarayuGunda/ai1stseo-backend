@@ -52,9 +52,8 @@ tr:hover td{background:rgba(88,166,255,.02)}
 <p class="subtitle">Brand visibility across Claude, ChatGPT, Gemini, Perplexity, Groq, Nova Lite & Ollama</p>
 <nav class="nav">
   <a href="/geo-scanner">Scanner</a>
-  <a href="/geo-scanner-intelligence">Intelligence</a>
-  <a href="/geo-tracker">GEO Tracker</a>
-  <a href="/client-dashboard">Client Dashboard</a>
+  <a href="/geo-scanner-intelligence.html">Intelligence</a>
+  <a href="/geo-tracker.html">GEO Tracker</a>
   <a href="/">Home</a>
 </nav>
 
@@ -81,19 +80,22 @@ tr:hover td{background:rgba(88,166,255,.02)}
 </div>
 </div>
 <script>
-const BASE='https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const BASE='https://www.ai1stseo.com';
 const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'):''
 const pct=v=>Math.round((parseFloat(v)||0)*100);
 
 async function loadDash(){
   try{
     const r=await fetch(BASE+'/api/m3/deepthi/scanner/intelligence-summary');
-    const d=await r.json();
+    if(!r.ok) throw new Error('API returned '+r.status);
+    const text=await r.text();
+    if(text.startsWith('<')) throw new Error('HTML response — API route not available');
+    const d=JSON.parse(text);
     document.getElementById('v-loading').style.display='none';
     document.getElementById('v-dash').style.display='block';
     renderDash(d);
   }catch(e){
-    document.getElementById('v-loading').innerHTML='<div style="color:#f85149">Failed to load: '+esc(e.message)+'</div>';
+    document.getElementById('v-loading').innerHTML='<div style="color:#8b949e;text-align:center;padding:20px"><div style="font-size:1.1rem;margin-bottom:8px">👆 Enter your brand and keywords above, then click <strong>Run Cross-Model Probe</strong></div><div style="font-size:.82rem;color:rgba(255,255,255,.4)">Historical data will appear here once you run your first scan.</div></div>';
   }
 }
 

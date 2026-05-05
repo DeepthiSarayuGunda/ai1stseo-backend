@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Visibility Checker - AI1stSEO</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;min-height:100vh;color:#e6edf3}
+
+        /* Nav */
+        .nav{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+        .nav-back{color:#8b949e;text-decoration:none;font-size:.85rem;transition:color .2s}
+        .nav-back:hover{color:#00d4ff}
+
+        /* Hero */
+        .hero{text-align:center;padding:60px 24px 48px;background:linear-gradient(180deg,rgba(0,212,255,0.04) 0%,transparent 100%)}
+        .hero-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.2);margin-bottom:16px}
+        .hero h1{font-size:2rem;font-weight:800;line-height:1.2;margin-bottom:10px}
+        .hero h1 span{background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:#8b949e;font-size:1rem;max-width:560px;margin:0 auto 8px;line-height:1.6}
+        .hero-features{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:20px;font-size:.82rem;color:#8b949e}
+        .hero-features span{display:flex;align-items:center;gap:6px}
+        .hero-features .check{color:#00e676;font-weight:700}
+
+        /* Form */
+        .form-card{max-width:640px;margin:-20px auto 0;padding:28px 32px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;position:relative;z-index:1}
+        .form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+        .form-field{flex:1;min-width:180px}
+        .form-field label{display:block;font-size:.78rem;color:#8b949e;margin-bottom:5px;font-weight:500}
+        .form-field input,.form-field textarea{width:100%;padding:11px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e6edf3;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+        .form-field input:focus,.form-field textarea:focus{border-color:#00d4ff}
+        .form-field textarea{resize:vertical;min-height:68px}
+        .form-hint{font-size:.72rem;color:#484f58;margin-top:3px}
+        .btn-primary{width:100%;padding:13px;border:none;border-radius:10px;cursor:pointer;font-size:1rem;font-weight:700;font-family:inherit;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;transition:opacity .2s,transform .15s;letter-spacing:.3px}
+        .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+        .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+        /* Results */
+        .results{max-width:960px;margin:0 auto;padding:0 24px 60px;display:none}
+
+        /* Score hero */
+        .score-hero{text-align:center;padding:40px 0 32px}
+        .score-ring{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative}
+        .score-ring::before{content:'';position:absolute;inset:0;border-radius:50%;padding:4px;background:conic-gradient(var(--ring-color) var(--ring-pct),rgba(255,255,255,0.06) 0);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+        .score-num{font-size:2.2rem;font-weight:800;z-index:1}
+        .score-label{color:#8b949e;font-size:.85rem;margin-bottom:4px}
+        .score-sub{color:#484f58;font-size:.78rem}
+
+        /* Stat cards */
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:32px}
+        .stat{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;text-align:center;transition:border-color .2s}
+        .stat:hover{border-color:rgba(0,212,255,0.2)}
+        .stat-val{font-size:1.4rem;font-weight:700;margin-bottom:2px}
+        .stat-lbl{font-size:.73rem;color:#8b949e}
+
+        /* Section */
+        .sec-title{font-size:1.05rem;font-weight:600;margin:28px 0 14px;color:#e6edf3;display:flex;align-items:center;gap:8px}
+        .sec-title .icon{font-size:1.1rem}
+
+        /* Query cards */
+        .query-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+        .qcard{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .2s}
+        .qcard:hover{border-color:rgba(0,212,255,0.15)}
+        .qcard.cited{border-left:3px solid #00e676}
+        .qcard.missed{border-left:3px solid rgba(255,82,82,0.4)}
+        .qcard-left{flex:1}
+        .qcard-query{font-size:.9rem;font-weight:500;margin-bottom:4px}
+        .qcard-meta{font-size:.75rem;color:#8b949e;display:flex;gap:10px;flex-wrap:wrap}
+        .qcard-right{text-align:right;flex-shrink:0}
+        .pill{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.72rem;font-weight:600}
+        .pill-yes{background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2)}
+        .pill-no{background:rgba(255,82,82,0.08);color:#ff5252;border:1px solid rgba(255,82,82,0.15)}
+        .pill-llm{background:rgba(123,44,191,0.1);color:#ce93d8;border:1px solid rgba(123,44,191,0.15);font-weight:500}
+
+        /* Insight cards */
+        .insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:32px}
+        .insight{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;transition:border-color .2s}
+        .insight:hover{border-color:rgba(0,212,255,0.15)}
+        .insight-icon{font-size:1.3rem;margin-bottom:8px}
+        .insight-title{font-size:.88rem;font-weight:600;margin-bottom:4px}
+        .insight-desc{font-size:.78rem;color:#8b949e;line-height:1.5}
+
+        /* CTA */
+        .cta-box{text-align:center;padding:32px;background:linear-gradient(135deg,rgba(0,212,255,0.06),rgba(123,44,191,0.06));border:1px solid rgba(255,255,255,0.06);border-radius:16px;margin-top:32px}
+        .cta-box h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+        .cta-box p{color:#8b949e;font-size:.85rem;margin-bottom:16px}
+        .btn-cta{display:inline-block;padding:12px 32px;border-radius:10px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff;text-decoration:none;font-size:.92rem;font-weight:600;transition:opacity .2s}
+        .btn-cta:hover{opacity:.85}
+
+        /* Loading */
+        .loading{text-align:center;padding:60px 0;display:none}
+        .spinner{width:44px;height:44px;margin:0 auto 16px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading p{color:#8b949e;font-size:.9rem}
+        .loading .sub{color:#484f58;font-size:.78rem;margin-top:6px}
+
+        /* Footer */
+        .footer{text-align:center;padding:24px;color:#484f58;font-size:.72rem;border-top:1px solid rgba(255,255,255,0.04);margin-top:40px}
+
+        @media(max-width:600px){
+            .hero h1{font-size:1.5rem}
+            .form-row{flex-direction:column}
+            .stats{grid-template-columns:repeat(2,1fr)}
+            .score-ring{width:100px;height:100px}
+            .score-num{font-size:1.8rem}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="/" class="nav-logo">AI1stSEO</a>
+    <a href="/" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="hero">
+    <span class="hero-badge">Free Tool</span>
+    <h1>Is Your Brand Visible to <span>AI Search?</span></h1>
+    <p>Find out if ChatGPT, Gemini, Claude, and Perplexity mention your brand when people ask about your industry.</p>
+    <div class="hero-features">
+        <span><span class="check">✓</span> Free instant scan</span>
+        <span><span class="check">✓</span> 4 AI models checked</span>
+        <span><span class="check">✓</span> No signup required</span>
+    </div>
+</div>
+
+<div class="form-card">
+    <form id="scan-form">
+        <div class="form-row">
+            <div class="form-field">
+                <label>Brand Name</label>
+                <input type="text" id="f-brand" placeholder="Your Company" required>
+            </div>
+            <div class="form-field">
+                <label>Domain</label>
+                <input type="text" id="f-domain" placeholder="yourcompany.com" required>
+            </div>
+        </div>
+        <div class="form-field" style="margin-bottom:16px">
+            <label>What should AI say about you? (one query per line)</label>
+            <textarea id="f-queries" placeholder="what is [your brand]&#10;best tools for [your industry]&#10;tell me about [your domain]"></textarea>
+            <div class="form-hint">We'll ask each AI model these questions and check if they mention you.</div>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-scan">Check My AI Visibility</button>
+    </form>
+</div>
+
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Asking AI models about your brand…</p>
+    <p class="sub">This takes a few seconds</p>
+</div>
+
+<div class="results" id="results"></div>
+
+<div class="footer">AI1stSEO — AI-First SEO Platform · AEO · GEO · SEO</div>
+
+<script>
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '' : 'https://www.ai1stseo.com';
+const LLM_NAMES = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',groq:'Groq AI',mock:'AI Scan'};
+
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+document.getElementById('scan-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const brand = document.getElementById('f-brand').value.trim();
+    const rawDomain = document.getElementById('f-domain').value.trim();
+    const rawQ = document.getElementById('f-queries').value.trim();
+
+    if(!brand||!rawDomain) return;
+    const domain = rawDomain.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0].toLowerCase();
+    const queries = rawQ ? rawQ.split('\n').map(q=>q.trim()).filter(Boolean) : [
+        'what is '+brand,
+        'best tools for SEO and marketing',
+        'tell me about '+domain
+    ];
+    if(queries.length>20){alert('Maximum 20 queries.');return}
+
+    const btn=document.getElementById('btn-scan');
+    const loading=document.getElementById('loading');
+    const results=document.getElementById('results');
+
+    btn.disabled=true;btn.textContent='Scanning…';
+    loading.style.display='block';results.style.display='none';
+    loading.scrollIntoView({behavior:'smooth',block:'center'});
+
+    try{
+        const res=await fetch(API_BASE+'/api/aeo-tracker/run',{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({brand_name:brand,target_domain:domain,queries:queries})
+        });
+        const data=await res.json();
+        if(data.status!=='ok') throw new Error(data.error||'Scan failed');
+        loading.style.display='none';
+        results.style.display='block';
+        render(data,brand,domain);
+        results.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(err){
+        loading.style.display='none';
+        results.style.display='block';
+        const msg = err.message || 'Something went wrong';
+        const isNoProvider = msg.toLowerCase().includes('no active llm');
+        results.innerHTML='<div style="text-align:center;padding:40px 0">' +
+            '<p style="color:#ff8a80;font-size:1rem">'+ esc(msg) +'</p>' +
+            (isNoProvider ? '<p style="color:#8b949e;font-size:.85rem;margin-top:8px">Contact the administrator to configure API keys.</p>' : '<p style="color:#8b949e;font-size:.85rem;margin-top:8px">Please try again.</p>') +
+            '</div>';
+    }finally{
+        btn.disabled=false;btn.textContent='Check My AI Visibility';
+    }
+});
+</script>
+<script>
+function render(data,brand,domain){
+    const s=data.summary||{};const res=data.results||[];
+    const vis=s.visibility_score||0;
+    const cited=s.total_cited||0;const total=s.total_scanned||0;
+    const ringColor=vis>=50?'#00e676':vis>0?'#ffab00':'#ff5252';
+    const bestLlm=LLM_NAMES[s.best_llm]||s.best_llm||'—';
+    const topQ=s.top_query||'—';
+
+    let h='';
+
+    // Score hero
+    h+=`<div class="score-hero">
+        <div class="score-ring" style="--ring-color:${ringColor};--ring-pct:${vis}%">
+            <span class="score-num" style="color:${ringColor}">${vis}%</span>
+        </div>
+        <div class="score-label">AI Visibility Score for <strong>${esc(domain)}</strong></div>
+        <div class="score-sub">${cited} of ${total} AI responses mentioned your brand</div>
+        <div style="margin-top:10px"><span style="display:inline-block;padding:4px 12px;border-radius:14px;font-size:.72rem;font-weight:600;background:rgba(0,230,118,0.1);color:#00e676;border:1px solid rgba(0,230,118,0.2);">● Live AI Data</span></div>
+    </div>`;
+
+    // Stats
+    h+=`<div class="stats">
+        <div class="stat"><div class="stat-val" style="color:#00d4ff">${total}</div><div class="stat-lbl">AI Responses Checked</div></div>
+        <div class="stat"><div class="stat-val" style="color:#00e676">${cited}</div><div class="stat-lbl">Times Cited</div></div>
+        <div class="stat"><div class="stat-val">${esc(bestLlm)}</div><div class="stat-lbl">Most Likely to Cite You</div></div>
+        <div class="stat"><div class="stat-val" style="font-size:.95rem;line-height:1.4rem">${esc(topQ.length>28?topQ.substring(0,28)+'…':topQ)}</div><div class="stat-lbl">Best Performing Query</div></div>
+    </div>`;
+
+    // Insights
+    h+=`<div class="sec-title"><span class="icon">💡</span> What This Means</div>`;
+    h+='<div class="insights">';
+    if(vis>=70){
+        h+=insightCard('🟢','Strong AI Presence','Your brand is well-represented in AI search results. Keep creating authoritative content to maintain this position.');
+    }else if(vis>=30){
+        h+=insightCard('🟡','Moderate Visibility','AI models sometimes mention you, but there\'s room to grow. Focus on structured content and FAQ schema.');
+    }else{
+        h+=insightCard('🔴','Low AI Visibility','AI models rarely cite your brand. This means potential customers asking AI won\'t find you. Action needed.');
+    }
+    if(cited>0){
+        h+=insightCard('✅','You\'re Being Cited','AI models are already referencing your brand — this is a strong signal. Build on this with more targeted content.');
+    }else{
+        h+=insightCard('⚠️','Not Yet Cited','No AI model mentioned your brand in these queries. Create answer-style content targeting these exact questions.');
+    }
+    h+=insightCard('📊','Competitive Edge','Most businesses haven\'t optimized for AI search yet. Acting now puts you ahead of competitors in AI discovery.');
+    h+='</div>';
+
+    // Query results
+    h+=`<div class="sec-title"><span class="icon">🔍</span> Results by Query</div>`;
+    h+='<div class="query-cards">';
+    for(const r of res){
+        const isCited=r.citation_found;
+        const llm=LLM_NAMES[r.llm]||r.llm;
+        const matchLabel=r.match_type?r.match_type.replace(/_/g,' '):'';
+        h+=`<div class="qcard ${isCited?'cited':'missed'}">
+            <div class="qcard-left">
+                <div class="qcard-query">"${esc(r.query)}"</div>
+                <div class="qcard-meta">
+                    <span class="pill pill-llm">${esc(llm)}</span>
+                    ${matchLabel?'<span>'+esc(matchLabel)+'</span>':''}
+                </div>
+            </div>
+            <div class="qcard-right">
+                ${isCited?'<span class="pill pill-yes">✓ Cited</span>':'<span class="pill pill-no">Not found</span>'}
+            </div>
+        </div>`;
+    }
+    h+='</div>';
+
+    // Per-LLM breakdown
+    const llmPerf=s.llm_performance||{};
+    const llmEntries=Object.entries(llmPerf).sort((a,b)=>b[1].rate-a[1].rate);
+    if(llmEntries.length>1){
+        h+=`<div class="sec-title"><span class="icon">🤖</span> Performance by AI Model</div>`;
+        h+='<div class="stats">';
+        for(const [k,v] of llmEntries){
+            const name=LLM_NAMES[k]||k;
+            const c=v.rate>=50?'#00e676':v.rate>0?'#ffab00':'#ff5252';
+            h+=`<div class="stat"><div class="stat-val" style="color:${c}">${v.rate}%</div><div class="stat-lbl">${esc(name)} (${v.cited}/${v.total})</div></div>`;
+        }
+        h+='</div>';
+    }
+
+    // CTA
+    h+=`<div class="cta-box">
+        <h3>Want to Improve Your AI Visibility?</h3>
+        <p>Get a full 236-point SEO + AEO audit with actionable recommendations.</p>
+        <a href="/analyze" class="btn-cta">Run Full SEO Analysis →</a>
+    </div>`;
+
+    document.getElementById('results').innerHTML=h;
+}
+
+function insightCard(icon,title,desc){
+    return `<div class="insight"><div class="insight-icon">${icon}</div><div class="insight-title">${esc(title)}</div><div class="insight-desc">${esc(desc)}</div></div>`;
+}
+</script>
+</body>
+</html>

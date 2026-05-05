@@ -210,6 +210,15 @@ def _log_request(response):
         pass
     return response
 
+@app.after_request
+def _no_cache_headers(response):
+    """Prevent browser caching so all users always get the latest deployed version."""
+    if 'text/html' in response.content_type:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 try:
     from visitor_tracking.tracker_api import register_blueprint as register_tracker
     register_tracker(app)
@@ -745,6 +754,69 @@ def analyze_content_seo(url, soup, response, load_time):
     add_check(checks, 'Contact Information', 'pass' if contact_info else 'info',
               'Contact details', 'Found' if contact_info else 'Not found', 'Provide contact information', 'Medium', 'E-E-A-T')
     
+    # 21-30: AI Readiness & Advanced Content Signals
+    # 21. Image alt text coverage
+    images = soup.find_all('img')
+    imgs_with_alt = [i for i in images if i.get('alt', '').strip()]
+    alt_pct = (len(imgs_with_alt) / len(images) * 100) if images else 100
+    add_check(checks, 'Image Alt Text', 'pass' if alt_pct >= 90 else ('warning' if alt_pct >= 50 else 'fail'),
+              'Alt text coverage', f'{alt_pct:.0f}% ({len(imgs_with_alt)}/{len(images)})', 'Add descriptive alt text to all images', 'High', 'AI Readiness')
+
+    # 22. Structured headings (H2/H3 hierarchy)
+    h2s = soup.find_all('h2')
+    h3s = soup.find_all('h3')
+    heading_depth = len(h2s) + len(h3s)
+    add_check(checks, 'Heading Hierarchy', 'pass' if len(h2s) >= 2 and heading_depth >= 4 else 'warning',
+              'Content structure depth', f'{len(h2s)} H2s, {len(h3s)} H3s', 'Use 3+ H2s with nested H3s for clear structure', 'High', 'AI Readiness')
+
+    # 23. FAQ / Q&A content (AI engines love this)
+    faq_signals = len(re.findall(r'(?:what|how|why|when|where|who|which|can|does|is)\s.+\?', text.lower()))
+    add_check(checks, 'FAQ Content', 'pass' if faq_signals >= 3 else ('warning' if faq_signals >= 1 else 'info'),
+              'Question-answer patterns', f'{faq_signals} Q&A patterns', 'Add FAQ sections for AI snippet eligibility', 'High', 'AI Readiness')
+
+    # 24. List content (ordered/unordered)
+    lists = soup.find_all(['ul', 'ol'])
+    list_items = soup.find_all('li')
+    add_check(checks, 'List Content', 'pass' if len(lists) >= 2 else 'info',
+              'Structured lists', f'{len(lists)} lists, {len(list_items)} items', 'Use lists for scannable, AI-friendly content', 'Medium', 'AI Readiness')
+
+    # 25. Table data (comparison/structured data)
+    tables = soup.find_all('table')
+    add_check(checks, 'Table Data', 'pass' if tables else 'info',
+              'Data tables', f'{len(tables)} tables', 'Add comparison tables for rich snippet eligibility', 'Medium', 'AI Readiness')
+
+    # 26. Schema/JSON-LD markup
+    schemas = soup.find_all('script', type='application/ld+json')
+    add_check(checks, 'Schema Markup', 'pass' if schemas else 'warning',
+              'Structured data', f'{len(schemas)} schema blocks', 'Add JSON-LD schema for AI discoverability', 'High', 'AI Readiness')
+
+    # 27. Multimedia content (video/audio embeds)
+    videos = soup.find_all(['video', 'iframe'])
+    video_embeds = [v for v in videos if 'youtube' in str(v).lower() or 'vimeo' in str(v).lower() or v.name == 'video']
+    add_check(checks, 'Multimedia Content', 'pass' if video_embeds else 'info',
+              'Video/media embeds', f'{len(video_embeds)} media elements', 'Embed videos for engagement and dwell time', 'Low', 'AI Readiness')
+
+    # 28. Content freshness signals
+    freshness_signals = re.findall(r'\b20(?:2[3-9]|[3-9]\d)\b', text)
+    add_check(checks, 'Content Freshness', 'pass' if freshness_signals else 'warning',
+              'Recent date references', f'{len(freshness_signals)} recent dates', 'Reference current year/dates for freshness signals', 'Medium', 'AI Readiness')
+
+    # 29. CTA (Call-to-Action) presence
+    cta_patterns = re.findall(r'(?:sign up|get started|try free|learn more|contact us|book|subscribe|download|start)', text.lower())
+    cta_buttons = soup.find_all(['button', 'a'], class_=re.compile(r'btn|button|cta', re.I))
+    has_cta = len(cta_patterns) > 0 or len(cta_buttons) > 0
+    add_check(checks, 'Call-to-Action', 'pass' if has_cta else 'warning',
+              'CTA elements', f'{len(cta_patterns)} text CTAs, {len(cta_buttons)} buttons', 'Include clear calls-to-action', 'Medium', 'Conversion')
+
+    # 30. Readability score (Flesch-Kincaid approximation)
+    syllable_count = sum(max(1, len(re.findall(r'[aeiouy]+', w.lower()))) for w in words[:500])
+    words_sample = min(len(words), 500)
+    sents_sample = max(1, len([s for s in re.split(r'[.!?]+', ' '.join(words[:500])) if len(s.split()) > 2]))
+    fk_grade = 0.39 * (words_sample / sents_sample) + 11.8 * (syllable_count / words_sample) - 15.59 if words_sample else 0
+    fk_grade = max(0, min(20, fk_grade))
+    add_check(checks, 'Readability Grade', 'pass' if 6 <= fk_grade <= 12 else 'warning',
+              'Flesch-Kincaid grade level', f'Grade {fk_grade:.1f}', 'Aim for grade 8-10 for broad accessibility', 'Medium', 'Conversion')
+
     passed = sum(1 for c in checks if c['status'] == 'pass')
     return {'score': round((passed / len(checks)) * 100, 1), 'checks': checks, 'total': len(checks), 'passed': passed}
 
@@ -2075,18 +2147,19 @@ def analyze_url():
 def health_check():
     return jsonify({
         'status': 'ok', 
-        'totalChecks': 200,
+        'totalChecks': 246,
         'categories': {
             'technical': 35,
             'onpage': 25,
-            'content': 20,
+            'content': 30,
             'mobile': 15,
             'performance': 18,
             'security': 12,
             'social': 10,
             'local': 15,
             'geo': 30,
-            'citationgap': 20
+            'citationgap': 20,
+            'ai_readiness': 10
         },
         'endpoints': ['/api/analyze', '/api/content-brief', '/api/content-briefs', '/api/content-score', '/api/keyword-cluster', '/api/template-benchmark', '/api/template-types', '/api/ai-recommendations', '/api/health', '/api/status']
     })
@@ -3733,15 +3806,133 @@ def council_geo_agent(soup, text, url):
     }
 
 
+def _build_council_context(url, soup, text, keyword):
+    """Pre-extract structural signals once so each agent gets a focused, cheap prompt."""
+    # Structural
+    h1s = soup.find_all('h1')
+    h2s = [h.get_text(strip=True) for h in soup.find_all('h2')]
+    h3s = [h.get_text(strip=True) for h in soup.find_all('h3')]
+    images = soup.find_all('img')
+    imgs_with_alt = [i for i in images if i.get('alt', '').strip()]
+    alt_pct = round((len(imgs_with_alt) / len(images) * 100), 1) if images else 100.0
+    lists = soup.find_all(['ul', 'ol'])
+    tables = soup.find_all('table')
+    a_tags = soup.find_all('a', href=True)
+    parsed = urlparse(url)
+    host = parsed.netloc.lower()
+    internal = [a for a in a_tags if host in a['href'] or a['href'].startswith('/')]
+    external = [a for a in a_tags if a['href'].startswith('http') and host not in a['href']]
+
+    # Schema
+    json_ld_blocks = soup.find_all('script', {'type': 'application/ld+json'})
+    schema_types = []
+    for s in json_ld_blocks:
+        try:
+            obj = json.loads(s.string or '{}')
+            candidates = obj if isinstance(obj, list) else [obj]
+            for c in candidates:
+                t = c.get('@type') if isinstance(c, dict) else None
+                if isinstance(t, str):
+                    schema_types.append(t)
+                elif isinstance(t, list):
+                    schema_types.extend([str(x) for x in t])
+        except Exception:
+            pass
+    schema_dump = ' '.join((s.string or '') for s in json_ld_blocks).lower()
+
+    # Meta
+    title_tag = soup.find('title')
+    title = title_tag.get_text(strip=True) if title_tag else ''
+    meta_desc_tag = soup.find('meta', attrs={'name': 'description'})
+    meta_desc = meta_desc_tag.get('content', '').strip() if meta_desc_tag else ''
+    canonical_tag = soup.find('link', attrs={'rel': 'canonical'})
+    has_canonical = bool(canonical_tag and canonical_tag.get('href'))
+
+    # Content signals
+    text_lower = text.lower()
+    word_count = len(text.split())
+    has_author = bool(re.search(r'(author|written by|posted by|dr\.|phd)', text_lower))
+    has_freshness = bool(re.search(r'(202[4-6]|updated|as of|last modified)', text_lower))
+    has_citations = bool(re.search(r'(according to|source:|study|research shows|data from)', text_lower))
+    faq_count = len(re.findall(r'(?:what|how|why|when|where|who|which|can|does|is)\s[^?]{3,}\?', text_lower))
+    # Direct-answer heuristic: short paragraphs starting with a definition cue
+    direct_answers = len(re.findall(r'(?:^|\n)(?:[A-Z][^\n]{20,200}(?:\sis\s|\sare\s|\smeans\s|refers to))', text))
+
+    # Local signals
+    has_address = bool(re.search(r'\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd)\b', text_lower))
+    has_phone = bool(re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', text))
+    has_hours = bool(re.search(r'(monday|tuesday|wednesday|thursday|friday|saturday|sunday|\bhours\b|\bopen\b)', text_lower))
+    has_local_schema = 'localbusiness' in schema_dump
+    has_geo_coords = 'geocoordinates' in schema_dump
+    has_local_keywords = bool(re.search(r'(ottawa|toronto|vancouver|montreal|canada|near me|local|nearby)', text_lower))
+    service_areas = re.findall(r'(?:serving|service area|we serve)\s+([A-Z][a-zA-Z ,]{2,40})', text)[:5]
+
+    # Readability
+    try:
+        readability = compute_readability_score(text)
+    except Exception:
+        readability = {'score': 0, 'grade': 'n/a'}
+
+    return {
+        'url': url,
+        'keyword': keyword,
+        'text': text,
+        'title': title,
+        'meta_desc': meta_desc,
+        'has_canonical': has_canonical,
+        'h1_count': len(h1s),
+        'h2_count': len(h2s),
+        'h3_count': len(h3s),
+        'h2s': h2s,
+        'h3s': h3s,
+        'word_count': word_count,
+        'readability_grade': readability.get('grade', 'n/a'),
+        'readability_score': readability.get('score', 0),
+        'alt_pct': alt_pct,
+        'image_count': len(images),
+        'list_count': len(lists),
+        'table_count': len(tables),
+        'internal_links': len(internal),
+        'external_links': len(external),
+        'schema_types': sorted(set(schema_types)),
+        'schema_count': len(schema_types),
+        'faq_count': faq_count,
+        'direct_answers': direct_answers,
+        'has_author': has_author,
+        'has_freshness': has_freshness,
+        'has_citations': has_citations,
+        'has_address': has_address,
+        'has_phone': has_phone,
+        'has_hours': has_hours,
+        'has_local_schema': has_local_schema,
+        'has_geo_coords': has_geo_coords,
+        'has_local_keywords': has_local_keywords,
+        'service_areas': service_areas,
+    }
+
+
 @app.route('/api/council/analyze', methods=['POST'])
 def council_analyze():
-    """AI Council — 5 specialized agents analyze a URL and produce a unified action plan."""
+    """AI Council — 5 specialized agents from 4 different companies produce a unified action plan.
+
+    Each agent is powered by a dedicated Bedrock model:
+      AEO        → Claude 3.5 Haiku      (Anthropic)
+      SEO        → Nova Lite             (Amazon)
+      Content    → Llama 4 Maverick      (Meta)
+      Competitor → Mistral Large         (Mistral AI)
+      GEO        → Nova Lite             (Amazon)
+      Moderator  → Claude Sonnet 4       (Anthropic)
+
+    Rule-based scoring is computed first and passed as a fallback so the Council
+    always returns a result, even if one or more LLM calls fail.
+    """
     try:
         data = request.get_json(silent=True)
         if not data:
             return jsonify({'error': 'Invalid JSON'}), 400
         url = (data.get('url') or '').strip()
         keyword = (data.get('keyword') or '').strip()
+        use_llm = data.get('use_llm', True)  # Allow forcing rule-based for testing
         if not url:
             return jsonify({'error': 'url is required'}), 400
         if not url.startswith('http'):
@@ -3750,8 +3941,8 @@ def council_analyze():
         resp, soup, load_time = fetch_website(url)
         text = soup.get_text(separator=' ', strip=True)
 
-        # Run all 5 agents
-        agents = [
+        # Step 1 — compute rule-based agent outputs (cheap, deterministic, always succeed)
+        rb_agents = [
             council_aeo_agent(soup, text, keyword),
             council_seo_agent(url, soup, text, keyword),
             council_content_agent(text, soup),
@@ -3759,19 +3950,52 @@ def council_analyze():
             council_geo_agent(soup, text, url),
         ]
 
-        # Overall council score (weighted: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%)
+        # Step 2 — upgrade each agent via its assigned Bedrock model (with fallback)
+        if use_llm:
+            try:
+                from council_agents import (
+                    run_aeo_agent, run_seo_agent, run_content_agent,
+                    run_competitor_agent, run_geo_agent, run_moderator,
+                    AGENT_MODEL_LABELS,
+                )
+                ctx = _build_council_context(url, soup, text, keyword)
+                agents = [
+                    run_aeo_agent(ctx, rb_agents[0]),
+                    run_seo_agent(ctx, rb_agents[1]),
+                    run_content_agent(ctx, rb_agents[2]),
+                    run_competitor_agent(ctx, rb_agents[3]),
+                    run_geo_agent(ctx, rb_agents[4]),
+                ]
+            except Exception as e:
+                app.logger.warning("Council LLM path failed, using rule-based: %s", e)
+                agents = rb_agents
+                run_moderator = None
+                AGENT_MODEL_LABELS = {}
+        else:
+            agents = rb_agents
+            run_moderator = None
+            AGENT_MODEL_LABELS = {}
+
+        # Weighted overall score: AEO 30%, SEO 25%, Content 20%, Competitor 15%, GEO 10%
         weights = [0.30, 0.25, 0.20, 0.15, 0.10]
         overall = round(sum(a['score'] * w for a, w in zip(agents, weights)))
 
-        # Council moderator — LLM synthesizes all agent findings
+        # Step 3 — Moderator (Claude Sonnet 4) synthesizes the 5 reports
         council_summary = None
-        all_recs = []
-        for a in agents:
-            all_recs.extend([(a['agent'], r) for r in a['top_recommendations'][:2]])
-        
-        if all_recs:
-            recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
-            prompt = f"""You are the moderator of an AI Council analyzing a webpage for "{keyword or url}". Five specialist agents have reviewed the page. Overall score: {overall}/100.
+        if use_llm and run_moderator:
+            try:
+                council_summary = run_moderator(agents, keyword, overall)
+            except Exception as e:
+                app.logger.warning("Moderator failed, falling back to simple LLM: %s", e)
+
+        # Fallback summary path if moderator couldn't run
+        if not council_summary:
+            all_recs = []
+            for a in agents:
+                all_recs.extend([(a['agent'], r) for r in a.get('top_recommendations', [])[:2]])
+            if all_recs:
+                recs_text = '\n'.join(f"- {agent}: {rec}" for agent, rec in all_recs)
+                prompt = f"""You are the moderator of an AI Council analyzing a webpage for "{keyword or url}". Five specialist agents have reviewed the page. Overall score: {overall}/100.
 
 Agent findings:
 {recs_text}
@@ -3782,10 +4006,10 @@ As the council moderator, produce:
 3. One bold strategic recommendation that would have the biggest single impact
 
 Be concise and actionable. Format as a numbered list."""
-            try:
-                council_summary = call_llm(prompt, timeout=15)
-            except Exception:
-                pass
+                try:
+                    council_summary = call_llm(prompt, timeout=15)
+                except Exception:
+                    pass
 
         return jsonify({
             'status': 'success',
@@ -3794,11 +4018,24 @@ Be concise and actionable. Format as a numbered list."""
             'overall_score': overall,
             'agents': agents,
             'council_summary': council_summary,
+            'moderator_model': AGENT_MODEL_LABELS.get('moderator') if use_llm else None,
+            'powered_by': 'Multi-LLM AI Council' if use_llm else 'Rule-based Council',
             'load_time': round(load_time, 2),
             'analyzed_at': datetime.utcnow().isoformat()
         })
     except Exception as e:
+        app.logger.exception("Council analysis failed")
         return jsonify({'error': f'Council analysis failed: {str(e)}'}), 500
+
+
+@app.route('/api/council/status', methods=['GET'])
+def council_status():
+    """Report which LLM providers are configured for the council. No secrets leaked."""
+    try:
+        from council_agents import get_council_status
+        return jsonify({'status': 'ok', **get_council_status()})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)[:200]}), 500
 
 
 @app.route('/api/geo-probe', methods=['POST'])
@@ -4110,6 +4347,21 @@ def aeo_visibility_results():
 def serve_aeo_dashboard():
     """AEO Visibility Dashboard — LLM mention tracking."""
     return send_from_directory('.', 'aeo-dashboard.html')
+
+@app.route('/aeo-tracker')
+def serve_aeo_tracker():
+    """AEO Rank Tracker — Multi-LLM citation detection UI."""
+    return send_from_directory('.', 'aeo-tracker.html')
+
+@app.route('/citation-velocity')
+def serve_citation_velocity():
+    """Citation Velocity Tracker — monitor AI citations over time."""
+    return send_from_directory('.', 'citation-velocity.html')
+
+@app.route('/ai-compare')
+def serve_ai_compare():
+    """AI Visibility Comparison — compare brands head-to-head."""
+    return send_from_directory('.', 'ai-compare.html')
 
 
 # ============== OUTREACH GENERATOR (Unlinked Mentions) ==============
@@ -5212,7 +5464,32 @@ try:
 except Exception as e:
     print(f"\u26a0 Attribution API: {e}")
 
-
+# --- AEO Rank Tracker (Multi-LLM citation detection) ---
+try:
+    from aeo_rank_tracker.api import aeo_tracker_bp
+    app.register_blueprint(aeo_tracker_bp)
+    # Startup status log
+    try:
+        from aeo_rank_tracker.tracker import detect_available_llms
+        _det = detect_available_llms()
+        _active = _det["active"]
+        if _active == ["mock"]:
+            _mode = "mock"
+        elif len(_active) == 1:
+            _mode = _active[0]
+        else:
+            _mode = "mixed"
+        print(f"✓ AEO Rank Tracker ready — running in {_mode} mode (providers: {', '.join(_active)})")
+        # Start automated scan scheduler
+        try:
+            from aeo_rank_tracker.scheduler import start_scheduler
+            start_scheduler()
+        except Exception as _se:
+            print(f"⚠ AEO scheduler: {_se}")
+    except Exception:
+        print("✓ AEO Rank Tracker registered (provider detection deferred)")
+except Exception as e:
+    print(f"\u26a0 AEO Rank Tracker: {e}")
 
 
 

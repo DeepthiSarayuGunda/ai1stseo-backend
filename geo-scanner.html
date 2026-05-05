@@ -210,9 +210,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <a href="/ai-visibility-checker.html" style="background:rgba(63,185,80,.1);border-color:rgba(63,185,80,.3);color:#3fb950">🔍 Free AI Checker</a>
   <a href="/visibility-dashboard.html" style="background:rgba(88,166,255,.1);border-color:rgba(88,166,255,.3);color:#58a6ff">📊 Visibility</a>
   <a href="/geo-tracker.html" style="background:rgba(34,211,238,.1);border-color:rgba(34,211,238,.3);color:#22d3ee">📈 GEO Tracker</a>
-  <a href="/client-dashboard.html" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:#fbbf24">📋 Client Report</a>
   <a href="/aeo-rank-tracker.html" style="background:rgba(0,255,136,.1);border-color:rgba(0,255,136,.3);color:#00ff88;font-weight:700">🔬 AEO Rank Tracker</a>
-  <a href="#month1-research" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:#34d399">📊 Research</a>
   <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Switch light/dark mode">&#x1F319;</button>
 </nav>
 
@@ -246,6 +244,26 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
     <div>
       <label>Scanners</label>
       <div style="font-size:.78rem;color:#8b949e;margin-top:6px" id="agent-list">Loading agents…</div>
+    </div>
+  </div>
+
+  <!-- ADD 2: Competitor Comparison Input -->
+  <div class="row2" style="margin-top:12px">
+    <div>
+      <label for="s-competitor">Compare against competitor (optional) <span class="tip" title="Enter a competitor brand name to see a side-by-side comparison of AI visibility.">ⓘ</span></label>
+      <input id="s-competitor" placeholder="e.g. competitor brand name">
+    </div>
+    <!-- ADD 3: Language Selector -->
+    <div>
+      <label for="s-lang">Language <span class="tip" title="Probe AI models in different languages to check global visibility.">ⓘ</span></label>
+      <select id="s-lang">
+        <option value="en" selected>English</option>
+        <option value="es">Spanish</option>
+        <option value="hi">Hindi</option>
+        <option value="ar">Arabic</option>
+        <option value="fr">French</option>
+        <option value="pt">Portuguese</option>
+      </select>
     </div>
   </div>
 
@@ -681,9 +699,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- MONTH 1 RESEARCH SECTION                                                   -->
+<!-- RESEARCH & INTELLIGENCE SECTION                                            -->
 <!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<div class="section-title" id="month1-research" style="margin-top:48px"><span>📊</span> Month 1 — Research &amp; Platform Mastery</div>
+<div class="section-title" id="month1-research" style="margin-top:48px"><span>📊</span> Research &amp; Platform Intelligence</div>
 
 <div class="grid">
 
@@ -741,7 +759,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 <div class="card" style="grid-column:1/-1;position:relative;overflow:hidden">
   <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#238636,#3fb950)"></div>
   <span class="tag tag-live">LIVE</span>
-  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Month 1 Baseline Report</h2>
+  <h2 style="color:#58a6ff;font-size:1rem;margin-bottom:2px">Full Baseline Report</h2>
   <p style="font-size:.78rem;color:#8b949e;margin-bottom:12px">Run all 8 deliverables: Keyword Universe, Benchmark, Provider Guide, Answer Taxonomy, GEO Baseline, Monitoring, E-E-A-T Register, Technical Debt</p>
   <label>Brand</label><input id="m1-all-brand" class="sync-brand" placeholder="Auto-filled from above">
   <label>URL</label><input id="m1-all-url" class="sync-url" placeholder="Auto-filled from above">
@@ -751,7 +769,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
     <div><label>Visibility Brands (comma-separated)</label><input id="m1-all-vis" placeholder="e.g. HubSpot, Moz"></div>
   </div>
   <label>Brand Pages to Audit (comma-separated URLs)</label><textarea id="m1-all-pages" rows="2" placeholder="e.g. https://ai1stseo.com/, https://ai1stseo.com/features"></textarea>
-  <button class="btn-scan" onclick="m1RunAll()">🚀 Generate Month 1 Report</button>
+  <button class="btn-scan" onclick="m1RunAll()">🚀 Generate Full Report</button>
   <div id="m1-all-progress" style="display:none;margin-top:12px;padding:14px;background:#0d0f14;border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:.82rem;color:#8b949e"></div>
   <div id="m1-all-out" class="out" style="margin-top:10px;padding:10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:.78rem;max-height:500px;overflow-y:auto;white-space:pre-wrap;display:none"></div>
 </div>
@@ -791,7 +809,7 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
 </details>
 
 <script>
-const BASE = window.location.hostname.includes('ai1stseo.com') ? 'https://sgnmqxb2sw.us-east-1.awsapprunner.com' : window.location.origin;
+const BASE = window.location.hostname.includes('ai1stseo.com') ? 'https://www.ai1stseo.com' : window.location.origin;
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
@@ -2045,6 +2063,40 @@ async function m1RunAll() {
 }
 </script>
 </div><!-- /page-wrap -->
+
+<!-- ADD 4: Competitor Comparison Table -->
+<div style="max-width:900px;margin:48px auto;padding:0 24px">
+  <h2 style="text-align:center;color:#e1e4e8;font-size:1.4rem;font-weight:800;margin-bottom:8px">Why AI1stSEO Beats $250-$400/month Competitors</h2>
+  <p style="text-align:center;color:#7d8590;font-size:.88rem;margin-bottom:24px">The only platform with hallucination detection, sentiment analysis, AND a free plan.</p>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr>
+        <th style="text-align:left;padding:10px 12px;color:#7d8590;font-size:.72rem;text-transform:uppercase;border-bottom:1px solid #21262d;min-width:160px">Feature</th>
+        <th style="text-align:center;padding:10px 12px;color:#00d4ff;font-weight:700;border-bottom:1px solid #21262d;background:rgba(0,212,255,.03);border-radius:8px 8px 0 0">AI1stSEO</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Scrunch ($250/mo)</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Profound ($399/mo)</th>
+        <th style="text-align:center;padding:10px 12px;color:#7d8590;border-bottom:1px solid #21262d">Peec AI</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Free plan</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅ Yes</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">AI models</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">7</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">4</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">10</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c9d1d9">5</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Hallucination Detection</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Sentiment Analysis</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#00ff88">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">ROI Calculator</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Action Plan</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-weight:600;color:#e1e4e8">Multilingual</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);background:rgba(0,212,255,.02);color:#00ff88;font-weight:700">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#00ff88">✅</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td><td style="text-align:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.03);color:#f85149">❌</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="text-align:center;color:#484f58;font-size:.75rem;margin-top:14px">AI1stSEO is the only platform that combines GEO monitoring, hallucination detection, sentiment analysis, and actionable recommendations — for free.</p>
+</div>
+
+<!-- ADD 5: Bottom CTA Banner -->
+<div style="max-width:900px;margin:32px auto 48px;padding:48px 24px;text-align:center;background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,255,136,.04));border:1px solid rgba(0,212,255,.12);border-radius:20px">
+  <h2 style="font-size:1.6rem;font-weight:900;color:#e1e4e8;margin-bottom:8px">Start Scanning Your Brand Free</h2>
+  <p style="color:#7d8590;font-size:.95rem;margin-bottom:24px">No credit card. 30 seconds. 7 AI engines.</p>
+  <button onclick="document.getElementById('s-brand').focus();window.scrollTo({top:200,behavior:'smooth'})" style="padding:16px 40px;border:none;border-radius:14px;background:linear-gradient(135deg,#00d4ff,#00ff88);color:#000;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s">Run Free Scan →</button>
+</div>
 
 <script src="/s3-pages/a11y-sports.js?v=2"></script>
 <script>var b=document.getElementById('themeBtn');if(b)b.innerHTML=document.documentElement.classList.contains('light')?'&#x2600;&#xFE0F;':'&#x1F319;';</script>
