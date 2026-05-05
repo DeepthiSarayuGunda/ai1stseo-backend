@@ -2148,3 +2148,317 @@ def prompt_suggestions():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== BACKLINK ROI SCORER =====================
+
+@backlink_bp.route('/api/backlinks/roi-score', methods=['POST'])
+@require_auth
+def backlink_roi_score():
+    """
+    Score a backlink opportunity's ROI across both Google authority AND AI citation value.
+    Returns a composite score (0-100) combining traditional link value + AI citation probability.
+    """
+    data = request.get_json() or {}
+    source_domain = data.get('source_domain', '').strip()
+    target_url = data.get('target_url', '').strip()
+    anchor_text = data.get('anchor_text', '').strip()
+    niche = data.get('niche', 'SEO')
+    if not source_domain:
+        return jsonify({'status': 'error', 'message': 'source_domain required'}), 400
+
+    try:
+        # 1. Traditional Google authority signals
+        google_score = 0
+        da_result = _estimate_domain_authority(source_domain)
+        da = da_result.get('da_score', 0)
+        google_score = da  # DA is already 0-100
+
+        # 2. AI citation authority — check if AI models cite this domain
+        ai_score = 0
+        items = scan_table(BACKLINKS_TABLE, 200)
+        citation_probes = [i for i in items if i.get('type') == 'citation_authority']
+        domain_citations = 0
+        total_probes = 0
+        for probe in citation_probes:
+            total_probes += 1
+            for cited in probe.get('top_cited_domains', []):
+                if source_domain.lower() in (cited.get('domain', '') or '').lower():
+                    domain_citations += cited.get('citation_count', 1)
+        if total_probes > 0 and domain_citations > 0:
+            ai_score = min(100, domain_citations * 15)  # Scale: 1 citation = 15 points
+
+        # 3. Platform trust bonus (Common Crawl indexed, Reddit, Wikipedia, GitHub)
+        platform_bonus = 0
+        trusted_patterns = {
+            'reddit.com': 20, 'wikipedia.org': 25, 'github.com': 15,
+            'stackoverflow.com': 15, 'medium.com': 10, 'linkedin.com': 10,
+            'forbes.com': 20, 'techcrunch.com': 18, 'nytimes.com': 20,
+        }
+        for pattern, bonus in trusted_patterns.items():
+            if pattern in source_domain.lower():
+                platform_bonus = bonus
+                break
+
+        # 4. Anchor text quality (penalize exact match spam)
+        anchor_score = 50  # neutral
+        if anchor_text:
+            words = anchor_text.split()
+            if len(words) >= 2 and len(words) <= 6:
+                anchor_score = 80  # descriptive, good length
+            elif len(words) == 1:
+                anchor_score = 30  # exact match, risky
+            elif len(words) > 8:
+                anchor_score = 40  # too long
+
+        # 5. Composite ROI score (weighted)
+        composite = (
+            google_score * 0.35 +      # 35% traditional DA
+            ai_score * 0.30 +          # 30% AI citation value
+            platform_bonus * 0.20 +    # 20% platform trust
+            anchor_score * 0.15        # 15% anchor quality
+        )
+        composite = min(100, round(composite, 1))
+
+        return jsonify({
+            'status': 'success',
+            'source_domain': source_domain,
+            'composite_roi_score': composite,
+            'breakdown': {
+                'google_authority': {'score': da, 'weight': '35%', 'signals': da_result.get('signals', {})},
+                'ai_citation_value': {'score': ai_score, 'weight': '30%', 'citations_found': domain_citations},
+                'platform_trust': {'score': platform_bonus, 'weight': '20%'},
+                'anchor_quality': {'score': anchor_score, 'weight': '15%', 'anchor': anchor_text},
+            },
+            'recommendation': 'High value' if composite >= 70 else ('Medium value' if composite >= 40 else 'Low value — consider alternatives'),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# ===================== CONTENT SEEDING PLANNER =====================
+
+@backlink_bp.route('/api/backlinks/seeding-plan', methods=['POST'])
+@require_auth
+def content_seeding_plan():
+    """
+    Generate a content seeding plan: which platforms to target for a niche
+    based on where AI models actually pull their citations from.
+    """
+    data = request.get_json() or {}
+    niche = data.get('niche', '').strip()
+    brand = data.get('brand', '').strip()
+    if not niche:
+        return jsonify({'status': 'error', 'message': 'niche required (e.g. "SEO tools", "ecommerce", "SaaS")'}), 400
+
+    try:
+        # Pull citation data to see which platforms AI models trust for this niche
+        items = scan_table(BACKLINKS_TABLE, 300)
+        citation_probes = [i for i in items if i.get('type') == 'citation_authority'
+                          and niche.lower() in (i.get('niche', '') or '').lower()]
+
+        # Count which domains get cited most
+        from collections import Counter
+        domain_counts = Counter()
+        for probe in citation_probes:
+            for cited in probe.get('top_cited_domains', []):
+                domain_counts[cited.get('domain', '')] += cited.get('citation_count', 1)
+
+        # Categorize into platform types
+        platform_categories = {
+            'reddit': {'domains': ['reddit.com'], 'type': 'Community/Forum', 'effort': 'Medium', 'ai_weight': 'High'},
+            'github': {'domains': ['github.com', 'github.io'], 'type': 'Code/Documentation', 'effort': 'Medium', 'ai_weight': 'High'},
+            'wikipedia': {'domains': ['wikipedia.org', 'wikimedia.org'], 'type': 'Encyclopedia', 'effort': 'High', 'ai_weight': 'Very High'},
+            'stackoverflow': {'domains': ['stackoverflow.com', 'stackexchange.com'], 'type': 'Q&A', 'effort': 'Medium', 'ai_weight': 'High'},
+            'medium': {'domains': ['medium.com'], 'type': 'Blog Platform', 'effort': 'Low', 'ai_weight': 'Medium'},
+            'linkedin': {'domains': ['linkedin.com'], 'type': 'Professional Network', 'effort': 'Low', 'ai_weight': 'Medium'},
+            'youtube': {'domains': ['youtube.com'], 'type': 'Video', 'effort': 'High', 'ai_weight': 'Medium'},
+            'news_sites': {'domains': ['forbes.com', 'techcrunch.com', 'wired.com', 'theverge.com'], 'type': 'News/PR', 'effort': 'Very High', 'ai_weight': 'Very High'},
+            'industry_blogs': {'domains': ['moz.com', 'ahrefs.com', 'searchenginejournal.com', 'semrush.com'], 'type': 'Industry Authority', 'effort': 'High', 'ai_weight': 'High'},
+        }
+
+        # Score each platform based on citation data
+        platform_scores = []
+        for platform, info in platform_categories.items():
+            citations = sum(domain_counts.get(d, 0) for d in info['domains'])
+            # Also check if any cited domain matches the pattern
+            for cited_domain in domain_counts:
+                for pattern in info['domains']:
+                    if pattern in cited_domain and cited_domain not in info['domains']:
+                        citations += domain_counts[cited_domain]
+
+            priority = 'High' if citations > 3 else ('Medium' if citations > 0 else 'Standard')
+            platform_scores.append({
+                'platform': platform,
+                'type': info['type'],
+                'ai_citation_weight': info['ai_weight'],
+                'citations_in_niche': citations,
+                'effort_level': info['effort'],
+                'priority': priority,
+                'action': _get_seeding_action(platform, niche, brand),
+            })
+
+        # Sort by priority
+        priority_order = {'High': 0, 'Medium': 1, 'Standard': 2}
+        platform_scores.sort(key=lambda x: (priority_order.get(x['priority'], 3), -x['citations_in_niche']))
+
+        # Generate AI-powered specific recommendations
+        recommendations = []
+        try:
+            from ai_inference import generate
+            prompt = (
+                'For a brand in the "{niche}" niche, suggest 5 specific content seeding actions. '
+                'Each should name a specific platform, subreddit, or site and what to post there. '
+                'Focus on platforms that AI chatbots cite frequently. One per line, be specific.'
+            ).format(niche=niche)
+            response = generate(prompt, max_tokens=512, temperature=0.7, triggered_by='seeding_plan')
+            recommendations = [line.strip() for line in response.strip().split('\n')
+                               if line.strip() and len(line.strip()) > 15][:5]
+        except Exception:
+            pass
+
+        # Store the plan
+        plan_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': plan_id,
+            'type': 'seeding_plan',
+            'niche': niche,
+            'brand': brand,
+            'platforms_scored': len(platform_scores),
+            'created_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+
+        return jsonify({
+            'status': 'success',
+            'id': plan_id,
+            'niche': niche,
+            'platforms': platform_scores,
+            'ai_recommendations': recommendations,
+            'strategy_summary': 'Focus on {} first — highest AI citation weight for your niche.'.format(
+                platform_scores[0]['platform'] if platform_scores else 'community platforms'),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _get_seeding_action(platform, niche, brand):
+    """Return a specific action for each platform."""
+    actions = {
+        'reddit': 'Find 3-5 subreddits in the {} space. Post helpful answers mentioning {} naturally. Target threads asking for tool recommendations.'.format(niche, brand or 'your brand'),
+        'github': 'Create a public repo with {} resources, guides, or tools. Include comprehensive README with links back to your site.'.format(niche),
+        'wikipedia': 'Identify {} articles with dead citations. Propose edits replacing dead links with your authoritative content.'.format(niche),
+        'stackoverflow': 'Answer {} questions with detailed, helpful responses. Include links to relevant documentation on your site.'.format(niche),
+        'medium': 'Publish 2-3 in-depth {} articles per month. Cross-link to your main site for detailed guides.'.format(niche),
+        'linkedin': 'Share {} insights weekly. Tag industry leaders. Publish articles with original data from your platform.'.format(niche),
+        'youtube': 'Create tutorial/explainer videos about {}. Include links in descriptions and pinned comments.'.format(niche),
+        'news_sites': 'Pitch original {} data/research to journalists. Use HARO/Connectively for expert source opportunities.'.format(niche),
+        'industry_blogs': 'Guest post on {} authority sites. Offer unique data or case studies they can\'t get elsewhere.'.format(niche),
+    }
+    return actions.get(platform, 'Create authoritative content on this platform about {}.'.format(niche))
+
+
+# ===================== BACKLINK OUTREACH TRACKER =====================
+
+@backlink_bp.route('/api/backlinks/outreach/track', methods=['POST'])
+@require_auth
+def track_outreach():
+    """
+    Track an outreach attempt for a backlink opportunity.
+    Status flow: contacted → replied → link_placed | rejected | no_response
+    """
+    data = request.get_json() or {}
+    opportunity_id = data.get('opportunity_id', '').strip()
+    target_url = data.get('target_url', '').strip()
+    contact_email = data.get('contact_email', '').strip()
+    status = data.get('status', 'contacted')
+
+    if not target_url and not opportunity_id:
+        return jsonify({'status': 'error', 'message': 'target_url or opportunity_id required'}), 400
+
+    valid_statuses = {'contacted', 'replied', 'link_placed', 'rejected', 'no_response', 'follow_up_sent'}
+    if status not in valid_statuses:
+        return jsonify({'status': 'error', 'message': 'status must be one of: {}'.format(', '.join(sorted(valid_statuses)))}), 400
+
+    try:
+        record_id = str(uuid.uuid4())
+        put_item(BACKLINKS_TABLE, {
+            'id': record_id,
+            'type': 'outreach_record',
+            'opportunity_id': opportunity_id,
+            'target_url': target_url,
+            'contact_email': contact_email,
+            'status': status,
+            'notes': data.get('notes', ''),
+            'outreach_method': data.get('method', 'email'),
+            'created_at': _now(),
+            'updated_at': _now(),
+            'project_id': DEFAULT_PROJECT_ID,
+            'created_by': _get_user_id(),
+        })
+        return jsonify({'status': 'success', 'id': record_id, 'outreach_status': status}), 201
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/outreach/update', methods=['PUT'])
+@require_auth
+def update_outreach():
+    """Update the status of an outreach record."""
+    data = request.get_json() or {}
+    record_id = data.get('id', '').strip()
+    new_status = data.get('status', '').strip()
+    if not record_id or not new_status:
+        return jsonify({'status': 'error', 'message': 'id and status required'}), 400
+    try:
+        update_item(BACKLINKS_TABLE, {'id': record_id}, {
+            'status': new_status,
+            'updated_at': _now(),
+            'notes': data.get('notes', ''),
+        })
+        return jsonify({'status': 'success', 'id': record_id, 'new_status': new_status})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@backlink_bp.route('/api/backlinks/outreach/stats', methods=['GET'])
+@require_auth
+def outreach_stats():
+    """
+    Get outreach funnel stats: how many contacted → replied → link placed.
+    Shows conversion rates at each stage.
+    """
+    try:
+        items = scan_table(BACKLINKS_TABLE, 500)
+        records = [i for i in items if i.get('type') == 'outreach_record']
+
+        from collections import Counter
+        status_counts = Counter(r.get('status', 'unknown') for r in records)
+
+        total = len(records)
+        contacted = status_counts.get('contacted', 0) + status_counts.get('follow_up_sent', 0)
+        replied = status_counts.get('replied', 0)
+        placed = status_counts.get('link_placed', 0)
+        rejected = status_counts.get('rejected', 0)
+        no_response = status_counts.get('no_response', 0)
+
+        return jsonify({
+            'status': 'success',
+            'total_outreach': total,
+            'funnel': {
+                'contacted': contacted,
+                'replied': replied,
+                'link_placed': placed,
+                'rejected': rejected,
+                'no_response': no_response,
+            },
+            'conversion_rates': {
+                'contact_to_reply': round(replied / max(contacted, 1) * 100, 1),
+                'reply_to_placement': round(placed / max(replied, 1) * 100, 1),
+                'overall_success': round(placed / max(total, 1) * 100, 1),
+            },
+            'records': records[:50],
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
