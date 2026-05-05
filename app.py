@@ -210,6 +210,15 @@ def _log_request(response):
         pass
     return response
 
+@app.after_request
+def _no_cache_headers(response):
+    """Prevent browser caching so all users always get the latest deployed version."""
+    if 'text/html' in response.content_type:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 try:
     from visitor_tracking.tracker_api import register_blueprint as register_tracker
     register_tracker(app)
