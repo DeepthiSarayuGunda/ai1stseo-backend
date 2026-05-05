@@ -201,7 +201,7 @@ html.light [style*="background:#0a0c12"]{background:#e0f2fe!important;border-bot
 <script>
 // Pull real stats for ticker
 (function(){
-  fetch('https://sgnmqxb2sw.us-east-1.awsapprunner.com/api/public/live-stats')
+  fetch('https://www.ai1stseo.com/api/public/live-stats')
     .then(r=>r.json()).then(d=>{
       var el;
       if(d.total_ai_probes_run&&(el=document.getElementById('tk-probes')))el.textContent=d.total_ai_probes_run;
@@ -496,7 +496,7 @@ html.light [style*="background:#0a0c12"]{background:#e0f2fe!important;border-bot
 </div>
 
 <script>
-const BASE = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const BASE = 'https://www.ai1stseo.com';
 const esc = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 const pct = v => Math.round((parseFloat(v)||0)*100);
 const scoreCls = v => v>=60?'up':v>=30?'stable':'down';
@@ -512,7 +512,8 @@ async function load(){
     document.getElementById('dashboard').style.display='block';
     render(d);
   }catch(e){
-    document.getElementById('loading').innerHTML='<div style="color:#f85149">Failed to load intelligence data: '+esc(e.message)+'</div>';
+    document.getElementById('loading').style.display='none';
+    document.getElementById('dashboard').style.display='block';
   }
 }
 
