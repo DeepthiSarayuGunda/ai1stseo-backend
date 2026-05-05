@@ -1,146 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Council — Multi-Agent Analysis | AI1stSEO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;background:#030712;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
-        .glow{position:fixed;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 20% 30%,rgba(139,92,246,0.1) 0%,transparent 40%),radial-gradient(circle at 80% 70%,rgba(6,182,212,0.07) 0%,transparent 40%),radial-gradient(circle at 50% 50%,rgba(236,72,153,0.05) 0%,transparent 45%);animation:gd 22s ease-in-out infinite;z-index:0;pointer-events:none}
-        @keyframes gd{0%,100%{transform:translate(0,0)}50%{transform:translate(-2%,1.5%)}}
-        nav{position:relative;z-index:10;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(16px)}
-        .logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
-        .nav-r a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.8rem;margin-left:20px;transition:color 0.2s}
-        .nav-r a:hover{color:#e2e8f0}
-        .wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:40px 20px}
-        .hero{text-align:center;margin-bottom:32px}
-        .badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.2);color:#a5b4fc;margin-bottom:14px}
-        .hero h1{font-size:2rem;font-weight:800;letter-spacing:-0.7px;margin-bottom:10px}
-        .hero h1 span{background:linear-gradient(135deg,#8b5cf6,#06b6d4,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .hero p{color:rgba(255,255,255,0.38);font-size:0.88rem;max-width:620px;margin:0 auto;line-height:1.6}
-        .bar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;justify-content:center}
-        .bar input{flex:1;min-width:240px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#e2e8f0;font-size:0.92rem;outline:none;transition:border-color 0.3s,box-shadow 0.3s}
-        .bar input:focus{border-color:rgba(139,92,246,0.4);box-shadow:0 0 24px rgba(139,92,246,0.08)}
-        .btn{padding:14px 28px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:0.9rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;background:linear-gradient(135deg,#8b5cf6,#06b6d4)}
-        .btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(139,92,246,0.3)}
-        .btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
-        .overall{text-align:center;padding:28px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;margin:20px 0;position:relative;overflow:hidden}
-        .overall::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8b5cf6,#06b6d4,#ec4899,#f59e0b,#34d399)}
-        .overall-score{font-size:3.5rem;font-weight:800}
-        .overall-label{font-size:0.7rem;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
-        .agents{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
-        @media(max-width:768px){.agents{grid-template-columns:1fr}}
-        .agent{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:18px;transition:border-color 0.3s,transform 0.2s}
-        .agent:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-2px)}
-        .agent-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-        .agent-name{font-weight:700;font-size:0.88rem;display:flex;align-items:center;gap:8px}
-        .agent-dot{width:10px;height:10px;border-radius:50%}
-        .agent-score{font-size:1.4rem;font-weight:800}
-        .agent-focus{font-size:0.72rem;color:rgba(255,255,255,0.3);margin-bottom:10px}
-        .agent-verdict{display:inline-block;padding:3px 10px;border-radius:16px;font-size:0.68rem;font-weight:700;margin-bottom:10px}
-        .v-strong{background:rgba(52,211,153,0.12);color:#34d399}
-        .v-moderate{background:rgba(251,191,36,0.12);color:#fbbf24}
-        .v-weak{background:rgba(248,113,113,0.12);color:#f87171}
-        .check-list{margin-top:8px}
-        .check{display:flex;align-items:center;gap:6px;font-size:0.76rem;padding:3px 0;color:rgba(255,255,255,0.5)}
-        .check-icon{width:14px;text-align:center;font-size:0.7rem;flex-shrink:0}
-        .recs{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04)}
-        .rec{font-size:0.76rem;color:rgba(255,255,255,0.45);padding:3px 0;padding-left:12px;border-left:2px solid rgba(139,92,246,0.3)}
-        .agent-model{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:6px;display:flex;align-items:center;gap:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)}
-        .agent-model-chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.66rem;font-weight:600;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);color:#c4b5fd}
-        .powered-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(6,182,212,0.1));border:1px solid rgba(139,92,246,0.2);color:#a5b4fc;margin-top:8px}
-        .council-full{grid-column:1/-1}
-        .ai-box{background:linear-gradient(135deg,rgba(139,92,246,0.05),rgba(6,182,212,0.03));border:1px solid rgba(139,92,246,0.1);border-radius:16px;padding:20px;margin:16px 0}
-        .ai-box h3{font-size:0.88rem;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .ai-box pre{white-space:pre-wrap;font-size:0.8rem;color:rgba(255,255,255,0.42);line-height:1.7;font-family:inherit}
-        .loading{text-align:center;padding:60px;color:rgba(255,255,255,0.3)}
-        .spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(255,255,255,0.05);border-top-color:#8b5cf6;border-radius:50%;animation:sp 0.8s linear infinite;margin-right:12px;vertical-align:middle}
-        @keyframes sp{to{transform:rotate(360deg)}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Council — Multi-LLM Analysis | AI1stSEO</title>
+<meta name="description" content="5 AI specialists from 4 different companies analyse your page in real time. Watch Claude, GPT-4o, Gemini, and Nova work together live.">
+<link rel="canonical" href="https://www.ai1stseo.com/council.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#030712;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+.glow{position:fixed;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 20% 30%,rgba(139,92,246,0.12) 0%,transparent 40%),radial-gradient(circle at 80% 70%,rgba(6,182,212,0.08) 0%,transparent 40%),radial-gradient(circle at 50% 50%,rgba(236,72,153,0.06) 0%,transparent 45%);animation:gd 22s ease-in-out infinite;z-index:0;pointer-events:none}
+@keyframes gd{0%,100%{transform:translate(0,0)}50%{transform:translate(-2%,1.5%)}}
+
+nav{position:relative;z-index:10;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(16px)}
+.logo{font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#06b6d4,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-r a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.8rem;margin-left:20px;transition:color 0.2s}
+.nav-r a:hover{color:#e2e8f0}
+
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:32px 20px 60px}
+
+.hero{text-align:center;margin-bottom:24px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,rgba(52,211,153,0.12),rgba(6,182,212,0.12));border:1px solid rgba(52,211,153,0.25);color:#6ee7b7;margin-bottom:12px}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 12px #34d399;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero h1{font-size:2.1rem;font-weight:800;letter-spacing:-0.7px;margin-bottom:8px}
+.hero h1 span{background:linear-gradient(135deg,#8b5cf6,#06b6d4,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:rgba(255,255,255,0.4);font-size:0.9rem;max-width:680px;margin:0 auto;line-height:1.55}
+
+.bar{display:flex;gap:10px;margin:24px 0 32px;flex-wrap:wrap;justify-content:center}
+.bar input{flex:1;min-width:240px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#e2e8f0;font-size:0.92rem;outline:none;transition:border-color 0.3s,box-shadow 0.3s}
+.bar input:focus{border-color:rgba(52,211,153,0.4);box-shadow:0 0 24px rgba(52,211,153,0.1)}
+.btn{padding:14px 28px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:0.9rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;background:linear-gradient(135deg,#34d399,#06b6d4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(52,211,153,0.3)}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Dashboard grid: agents left, console right */
+.dash{display:grid;grid-template-columns:1fr 420px;gap:16px;margin-top:16px}
+@media(max-width:960px){.dash{grid-template-columns:1fr}}
+
+.agents-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.agents-col{grid-template-columns:1fr}}
+
+.agent{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.2s}
+.agent::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,#8b5cf6);opacity:0.3;transition:opacity 0.4s}
+.agent.working::before{opacity:1;animation:scan 1.6s infinite}
+.agent.done::before{opacity:1;background:#34d399}
+.agent.failed::before{opacity:1;background:#f87171}
+@keyframes scan{0%{transform:scaleX(0.2);transform-origin:left}50%{transform:scaleX(1);transform-origin:center}100%{transform:scaleX(0.2);transform-origin:right}}
+
+.agent-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.agent-name{font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:8px}
+.agent-dot{width:9px;height:9px;border-radius:50%;background:var(--accent,#8b5cf6);flex-shrink:0}
+.agent.idle .agent-dot{opacity:0.25}
+.agent.working .agent-dot{animation:pulse 1.2s infinite;box-shadow:0 0 8px var(--accent,#8b5cf6)}
+.agent-score{font-size:1.55rem;font-weight:800;font-variant-numeric:tabular-nums}
+.agent-model{font-size:0.67rem;color:rgba(255,255,255,0.3);margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.agent-state{font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:12px;display:inline-block;margin-bottom:8px}
+.state-idle{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.35)}
+.state-working{background:rgba(251,191,36,0.12);color:#fbbf24}
+.state-done{background:rgba(52,211,153,0.12);color:#34d399}
+.state-failed{background:rgba(248,113,113,0.12);color:#f87171}
+
+.agent-lines{font-size:0.75rem;color:rgba(255,255,255,0.45);line-height:1.55;min-height:80px}
+.agent-lines .line{padding:2px 0;opacity:0;animation:fadeUp 0.45s forwards}
+.agent-lines .line.pass{color:rgba(52,211,153,0.75)}
+.agent-lines .line.fail{color:rgba(248,113,113,0.75)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.agent-elapsed{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:8px;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px}
+
+/* Live console */
+.console{background:#0a0f1e;border:1px solid rgba(52,211,153,0.15);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;height:fit-content;max-height:680px;position:sticky;top:20px}
+.console-head{padding:12px 16px;border-bottom:1px solid rgba(52,211,153,0.12);display:flex;align-items:center;justify-content:space-between;background:rgba(52,211,153,0.03)}
+.console-title{font-size:0.75rem;font-weight:700;color:#6ee7b7;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.console-title::before{content:'';width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 8px #34d399}
+.console-meta{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:rgba(255,255,255,0.3)}
+.console-body{flex:1;overflow-y:auto;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.7;min-height:300px}
+.console-body::-webkit-scrollbar{width:4px}
+.console-body::-webkit-scrollbar-thumb{background:rgba(52,211,153,0.2);border-radius:4px}
+.log-line{opacity:0;animation:fadeUp 0.3s forwards}
+.log-ts{color:rgba(255,255,255,0.28);margin-right:8px}
+.log-info{color:rgba(255,255,255,0.6)}
+.log-ok{color:#6ee7b7}
+.log-warn{color:#fbbf24}
+.log-err{color:#f87171}
+.log-hdr{color:#a5b4fc;font-weight:600}
+
+/* Overall score + moderator */
+.overall{margin-top:16px;text-align:center;padding:24px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:18px;position:relative;overflow:hidden;opacity:0;transition:opacity 0.6s}
+.overall.visible{opacity:1}
+.overall::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8b5cf6,#06b6d4,#ec4899,#f59e0b,#34d399)}
+.overall-score{font-size:3.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+.overall-label{font-size:0.7rem;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
+
+.ai-box{background:linear-gradient(135deg,rgba(139,92,246,0.05),rgba(6,182,212,0.03));border:1px solid rgba(139,92,246,0.1);border-radius:16px;padding:20px;margin-top:16px;opacity:0;transition:opacity 0.6s}
+.ai-box.visible{opacity:1}
+.ai-box h3{font-size:0.88rem;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-box .model-chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.65rem;font-weight:600;font-family:'JetBrains Mono',monospace;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);color:#c4b5fd;-webkit-text-fill-color:#c4b5fd}
+.ai-box pre{white-space:pre-wrap;font-size:0.8rem;color:rgba(255,255,255,0.46);line-height:1.7;font-family:inherit;min-height:20px}
+.cursor{display:inline-block;width:7px;height:14px;background:#06b6d4;vertical-align:middle;margin-left:2px;animation:blink 1s infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+.legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:8px 0 0;font-size:0.7rem;color:rgba(255,255,255,0.4)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+</style>
 </head>
 <body>
 <div class="glow"></div>
-<nav><a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a><div class="nav-r"><a href="https://www.ai1stseo.com">Home</a><a href="https://www.ai1stseo.com/psie.html">PSIE</a><a href="https://www.ai1stseo.com/template-benchmark.html">Benchmark</a><a href="https://www.ai1stseo.com/audit.html">Audit</a></div></nav>
-<div class="wrap">
-    <div class="hero" data-aos="fade-up">
-        <div class="badge">Multi-LLM Intelligence · 4 Companies</div>
-        <h1>Your website, reviewed by <span>5 AI specialists</span></h1>
-        <p>Five agents powered by four different AI companies — Anthropic, Amazon, OpenAI, Google — analyse your page in parallel. A senior moderator from a different model tier synthesises their findings into one unified action plan. No model judges its own work.</p>
-    </div>
-    <div class="bar" data-aos="fade-up" data-aos-delay="100">
-        <input type="text" id="url" placeholder="Enter URL to analyze..." />
-        <input type="text" id="kw" placeholder="Target keyword (optional)..." style="min-width:180px;max-width:240px;" />
-        <button class="btn" id="goBtn" onclick="run()">Convene Council</button>
-        <a href="https://www.ai1stseo.com/council-live.html" class="btn" style="background:linear-gradient(135deg,#34d399,#06b6d4);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">⚡ Live Mode</a>
-    </div>
-    <div id="out"></div>
+<nav>
+<a href="https://www.ai1stseo.com" class="logo">AI1stSEO</a>
+<div class="nav-r">
+<a href="https://www.ai1stseo.com">Home</a>
+<a href="https://www.ai1stseo.com/council.html">Council</a>
+<a href="https://www.ai1stseo.com/psie.html">PSIE</a>
+<a href="https://www.ai1stseo.com/audit.html">Audit</a>
 </div>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</nav>
+<div class="wrap">
+<div class="hero">
+<div class="badge"><span class="dot"></span>Live Mode</div>
+<h1>Watch <span>5 AI specialists</span> analyse your page in real time</h1>
+<p>Fire all 5 agents simultaneously across 4 different AI companies. See each result stream in as the model responds. The moderator then synthesises everything into one unified action plan — live.</p>
+</div>
+
+<div class="bar">
+<input type="text" id="url" placeholder="Enter URL to analyse..." />
+<input type="text" id="kw" placeholder="Target keyword (optional)" style="min-width:180px;max-width:240px;" />
+<button class="btn" id="goBtn" onclick="startLive()">Start Live Analysis</button>
+</div>
+
+<div class="legend">
+<span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>AEO · Claude Haiku</span>
+<span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>SEO · Nova Lite</span>
+<span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Content · GPT-4o-mini</span>
+<span class="legend-item"><span class="legend-dot" style="background:#ec4899"></span>Competitor · Gemini Flash</span>
+<span class="legend-item"><span class="legend-dot" style="background:#34d399"></span>GEO · Nova Lite</span>
+</div>
+
+<div class="dash">
+<div class="agents-col" id="agentsCol"></div>
+<div class="console">
+<div class="console-head">
+<div class="console-title">Council Console</div>
+<div class="console-meta" id="consoleMeta">idle</div>
+</div>
+<div class="console-body" id="consoleBody">
+<div class="log-line" style="animation-delay:0s"><span class="log-ts">&gt;</span><span class="log-info">Awaiting URL…</span></div>
+</div>
+</div>
+</div>
+
+<div id="overall" class="overall" style="display:none;">
+<div class="overall-score" id="overallScore">--</div>
+<div class="overall-label">Council Consensus Score</div>
+</div>
+
+<div id="aiBox" class="ai-box" style="display:none;">
+<h3>Council Moderator — Unified Action Plan<span class="model-chip" id="modChip"></span></h3>
+<pre id="modText"></pre>
+</div>
+</div>
+
 <script>
-AOS.init({duration:600,once:true});
-const API='https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
-const agentColors={
-    'AEO Specialist':'#8b5cf6','SEO Specialist':'#3b82f6','Content Quality Analyst':'#f59e0b',
-    'Competitor Intelligence':'#ec4899','GEO/Local Specialist':'#34d399'
-};
+const API = 'https://cwb0hb27bf.execute-api.us-east-1.amazonaws.com';
 
-async function run(){
-    const url=document.getElementById('url').value.trim(),kw=document.getElementById('kw').value.trim(),btn=document.getElementById('goBtn'),out=document.getElementById('out');
-    if(!url){alert('Enter a URL');return}
-    btn.disabled=true;btn.textContent='Council in session...';
-    out.innerHTML='<div class="loading"><span class="spinner"></span>5 AI agents are analyzing your page in parallel...</div>';
-    try{
-        const fu=url.startsWith('http')?url:'https://'+url;
-        const r=await fetch(API+'/api/council/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:fu,keyword:kw})});
-        const d=await r.json();
-        if(d.status!=='success'){out.innerHTML='<div class="agent" style="color:#f87171;">'+(d.error||'Error')+'</div>';btn.disabled=false;btn.textContent='Convene Council';return}
-        let h='';
+const AGENTS = [
+  { key: 'aeo',        name: 'AEO Specialist',          model: 'Claude 3.5 Haiku (Anthropic)',  color: '#8b5cf6' },
+  { key: 'seo',        name: 'SEO Specialist',          model: 'Nova Lite (Amazon)',            color: '#3b82f6' },
+  { key: 'content',    name: 'Content Quality Analyst', model: 'GPT-4o-mini (OpenAI)',          color: '#f59e0b' },
+  { key: 'competitor', name: 'Competitor Intelligence', model: 'Gemini 1.5 Flash (Google)',     color: '#ec4899' },
+  { key: 'geo',        name: 'GEO/Local Specialist',    model: 'Nova Lite (Amazon)',            color: '#34d399' },
+];
 
-        // Overall score
-        const oc=d.overall_score>=70?'#34d399':d.overall_score>=40?'#fbbf24':'#f87171';
-        h+='<div class="overall" data-aos="zoom-in"><div class="overall-score" style="color:'+oc+';">'+d.overall_score+'</div><div class="overall-label">Council Consensus Score</div>';
-        if(d.powered_by){h+='<div class="powered-badge">⚡ '+d.powered_by+'</div>';}
-        h+='</div>';
+// Render idle agent cards on load
+function renderAgents() {
+  const col = document.getElementById('agentsCol');
+  col.innerHTML = '';
+  AGENTS.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'agent idle';
+    el.id = 'agent-' + a.key;
+    el.style.setProperty('--accent', a.color);
+    el.innerHTML = `
+      <div class="agent-head">
+        <div class="agent-name"><span class="agent-dot"></span>${a.name}</div>
+        <div class="agent-score" style="color:${a.color};opacity:0.25;">--</div>
+      </div>
+      <div class="agent-model">${a.model}</div>
+      <span class="agent-state state-idle">Idle</span>
+      <div class="agent-lines" id="lines-${a.key}"></div>
+      <div class="agent-elapsed" id="elapsed-${a.key}">—</div>
+    `;
+    col.appendChild(el);
+  });
+}
+renderAgents();
 
-        // Agent cards
-        h+='<div class="agents">';
-        d.agents.forEach((a,i)=>{
-            const c=agentColors[a.agent]||'#8b5cf6';
-            const vc=a.score>=70?'v-strong':a.score>=40?'v-moderate':'v-weak';
-            h+='<div class="agent" data-aos="fade-up" data-aos-delay="'+(i*80)+'">';
-            h+='<div class="agent-header"><div class="agent-name"><span class="agent-dot" style="background:'+c+';"></span>'+a.agent+'</div><div class="agent-score" style="color:'+c+';">'+a.score+'</div></div>';
-            h+='<div class="agent-focus">'+a.focus+'</div>';
-            h+='<div class="agent-verdict '+vc+'">'+a.verdict+'</div>';
+// Console logger
+function ts() {
+  const d = new Date();
+  return d.toTimeString().slice(0, 8);
+}
+function log(kind, msg) {
+  const body = document.getElementById('consoleBody');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.style.animationDelay = '0s';
+  line.innerHTML = `<span class="log-ts">${ts()}</span><span class="log-${kind}">${msg}</span>`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
+function clearLog() {
+  document.getElementById('consoleBody').innerHTML = '';
+}
+function setMeta(t) {
+  document.getElementById('consoleMeta').textContent = t;
+}
 
-            // Passed checks
-            if(a.passed&&a.passed.length){h+='<div class="check-list">';a.passed.slice(0,4).forEach(p=>{h+='<div class="check"><span class="check-icon" style="color:#34d399;">✓</span>'+p+'</div>'});h+='</div>'}
+// Agent card state transitions
+function markAgent(key, state, data) {
+  const el = document.getElementById('agent-' + key);
+  if (!el) return;
+  el.classList.remove('idle', 'working', 'done', 'failed');
+  el.classList.add(state);
+  const stateEl = el.querySelector('.agent-state');
+  stateEl.className = 'agent-state state-' + state;
+  stateEl.textContent = {
+    working: 'Analysing…',
+    done: 'Complete',
+    failed: 'Failed',
+  }[state] || 'Idle';
 
-            // Failed checks
-            if(a.failed&&a.failed.length){h+='<div class="check-list">';a.failed.slice(0,3).forEach(f=>{h+='<div class="check"><span class="check-icon" style="color:#f87171;">✗</span>'+f+'</div>'});h+='</div>'}
+  if (state === 'done' && data) {
+    const scoreEl = el.querySelector('.agent-score');
+    const color = AGENTS.find(a => a.key === key).color;
+    scoreEl.style.opacity = '1';
+    // animate score counter
+    const target = data.score || 0;
+    const dur = 900;
+    const start = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      scoreEl.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
 
-            // Recommendations
-            if(a.top_recommendations&&a.top_recommendations.length){h+='<div class="recs">';a.top_recommendations.slice(0,2).forEach(r=>{h+='<div class="rec">'+r+'</div>'});h+='</div>'}
+    // Stream passed/failed lines
+    const lines = document.getElementById('lines-' + key);
+    lines.innerHTML = '';
+    const entries = [];
+    (data.passed || []).slice(0, 2).forEach(t => entries.push({ cls: 'pass', text: '✓ ' + t }));
+    (data.failed || []).slice(0, 2).forEach(t => entries.push({ cls: 'fail', text: '✗ ' + t }));
+    (data.top_recommendations || []).slice(0, 1).forEach(t => entries.push({ cls: '', text: '→ ' + t }));
+    entries.forEach((e, i) => {
+      const l = document.createElement('div');
+      l.className = 'line ' + e.cls;
+      l.style.animationDelay = (i * 0.18) + 's';
+      l.textContent = e.text;
+      lines.appendChild(l);
+    });
+  }
+}
 
-            // Model that powered this agent
-            if(a.model){h+='<div class="agent-model">Powered by <span class="agent-model-chip">'+a.model+'</span></div>'}
+function setElapsed(key, s) {
+  const el = document.getElementById('elapsed-' + key);
+  if (el) el.textContent = `latency ${s}s  ·  ${AGENTS.find(a=>a.key===key).model}`;
+}
 
-            h+='</div>';
-        });
-        h+='</div>';
+// Run a single agent
+async function runAgent(key, url, keyword) {
+  const t0 = performance.now();
+  markAgent(key, 'working');
+  log('info', `→ dispatched ${key.toUpperCase()} agent`);
+  try {
+    const r = await fetch(`${API}/api/council/live/${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, keyword }),
+    });
+    const d = await r.json();
+    const rt = ((performance.now() - t0) / 1000).toFixed(2);
+    if (d.status !== 'success') {
+      markAgent(key, 'failed');
+      log('err', `✗ ${key.toUpperCase()} failed — ${(d.error || 'unknown').slice(0, 80)}`);
+      return null;
+    }
+    markAgent(key, 'done', d.agent);
+    setElapsed(key, d.elapsed || rt);
+    const model = (d.agent && d.agent.model) || '';
+    const fallback = model.includes('(fallback)') ? ' (fallback)' : '';
+    log('ok', `✓ ${d.agent.agent} → ${d.agent.score}/100 · ${d.elapsed}s${fallback}`);
+    return d.agent;
+  } catch (e) {
+    markAgent(key, 'failed');
+    log('err', `✗ ${key.toUpperCase()} network error`);
+    return null;
+  }
+}
 
-        // Council moderator summary
-        if(d.council_summary){
-            const modelLine = d.moderator_model ? ' <span class="agent-model-chip" style="margin-left:8px;font-size:0.62rem;">'+d.moderator_model+'</span>' : '';
-            h+='<div class="ai-box" data-aos="fade-up"><h3>Council Moderator — Unified Action Plan'+modelLine+'</h3><pre>'+d.council_summary+'</pre></div>';
-        }
+// Typewriter stream for the moderator text
+function typewrite(el, text, cps = 80) {
+  return new Promise(resolve => {
+    el.innerHTML = '';
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    el.appendChild(cursor);
+    let i = 0;
+    const tick = () => {
+      if (i >= text.length) { cursor.remove(); return resolve(); }
+      cursor.insertAdjacentText('beforebegin', text[i]);
+      i++;
+      setTimeout(tick, 1000 / cps);
+    };
+    tick();
+  });
+}
 
-        out.innerHTML=h;
-        AOS.refresh();
-    }catch(e){out.innerHTML='<div class="agent" style="color:#f87171;">'+e.message+'</div>'}
-    btn.disabled=false;btn.textContent='Convene Council';
+async function startLive() {
+  const url = document.getElementById('url').value.trim();
+  const keyword = document.getElementById('kw').value.trim();
+  const btn = document.getElementById('goBtn');
+  if (!url) { alert('Enter a URL'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Live session running…';
+  clearLog();
+  setMeta('running');
+  renderAgents();
+  document.getElementById('overall').style.display = 'none';
+  document.getElementById('overall').classList.remove('visible');
+  document.getElementById('aiBox').style.display = 'none';
+  document.getElementById('aiBox').classList.remove('visible');
+
+  const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+  log('hdr', `▸ LIVE MODE · target: ${fullUrl}`);
+  log('info', `▸ dispatching 5 agents across 4 AI companies in parallel`);
+
+  const tStart = performance.now();
+
+  // Fire all 5 agents in parallel
+  const promises = AGENTS.map(a => runAgent(a.key, fullUrl, keyword));
+  const results = await Promise.all(promises);
+  const agents = results.filter(Boolean);
+
+  const tAgents = ((performance.now() - tStart) / 1000).toFixed(2);
+  log('hdr', `▸ all 5 agents returned in ${tAgents}s`);
+
+  if (agents.length === 0) {
+    log('err', '✗ all agents failed — cannot synthesise');
+    btn.disabled = false;
+    btn.textContent = 'Start Live Analysis';
+    setMeta('error');
+    return;
+  }
+
+  // Moderator phase
+  log('info', '→ dispatching moderator (GPT-4o)');
+  const tMod = performance.now();
+  let modData = null;
+  try {
+    const mr = await fetch(`${API}/api/council/live/moderator`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agents, keyword }),
+    });
+    modData = await mr.json();
+  } catch (e) {
+    log('err', '✗ moderator network error');
+  }
+
+  if (modData && modData.status === 'success') {
+    const modRt = ((performance.now() - tMod) / 1000).toFixed(2);
+    log('ok', `✓ moderator synthesised plan · ${modData.elapsed}s`);
+
+    // Reveal overall score
+    const overallEl = document.getElementById('overall');
+    const scoreEl = document.getElementById('overallScore');
+    const color = modData.overall_score >= 70 ? '#34d399' : modData.overall_score >= 40 ? '#fbbf24' : '#f87171';
+    scoreEl.style.color = color;
+    overallEl.style.display = 'block';
+    setTimeout(() => overallEl.classList.add('visible'), 50);
+
+    // Animate score
+    const target = modData.overall_score || 0;
+    const dur = 1100;
+    const start = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      scoreEl.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+
+    // Typewriter the moderator plan
+    if (modData.council_summary) {
+      const box = document.getElementById('aiBox');
+      const chip = document.getElementById('modChip');
+      chip.textContent = modData.moderator_model || 'GPT-4o (OpenAI)';
+      box.style.display = 'block';
+      setTimeout(() => box.classList.add('visible'), 50);
+      await typewrite(document.getElementById('modText'), modData.council_summary, 90);
+      log('hdr', '▸ live session complete');
+    }
+  } else {
+    log('err', '✗ moderator failed to synthesise');
+  }
+
+  const tTotal = ((performance.now() - tStart) / 1000).toFixed(2);
+  setMeta(`done · total ${tTotal}s`);
+  btn.disabled = false;
+  btn.textContent = 'Run Another Analysis';
 }
 </script>
 </body>
