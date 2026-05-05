@@ -1,0 +1,165 @@
+{
+  "summary": {
+    "blogsGenerated": 3,
+    "postsCreated": 9,
+    "postsScheduled": 9,
+    "engagementRecorded": 3,
+    "growthMetrics": {
+      "totalPosts": 3,
+      "totalEngagement": 81,
+      "engagementRate": 27,
+      "breakdown": {
+        "likes": 26,
+        "comments": 6,
+        "shares": 8,
+        "clicks": 41
+      },
+      "topPosts": [
+        {
+          "postId": "f474cc2b-e2c7-4986-ad24-04f09acb6447",
+          "platform": "linkedin",
+          "total": 35
+        },
+        {
+          "postId": "7d851cea-68f2-4f2e-8e31-e382871c4be9",
+          "platform": "twitter",
+          "total": 28
+        },
+        {
+          "postId": "d61e2bbb-5fe7-4b64-86f8-543163d85261",
+          "platform": "linkedin",
+          "total": 18
+        }
+      ],
+      "calculatedAt": "2026-04-30T08:01:03.949Z"
+    },
+    "queueStats": {
+      "total": 9,
+      "queued": 9,
+      "published": 0,
+      "failed": 0,
+      "cancelled": 0,
+      "byPlatform": {
+        "linkedin": {
+          "queued": 3,
+          "published": 0,
+          "failed": 0
+        },
+        "twitter": {
+          "queued": 3,
+          "published": 0,
+          "failed": 0
+        },
+        "caption": {
+          "queued": 3,
+          "published": 0,
+          "failed": 0
+        }
+      }
+    }
+  },
+  "blogs": [
+    {
+      "slug": "ai-seo-ai-powered-seo-strategies-for-2026",
+      "title": "Ai Seo: AI-Powered SEO Strategies for 2026",
+      "seoScore": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "local-seo-how-small-businesses-can-dominate-local-search",
+      "title": "Local Seo: How Small Businesses Can Dominate Local Search",
+      "seoScore": 86,
+      "grade": "A"
+    },
+    {
+      "slug": "content-marketing-that-actually-drives-revenue",
+      "title": "Content Marketing That Actually Drives Revenue",
+      "seoScore": 86,
+      "grade": "A"
+    }
+  ],
+  "readyToPostContent": {
+    "linkedin": [
+      {
+        "topic": "ai-seo-ai-powered-seo-strategies-for-2026",
+        "text": "Ai Seo: AI-Powered SEO Strategies for 2026\n\nMost people get ai seo wrong. Here's what actually works:\n\n1. Understanding ai seo is the first step toward building a strong strategy for ai-powered seo strategies for 2026.\n\n2. We compare the top options for ai seo so you can make an informed decision based on performance and value.\n\n3. A step-by-step walkthrough on implementing ai seo effectively in your workflow.\n\n4. This comprehensive ai seo guide covers beginner to advanced techniques you can apply immediately.\n\nAi Seo continues to evolve, and staying ahead means acting on data, not guesswork. Use the strategies in this guide to build a sustainable, results-driven approach to ai seo.\n\nWhat's your biggest challenge with ai seo? Drop it in the comments 👇\n\n#aiseo #bestaiseo #howtouseaiseo #aiseoguide"
+      },
+      {
+        "topic": "local-seo-how-small-businesses-can-dominate-local-search",
+        "text": "Local Seo: How Small Businesses Can Dominate Local Search\n\nMost people get local seo wrong. Here's what actually works:\n\n1. Understanding local seo is the first step toward building a strong strategy for how small businesses can dominate local search.\n\n2. We compare the top options for local seo so you can make an informed decision based on performance and value.\n\n3. A step-by-step walkthrough on implementing local seo effectively in your workflow.\n\n4. This comprehensive local seo guide covers beginner to advanced techniques you can apply immediately.\n\nLocal Seo continues to evolve, and staying ahead means acting on data, not guesswork. Use the strategies in this guide to build a sustainable, results-driven approach to local seo.\n\nWhat's your biggest challenge with local seo? Drop it in the comments 👇\n\n#localseo #bestlocalseo #howtouselocalseo #localseoguide"
+      },
+      {
+        "topic": "content-marketing-that-actually-drives-revenue",
+        "text": "Content Marketing That Actually Drives Revenue\n\nMost people get content marketing wrong. Here's what actually works:\n\n1. Understanding content marketing is the first step toward building a strong strategy for content marketing that actually drives revenue.\n\n2. We compare the top options for content marketing so you can make an informed decision based on performance and value.\n\n3. A step-by-step walkthrough on implementing content marketing effectively in your workflow.\n\n4. This comprehensive content marketing guide covers beginner to advanced techniques you can apply immediately.\n\nContent Marketing continues to evolve, and staying ahead means acting on data, not guesswork. Use the strategies in this guide to build a sustainable, results-driven approach to content marketing.\n\nWhat's your biggest challenge with content marketing? Drop it in the comments 👇\n\n#contentmarketing #bestcontentmarketing #howtousecontentmarketing #contentmarketingguide"
+      }
+    ],
+    "twitter": [
+      {
+        "topic": "ai-seo-ai-powered-seo-strategies-for-2026",
+        "tweets": [
+          "🧵 Ai Seo: AI-Powered SEO Strategies for 2026\n\nA thread on what actually moves the needle with ai seo:\n\n#aiseo #bestaiseo",
+          "2/ Understanding ai seo is the first step toward building a strong strategy for ai-powered seo strategies for 2026.\n\nThis is where most strategies fall short.",
+          "3/ We compare the top options for ai seo so you can make an informed decision based on performance and value.\n\nThis is where most strategies fall short.",
+          "4/ A step-by-step walkthrough on implementing ai seo effectively in your workflow.\n\nThis is where most strategies fall short.",
+          "5/ If this was useful, repost the first tweet.\n\nFollow for more on ai seo.\n\n#aiseo #bestaiseo"
+        ]
+      },
+      {
+        "topic": "local-seo-how-small-businesses-can-dominate-local-search",
+        "tweets": [
+          "🧵 Local Seo: How Small Businesses Can Dominate Local Search\n\nA thread on what actually moves the needle with local seo:\n\n#localseo #bestlocalseo",
+          "2/ Understanding local seo is the first step toward building a strong strategy for how small businesses can dominate local search.\n\nThis is where most strategies fall short.",
+          "3/ We compare the top options for local seo so you can make an informed decision based on performance and value.\n\nThis is where most strategies fall short.",
+          "4/ A step-by-step walkthrough on implementing local seo effectively in your workflow.\n\nThis is where most strategies fall short.",
+          "5/ If this was useful, repost the first tweet.\n\nFollow for more on local seo.\n\n#localseo #bestlocalseo"
+        ]
+      },
+      {
+        "topic": "content-marketing-that-actually-drives-revenue",
+        "tweets": [
+          "🧵 Content Marketing That Actually Drives Revenue\n\nA thread on what actually moves the needle with content marketing:\n\n#contentmarketing #bestcontentmarketing",
+          "2/ Understanding content marketing is the first step toward building a strong strategy for content marketing that actually drives revenue.\n\nThis is where most strategies fall short.",
+          "3/ We compare the top options for content marketing so you can make an informed decision based on performance and value.\n\nThis is where most strategies fall short.",
+          "4/ A step-by-step walkthrough on implementing content marketing effectively in your workflow.\n\nThis is where most strategies fall short.",
+          "5/ If this was useful, repost the first tweet.\n\nFollow for more on content marketing.\n\n#contentmarketing #bestcontentmarketing"
+        ]
+      }
+    ]
+  },
+  "engagement": [
+    {
+      "postId": "f474cc2b-e2c7-4986-ad24-04f09acb6447",
+      "platform": "linkedin",
+      "metrics": {
+        "likes": 12,
+        "comments": 3,
+        "shares": 2,
+        "clicks": 18
+      },
+      "entryId": "3c41fbf1-e85b-4421-90b2-37182c1a64a8"
+    },
+    {
+      "postId": "7d851cea-68f2-4f2e-8e31-e382871c4be9",
+      "platform": "twitter",
+      "metrics": {
+        "likes": 8,
+        "comments": 1,
+        "shares": 5,
+        "clicks": 14
+      },
+      "entryId": "748023c7-8f8d-451e-893a-f2fc353656f3"
+    },
+    {
+      "postId": "d61e2bbb-5fe7-4b64-86f8-543163d85261",
+      "platform": "linkedin",
+      "metrics": {
+        "likes": 6,
+        "comments": 2,
+        "shares": 1,
+        "clicks": 9
+      },
+      "entryId": "eaa197c2-7f51-4808-87de-6a3ebe88598e"
+    }
+  ],
+  "generatedAt": "2026-04-30T08:01:03.976Z"
+}

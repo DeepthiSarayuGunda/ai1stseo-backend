@@ -1,5 +1,5 @@
 """
-Daily Admin Metrics Aggregation ΓÇö DynamoDB version.
+Daily Admin Metrics Aggregation — DynamoDB version.
 Populates ai1stseo-admin-metrics table with rolled-up stats.
 Triggered by EventBridge at 02:00 UTC.
 """

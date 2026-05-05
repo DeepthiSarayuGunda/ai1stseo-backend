@@ -1,0 +1,21 @@
+{
+  "total_mentions_scanned": 1,
+  "outreach_generated": 1,
+  "source_breakdown": {
+    "reddit": 1
+  },
+  "queue": [
+    {
+      "url": "https://reddit.com/r/SEO/abc",
+      "domain": "reddit.com",
+      "title": "AI 1st SEO review",
+      "snippet_context": "",
+      "source": "reddit",
+      "subject": "Quick note about your article: AI 1st SEO review",
+      "email_body": "Hi reddit.com team,\n\nI came across your article \"AI 1st SEO review\" and wanted to say thanks for covering this topic so thoroughly.\n\nWe've built AI 1st SEO (ai1stseo.com), a platform focused on AI-powered search optimization and answer engine visibility. Given the context of your article, I think our tool would be a valuable addition for your readers.\n\nWould you consider adding a link to ai1stseo.com in your article? Here's a suggested anchor text that fits naturally:\n\n  \"AI 1st SEO\" → https://www.ai1stseo.com\n\nHappy to return the favor with a mention on our end as well.\n\nThanks for your time,\nThe AI 1st SEO Team\nhttps://www.ai1stseo.com",
+      "status": "pending",
+      "generated_at": "2026-04-30T18:47:34.370649+00:00"
+    }
+  ],
+  "generated_at": "2026-04-30T18:47:34.370672+00:00"
+}

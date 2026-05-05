@@ -35,10 +35,25 @@ def _get_ses():
     return _ses_client
 
 
-def _send_welcome_email(email: str, name: str = None) -> dict:
-    """Send a welcome email via AWS SES."""
+def _send_welcome_email(email: str, name: str = None, lead_magnet: dict = None) -> dict:
+    """Send a welcome email via AWS SES, optionally including lead magnet download link."""
     display_name = name or "there"
     subject = "Welcome to AI1stSEO — Your Free AEO/GEO & SEO Analysis"
+
+    # Build optional lead magnet section
+    lead_magnet_html = ""
+    lead_magnet_text = ""
+    if lead_magnet and lead_magnet.get("download_url"):
+        lm_title = lead_magnet.get("title", "Your Free Resource")
+        lm_url = lead_magnet["download_url"]
+        lead_magnet_html = f"""
+            <div style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:20px;margin:20px 0;">
+                <p style="color:#00d4ff;font-weight:600;margin:0 0 8px;">&#127873; {lm_title}</p>
+                <a href="{lm_url}" style="display:inline-block;padding:10px 24px;background:#7b2cbf;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">Download Now</a>
+            </div>
+        """
+        lead_magnet_text = f"\n\nYour free resource: {lm_title}\nDownload: {lm_url}"
+
     html_body = f"""
     <html>
     <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff;padding:40px;">
@@ -52,7 +67,7 @@ def _send_welcome_email(email: str, name: str = None) -> dict:
                 <li><strong>Run a free SEO audit</strong> — 236 checks across 10 categories</li>
                 <li><strong>Check your AI visibility</strong> — see if ChatGPT and Gemini mention your brand</li>
                 <li><strong>Get a PDF report</strong> — download and share with your team</li>
-            </ul>
+            </ul>{lead_magnet_html}
             <div style="text-align:center;margin:28px 0;">
                 <a href="https://ai1stseo.com" style="display:inline-block;padding:12px 32px;background:#00d4ff;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:600;font-size:0.95rem;">Start Your Free Analysis</a>
             </div>
@@ -66,7 +81,7 @@ def _send_welcome_email(email: str, name: str = None) -> dict:
     </body>
     </html>
     """
-    text_body = f"Hey {display_name}! Thanks for signing up at AI1stSEO. Start your free AEO/GEO & SEO analysis at https://ai1stseo.com"
+    text_body = f"Hey {display_name}! Thanks for signing up at AI1stSEO. Start your free AEO/GEO & SEO analysis at https://ai1stseo.com{lead_magnet_text}"
 
     try:
         _get_ses().send_email(
@@ -91,9 +106,10 @@ def sync_subscriber_to_email_platform(subscriber_data: dict) -> dict:
     """Sync a new subscriber — send welcome email and/or sync to platform."""
     email = subscriber_data.get("email")
     name = subscriber_data.get("name")
+    lead_magnet = subscriber_data.get("lead_magnet")
 
     if PLATFORM == "ses":
-        return _send_welcome_email(email, name)
+        return _send_welcome_email(email, name, lead_magnet)
 
     if not PLATFORM or not API_KEY:
         logger.debug("email_platform_sync: no-op (platform=%s)", PLATFORM or "(not set)")

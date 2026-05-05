@@ -1,0 +1,25 @@
+{
+  "_description": "Sample response from GET /api/outreach/list — for integration reference",
+  "_api_endpoints": {
+    "generate": "POST /api/outreach/generate",
+    "list": "GET /api/outreach/list",
+    "update_status": "POST /api/outreach/status {url, status}"
+  },
+  "_input_sources": [
+    "AEO search results (data/aeo_results.json)",
+    "Direct mentions via POST body: {mentions: [{url, title, snippet, source, date}]}",
+    "Future: /api/mentions/scan (backlink_api blueprint, requires DynamoDB)"
+  ],
+  "_status_values": ["pending", "sent", "replied", "converted", "skipped"],
+  "sample_item": {
+    "url": "https://whatagraph.com/blog/articles/ai-seo-tools",
+    "domain": "whatagraph.com",
+    "title": "We Tested the 12 Best (& Underrated) AI SEO Tools in 2026",
+    "snippet_context": "15 May 2025...We Tested the 12Best(& Underrated)AI SEO Toolsin 2026...",
+    "source": "competitor_page",
+    "subject": "Quick note about your article: We Tested the 12 Best (& Underrated) AI SEO Tools in 2026",
+    "email_body": "Hi whatagraph.com team,\n\nI came across your article...",
+    "status": "pending",
+    "generated_at": "2026-04-30T16:59:36.092177+00:00"
+  }
+}

@@ -1,3 +1,11 @@
+# ======================================================================
+# WARNING: SHARED FILE - DO NOT OVERWRITE WITHOUT PULLING FIRST
+# Owner: Troy (Dev 3) | Uses DynamoDB (NOT RDS)
+# BEFORE EDITING: git pull origin main
+# BEFORE PUSHING: git diff backend/ai_inference.py (verify no endpoints removed)
+# Key features: Nova Lite + Ollama dual-path, 24h DynamoDB response cache, usage logging
+# If any are missing after your edit, you broke it.
+# ======================================================================
 """
 AI Inference Module — Dual-path: Nova Lite (primary) + Ollama (fallback)
 Used by all services that need LLM inference.

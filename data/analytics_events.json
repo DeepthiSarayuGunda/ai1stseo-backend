@@ -1,0 +1,479 @@
+[
+  {
+    "eventId": "51d4230f-2427-4f8a-89ea-691ff61f1c9f",
+    "type": "social_post_created",
+    "data": {
+      "blogSlug": "ai-seo-ai-powered-seo-strategies-for-2026",
+      "platforms": [
+        "linkedin",
+        "twitter",
+        "caption"
+      ]
+    },
+    "timestamp": "2026-04-30T08:01:03.896Z"
+  },
+  {
+    "eventId": "32d6c7ff-2d13-458b-a388-d4f1bdd9f3a4",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T08:01:03.905Z"
+  },
+  {
+    "eventId": "339afae6-28f8-4aba-b941-4c4f79aca424",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "48dd1ac5-801a-41e4-b1a1-c0a77c45cda4",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T08:01:03.909Z"
+  },
+  {
+    "eventId": "989b0d10-643f-45ba-ba6b-d759b03737c7",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "a3a9d715-2356-46da-8e02-1a966d420ba8",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T08:01:03.912Z"
+  },
+  {
+    "eventId": "510ca138-f5cd-47ef-88d4-7269dfc7b359",
+    "type": "social_post_created",
+    "data": {
+      "blogSlug": "local-seo-how-small-businesses-can-dominate-local-search",
+      "platforms": [
+        "linkedin",
+        "twitter",
+        "caption"
+      ]
+    },
+    "timestamp": "2026-04-30T08:01:03.917Z"
+  },
+  {
+    "eventId": "62bc8d24-43d5-4784-92ec-a5fa8b37421e",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T08:01:03.920Z"
+  },
+  {
+    "eventId": "a9349f90-5936-4f52-994c-7e07bc91e6dd",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "10b1b2c8-e416-4978-91e2-614237eb1b1b",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T08:01:03.922Z"
+  },
+  {
+    "eventId": "427f1e5f-9efa-4b8a-b6db-3d979c543095",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "2c0b1072-3047-4074-b83c-d461ac5fea9f",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T08:01:03.923Z"
+  },
+  {
+    "eventId": "2b0dfaf7-c3fb-427a-9306-b36fa8137d48",
+    "type": "social_post_created",
+    "data": {
+      "blogSlug": "content-marketing-that-actually-drives-revenue",
+      "platforms": [
+        "linkedin",
+        "twitter",
+        "caption"
+      ]
+    },
+    "timestamp": "2026-04-30T08:01:03.925Z"
+  },
+  {
+    "eventId": "e67c023a-2ef4-4fc0-94bc-f1a529429425",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "fdd7575f-9c9d-4d4f-acf2-c4af1c2cdc68",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T08:01:03.929Z"
+  },
+  {
+    "eventId": "1e76a20e-28ad-4d74-9c38-5f1401bf7c82",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T08:01:03.931Z"
+  },
+  {
+    "eventId": "1abec071-7070-40bf-93eb-d3df0e2ef1d6",
+    "type": "social_post_scheduled",
+    "data": {
+      "scheduleId": "39bbd79a-10a0-4fcd-b481-38c553f3c5a3",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T08:01:03.934Z"
+  },
+  {
+    "eventId": "8cc405ae-c51d-4b35-8cbc-3e154c83370c",
+    "type": "social_engagement",
+    "data": {
+      "postId": "f474cc2b-e2c7-4986-ad24-04f09acb6447",
+      "platform": "linkedin",
+      "likes": 12,
+      "comments": 3,
+      "shares": 2,
+      "clicks": 18,
+      "total": 35
+    },
+    "timestamp": "2026-04-30T08:01:03.937Z"
+  },
+  {
+    "eventId": "c68508d3-7ee3-497b-8028-ab91f092433c",
+    "type": "social_engagement",
+    "data": {
+      "postId": "7d851cea-68f2-4f2e-8e31-e382871c4be9",
+      "platform": "twitter",
+      "likes": 8,
+      "comments": 1,
+      "shares": 5,
+      "clicks": 14,
+      "total": 28
+    },
+    "timestamp": "2026-04-30T08:01:03.939Z"
+  },
+  {
+    "eventId": "f3c162ac-b51d-4ed5-bd43-e5036a310237",
+    "type": "social_engagement",
+    "data": {
+      "postId": "d61e2bbb-5fe7-4b64-86f8-543163d85261",
+      "platform": "linkedin",
+      "likes": 6,
+      "comments": 2,
+      "shares": 1,
+      "clicks": 9,
+      "total": 18
+    },
+    "timestamp": "2026-04-30T08:01:03.942Z"
+  },
+  {
+    "eventId": "f4577a67-dfb2-40e2-9dcf-f84143cf649e",
+    "type": "social_post_published",
+    "data": {
+      "platform": "linkedin",
+      "topic": "AI-Powered SEO Strategies for 2026"
+    },
+    "timestamp": "2026-04-30T08:01:03.942Z"
+  },
+  {
+    "eventId": "953cde5b-9e33-4103-b06c-2d10552641d3",
+    "type": "social_post_published",
+    "data": {
+      "platform": "twitter",
+      "topic": "AI-Powered SEO Strategies for 2026"
+    },
+    "timestamp": "2026-04-30T08:01:03.944Z"
+  },
+  {
+    "eventId": "b7fc61fd-5945-463d-8ff6-385e4a3dd7f3",
+    "type": "social_post_published",
+    "data": {
+      "platform": "linkedin",
+      "topic": "How Small Businesses Can Dominate Local Search"
+    },
+    "timestamp": "2026-04-30T08:01:03.946Z"
+  },
+  {
+    "eventId": "41ce2ca3-607f-4be6-8456-9aabf43fcb11",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.860Z"
+  },
+  {
+    "eventId": "be759435-44af-4230-83fb-ae4094ba067a",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "48dd1ac5-801a-41e4-b1a1-c0a77c45cda4",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.865Z"
+  },
+  {
+    "eventId": "001c9eec-5ed0-4465-8321-632e1181d078",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "a3a9d715-2356-46da-8e02-1a966d420ba8",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.869Z"
+  },
+  {
+    "eventId": "8e1ccf2d-eb05-49a5-8eb1-ec8c9393eac4",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.873Z"
+  },
+  {
+    "eventId": "315df908-986f-496a-a933-4da1a70c1a0b",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "10b1b2c8-e416-4978-91e2-614237eb1b1b",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.877Z"
+  },
+  {
+    "eventId": "e8469c98-f7cf-449d-9493-8cb0fe54da41",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "2c0b1072-3047-4074-b83c-d461ac5fea9f",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.881Z"
+  },
+  {
+    "eventId": "05bd767f-e632-4b0d-a149-24c6f35ff4e7",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "fdd7575f-9c9d-4d4f-acf2-c4af1c2cdc68",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.887Z"
+  },
+  {
+    "eventId": "769f4b1b-85cd-4445-b315-d10a8c963ad6",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.894Z"
+  },
+  {
+    "eventId": "3b99df7f-9f67-4a36-8122-e6c5be4a1bf9",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "39bbd79a-10a0-4fcd-b481-38c553f3c5a3",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.897Z"
+  },
+  {
+    "eventId": "9b8abde1-6b97-4cf5-b4bd-32ad3e893b69",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.898Z"
+  },
+  {
+    "eventId": "751763ee-056d-432e-baea-b2b7fae349fa",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "48dd1ac5-801a-41e4-b1a1-c0a77c45cda4",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.899Z"
+  },
+  {
+    "eventId": "e091cc90-8d3e-405a-be5d-8bb2584b917b",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "a3a9d715-2356-46da-8e02-1a966d420ba8",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.900Z"
+  },
+  {
+    "eventId": "5c34b2c8-4125-417f-8a87-5befc5665cad",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.902Z"
+  },
+  {
+    "eventId": "0d3e062e-1564-4c4b-bec0-6561b2a405e7",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "10b1b2c8-e416-4978-91e2-614237eb1b1b",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.904Z"
+  },
+  {
+    "eventId": "0ccb71a6-6fc0-4581-b43f-bcdb90790144",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "2c0b1072-3047-4074-b83c-d461ac5fea9f",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.906Z"
+  },
+  {
+    "eventId": "1f61b4c5-b505-40f0-8458-5c390ee9c70c",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "fdd7575f-9c9d-4d4f-acf2-c4af1c2cdc68",
+      "platform": "linkedin"
+    },
+    "timestamp": "2026-04-30T13:19:44.908Z"
+  },
+  {
+    "eventId": "90ad1c2e-c6d5-4c91-8a82-4060e0088a2f",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+      "platform": "twitter"
+    },
+    "timestamp": "2026-04-30T13:19:44.909Z"
+  },
+  {
+    "eventId": "298b0bfe-027c-4d0c-8e0d-731ea8a5841e",
+    "type": "social_post_published",
+    "data": {
+      "scheduleId": "39bbd79a-10a0-4fcd-b481-38c553f3c5a3",
+      "platform": "caption"
+    },
+    "timestamp": "2026-04-30T13:19:44.910Z"
+  },
+  {
+    "eventId": "26614999-5460-41fc-9bbd-32acea3cc046",
+    "type": "social_engagement",
+    "data": {
+      "postId": "f472935b-e3b4-4f43-ace2-3ca1f3c6adc8",
+      "platform": "linkedin",
+      "likes": 15,
+      "comments": 5,
+      "shares": 5,
+      "clicks": 17,
+      "total": 42
+    },
+    "timestamp": "2026-04-30T13:19:44.916Z"
+  },
+  {
+    "eventId": "02cf431a-0fac-4311-8bcf-a7e0ab71ec02",
+    "type": "social_engagement",
+    "data": {
+      "postId": "48dd1ac5-801a-41e4-b1a1-c0a77c45cda4",
+      "platform": "twitter",
+      "likes": 7,
+      "comments": 1,
+      "shares": 7,
+      "clicks": 10,
+      "total": 25
+    },
+    "timestamp": "2026-04-30T13:19:44.919Z"
+  },
+  {
+    "eventId": "df87e9dc-c81f-43c6-8f21-9cbcb718f623",
+    "type": "social_engagement",
+    "data": {
+      "postId": "a3a9d715-2356-46da-8e02-1a966d420ba8",
+      "platform": "caption",
+      "likes": 3,
+      "comments": 1,
+      "shares": 1,
+      "clicks": 3,
+      "total": 8
+    },
+    "timestamp": "2026-04-30T13:19:44.921Z"
+  },
+  {
+    "eventId": "fc96c49c-3b79-4663-ba5a-aebdd75c0b89",
+    "type": "social_engagement",
+    "data": {
+      "postId": "f4ef18b8-b2a2-4237-a0ca-ecdb130c1c3a",
+      "platform": "linkedin",
+      "likes": 22,
+      "comments": 5,
+      "shares": 4,
+      "clicks": 14,
+      "total": 45
+    },
+    "timestamp": "2026-04-30T13:19:44.924Z"
+  },
+  {
+    "eventId": "f901e98d-3a08-4d7c-b63f-46b11d83b0e1",
+    "type": "social_engagement",
+    "data": {
+      "postId": "10b1b2c8-e416-4978-91e2-614237eb1b1b",
+      "platform": "twitter",
+      "likes": 10,
+      "comments": 2,
+      "shares": 5,
+      "clicks": 10,
+      "total": 27
+    },
+    "timestamp": "2026-04-30T13:19:44.927Z"
+  },
+  {
+    "eventId": "531b9179-4cf6-4984-83d8-14963d3d869f",
+    "type": "social_engagement",
+    "data": {
+      "postId": "2c0b1072-3047-4074-b83c-d461ac5fea9f",
+      "platform": "caption",
+      "likes": 11,
+      "comments": 2,
+      "shares": 1,
+      "clicks": 2,
+      "total": 16
+    },
+    "timestamp": "2026-04-30T13:19:44.932Z"
+  },
+  {
+    "eventId": "3ed13485-4838-499f-9d3b-a403058fc46e",
+    "type": "social_engagement",
+    "data": {
+      "postId": "fdd7575f-9c9d-4d4f-acf2-c4af1c2cdc68",
+      "platform": "linkedin",
+      "likes": 15,
+      "comments": 5,
+      "shares": 5,
+      "clicks": 9,
+      "total": 34
+    },
+    "timestamp": "2026-04-30T13:19:44.935Z"
+  },
+  {
+    "eventId": "02f1019b-8e71-4875-b6d4-27463e493f9c",
+    "type": "social_engagement",
+    "data": {
+      "postId": "34b20d0c-c96d-4bea-b2a1-8bfd4847e105",
+      "platform": "twitter",
+      "likes": 12,
+      "comments": 3,
+      "shares": 8,
+      "clicks": 14,
+      "total": 37
+    },
+    "timestamp": "2026-04-30T13:19:44.939Z"
+  },
+  {
+    "eventId": "73b9715a-6563-4056-9f24-31611c2944a5",
+    "type": "social_engagement",
+    "data": {
+      "postId": "39bbd79a-10a0-4fcd-b481-38c553f3c5a3",
+      "platform": "caption",
+      "likes": 8,
+      "comments": 3,
+      "shares": 1,
+      "clicks": 2,
+      "total": 14
+    },
+    "timestamp": "2026-04-30T13:19:44.943Z"
+  }
+]

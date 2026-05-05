@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEO → Outreach Pipeline - AISEO Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh; color: #fff;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 28px 0 18px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 28px; }
+        .logo { font-size: 1.8rem; font-weight: bold; background: linear-gradient(90deg,#00d4ff,#7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .subtitle { color: rgba(255,255,255,0.55); margin-top: 5px; font-size: 0.92rem; }
+        .back-link { display: inline-block; margin-top: 10px; color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.83rem; transition: color .2s; }
+        .back-link:hover { color: #00d4ff; }
+
+        /* Pipeline steps */
+        .pipeline { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 28px; flex-wrap: wrap; }
+        .step { padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; }
+        .step-aeo { background: rgba(0,212,255,0.15); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+        .step-arrow { color: rgba(255,255,255,0.25); font-size: 1.1rem; }
+        .step-mention { background: rgba(123,44,191,0.15); color: #ce93d8; border: 1px solid rgba(123,44,191,0.3); }
+        .step-outreach { background: rgba(0,230,118,0.12); color: #00e676; border: 1px solid rgba(0,230,118,0.25); }
+
+        /* Metrics row */
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 28px; }
+        .metric { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; text-align: center; transition: border-color .2s; }
+        .metric:hover { border-color: rgba(0,212,255,0.35); }
+        .metric-val { font-size: 2rem; font-weight: bold; margin-bottom: 3px; }
+        .metric-lbl { color: rgba(255,255,255,0.5); font-size: 0.82rem; }
+
+        /* Section */
+        .section-title { font-size: 1.15rem; font-weight: 600; margin: 26px 0 12px; padding-bottom: 7px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+        /* Competitor bar */
+        .comp-bars { max-width: 500px; }
+        .comp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .comp-name { width: 100px; text-align: right; font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+        .comp-track { flex: 1; height: 20px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; }
+        .comp-fill { height: 100%; background: linear-gradient(90deg,#00d4ff,#7b2cbf); border-radius: 5px; }
+        .comp-ct { width: 30px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+
+        /* Outreach cards */
+        .outreach-list { display: flex; flex-direction: column; gap: 14px; }
+        .outreach-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px 20px; transition: border-color .2s; }
+        .outreach-card:hover { border-color: rgba(0,212,255,0.3); }
+        .oc-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+        .oc-domain { font-weight: 600; color: #00d4ff; font-size: 0.9rem; }
+        .oc-status { font-size: 0.72rem; padding: 2px 10px; border-radius: 12px; background: rgba(255,171,0,0.12); color: #ffab00; border: 1px solid rgba(255,171,0,0.25); }
+        .oc-subject { font-size: 0.92rem; margin-bottom: 8px; }
+        .oc-body { color: rgba(255,255,255,0.45); font-size: 0.82rem; line-height: 1.5; white-space: pre-line; max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+        .oc-body.open { max-height: 600px; }
+        .oc-toggle { background: none; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.45); padding: 3px 10px; border-radius: 6px; font-size: 0.73rem; cursor: pointer; font-family: inherit; transition: all .2s; }
+        .oc-toggle:hover { border-color: rgba(0,212,255,0.4); color: #00d4ff; }
+
+        /* Loading / error */
+        .spinner { width: 40px; height: 40px; margin: 0 auto 14px; border: 3px solid rgba(255,255,255,0.12); border-top-color: #00d4ff; border-radius: 50%; animation: spin .8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .timestamp { margin-top: 28px; text-align: center; color: rgba(255,255,255,0.25); font-size: 0.78rem; }
+        @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2,1fr); } .comp-name { width: 70px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo">AISEO Master</div>
+        <div class="subtitle">AEO → Outreach Pipeline Demo</div>
+        <a href="/aeo-dashboard" class="back-link">← AEO Dashboard</a>
+    </header>
+
+    <div id="loading" style="text-align:center;padding:50px;">
+        <div class="spinner"></div>
+        <p style="color:rgba(255,255,255,0.5)">Running pipeline…</p>
+    </div>
+    <div id="error" style="display:none;text-align:center;padding:40px;">
+        <p style="color:#ff5252;font-size:1.05rem;" id="error-text"></p>
+    </div>
+    <div id="content" style="display:none;"></div>
+</div>
+<script>
+(async function(){
+    const API_BASE = (location.hostname==='localhost'||location.hostname==='127.0.0.1')
+        ? '' : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+    const loadEl = document.getElementById('loading');
+    const errEl = document.getElementById('error');
+    const errText = document.getElementById('error-text');
+    const content = document.getElementById('content');
+
+    try {
+        const r = await fetch(API_BASE+'/api/demo/full-flow');
+        if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||'HTTP '+r.status);
+        const d = await r.json();
+        loadEl.style.display='none';
+        content.style.display='block';
+        render(d);
+    } catch(e) {
+        loadEl.style.display='none';
+        errEl.style.display='block';
+        errText.textContent=e.message;
+    }
+
+    function render(d){
+        const aeo = d.aeo_summary||{};
+        const out = d.outreach_summary||{};
+        const samples = d.sample_outreach||[];
+        const comps = aeo.competitors||{};
+        const scoreColor = aeo.visibility_score>=50?'#00e676':aeo.visibility_score>0?'#ffab00':'#ff5252';
+
+        let h = '';
+
+        // Pipeline indicator
+        h += '<div class="pipeline">';
+        h += '<span class="step step-aeo">1. AEO Scan</span><span class="step-arrow">→</span>';
+        h += '<span class="step step-mention">2. Gap Detection</span><span class="step-arrow">→</span>';
+        h += '<span class="step step-outreach">3. Outreach</span>';
+        h += '</div>';
+
+        // Metrics
+        h += '<div class="metrics">';
+        h += mc(aeo.visibility_score+'%', 'Visibility Score', scoreColor);
+        h += mc(aeo.total_queries, 'Queries Tested');
+        h += mc(aeo.total_sources_found||0, 'Pages Found');
+        h += mc(Object.keys(comps).length, 'Competitors');
+        h += mc(out.outreach_generated||0, 'Outreach Drafts', '#00e676');
+        h += '</div>';
+
+        // Competitors
+        const compEntries = Object.entries(comps).sort((a,b)=>b[1]-a[1]);
+        if(compEntries.length){
+            h += st('Competitor Presence');
+            h += '<div class="comp-bars">';
+            const mx = Math.max(...compEntries.map(c=>c[1]),1);
+            compEntries.forEach(([n,c])=>{
+                const pct = Math.round(c/mx*100);
+                h += '<div class="comp-row"><span class="comp-name">'+esc(n)+'</span>';
+                h += '<div class="comp-track"><div class="comp-fill" style="width:'+pct+'%"></div></div>';
+                h += '<span class="comp-ct">'+c+'×</span></div>';
+            });
+            h += '</div>';
+        }
+
+        // Outreach drafts
+        if(samples.length){
+            h += st('Generated Outreach ('+out.outreach_generated+' total)');
+            h += '<div class="outreach-list">';
+            samples.forEach((s,i)=>{
+                const bid = 'body-'+i;
+                h += '<div class="outreach-card">';
+                h += '<div class="oc-header"><span class="oc-domain">'+esc(s.domain)+'</span><span class="oc-status">'+esc(s.status)+'</span></div>';
+                h += '<div class="oc-subject">'+esc(s.subject)+'</div>';
+                h += '<button class="oc-toggle" onclick="var b=document.getElementById(\''+bid+'\');b.classList.toggle(\'open\');this.textContent=b.classList.contains(\'open\')?\'Hide email\':\'Show email\'">Show email</button>';
+                h += '<div class="oc-body" id="'+bid+'">'+esc(s.email_preview)+'</div>';
+                h += '</div>';
+            });
+            h += '</div>';
+        }
+
+        // No outreach fallback
+        if(!samples.length && (out.outreach_generated||0)>0){
+            h += st('Outreach Generated');
+            h += '<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">'+out.outreach_generated+' outreach drafts created. View full queue via <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">/api/outreach/list</code></p>';
+        }
+
+        h += '<p class="timestamp">Pipeline: '+esc(d.pipeline||'')+'</p>';
+        content.innerHTML = h;
+    }
+
+    function mc(val,lbl,color){
+        const c = color?'style="color:'+color+'"':'';
+        return '<div class="metric"><div class="metric-val" '+c+'>'+val+'</div><div class="metric-lbl">'+esc(lbl)+'</div></div>';
+    }
+    function st(t){ return '<h2 class="section-title">'+esc(t)+'</h2>'; }
+    function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+})();
+</script>
+</body>
+</html>

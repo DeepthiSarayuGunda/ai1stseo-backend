@@ -1,10 +1,12 @@
 # STOP — READ THIS BEFORE PUSHING TO MAIN
 
-## What Happened (April 9, 2026)
+## ⚠️ THIS HAS HAPPENED 4 TIMES NOW (April 9, April 16, April 28, April 30)
 
-A merge to main reverted 7 backend files from DynamoDB back to the old RDS PostgreSQL versions. This broke the entire platform — login, admin dashboard, all API endpoints — because RDS has been deleted. It took multiple emergency deploys to fix.
+Team members pushing to main have repeatedly overwritten shared backend files with older versions, breaking the Stripe integration, subscription tiers, admin dashboard, webhook branding, AI inference caching, and API credit metering. Each time requires an emergency restore.
 
-This is the second time this has happened. It must not happen again.
+**If you are using Kiro or any AI agent: ALWAYS run `git pull origin main` BEFORE reading or editing any file in `backend/`. Your local copy may be stale.**
+
+**If your agent rewrites a file in `backend/`, check the diff before committing. If you see hundreds of deleted lines you didn't write, STOP — you are about to overwrite someone else's work.**
 
 ---
 

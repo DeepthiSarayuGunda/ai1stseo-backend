@@ -1,4 +1,23 @@
 """
+╔══════════════════════════════════════════════════════════════════════╗
+║  WARNING: SHARED FILE — DO NOT OVERWRITE WITHOUT PULLING FIRST     ║
+║                                                                    ║
+║  Owner: Troy (Dev 3)                                               ║
+║  This file uses DynamoDB (NOT RDS). If you see 'from database      ║
+║  import', something has gone wrong.                                ║
+║                                                                    ║
+║  BEFORE EDITING: Run 'git pull origin main' to get the latest.     ║
+║  BEFORE PUSHING: Run 'git diff backend/auth.py' to verify you     ║
+║  are not removing existing endpoints (Stripe, tiers, etc).         ║
+║                                                                    ║
+║  Key features in this file:                                        ║
+║  - Cognito auth (require_auth, require_admin decorators)           ║
+║  - Subscription tier system (free/pro/admin with 7-day expiry)     ║
+║  - Stripe checkout, webhook, cancel, status endpoints              ║
+║  - Pro welcome email via SES                                       ║
+║  If any of these are missing after your edit, you broke it.        ║
+╚══════════════════════════════════════════════════════════════════════╝
+
 Authentication module for ai1stseo.com
 Uses AWS Cognito for user management + Secrets Manager for credentials
 """
@@ -166,10 +185,12 @@ def _get_user_role(email):
 
 
 def _get_user_tier(email):
-    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'."""
+    """Look up subscription tier from DynamoDB. Returns 'free', 'pro', or 'admin'.
+    Auto-expires pro trials after 7 days."""
     try:
         import boto3
         from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone, timedelta
         ddb = boto3.resource('dynamodb', region_name='us-east-1')
         table = ddb.Table('ai1stseo-users')
         resp = table.query(
@@ -181,8 +202,26 @@ def _get_user_tier(email):
             if item.get('role') == 'admin':
                 return 'admin'
             tier = item.get('subscription_tier', 'free')
-            if tier in ('pro', 'admin'):
-                return tier
+            if tier == 'pro':
+                # Check if trial has expired (7 days)
+                tier_updated = item.get('tier_updated_at', '')
+                if tier_updated:
+                    try:
+                        updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                        if datetime.now(timezone.utc) - updated_time > timedelta(days=7):
+                            # Trial expired — downgrade to free
+                            table.update_item(
+                                Key={'userId': item['userId']},
+                                UpdateExpression='SET subscription_tier = :tier, trial_expired = :exp',
+                                ExpressionAttributeValues={
+                                    ':tier': 'free',
+                                    ':exp': True,
+                                },
+                            )
+                            return 'free'
+                    except Exception:
+                        pass
+                return 'pro'
         return 'free'
     except Exception:
         return 'free'
@@ -538,14 +577,92 @@ def delete_account():
 @auth_bp.route('/api/user/tier', methods=['GET'])
 @require_auth
 def get_user_tier():
-    """Get the current user's subscription tier."""
+    """Get the current user's subscription tier with trial expiry info."""
     user = request.cognito_user
-    return jsonify({
+    tier = user.get('subscription_tier', 'free')
+    result = {
         'status': 'success',
         'email': user.get('email', ''),
-        'tier': user.get('subscription_tier', 'free'),
+        'tier': tier,
         'role': user.get('role', 'member'),
-    })
+    }
+    # Add trial expiry info for pro users
+    if tier == 'pro':
+        try:
+            import boto3
+            from boto3.dynamodb.conditions import Key
+            from datetime import datetime, timezone, timedelta
+            ddb = boto3.resource('dynamodb', region_name='us-east-1')
+            table = ddb.Table('ai1stseo-users')
+            resp = table.query(
+                IndexName='email-index',
+                KeyConditionExpression=Key('email').eq(user.get('email', '')),
+                Limit=1,
+            )
+            items = resp.get('Items', [])
+            if items:
+                tier_updated = items[0].get('tier_updated_at', '')
+                if tier_updated:
+                    updated_time = datetime.fromisoformat(tier_updated.replace('Z', '+00:00'))
+                    expires_at = updated_time + timedelta(days=7)
+                    remaining = (expires_at - datetime.now(timezone.utc)).total_seconds()
+                    result['trial_expires_at'] = expires_at.isoformat()
+                    result['trial_days_remaining'] = max(0, round(remaining / 86400, 1))
+        except Exception:
+            pass
+    return jsonify(result)
+
+
+def _send_pro_welcome_email(email, name):
+    """Send a welcome/receipt email after Pro trial purchase via SES."""
+    try:
+        import boto3
+        ses = boto3.client('ses', region_name='us-east-1')
+        user_name = name or email.split('@')[0]
+        subject = 'Welcome to AI 1st SEO Pro — Your 7-Day Trial is Active'
+        body = '''Hi {name},
+
+Thank you for purchasing the AI 1st SEO Pro Trial!
+
+Here's what you now have access to for the next 7 days:
+
+- Full SEO audits (236 checks across 10 categories)
+- GEO/AEO multi-model probing (ChatGPT, Gemini, Perplexity, Claude)
+- Backlink intelligence (domain scoring, link gaps, citation authority mapping)
+- Brand sentiment & hallucination monitoring
+- White-label report generation
+- Internal link analysis
+- Web mention scanning
+- Answer fingerprint change detection
+- Priority backlink opportunity queue
+- API access for integrations
+
+Your Pro access will expire 7 days from now. You can check your remaining time anytime at:
+https://www.ai1stseo.com/admin
+
+Receipt Details:
+- Amount: $5.00 USD
+- Plan: AI 1st SEO Pro Trial (7 days)
+- Email: {email}
+
+If you have any questions, reply to this email or reach out at support@ai1stseo.com.
+
+Happy optimizing,
+The AI 1st SEO Team
+https://www.ai1stseo.com
+'''.format(name=user_name, email=email)
+
+        ses.send_email(
+            Source='no-reply@ai1stseo.com',
+            Destination={'ToAddresses': [email]},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': body}},
+            },
+        )
+        print('Pro welcome email sent to {}'.format(email))
+    except Exception as e:
+        print('Pro welcome email failed (non-fatal): {}'.format(e))
 
 
 @auth_bp.route('/api/webhooks/stripe', methods=['POST'])
@@ -606,6 +723,8 @@ def stripe_webhook():
                         },
                     )
                     print('Upgraded {} to pro tier'.format(customer_email))
+                    # Send welcome/receipt email via SES
+                    _send_pro_welcome_email(customer_email, items[0].get('name', ''))
                 else:
                     print('Stripe webhook: user {} not found in DB'.format(customer_email))
             except Exception as e:
@@ -643,7 +762,7 @@ def create_checkout_session():
                 'payment_method_types[]': 'card',
                 'line_items[0][price_data][currency]': 'usd',
                 'line_items[0][price_data][product_data][name]': 'AI 1st SEO Pro Trial',
-                'line_items[0][price_data][product_data][description]': '30-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
+                'line_items[0][price_data][product_data][description]': '7-day Pro access — full SEO audits, GEO probing, backlink intelligence, and white-label reports',
                 'line_items[0][price_data][unit_amount]': '500',  # $5.00 in cents
                 'line_items[0][quantity]': '1',
                 'success_url': success_url,
@@ -678,3 +797,70 @@ def stripe_config():
         'publishable_key': pk,
         'has_stripe': bool(pk),
     })
+
+
+@auth_bp.route('/api/stripe/subscription-status', methods=['GET'])
+@require_auth
+def subscription_status():
+    """Get the current user's full subscription details."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        u = items[0]
+        return jsonify({
+            'status': 'success',
+            'email': email,
+            'tier': u.get('subscription_tier', 'free'),
+            'role': u.get('role', 'member'),
+            'tier_updated_at': u.get('tier_updated_at', ''),
+            'created_at': u.get('created_at', ''),
+            'last_login': u.get('last_login', ''),
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@auth_bp.route('/api/stripe/cancel', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    """Downgrade the current user from pro back to free."""
+    user = request.cognito_user
+    email = user.get('email', '')
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+        from datetime import datetime, timezone
+        ddb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = ddb.Table('ai1stseo-users')
+        resp = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=Key('email').eq(email),
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if not items:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        table.update_item(
+            Key={'userId': items[0]['userId']},
+            UpdateExpression='SET subscription_tier = :tier, tier_updated_at = :now, cancellation_reason = :reason',
+            ExpressionAttributeValues={
+                ':tier': 'free',
+                ':now': datetime.now(timezone.utc).isoformat(),
+                ':reason': (request.get_json() or {}).get('reason', ''),
+            },
+        )
+        return jsonify({'status': 'success', 'tier': 'free', 'message': 'Subscription cancelled. You now have free tier access.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Velocity Tracker - AI1stSEO</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;min-height:100vh;color:#e6edf3}
+        .nav{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .nav-logo{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+        .nav-links{display:flex;gap:16px}
+        .nav-links a{color:#8b949e;text-decoration:none;font-size:.85rem;transition:color .2s}
+        .nav-links a:hover{color:#00d4ff}
+
+        .container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+
+        /* Header */
+        .page-header{margin-bottom:28px}
+        .page-header h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+        .page-header p{color:#8b949e;font-size:.9rem}
+
+        /* Brand selector */
+        .brand-bar{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+        .brand-bar select{padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#161b22;color:#e6edf3;font-size:.9rem;font-family:inherit;outline:none;min-width:200px}
+        .brand-bar select:focus{border-color:#00d4ff}
+        .brand-bar .refresh-btn{padding:10px 20px;border:none;border-radius:8px;background:rgba(0,212,255,0.1);color:#00d4ff;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid rgba(0,212,255,0.2);transition:all .2s}
+        .brand-bar .refresh-btn:hover{background:rgba(0,212,255,0.2)}
+
+        /* KPI row */
+        .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+        .kpi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:18px;text-align:center}
+        .kpi-val{font-size:1.8rem;font-weight:700;margin-bottom:2px}
+        .kpi-lbl{font-size:.73rem;color:#8b949e}
+        .kpi-delta{font-size:.72rem;margin-top:4px}
+        .kpi-up{color:#00e676}
+        .kpi-down{color:#ff5252}
+        .kpi-flat{color:#8b949e}
+
+        /* Chart area */
+        .chart-section{margin-bottom:28px}
+        .sec-title{font-size:1rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .sec-title .icon{font-size:1.1rem}
+        .chart-box{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;overflow-x:auto}
+
+        /* SVG chart */
+        .chart-svg{width:100%;height:200px}
+        .chart-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .chart-area{opacity:0.1}
+        .chart-dot{r:3;transition:r .15s}
+        .chart-dot:hover{r:5}
+        .chart-label{fill:#8b949e;font-size:11px;font-family:inherit}
+        .chart-grid{stroke:rgba(255,255,255,0.04);stroke-width:1}
+
+        /* Table */
+        .data-table{width:100%;border-collapse:collapse;font-size:.85rem}
+        .data-table th{text-align:left;padding:10px 14px;color:#8b949e;font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .data-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .data-table tr:hover td{background:rgba(255,255,255,0.02)}
+
+        .pill{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.72rem;font-weight:600}
+        .pill-rate{background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.15)}
+
+        /* Empty state */
+        .empty{text-align:center;padding:60px 20px;color:#8b949e}
+        .empty .icon{font-size:2.5rem;margin-bottom:12px}
+        .empty a{color:#00d4ff;text-decoration:none}
+
+        /* Loading */
+        .loading{text-align:center;padding:40px 0;display:none}
+        .spinner{width:36px;height:36px;margin:0 auto 12px;border:3px solid rgba(255,255,255,0.1);border-top-color:#00d4ff;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        @media(max-width:600px){
+            .kpi-row{grid-template-columns:repeat(2,1fr)}
+            .kpi-val{font-size:1.4rem}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="/" class="nav-logo">AI1stSEO</a>
+    <div class="nav-links">
+        <a href="/aeo-tracker">AI Visibility Checker</a>
+        <a href="/">Home</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>📊 Citation Velocity Tracker</h1>
+        <p>Monitor how AI models cite your brand over time — like Search Console, but for LLMs.</p>
+    </div>
+
+    <div class="brand-bar">
+        <select id="brand-select"><option value="">Loading brands…</option></select>
+        <button class="refresh-btn" onclick="loadVelocity()">Load Data</button>
+        <a href="/aeo-tracker" style="color:#00d4ff;font-size:.85rem;text-decoration:none;margin-left:auto;">+ Run New Scan</a>
+    </div>
+
+    <div class="loading" id="loading"><div class="spinner"></div><p style="color:#8b949e;font-size:.85rem;">Loading velocity data…</p></div>
+
+    <div id="dashboard" style="display:none;">
+        <div class="kpi-row" id="kpis"></div>
+
+        <div class="chart-section">
+            <div class="sec-title"><span class="icon">📈</span> Citation Rate Over Time</div>
+            <div class="chart-box" id="main-chart"></div>
+        </div>
+
+        <div class="chart-section">
+            <div class="sec-title"><span class="icon">🤖</span> Performance by AI Model</div>
+            <div class="chart-box" id="llm-table"></div>
+        </div>
+
+        <div class="chart-section">
+            <div class="sec-title"><span class="icon">🔍</span> Performance by Query</div>
+            <div class="chart-box" id="query-table"></div>
+        </div>
+    </div>
+
+    <div class="empty" id="empty">
+        <div class="icon">📊</div>
+        <p>No citation data yet.</p>
+        <p style="margin-top:8px;"><a href="/aeo-tracker">Run your first AI Visibility scan →</a></p>
+    </div>
+</div>
+
+<script>
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '' : 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const LLM_NAMES = {openai:'ChatGPT',claude:'Claude',gemini:'Gemini',perplexity:'Perplexity',ollama:'Ollama',groq:'Groq AI',mock:'Demo'};
+
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+// Load brands on page load
+(async function(){
+    try{
+        const r=await fetch(API_BASE+'/api/aeo-tracker/brands');
+        const d=await r.json();
+        const sel=document.getElementById('brand-select');
+        if(d.brands&&d.brands.length){
+            sel.innerHTML=d.brands.map(b=>'<option value="'+esc(b.brand)+'">'+esc(b.brand)+' ('+esc(b.domain)+') — '+b.rate+'%</option>').join('');
+            loadVelocity();
+        }else{
+            sel.innerHTML='<option value="">No brands scanned yet</option>';
+            document.getElementById('empty').style.display='block';
+        }
+    }catch(e){
+        document.getElementById('brand-select').innerHTML='<option value="">Could not load brands</option>';
+        document.getElementById('empty').style.display='block';
+    }
+})();
+
+async function loadVelocity(){
+    const brand=document.getElementById('brand-select').value;
+    if(!brand)return;
+    const loading=document.getElementById('loading');
+    const dashboard=document.getElementById('dashboard');
+    const empty=document.getElementById('empty');
+    loading.style.display='block';dashboard.style.display='none';empty.style.display='none';
+
+    try{
+        const r=await fetch(API_BASE+'/api/aeo-tracker/velocity?brand='+encodeURIComponent(brand));
+        const d=await r.json();
+        loading.style.display='none';
+
+        if(!d.totals||d.totals.total===0){
+            empty.style.display='block';return;
+        }
+        dashboard.style.display='block';
+        renderDashboard(d,brand);
+    }catch(e){
+        loading.style.display='none';
+        empty.style.display='block';
+    }
+}
+
+function renderDashboard(d,brand){
+    const t=d.totals;
+    const daily=d.daily||[];
+
+    // KPIs
+    let delta='';
+    if(daily.length>=2){
+        const last=daily[daily.length-1].rate;
+        const prev=daily[daily.length-2].rate;
+        const diff=last-prev;
+        if(diff>0) delta='<div class="kpi-delta kpi-up">↑ +'+diff.toFixed(1)+'% vs previous</div>';
+        else if(diff<0) delta='<div class="kpi-delta kpi-down">↓ '+diff.toFixed(1)+'% vs previous</div>';
+        else delta='<div class="kpi-delta kpi-flat">— No change</div>';
+    }
+
+    document.getElementById('kpis').innerHTML=`
+        <div class="kpi"><div class="kpi-val" style="color:${t.rate>=50?'#00e676':t.rate>0?'#ffab00':'#ff5252'}">${t.rate}%</div><div class="kpi-lbl">Overall Citation Rate</div>${delta}</div>
+        <div class="kpi"><div class="kpi-val">${t.total}</div><div class="kpi-lbl">Total AI Checks</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:#00e676">${t.cited}</div><div class="kpi-lbl">Times Cited</div></div>
+        <div class="kpi"><div class="kpi-val">${t.scans}</div><div class="kpi-lbl">Scans Run</div></div>
+        <div class="kpi"><div class="kpi-val" style="font-size:1rem">${daily.length}</div><div class="kpi-lbl">Days Tracked</div></div>
+    `;
+
+    // Main chart
+    if(daily.length>1){
+        document.getElementById('main-chart').innerHTML=renderLineChart(daily,'rate','Citation Rate %','#00d4ff');
+    }else if(daily.length===1){
+        document.getElementById('main-chart').innerHTML='<p style="color:#8b949e;font-size:.85rem;text-align:center;padding:20px;">Only 1 day of data. Run more scans to see trends.</p>';
+    }else{
+        document.getElementById('main-chart').innerHTML='<p style="color:#8b949e;font-size:.85rem;text-align:center;padding:20px;">No daily data available.</p>';
+    }
+
+    // LLM table
+    const llm=d.by_llm||{};
+    let llmHtml='<table class="data-table"><thead><tr><th>AI Model</th><th>Checks</th><th>Cited</th><th>Rate</th><th>Trend</th></tr></thead><tbody>';
+    for(const [k,points] of Object.entries(llm)){
+        const name=LLM_NAMES[k]||k;
+        const tot=points.reduce((a,p)=>a+p.total,0);
+        const cit=points.reduce((a,p)=>a+p.cited,0);
+        const rate=tot?Math.round((cit/tot)*100):0;
+        const trend=points.length>=2?miniTrend(points):'—';
+        llmHtml+=`<tr><td>${esc(name)}</td><td>${tot}</td><td>${cit}</td><td><span class="pill pill-rate">${rate}%</span></td><td>${trend}</td></tr>`;
+    }
+    llmHtml+='</tbody></table>';
+    document.getElementById('llm-table').innerHTML=llmHtml;
+
+    // Query table
+    const qry=d.by_query||{};
+    let qHtml='<table class="data-table"><thead><tr><th>Query</th><th>Checks</th><th>Cited</th><th>Rate</th><th>Trend</th></tr></thead><tbody>';
+    for(const [k,points] of Object.entries(qry)){
+        const tot=points.reduce((a,p)=>a+p.total,0);
+        const cit=points.reduce((a,p)=>a+p.cited,0);
+        const rate=tot?Math.round((cit/tot)*100):0;
+        const trend=points.length>=2?miniTrend(points):'—';
+        qHtml+=`<tr><td>${esc(k)}</td><td>${tot}</td><td>${cit}</td><td><span class="pill pill-rate">${rate}%</span></td><td>${trend}</td></tr>`;
+    }
+    qHtml+='</tbody></table>';
+    document.getElementById('query-table').innerHTML=qHtml;
+}
+
+function miniTrend(points){
+    const last=points[points.length-1].rate;
+    const prev=points[points.length-2].rate;
+    if(last>prev) return '<span style="color:#00e676">↑</span>';
+    if(last<prev) return '<span style="color:#ff5252">↓</span>';
+    return '<span style="color:#8b949e">—</span>';
+}
+
+function renderLineChart(data,key,label,color){
+    const W=800,H=180,PL=40,PR=20,PT=10,PB=30;
+    const cw=W-PL-PR,ch=H-PT-PB;
+    const vals=data.map(d=>d[key]);
+    const maxV=Math.max(...vals,1);
+    const minV=Math.min(...vals,0);
+    const range=maxV-minV||1;
+
+    let points='';let area='';let dots='';let labels='';
+    const step=cw/(data.length-1||1);
+
+    for(let i=0;i<data.length;i++){
+        const x=PL+i*step;
+        const y=PT+ch-(((vals[i]-minV)/range)*ch);
+        points+=(i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1)+' ';
+        if(i===0) area+='M'+PL+','+(PT+ch)+' L'+x.toFixed(1)+','+y.toFixed(1)+' ';
+        else area+='L'+x.toFixed(1)+','+y.toFixed(1)+' ';
+        dots+=`<circle class="chart-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" fill="${color}"><title>${data[i].date}: ${vals[i]}%</title></circle>`;
+        if(data.length<=10||i%(Math.ceil(data.length/8))===0){
+            labels+=`<text class="chart-label" x="${x.toFixed(1)}" y="${H-4}" text-anchor="middle">${data[i].date.slice(5)}</text>`;
+        }
+    }
+    area+='L'+(PL+(data.length-1)*step).toFixed(1)+','+(PT+ch)+' Z';
+
+    // Grid lines
+    let grid='';
+    for(let i=0;i<=4;i++){
+        const y=PT+(ch/4)*i;
+        const v=maxV-((maxV-minV)/4)*i;
+        grid+=`<line class="chart-grid" x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}"/>`;
+        grid+=`<text class="chart-label" x="${PL-6}" y="${y+4}" text-anchor="end">${v.toFixed(0)}%</text>`;
+    }
+
+    return `<svg viewBox="0 0 ${W} ${H}" class="chart-svg">${grid}<path class="chart-area" d="${area}" fill="${color}"/><path class="chart-line" d="${points}" stroke="${color}"/>${dots}${labels}</svg>`;
+}
+</script>
+</body>
+</html>
