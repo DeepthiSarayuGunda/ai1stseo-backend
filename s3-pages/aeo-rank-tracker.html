@@ -353,40 +353,21 @@ function downloadScoreCard(score,brand){const canvas=document.getElementById('sh
 async function loadScoreHistory(brand){try{const r=await fetch(`${BACKEND}/api/geo-probe/history?brand=${encodeURIComponent(brand)}&limit=5`);const d=await r.json();if(d.history&&d.history.length>1){const prev=d.history[1];const prevScore=Math.round((prev.geo_score||0)*100);const currScore=Math.round((d.history[0].geo_score||0)*100);const diff=currScore-prevScore;const cls=diff>=0?'add8-trend':'add8-decline';const arrow=diff>=0?'↑':'↓';const lastDate=new Date(prev.created_at||prev.timestamp||Date.now()).toLocaleDateString();document.getElementById('add8Container').innerHTML=`<div class="add8-history">📊 Last scanned: ${lastDate} — Previous: ${prevScore}% → Current: ${currScore}% <span class="${cls}">${diff>=0?'Improved':'Declined'} ${diff>=0?'+':''}${diff}% ${arrow}</span></div>`;}}catch(e){}}
 
 /* ADD 2: Per AI Model Breakdown */
-/* FIX 1: Score Logic — score = models cited / total models, not keyword-based */
+/* FIX 1: Score Logic — uses REAL multi-model probe results from runScan */
 function renderModelBreakdown(results,brand){
-  const models=['ChatGPT','Claude','Gemini','Perplexity','Groq','Nova Lite','Ollama'];
-  const totalModels=models.length;
-  /* Determine which models cited based on actual probe response content */
-  const allText=((results||[]).map(r=>r.citation_context||r.response||'')).join(' ').toLowerCase();
-  const brandLower=brand.toLowerCase();
-  const hasBrandInResults=(results||[]).some(r=>r.cited||r.brand_present);
-  let modelResults=[];
-  models.forEach((model,i)=>{
-    /* Use actual results: if brand was cited in the probe, distribute across models realistically based on response data */
-    let isCited=false;
-    let conf=0;
-    if(results&&results.length>0){
-      /* Check if any result mentions this model or use the actual cited status from multi-model probing */
-      const resultForModel=results.find(r=>(r.provider||'').toLowerCase().includes(model.toLowerCase().split(' ')[0]));
-      if(resultForModel){isCited=resultForModel.cited||resultForModel.brand_present;conf=Math.round((resultForModel.confidence||0)*100);}
-      else{/* For models not directly probed, estimate from overall results */
-        const overallCiteRate=(results.filter(r=>r.cited).length/results.length);
-        /* Each model has different likelihood based on known behavior */
-        const modelBias=[0.85,0.80,0.70,0.75,0.55,0.90,0.50];/* ChatGPT,Claude,Gemini,Perplexity,Groq,Nova,Ollama */
-        isCited=overallCiteRate>=modelBias[i];
-        conf=isCited?Math.round(50+overallCiteRate*45):0;
-      }
-    }
-    modelResults.push({model,isCited,conf});
-  });
-  const modelsCited=modelResults.filter(m=>m.isCited).length;
-  /* Store for score calculation */
-  window._modelsCited=modelsCited;
-  window._totalModels=totalModels;
-  window._modelResults=modelResults;
+  const modelResults = window._multiModelResults || window._modelResults || [];
+  if(!modelResults.length) return;
+  const modelsCited = modelResults.filter(m=>m.cited).length;
+  const totalModels = modelResults.length;
+  window._modelsCited = modelsCited;
+  window._totalModels = totalModels;
+  window._modelResults = modelResults;
   let rows='';
-  modelResults.forEach(m=>{const cls=m.isCited?'add2-cited':'add2-not';rows+=`<tr><td>${m.model}</td><td class="${cls}">${m.isCited?'✅ Cited':'❌ Not Cited'}</td><td>${m.conf>0?m.conf+'%':'—'}</td></tr>`;});
+  modelResults.forEach(m=>{
+    const conf = Math.round((m.confidence||0)*100);
+    const cls = m.cited ? 'add2-cited' : 'add2-not';
+    rows+=`<tr><td>${m.model}</td><td class="${cls}">${m.cited?'✅ Cited':'❌ Not Cited'}</td><td>${conf>0?conf+'%':'—'}</td></tr>`;
+  });
   document.getElementById('add2Container').innerHTML=`<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:20px;margin:16px 0"><h4 style="font-size:.9rem;margin-bottom:12px">🤖 Per AI Model Breakdown — ${modelsCited}/${totalModels} models cite your brand</h4><table class="add2-table"><thead><tr><th>AI Model</th><th>Status</th><th>Confidence</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -402,13 +383,43 @@ async function runScan() {
   document.getElementById('add8Container').innerHTML='';document.getElementById('add2Container').innerHTML='';document.getElementById('add5Container').innerHTML='';document.getElementById('add6Container').innerHTML='';document.getElementById('add7Container').innerHTML='';
   showScanProgress();
   try {
+    /* Probe the primary provider (nova) for all keywords */
     const r = await fetch(`${BACKEND}/api/geo-probe/batch`, {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({brand_name: brand, keywords: keywords, provider: 'nova'})
     });
     const d = await r.json();
     if (d.error) { hideScanProgress(); alert('Scan failed: ' + d.error); btn.disabled = false; btn.innerHTML = 'Scan My AI Visibility — Free'; return; }
-    scanResults = d; hideScanProgress(); renderResults(d, brand, keywords);
+
+    /* Now probe the first keyword across multiple providers for the model breakdown */
+    const primaryKw = keywords[0];
+    const providers = ['nova','ollama','groq','openai','gemini','claude','perplexity'];
+    const providerNames = ['Nova Lite','Ollama','Groq','ChatGPT','Gemini','Claude','Perplexity'];
+    let modelProbeResults = [];
+    const probePromises = providers.map(async (prov, idx) => {
+      try {
+        const pr = await fetch(`${BACKEND}/api/geo-probe`, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({brand_name: brand, keyword: primaryKw, provider: prov})
+        });
+        const pd = await pr.json();
+        console.log(`[AEO Debug] ${providerNames[idx]} response for "${primaryKw}":`, pd);
+        return {model: providerNames[idx], cited: pd.brand_present || pd.cited || false, confidence: pd.confidence || 0, context: pd.citation_context || ''};
+      } catch(e) { return {model: providerNames[idx], cited: false, confidence: 0, context: ''}; }
+    });
+    modelProbeResults = await Promise.all(probePromises);
+    console.log('[AEO Debug] All model results:', modelProbeResults);
+
+    /* Store model results globally */
+    window._multiModelResults = modelProbeResults;
+    const modelsCited = modelProbeResults.filter(m => m.cited).length;
+    window._modelsCited = modelsCited;
+    window._totalModels = modelProbeResults.length;
+    window._modelResults = modelProbeResults;
+
+    scanResults = d;
+    hideScanProgress();
+    renderResults(d, brand, keywords);
     loadScoreHistory(brand);
     if (competitor) { const compData = await runCompetitorScan(competitor, keywords); if (compData && compData.geo_score !== undefined) { const myScore=Math.round((window._modelsCited/window._totalModels)*100); const compScore=Math.round((compData.geo_score||0)*100); renderCompetitorGapAnalysis(myScore,compScore,brand,competitor,keywords,window._modelResults); } }
   } catch(e) { hideScanProgress(); scanResults = generateDemoResults(brand, keywords); renderResults(scanResults, brand, keywords); }
