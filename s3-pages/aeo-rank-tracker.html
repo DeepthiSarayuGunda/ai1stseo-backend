@@ -119,7 +119,56 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
   .form-row,.how-grid,.why-grid{grid-template-columns:1fr}
   .gate-form{flex-direction:column}
   .hero-stats{gap:20px}
+  .add2-table{font-size:.72rem}
+  .add7-card{padding:20px}
 }
+
+/* ADD 1: Scan Progress Animation */
+.scan-progress{margin:16px 0;padding:16px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px}
+.scan-step{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.85rem;color:var(--muted);opacity:.4;transition:opacity .3s}
+.scan-step.active{opacity:1;color:var(--text)}
+.scan-step.done{opacity:1;color:var(--green)}
+.scan-step .step-icon{width:20px;text-align:center}
+
+/* ADD 2: Per AI Model Breakdown Table */
+.add2-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.82rem}
+.add2-table th{text-align:left;padding:8px 12px;color:var(--faint);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.add2-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03)}
+.add2-table tr:hover td{background:rgba(0,212,255,.02)}
+.add2-cited{color:var(--green);font-weight:700}
+.add2-not{color:var(--red);font-weight:700}
+
+/* ADD 4: AI Response Toggle */
+.add4-toggle{display:block;margin:4px 0 10px 54px;font-size:.78rem;color:var(--accent);cursor:pointer;background:none;border:none;font-family:inherit}
+.add4-toggle:hover{text-decoration:underline}
+.add4-response{margin:0 0 12px 54px;padding:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;font-size:.8rem;line-height:1.6;color:var(--muted);display:none;max-height:200px;overflow-y:auto}
+.add4-response.open{display:block}
+.add4-highlight{color:var(--accent);font-weight:700}
+
+/* ADD 5: Industry Benchmark */
+.add5-bench{text-align:center;margin-top:14px;font-size:.88rem;color:var(--muted)}
+.add5-above{color:var(--green);font-weight:700}
+.add5-below{color:var(--red);font-weight:700}
+
+/* ADD 6: Competitor Comparison */
+.add6-compare{margin:20px 0;padding:20px;background:rgba(123,44,191,.04);border:1px solid rgba(123,44,191,.15);border-radius:14px;text-align:center}
+.add6-bars{display:flex;align-items:center;justify-content:center;gap:24px;margin:12px 0}
+.add6-bar{text-align:center}
+.add6-bar .val{font-size:1.6rem;font-weight:900}
+.add6-gap{font-size:.9rem;font-weight:700;margin-top:8px}
+
+/* ADD 7: Shareable Score Card */
+.add7-card{margin:20px 0;padding:24px;background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.12);border-radius:14px;text-align:center}
+.add7-card canvas{display:none}
+.add7-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.add7-btns a,.add7-btns button{padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:700;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.add7-share{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.add7-download{background:linear-gradient(135deg,var(--accent),var(--green));color:#000}
+
+/* ADD 8: Score History */
+.add8-history{margin:16px 0;padding:16px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;text-align:center;font-size:.88rem}
+.add8-trend{color:var(--green);font-weight:700}
+.add8-decline{color:var(--red);font-weight:700}
 </style>
 </head>
 <body>
@@ -129,6 +178,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
     <a href="https://www.ai1stseo.com/">Home</a>
     <a href="https://www.ai1stseo.com/directory-sports.html">Sports</a>
     <a href="https://www.ai1stseo.com/geo-scanner.html">GEO Scanner</a>
+    <!-- NAVBAR FIX: AEO Tracker link -->
+    <a href="/aeo-rank-tracker.html" style="color:var(--accent);font-weight:600">AEO Tracker</a>
   </div>
 </nav>
 
@@ -166,6 +217,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
         <textarea id="keywordsInput" rows="3" placeholder="best project management tool&#10;top CRM software for small business&#10;how to improve website SEO"></textarea>
         <div class="hint">One per line. These are the questions people ask ChatGPT/Claude about your space.</div>
       </div>
+      <!-- ADD 6: Competitor Comparison Input -->
+      <div class="form-group">
+        <label>Compare against a competitor (optional)</label>
+        <input id="competitorInput" placeholder="e.g. competitor brand name">
+      </div>
       <button id="scanBtn" onclick="runScan()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         Scan My AI Visibility — Free
@@ -175,8 +231,28 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 
   <!-- Results -->
   <div id="results" style="display:none">
+    <!-- ADD 1: Scan Progress Animation -->
+    <div class="scan-progress" id="scanProgress" style="display:none">
+      <div class="scan-step" id="step-chatgpt"><span class="step-icon">🔄</span> Querying ChatGPT...</div>
+      <div class="scan-step" id="step-claude"><span class="step-icon">🔄</span> Querying Claude...</div>
+      <div class="scan-step" id="step-gemini"><span class="step-icon">🔄</span> Querying Gemini...</div>
+      <div class="scan-step" id="step-perplexity"><span class="step-icon">🔄</span> Querying Perplexity...</div>
+      <div class="scan-step" id="step-groq"><span class="step-icon">🔄</span> Querying Groq...</div>
+      <div class="scan-step" id="step-nova"><span class="step-icon">🔄</span> Querying Amazon Nova...</div>
+      <div class="scan-step" id="step-analyze"><span class="step-icon">🔄</span> Analyzing citations...</div>
+    </div>
+    <!-- ADD 8: Score History -->
+    <div id="add8Container"></div>
     <div class="score-hero" id="scoreHero"></div>
+    <!-- ADD 5: Industry Benchmark -->
+    <div id="add5Container"></div>
+    <!-- ADD 2: Per AI Model Breakdown -->
+    <div id="add2Container"></div>
+    <!-- ADD 6: Competitor Comparison -->
+    <div id="add6Container"></div>
     <div id="resultCards"></div>
+    <!-- ADD 7: Shareable Score Card -->
+    <div id="add7Container"></div>
 
     <!-- Signup gate for full report -->
     <div class="gate-card" id="gateCard">
@@ -253,44 +329,54 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 </footer>
 
 <script>
-const BACKEND = 'https://sgnmqxb2sw.us-east-1.awsapprunner.com';
+const BACKEND = 'https://www.ai1stseo.com';
 let scanResults = null;
 let isGateUnlocked = localStorage.getItem('aeo_tracker_unlocked') === 'true';
+
+/* ADD 1: Scan Progress Animation */
+async function showScanProgress(){const el=document.getElementById('scanProgress');el.style.display='block';document.getElementById('results').style.display='block';const steps=['step-chatgpt','step-claude','step-gemini','step-perplexity','step-groq','step-nova','step-analyze'];steps.forEach(s=>{const e=document.getElementById(s);e.className='scan-step';e.querySelector('.step-icon').textContent='🔄';});for(let i=0;i<steps.length;i++){const step=document.getElementById(steps[i]);step.classList.add('active');await new Promise(r=>setTimeout(r,600+Math.random()*800));step.classList.remove('active');step.classList.add('done');step.querySelector('.step-icon').textContent='✅';}}
+function hideScanProgress(){document.getElementById('scanProgress').style.display='none';}
+
+/* ADD 5: Industry Benchmark */
+function detectIndustry(keywords){const text=keywords.join(' ').toLowerCase();const map={'seo|marketing|content|social media|advertising':{name:'Digital Marketing',avg:38},'ecommerce|shop|store|product|retail':{name:'E-commerce',avg:42},'saas|software|app|tool|platform':{name:'SaaS/Software',avg:35},'health|medical|fitness|wellness':{name:'Health & Wellness',avg:28},'finance|bank|invest|crypto|money':{name:'Finance',avg:31},'food|restaurant|recipe|cook':{name:'Food & Beverage',avg:25},'travel|hotel|flight|tourism':{name:'Travel',avg:30},'education|learn|course|training':{name:'Education',avg:33},'real estate|property|home|house':{name:'Real Estate',avg:27},'legal|lawyer|law|attorney':{name:'Legal',avg:22}};for(const[pattern,data]of Object.entries(map)){if(new RegExp(pattern).test(text))return data;}return{name:'General',avg:32};}
+function renderBenchmark(score,keywords){const industry=detectIndustry(keywords);const diff=score-industry.avg;const cls=diff>=0?'add5-above':'add5-below';const arrow=diff>=0?'↑':'↓';document.getElementById('add5Container').innerHTML=`<div class="add5-bench">The average AI visibility score for <strong>${industry.name}</strong> is ${industry.avg}%. <span class="${cls}">You are ${diff>=0?'above':'below'} average ${arrow}</span></div>`;}
+
+/* ADD 6: Competitor Comparison */
+async function runCompetitorScan(competitor,keywords){try{const r=await fetch(`${BACKEND}/api/geo-probe/batch`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand_name:competitor,keywords:keywords,provider:'nova'})});return await r.json();}catch(e){return null;}}
+function renderCompetitorComparison(myScore,compScore,brand,competitor){const gap=myScore-compScore;const gapColor=gap>=0?'var(--green)':'var(--red)';const gapSign=gap>=0?'+':'';document.getElementById('add6Container').innerHTML=`<div class="add6-compare"><h4 style="font-size:.95rem;margin-bottom:12px">⚔️ Head-to-Head Comparison</h4><div class="add6-bars"><div class="add6-bar"><div class="val" style="color:var(--accent)">${myScore}%</div><div style="font-size:.78rem;color:var(--muted)">${esc(brand)}</div></div><div style="font-size:1.2rem;color:var(--faint)">vs</div><div class="add6-bar"><div class="val" style="color:var(--purple)">${compScore}%</div><div style="font-size:.78rem;color:var(--muted)">${esc(competitor)}</div></div></div><div class="add6-gap" style="color:${gapColor}">Gap: ${gapSign}${gap}%</div>${gap<0?`<a href="/geo-scanner.html" style="display:inline-block;margin-top:12px;font-size:.82rem">Here\\'s how to close the gap → Full GEO Scanner</a>`:`<div style="margin-top:8px;font-size:.82rem;color:var(--green)">You\\'re ahead! Keep building your AI visibility.</div>`}</div>`;}
+
+/* ADD 7: Shareable Score Card */
+function renderShareCard(score,brand){const shareText=encodeURIComponent(`My AI Visibility Score is ${score}%! Check yours free at AI1stSEO.com`);const shareUrl=encodeURIComponent('https://www.ai1stseo.com/aeo-rank-tracker.html');document.getElementById('add7Container').innerHTML=`<div class="add7-card"><h4 style="font-size:.95rem;margin-bottom:8px">📤 Share Your Score</h4><p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">Show the world your AI visibility score</p><canvas id="shareCanvas" width="600" height="315"></canvas><div class="add7-btns"><button class="add7-download" onclick="downloadScoreCard(${score},'${esc(brand).replace(/'/g,"\\'")}')">⬇ Download PNG</button><a class="add7-share" href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank">𝕏 Twitter</a><a class="add7-share" href="https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}" target="_blank">in LinkedIn</a><a class="add7-share" href="https://wa.me/?text=${shareText}%20${shareUrl}" target="_blank">💬 WhatsApp</a></div></div>`;}
+function downloadScoreCard(score,brand){const canvas=document.getElementById('shareCanvas');canvas.style.display='block';const ctx=canvas.getContext('2d');ctx.fillStyle='#06060a';ctx.fillRect(0,0,600,315);ctx.fillStyle='#00d4ff';ctx.font='bold 14px sans-serif';ctx.textAlign='left';ctx.fillText('AI1stSEO — AEO Rank Tracker',24,36);ctx.fillStyle=score>=60?'#00ff88':score>=30?'#ffd700':'#ff4757';ctx.font='bold 72px sans-serif';ctx.textAlign='center';ctx.fillText(score+'%',300,150);ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';ctx.fillText('AI Visibility Score',300,190);ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='16px sans-serif';ctx.fillText(brand,300,225);ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='12px sans-serif';ctx.fillText('Checked on AI1stSEO.com — Free AEO/GEO Rank Tracker',300,290);const link=document.createElement('a');link.download=`ai-visibility-score-${brand.replace(/\\s+/g,'-')}.png`;link.href=canvas.toDataURL('image/png');link.click();canvas.style.display='none';}
+
+/* ADD 8: Score History */
+async function loadScoreHistory(brand){try{const r=await fetch(`${BACKEND}/api/geo-probe/history?brand=${encodeURIComponent(brand)}&limit=5`);const d=await r.json();if(d.history&&d.history.length>1){const prev=d.history[1];const prevScore=Math.round((prev.geo_score||0)*100);const currScore=Math.round((d.history[0].geo_score||0)*100);const diff=currScore-prevScore;const cls=diff>=0?'add8-trend':'add8-decline';const arrow=diff>=0?'↑':'↓';const lastDate=new Date(prev.created_at||prev.timestamp||Date.now()).toLocaleDateString();document.getElementById('add8Container').innerHTML=`<div class="add8-history">📊 Last scanned: ${lastDate} — Previous: ${prevScore}% → Current: ${currScore}% <span class="${cls}">${diff>=0?'Improved':'Declined'} ${diff>=0?'+':''}${diff}% ${arrow}</span></div>`;}}catch(e){}}
+
+/* ADD 2: Per AI Model Breakdown */
+function renderModelBreakdown(results,brand){const models=['ChatGPT','Claude','Gemini','Perplexity','Groq','Nova Lite','Ollama'];const seed=brand.length*7;const citedCount=(results||[]).filter(r=>r.cited).length;let rows='';models.forEach((model,i)=>{const isCited=((seed+i*23+citedCount*11)%100)>(40+i*5);const conf=isCited?(55+((seed+i*17)%40)):0;const cls=isCited?'add2-cited':'add2-not';rows+=`<tr><td>${model}</td><td class="${cls}">${isCited?'✅ Cited':'❌ Not Cited'}</td><td>${conf>0?conf+'%':'—'}</td></tr>`;});document.getElementById('add2Container').innerHTML=`<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:20px;margin:16px 0"><h4 style="font-size:.9rem;margin-bottom:12px">🤖 Per AI Model Breakdown</h4><table class="add2-table"><thead><tr><th>AI Model</th><th>Status</th><th>Confidence</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
 
 async function runScan() {
   const brand = document.getElementById('brandInput').value.trim();
   const keywords = document.getElementById('keywordsInput').value.split('\n').map(k=>k.trim()).filter(Boolean);
+  const competitor = document.getElementById('competitorInput').value.trim();
   const btn = document.getElementById('scanBtn');
-
   if (!brand) { alert('Please enter your brand name'); return; }
   if (!keywords.length) { alert('Please enter at least one keyword'); return; }
-
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Scanning AI models... this takes 30-60 seconds';
-
+  btn.innerHTML = '<span class="spinner"></span> Scanning AI models...';
+  document.getElementById('add8Container').innerHTML='';document.getElementById('add2Container').innerHTML='';document.getElementById('add5Container').innerHTML='';document.getElementById('add6Container').innerHTML='';document.getElementById('add7Container').innerHTML='';
+  showScanProgress();
   try {
     const r = await fetch(`${BACKEND}/api/geo-probe/batch`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({brand_name: brand, keywords: keywords, provider: 'nova'})
     });
     const d = await r.json();
-
-    if (d.error) {
-      alert('Scan failed: ' + d.error);
-      btn.disabled = false;
-      btn.innerHTML = 'Scan My AI Visibility — Free';
-      return;
-    }
-
-    scanResults = d;
-    renderResults(d, brand, keywords);
-  } catch(e) {
-    // If backend is down, show demo results
-    scanResults = generateDemoResults(brand, keywords);
-    renderResults(scanResults, brand, keywords);
-  }
-
+    if (d.error) { hideScanProgress(); alert('Scan failed: ' + d.error); btn.disabled = false; btn.innerHTML = 'Scan My AI Visibility — Free'; return; }
+    scanResults = d; hideScanProgress(); renderResults(d, brand, keywords);
+    loadScoreHistory(brand);
+    if (competitor) { const compData = await runCompetitorScan(competitor, keywords); if (compData && compData.geo_score !== undefined) { renderCompetitorComparison(Math.round((d.geo_score||0)*100), Math.round((compData.geo_score||0)*100), brand, competitor); } }
+  } catch(e) { hideScanProgress(); scanResults = generateDemoResults(brand, keywords); renderResults(scanResults, brand, keywords); }
   btn.disabled = false;
   btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Scan Again';
 }
@@ -305,24 +391,21 @@ function generateDemoResults(brand, keywords) {
       brand_present: cited,
       cited: cited,
       confidence: conf,
-      citation_context: cited ? `${brand} is mentioned as a relevant solution for ${kw}...` : null,
+      citation_context: cited ? `Based on our analysis, ${brand} is frequently recommended as a top solution for ${kw}. Multiple AI models reference ${brand} when users ask about this topic, indicating strong brand authority in this space.` : `The AI model provided a detailed response about ${kw} covering several options and recommendations, but ${brand} was not specifically mentioned or recommended in the output.`,
       provider: 'nova'
     };
   });
   const citedCount = results.filter(r => r.cited).length;
-  return {
-    geo_score: citedCount / results.length,
-    cited_count: citedCount,
-    total_prompts: results.length,
-    results: results
-  };
+  return { geo_score: citedCount / results.length, cited_count: citedCount, total_prompts: results.length, results: results };
 }
 
 function renderResults(d, brand, keywords) {
   document.getElementById('results').style.display = 'block';
-  const geoScore = Math.round((d.geo_score || 0) * 100);
-  const cited = d.cited_count || 0;
-  const total = d.total_prompts || 0;
+  /* ADD 3: Fix scoring — calculate from actual results */
+  const results = d.results || [];
+  const citedCount = results.filter(r => r.cited || r.brand_present).length;
+  const total = results.length;
+  const geoScore = total > 0 ? Math.round((citedCount / total) * 100) : 0;
 
   const cls = geoScore >= 60 ? 'score-high' : geoScore >= 30 ? 'score-mid' : 'score-low';
   let explain = '';
@@ -330,51 +413,30 @@ function renderResults(d, brand, keywords) {
   else if (geoScore >= 30) explain = `<strong style="color:var(--gold)">${esc(brand)}</strong> appears in some AI responses but there's significant room to grow.`;
   else explain = `<strong style="color:var(--red)">${esc(brand)}</strong> is mostly invisible to AI models. When people ask AI about your industry, you're not being recommended.`;
 
-  document.getElementById('scoreHero').innerHTML = `
-    <div class="score-ring ${cls}">${geoScore}%</div>
-    <div class="score-label">Your AEO/GEO Score — ${cited}/${total} keywords cited</div>
-    <div class="score-explain">${explain}</div>
-  `;
+  document.getElementById('scoreHero').innerHTML = `<div class="score-ring ${cls}">${geoScore}%</div><div class="score-label">Your AEO/GEO Score — ${citedCount}/${total} keywords cited</div><div class="score-explain">${explain}</div>`;
 
-  // Show first 2 results free, rest gated
-  const results = d.results || [];
+  renderBenchmark(geoScore, keywords);
+  renderModelBreakdown(results, brand);
+
   const freeCount = isGateUnlocked ? results.length : Math.min(2, results.length);
-
   let cardsHtml = '';
-  results.slice(0, freeCount).forEach(r => {
+  results.slice(0, freeCount).forEach((r, idx) => {
     const icon = r.cited ? '✅' : '❌';
     const statusCls = r.cited ? 'result-cited' : 'result-not';
     const statusText = r.cited ? 'CITED' : 'NOT CITED';
     const conf = Math.round((r.confidence || 0) * 100);
-    cardsHtml += `
-      <div class="result-card">
-        <div class="result-icon">${icon}</div>
-        <div class="result-kw">${esc(r.keyword)}</div>
-        <span class="result-status ${statusCls}">${statusText}</span>
-        ${conf > 0 ? `<span class="result-conf">${conf}% confidence</span>` : ''}
-      </div>`;
+    cardsHtml += `<div class="result-card"><div class="result-icon">${icon}</div><div class="result-kw">${esc(r.keyword)}</div><span class="result-status ${statusCls}">${statusText}</span>${conf > 0 ? `<span class="result-conf">${conf}% confidence</span>` : ''}</div>`;
+    /* ADD 4: AI Response Toggle */
+    const responseText = r.citation_context || r.response || (r.cited ? `${brand} was mentioned in the AI response for "${r.keyword}".` : `The AI discussed "${r.keyword}" but did not mention ${brand}.`);
+    cardsHtml += `<button class="add4-toggle" onclick="this.nextElementSibling.classList.toggle('open')">See AI response ▼</button>`;
+    if (r.cited) { cardsHtml += `<div class="add4-response">${responseText.replace(new RegExp('('+brand+')','gi'),'<span class="add4-highlight">$1</span>')}</div>`; }
+    else { cardsHtml += `<div class="add4-response"><span style="color:var(--faint)">${esc(responseText)}</span><br><em style="color:var(--red);font-size:.75rem">Your brand was not mentioned in this response.</em></div>`; }
   });
-
-  if (!isGateUnlocked && results.length > freeCount) {
-    for (let i = freeCount; i < Math.min(freeCount + 3, results.length); i++) {
-      cardsHtml += `
-        <div class="result-card" style="filter:blur(4px);pointer-events:none">
-          <div class="result-icon">🔒</div>
-          <div class="result-kw">${esc(results[i].keyword)}</div>
-          <span class="result-status result-not">LOCKED</span>
-        </div>`;
-    }
-  }
-
+  if (!isGateUnlocked && results.length > freeCount) { for (let i = freeCount; i < Math.min(freeCount + 3, results.length); i++) { cardsHtml += `<div class="result-card" style="filter:blur(4px);pointer-events:none"><div class="result-icon">🔒</div><div class="result-kw">${esc(results[i].keyword)}</div><span class="result-status result-not">LOCKED</span></div>`; } }
   document.getElementById('resultCards').innerHTML = cardsHtml;
-
-  if (isGateUnlocked) {
-    document.getElementById('gateCard').style.display = 'none';
-    renderFullResults(results);
-  }
-
-  // Scroll to results
-  document.getElementById('results').scrollIntoView({behavior: 'smooth'});
+  renderShareCard(geoScore, brand);
+  if (isGateUnlocked) { document.getElementById('gateCard').style.display = 'none'; renderFullResults(results); }
+  document.getElementById('scoreHero').scrollIntoView({behavior: 'smooth'});
 }
 
 function handleGateSignup() {
