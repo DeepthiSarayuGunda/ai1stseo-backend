@@ -305,21 +305,6 @@ button:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
   <div class="elapsed" id="elapsed"></div>
 </div>
 
-<!-- ═══ ADD 1: VIDEO DEMO ═══ -->
-<div style="text-align:center;margin:40px 0;padding:32px;background:rgba(255,255,255,.02);border:1px solid rgba(0,212,255,.08);border-radius:16px">
-  <h2 style="color:#58a6ff;font-size:1.2rem;margin-bottom:16px">🎬 See It In Action — 60 Seconds</h2>
-  <div style="position:relative;max-width:800px;margin:0 auto;aspect-ratio:16/9;background:#0d0f14;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)">
-    <iframe id="demo-video" width="100%" height="100%" src="" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></iframe>
-    <div id="video-overlay" onclick="playDemo()" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(123,44,191,.05))">
-      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#00ff88);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,212,255,.3)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      </div>
-    </div>
-  </div>
-  <p style="color:rgba(255,255,255,.4);font-size:.82rem;margin-top:12px">No signup needed — <a href="#" onclick="document.getElementById('s-brand').focus();window.scrollTo({top:200,behavior:'smooth'});return false" style="color:#00d4ff">scroll up to try it free ↑</a></p>
-</div>
-<script>function playDemo(){var f=document.getElementById('demo-video');f.src=f.dataset.src;f.style.display='block';document.getElementById('video-overlay').style.display='none';}</script>
-
 <!-- ═══ CORE TOOLS ═══ -->
 <h2 style="color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #21262d" class="section-title"><span>⚡</span> Core Features</h2>
 <div class="grid">
