@@ -4028,6 +4028,16 @@ Be concise and actionable. Format as a numbered list."""
         return jsonify({'error': f'Council analysis failed: {str(e)}'}), 500
 
 
+@app.route('/api/council/status', methods=['GET'])
+def council_status():
+    """Report which LLM providers are configured for the council. No secrets leaked."""
+    try:
+        from council_agents import get_council_status
+        return jsonify({'status': 'ok', **get_council_status()})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)[:200]}), 500
+
+
 @app.route('/api/geo-probe', methods=['POST'])
 def geo_probe():
     """GEO Monitoring Engine ΓÇö multi-provider, direct AI calls."""

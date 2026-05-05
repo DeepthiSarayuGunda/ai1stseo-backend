@@ -1,48 +1,147 @@
 """
 council_agents.py
-Multi-LLM AI Council — each agent uses a dedicated model via AWS Bedrock.
+Multi-LLM AI Council — 5 specialized agents from 4 different AI companies,
+with a senior moderator from a 5th model tier.
 
-Architecture:
-  - AEO Specialist       → Claude 3.5 Haiku (Anthropic)  — citation/attribution honesty
-  - SEO Specialist       → Nova Lite (Amazon)            — structured on-page SEO checks
-  - Content Analyst      → Llama 4 Maverick (Meta)       — natural language quality & E-E-A-T
-  - Competitor Intel     → Mistral Large 2 (Mistral AI)  — comparative analysis
-  - GEO/Local            → Nova Lite (Amazon)            — local signal pattern matching
-  - Council Moderator    → Claude Sonnet 4 (Anthropic)   — conflict resolution & synthesis
+Final architecture:
+  - AEO Specialist       → Claude 3.5 Haiku   (Anthropic, via Bedrock)
+  - SEO Specialist       → Nova Lite          (Amazon, via Bedrock)
+  - Content Analyst      → GPT-4o-mini        (OpenAI, direct API)
+  - Competitor Intel     → Gemini 1.5 Flash   (Google, direct API)
+  - GEO/Local            → Nova Lite          (Amazon, via Bedrock)
+  - Council Moderator    → GPT-4o (full)      (OpenAI, direct API — different tier from mini)
+
+Zero-bias by design:
+  - 4 different companies (Anthropic, Amazon, OpenAI, Google)
+  - No model judges its own output
+  - Moderator is a different model TIER (GPT-4o full ≠ GPT-4o-mini)
+  - Moderator sees reports as plain text, doesn't know which model wrote which
 
 Every agent returns a uniform JSON dict. If any LLM call fails, the rule-based
-fallback from app.py runs so the Council never goes fully dark on the user.
+fallback from app.py is used so the Council never fully fails on the user.
 """
 
 import json
 import logging
+import os
 import re
+import time
+
+import requests
 
 from bedrock_helper import invoke_converse
 
 logger = logging.getLogger(__name__)
 
 
-# ── Agent → Model assignment ─────────────────────────────────────────────── #
+# ── Agent → (provider, model) assignment ─────────────────────────────────── #
 
-AGENT_MODELS = {
-    "aeo": "claude-haiku",
-    "seo": "nova-lite",
-    "content": "llama-4-maverick",
-    "competitor": "mistral-large",
-    "geo": "nova-lite",
-    "moderator": "claude-sonnet-4",
+AGENT_PROVIDERS = {
+    "aeo":        ("bedrock",  "claude-haiku"),
+    "seo":        ("bedrock",  "nova-lite"),
+    "content":    ("openai",   "gpt-4o-mini"),
+    "competitor": ("gemini",   "gemini-1.5-flash"),
+    "geo":        ("bedrock",  "nova-lite"),
+    "moderator":  ("openai",   "gpt-4o"),
 }
 
 # Human-readable labels for UI surface
 AGENT_MODEL_LABELS = {
-    "aeo": "Claude 3.5 Haiku (Anthropic)",
-    "seo": "Nova Lite (Amazon)",
-    "content": "Llama 4 Maverick (Meta)",
-    "competitor": "Mistral Large (Mistral AI)",
-    "geo": "Nova Lite (Amazon)",
-    "moderator": "Claude Sonnet 4 (Anthropic)",
+    "aeo":        "Claude 3.5 Haiku (Anthropic)",
+    "seo":        "Nova Lite (Amazon)",
+    "content":    "GPT-4o-mini (OpenAI)",
+    "competitor": "Gemini 1.5 Flash (Google)",
+    "geo":        "Nova Lite (Amazon)",
+    "moderator":  "GPT-4o (OpenAI)",
 }
+
+
+# ── Environment configuration ────────────────────────────────────────────── #
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_CONTENT_MODEL = os.environ.get("OPENAI_CONTENT_MODEL", "gpt-4o-mini")
+OPENAI_MODERATOR_MODEL = os.environ.get("OPENAI_MODERATOR_MODEL", "gpt-4o")
+OPENAI_TIMEOUT = int(os.environ.get("OPENAI_TIMEOUT", "30"))
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_TIMEOUT = int(os.environ.get("GEMINI_TIMEOUT", "30"))
+
+
+# ── Provider adapters ────────────────────────────────────────────────────── #
+
+def _call_openai(prompt: str, model: str, max_tokens: int = 800, temperature: float = 0.6) -> str:
+    """Call OpenAI Chat Completions. Raises RuntimeError on failure."""
+    if not OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY not set")
+    t0 = time.time()
+    resp = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        },
+        timeout=OPENAI_TIMEOUT,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"OpenAI {model} returned {resp.status_code}: {resp.text[:300]}")
+    text = resp.json()["choices"][0]["message"]["content"]
+    logger.info("OpenAI %s: %.2fs, %d chars", model, time.time() - t0, len(text))
+    return text
+
+
+def _call_gemini(prompt: str, max_tokens: int = 800, temperature: float = 0.6) -> str:
+    """Call Gemini generateContent. Raises RuntimeError on failure."""
+    if not GEMINI_API_KEY:
+        raise RuntimeError("GEMINI_API_KEY not set")
+    t0 = time.time()
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    )
+    resp = requests.post(
+        url,
+        headers={"Content-Type": "application/json"},
+        json={
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": max_tokens,
+                "temperature": temperature,
+            },
+        },
+        timeout=GEMINI_TIMEOUT,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"Gemini returned {resp.status_code}: {resp.text[:300]}")
+    data = resp.json()
+    try:
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError) as e:
+        raise RuntimeError(f"Gemini response had unexpected shape: {e} / {str(data)[:200]}")
+    logger.info("Gemini: %.2fs, %d chars", time.time() - t0, len(text))
+    return text
+
+
+def _dispatch(agent_key: str, prompt: str, max_tokens: int = 800, temperature: float = 0.6) -> str:
+    """Route the prompt to the configured provider for this agent."""
+    provider, model = AGENT_PROVIDERS[agent_key]
+    if provider == "bedrock":
+        return invoke_converse(prompt, model=model, max_tokens=max_tokens, temperature=temperature)
+    if provider == "openai":
+        if agent_key == "moderator":
+            model = OPENAI_MODERATOR_MODEL
+        else:
+            model = OPENAI_CONTENT_MODEL
+        return _call_openai(prompt, model=model, max_tokens=max_tokens, temperature=temperature)
+    if provider == "gemini":
+        return _call_gemini(prompt, max_tokens=max_tokens, temperature=temperature)
+    raise RuntimeError(f"Unknown provider {provider}")
 
 
 # ── JSON extraction helper ────────────────────────────────────────────────── #
@@ -51,14 +150,12 @@ def _extract_json(text: str) -> dict:
     """Pull a JSON object out of an LLM response, tolerating prose or code fences."""
     if not text:
         return {}
-    # Try fenced code block first
     m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if m:
         try:
             return json.loads(m.group(1))
         except Exception:
             pass
-    # Fall back to first {...} in the response
     m = re.search(r"\{.*\}", text, re.DOTALL)
     if m:
         try:
@@ -271,7 +368,7 @@ Be concise, specific, and actionable. Use a numbered list. No fluff."""
 # ── Public agent entry points ────────────────────────────────────────────── #
 
 def run_aeo_agent(ctx: dict, fallback: dict) -> dict:
-    """Claude 3.5 Haiku — AEO readiness."""
+    """Claude 3.5 Haiku (Anthropic, via Bedrock) — AEO readiness."""
     try:
         prompt = AEO_PROMPT.format(
             keyword=ctx.get("keyword") or "(not specified)",
@@ -285,7 +382,7 @@ def run_aeo_agent(ctx: dict, fallback: dict) -> dict:
             word_count=ctx.get("word_count", 0),
             text_excerpt=(ctx.get("text") or "")[:2500],
         )
-        raw = _extract_json(invoke_converse(prompt, model=AGENT_MODELS["aeo"], max_tokens=800))
+        raw = _extract_json(_dispatch("aeo", prompt, max_tokens=800))
         if not raw:
             raise RuntimeError("empty JSON from AEO agent")
         out = _normalize_agent_output(
@@ -302,7 +399,7 @@ def run_aeo_agent(ctx: dict, fallback: dict) -> dict:
 
 
 def run_seo_agent(ctx: dict, fallback: dict) -> dict:
-    """Nova Lite — on-page SEO checklist."""
+    """Nova Lite (Amazon, via Bedrock) — on-page SEO checklist."""
     try:
         prompt = SEO_PROMPT.format(
             keyword=ctx.get("keyword") or "(not specified)",
@@ -320,7 +417,7 @@ def run_seo_agent(ctx: dict, fallback: dict) -> dict:
             internal_links=ctx.get("internal_links", 0),
             external_links=ctx.get("external_links", 0),
         )
-        raw = _extract_json(invoke_converse(prompt, model=AGENT_MODELS["seo"], max_tokens=700))
+        raw = _extract_json(_dispatch("seo", prompt, max_tokens=700))
         if not raw:
             raise RuntimeError("empty JSON from SEO agent")
         out = _normalize_agent_output(
@@ -337,7 +434,7 @@ def run_seo_agent(ctx: dict, fallback: dict) -> dict:
 
 
 def run_content_agent(ctx: dict, fallback: dict) -> dict:
-    """Llama 4 Maverick — content quality & E-E-A-T."""
+    """GPT-4o-mini (OpenAI) — content quality & E-E-A-T."""
     try:
         prompt = CONTENT_PROMPT.format(
             keyword=ctx.get("keyword") or "(not specified)",
@@ -349,7 +446,7 @@ def run_content_agent(ctx: dict, fallback: dict) -> dict:
             has_citations=ctx.get("has_citations", False),
             text_excerpt=(ctx.get("text") or "")[:3500],
         )
-        raw = _extract_json(invoke_converse(prompt, model=AGENT_MODELS["content"], max_tokens=800))
+        raw = _extract_json(_dispatch("content", prompt, max_tokens=800))
         if not raw:
             raise RuntimeError("empty JSON from content agent")
         out = _normalize_agent_output(
@@ -358,7 +455,6 @@ def run_content_agent(ctx: dict, fallback: dict) -> dict:
             fallback.get("score", 0),
         )
         out["model"] = AGENT_MODEL_LABELS["content"]
-        # Preserve extra metrics from the rule-based fallback where useful
         if "metrics" in fallback:
             out["metrics"] = fallback["metrics"]
         return out
@@ -369,7 +465,7 @@ def run_content_agent(ctx: dict, fallback: dict) -> dict:
 
 
 def run_competitor_agent(ctx: dict, fallback: dict) -> dict:
-    """Mistral Large — competitor intelligence."""
+    """Gemini 1.5 Flash (Google) — competitor intelligence."""
     try:
         prompt = COMPETITOR_PROMPT.format(
             keyword=ctx.get("keyword") or "(not specified)",
@@ -382,7 +478,7 @@ def run_competitor_agent(ctx: dict, fallback: dict) -> dict:
             word_count=ctx.get("word_count", 0),
             internal_links=ctx.get("internal_links", 0),
         )
-        raw = _extract_json(invoke_converse(prompt, model=AGENT_MODELS["competitor"], max_tokens=800))
+        raw = _extract_json(_dispatch("competitor", prompt, max_tokens=800))
         if not raw:
             raise RuntimeError("empty JSON from competitor agent")
         out = _normalize_agent_output(
@@ -399,7 +495,7 @@ def run_competitor_agent(ctx: dict, fallback: dict) -> dict:
 
 
 def run_geo_agent(ctx: dict, fallback: dict) -> dict:
-    """Nova Lite — GEO/local signals."""
+    """Nova Lite (Amazon, via Bedrock) — GEO/local signals."""
     try:
         prompt = GEO_PROMPT.format(
             keyword=ctx.get("keyword") or "(not specified)",
@@ -411,7 +507,7 @@ def run_geo_agent(ctx: dict, fallback: dict) -> dict:
             has_local_keywords=ctx.get("has_local_keywords", False),
             service_areas=", ".join(ctx.get("service_areas", [])) or "none detected",
         )
-        raw = _extract_json(invoke_converse(prompt, model=AGENT_MODELS["geo"], max_tokens=700))
+        raw = _extract_json(_dispatch("geo", prompt, max_tokens=700))
         if not raw:
             raise RuntimeError("empty JSON from GEO agent")
         out = _normalize_agent_output(
@@ -428,7 +524,11 @@ def run_geo_agent(ctx: dict, fallback: dict) -> dict:
 
 
 def run_moderator(agents: list, keyword: str, overall_score: int) -> str:
-    """Claude Sonnet 4 — synthesize all 5 reports into a unified plan."""
+    """GPT-4o full (OpenAI) — synthesize all 5 reports into a unified plan.
+
+    IMPORTANT: GPT-4o full is a different tier than the Content agent's GPT-4o-mini.
+    Different model weights, different reasoning depth. No model judges its own work.
+    """
     try:
         reports = []
         for a in agents:
@@ -446,7 +546,22 @@ def run_moderator(agents: list, keyword: str, overall_score: int) -> str:
             overall_score=overall_score,
             agent_reports="\n\n".join(reports),
         )
-        return invoke_converse(prompt, model=AGENT_MODELS["moderator"], max_tokens=1200, temperature=0.4)
+        return _dispatch("moderator", prompt, max_tokens=1200, temperature=0.4)
     except Exception as e:
         logger.warning("Moderator failed: %s", e)
         return None
+
+
+def get_council_status() -> dict:
+    """Report which providers are configured, for /health or /status endpoints."""
+    return {
+        "providers": {
+            "bedrock": True,  # always available through IAM role
+            "openai": bool(OPENAI_API_KEY),
+            "gemini": bool(GEMINI_API_KEY),
+        },
+        "agents": {
+            key: {"label": AGENT_MODEL_LABELS[key], "provider": AGENT_PROVIDERS[key][0]}
+            for key in AGENT_PROVIDERS
+        },
+    }
