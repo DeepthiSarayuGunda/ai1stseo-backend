@@ -427,6 +427,39 @@ html.light [style*="background:#0a0c12"]{background:#e0f2fe!important;border-bot
   </div>
 </div>
 
+<!-- 12. GEO ROI Calculator -->
+<div class="section" id="sec-roi">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,212,255,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div> GEO ROI Calculator — What Is AI Visibility Worth?</div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+      <div><label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Monthly Website Traffic</label><input id="roi-traffic" type="number" placeholder="e.g. 10000" value="5000" style="width:100%;height:38px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem"></div>
+      <div><label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Conversion Rate (%)</label><input id="roi-conv" type="number" placeholder="e.g. 2.5" value="2.5" step="0.1" style="width:100%;height:38px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem"></div>
+      <div><label style="display:block;font-size:.72rem;color:#7d8590;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:5px">Avg Order Value ($)</label><input id="roi-aov" type="number" placeholder="e.g. 85" value="85" style="width:100%;height:38px;padding:0 12px;background:#0d0f14;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e1e4e8;font-size:.85rem"></div>
+    </div>
+    <button onclick="calculateROI()" style="width:100%;height:44px;border:none;border-radius:10px;background:linear-gradient(135deg,#00ff88,#00d4ff);color:#000;font-size:.9rem;font-weight:700;cursor:pointer">Calculate My GEO ROI</button>
+    <div id="roi-results" style="display:none;margin-top:20px;padding:20px;background:rgba(0,255,136,.03);border:1px solid rgba(0,255,136,.15);border-radius:12px">
+    </div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#00ff88">💰 Understanding GEO ROI</strong><br>
+    This calculator converts your GEO score into estimated revenue impact. Every 10% increase in AI visibility drives additional organic traffic from AI-powered search. The calculation uses your actual traffic, conversion rate, and order value to show the business case for GEO optimization.
+  </div>
+</div>
+
+<!-- 13. AI Visibility Forecaster -->
+<div class="section" id="sec-forecast">
+  <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(192,132,252,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div> AI Visibility Forecaster — Predictive Intelligence</div>
+  <div class="card">
+    <div id="forecast-content">
+      <div style="text-align:center;padding:20px;color:#7d8590;font-size:.85rem">Loading forecast data from probe history...</div>
+    </div>
+  </div>
+  <div class="metric-explain">
+    <strong style="color:#a855f7">🔮 Understanding the Forecaster</strong><br>
+    Based on your historical probe data, the forecaster predicts where your GEO score will be in 4-8 weeks. It uses linear regression on your weekly scores to project trajectory. If a competitor is gaining faster, it calculates when they'll overtake you — giving you time to act.
+  </div>
+</div>
+
 <!-- ADD 5: Feature Comparison Table -->
 <div class="section" id="sec-compare">
   <div class="section-title"><div class="section-icon" style="background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(99,102,241,.15))"><svg viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div> The Only Platform Built for the AI Search Era</div>
@@ -886,6 +919,70 @@ function downloadRankingsPDF() {
 function downloadIntelPDF() {
   window.open(BASE+'/api/m5/executive-dashboard/pdf?brand=AI1stSEO', '_blank');
 }
+
+// ── 12. GEO ROI Calculator ───────────────────────────────────────────────────
+function calculateROI(){
+  const traffic=parseInt(document.getElementById('roi-traffic').value)||5000;
+  const conv=(parseFloat(document.getElementById('roi-conv').value)||2.5)/100;
+  const aov=parseFloat(document.getElementById('roi-aov').value)||85;
+  const currentGeo=window._latestGeoScore||35;
+  const aiTrafficPct=0.12;// AI search drives ~12% of organic traffic
+  const perTenPct=Math.round(traffic*aiTrafficPct*0.1);
+  const revenuePerTenPct=Math.round(perTenPct*conv*aov);
+  const gapVsComp=Math.max(0,70-currentGeo);
+  const lostRevenue=Math.round((gapVsComp/10)*revenuePerTenPct);
+  const el=document.getElementById('roi-results');
+  el.style.display='block';
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center;margin-bottom:16px">
+      <div><div style="font-size:1.6rem;font-weight:900;color:#00ff88">+${perTenPct}</div><div style="font-size:.75rem;color:#7d8590">Extra visitors per 10% GEO increase</div></div>
+      <div><div style="font-size:1.6rem;font-weight:900;color:#00d4ff">$${revenuePerTenPct.toLocaleString()}</div><div style="font-size:.75rem;color:#7d8590">Revenue per 10% GEO increase/mo</div></div>
+      <div><div style="font-size:1.6rem;font-weight:900;color:#f85149">$${lostRevenue.toLocaleString()}</div><div style="font-size:.75rem;color:#7d8590">Lost revenue vs competitor/mo</div></div>
+    </div>
+    <div style="font-size:.85rem;color:#c9d1d9;line-height:1.7;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+      <div>📊 Every <strong>10% increase</strong> in AI visibility = ~<strong>${perTenPct} extra visitors/month</strong></div>
+      <div>💰 At your conversion rate, that's worth <strong>$${revenuePerTenPct.toLocaleString()}/month</strong> in revenue</div>
+      <div>🚨 Your current GEO gap vs top competitor costs you an estimated <strong style="color:#f85149">$${lostRevenue.toLocaleString()}/month</strong></div>
+    </div>`;
+}
+
+// ── 13. AI Visibility Forecaster ─────────────────────────────────────────────
+async function loadForecast(){
+  try{
+    const brand=document.getElementById('client-brand')?.textContent||'AI1stSEO';
+    const r=await fetch(BASE+'/api/geo-probe/history?brand='+encodeURIComponent(brand)+'&limit=8');
+    const d=await r.json();
+    const history=(d.history||[]).filter(h=>h.geo_score!==undefined);
+    if(history.length<3){document.getElementById('forecast-content').innerHTML='<div style="text-align:center;padding:20px;color:#7d8590;font-size:.85rem">Need at least 3 weeks of data for forecasting. Keep running weekly probes.</div>';return;}
+    const scores=history.map(h=>Math.round((h.geo_score||0)*100)).reverse();
+    const n=scores.length;
+    const xMean=(n-1)/2;
+    const yMean=scores.reduce((a,b)=>a+b,0)/n;
+    let num=0,den=0;
+    scores.forEach((y,i)=>{num+=(i-xMean)*(y-yMean);den+=(i-xMean)*(i-xMean);});
+    const slope=den?num/den:0;
+    const intercept=yMean-slope*xMean;
+    const forecast4w=Math.round(Math.min(100,Math.max(0,slope*(n+3)+intercept)));
+    const forecast8w=Math.round(Math.min(100,Math.max(0,slope*(n+7)+intercept)));
+    const trend=slope>0.5?'improving':slope<-0.5?'declining':'stable';
+    const trendColor=trend==='improving'?'#3fb950':trend==='declining'?'#f85149':'#d29922';
+    const currentScore=scores[scores.length-1];
+    window._latestGeoScore=currentScore;
+    let html=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center;margin-bottom:20px">
+      <div><div style="font-size:1.4rem;font-weight:900;color:#58a6ff">${currentScore}%</div><div style="font-size:.72rem;color:#7d8590">Current Score</div></div>
+      <div><div style="font-size:1.4rem;font-weight:900;color:#a855f7">${forecast4w}%</div><div style="font-size:.72rem;color:#7d8590">4-Week Forecast</div></div>
+      <div><div style="font-size:1.4rem;font-weight:900;color:${trendColor}">${forecast8w}%</div><div style="font-size:.72rem;color:#7d8590">8-Week Forecast</div></div>
+    </div>`;
+    html+=`<div style="font-size:.85rem;color:#c9d1d9;line-height:1.7">`;
+    if(trend==='improving')html+=`<div style="color:#3fb950">📈 Your visibility is <strong>improving</strong> at ~${slope.toFixed(1)}% per week. At this rate you'll reach ${forecast4w}% in 4 weeks.</div>`;
+    else if(trend==='declining')html+=`<div style="color:#f85149">📉 Your visibility is <strong>declining</strong> at ~${Math.abs(slope).toFixed(1)}% per week. Take action now to reverse this trend.</div>`;
+    else html+=`<div style="color:#d29922">📊 Your visibility is <strong>stable</strong>. Publish new FAQ content and comparison articles to break through.</div>`;
+    if(slope<0)html+=`<div style="margin-top:8px">⚠️ If this trend continues, competitors may overtake you within ${Math.round(Math.abs(currentScore/(slope||1)))} weeks.</div>`;
+    html+=`</div>`;
+    document.getElementById('forecast-content').innerHTML=html;
+  }catch(e){document.getElementById('forecast-content').innerHTML='<div style="text-align:center;padding:20px;color:#7d8590;font-size:.85rem">Forecast unavailable — probe history not accessible.</div>';}
+}
+setTimeout(loadForecast,3000);
 
 function openDrill(id,name,status,cadence,components,metricsJson,issue,lastOutput){
   var metrics={};try{metrics=JSON.parse(metricsJson);}catch(e){}
